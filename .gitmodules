@@ -1,0 +1,3 @@
+[submodule "enginio-qt"]
+	path = enginio-qt
+	url = https://github.com/enginio/enginio-qt.git
