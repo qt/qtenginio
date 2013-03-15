@@ -4,7 +4,9 @@ Client library for accessing Enginio service from Qt and QML code.
 
 # System Requirements
 * Qt 5.0 or newer
-* OpenSSL library. Windows installer: http://slproweb.com/products/Win32OpenSSL.html (light version is enough, copy DLLs to windows system directory when asked). In Linux seach for `libssl` in your distribution's package repository.
+* OpenSSL library 
+  * Windows: Get the installer from http://slproweb.com/products/Win32OpenSSL.html (light version is enough, copy DLLs to windows system directory when asked).
+  * Linux: Seach for `libssl` in your distribution's package repository.
 * Enginio library and examples have been tested in Linux and in Windows with MinGW compiler. Other platforms are not currently officially supported.
 
 
@@ -22,7 +24,7 @@ Client library for accessing Enginio service from Qt and QML code.
 
 # Contributing
 * Fork the repository on [GitHub](https://github.com/enginio/enginio-qt)
-* Create a [feature branch](http://nvie.com/posts/a-successful-git-branching-model/) (i.e. create a branch which is named like my-cool-feature)
+* Create a [feature branch](http://nvie.com/posts/a-successful-git-branching-model/) (i.e. create a branch which is named like `my-cool-feature`)
 * Implement the new feature and automated tests for it
 * Make sure all tests pass
 * Submit a pull request that includes only your feature branch
