@@ -53,16 +53,9 @@ HEADERS += \
     enginioacloperation_p.h
 
 headers.files = $$HEADERS
+headers.path = $$[QT_INSTALL_HEADERS]/Enginio
+target.path = $$[QT_INSTALL_LIBS]
 
-unix:!symbian {
-    maemo5 {
-        target.path = /opt/usr/lib
-        headers.path = /opt/usr/include/Enginio
-    } else {
-        target.path = /usr/lib
-        headers.path = /usr/include/Enginio
-    }
-    INSTALLS += \
-        target \
-        headers
-}
+INSTALLS += \
+    target \
+    headers

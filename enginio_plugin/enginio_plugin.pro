@@ -36,12 +36,11 @@ URIDIR = $$replace(uri, \\., /)
 }
 
 qmldir.files = qmldir
-unix {
-    installPath = $$[QT_INSTALL_IMPORTS]/$$replace(uri, \\., /)
-    qmldir.path = $$installPath
-    target.path = $$installPath
-    INSTALLS += target qmldir
-}
+
+installPath = $$[QT_INSTALL_IMPORTS]/$$replace(uri, \\., /)
+qmldir.path = $$installPath
+target.path = $$installPath
+INSTALLS += target qmldir
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../enginio_client/release/ -lenginioclient
