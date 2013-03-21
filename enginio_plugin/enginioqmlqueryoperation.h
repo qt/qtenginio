@@ -57,6 +57,7 @@ public:
 
     EnginioQmlClient * getClient() const;
     EnginioQmlObjectModel * getModel() const;
+    Q_INVOKABLE QVariantList takeResults();
 };
 
 #endif // ENGINIOQMLQUERYOPERATION_H

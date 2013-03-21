@@ -35,8 +35,12 @@
 **
 ****************************************************************************/
 
+#include "enginioabstractobject.h"
 #include "enginioqmlqueryoperation.h"
 #include "enginioqmlclient.h"
+
+#include <QJsonDocument>
+#include <QJsonObject>
 
 /*!
  * \qmltype QueryOperation
@@ -119,4 +123,21 @@ EnginioQmlClient * EnginioQmlQueryOperation::getClient() const
 EnginioQmlObjectModel * EnginioQmlQueryOperation::getModel() const
 {
     return static_cast<EnginioQmlObjectModel*>(model());
+}
+
+/*!
+ * \qmlmethod list QueryOperation::takeResults()
+ * Returns query results if \c model parameter is not specified. Calling this
+ * method will remove all received result objects from internal storage and
+ * return them in a list.
+ */
+QVariantList EnginioQmlQueryOperation::takeResults()
+{
+    QList<EnginioAbstractObject*> results = EnginioQueryOperation::takeResults();
+    QVariantList variantResults;
+    for (int i = 0; i < results.size(); i++) {
+        variantResults.append(QJsonDocument::fromJson(results.at(i)->toEnginioJson()).object());
+        delete results.at(i);
+    }
+    return variantResults;
 }
