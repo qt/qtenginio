@@ -245,7 +245,7 @@ QString EnginioOperation::requestParam(const QString &name) const
 }
 
 /*!
- * Set request parameter with \a name and \value to be added to request URL. If
+ * Set request parameter with \a name and \a value to be added to request URL. If
  * request parameter with same \a name has already been set, the old value will
  * be overwritten. Setting parameter with empty \a value will remove already set
  * parameter.

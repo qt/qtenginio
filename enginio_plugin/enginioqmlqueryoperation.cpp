@@ -87,6 +87,23 @@
  * the \c networkError, \c QNetworkReply::OperationCanceledError.
  */
 
+/*!
+ * \qmlmethod string QueryOperation::requestParam(string name)
+ * Get request parameter with \a name. If request parameter with \a name has not
+ * been set, returns empty string.
+ */
+
+/*!
+ * \qmlmethod void QueryOperation::setRequestParam(string name, string value)
+ * Set request parameter with \a name and \a value to be added to request URL. If
+ * request parameter with same \a name has already been set, the old value will
+ * be overwritten. Setting parameter with empty \a value will remove already set
+ * parameter.
+ *
+ * Refer to the Enginio REST API documentation for valid parameters and value
+ * syntax.
+ */
+
 EnginioQmlQueryOperation::EnginioQmlQueryOperation(EnginioQmlClient *client,
                                                    EnginioQmlObjectModel *model,
                                                    QObject *parent) :

@@ -73,7 +73,7 @@ public:
 
     bool addToModel(QList<EnginioAbstractObject*> objects, int row);
     bool removeFromModel(int row, int count);
-    bool clear();
+    Q_INVOKABLE bool clear();
     QModelIndex indexFromId(const QString &id) const;
     EnginioAbstractObject * getObject(const QModelIndex &index);
 

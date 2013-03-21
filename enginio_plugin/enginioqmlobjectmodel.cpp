@@ -66,6 +66,11 @@
  * Returns object from model on row \a row or \c undefined if \a row is invalid.
  */
 
+/*!
+ * \qmlmethod bool ObjectModel::clear()
+ * Removes all rows from model.
+ */
+
 EnginioQmlObjectModel::EnginioQmlObjectModel(QObject *parent) :
     EnginioObjectModel(parent)
 {
