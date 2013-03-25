@@ -11,4 +11,6 @@ headers.fileextensions = "*.h"
 outputdir = ./html
 outputformats = HTML
 
+Cpp.ignoretokens = Q_INVOKABLE
+
 #spurious = "Can't link to 'All Modules'"
