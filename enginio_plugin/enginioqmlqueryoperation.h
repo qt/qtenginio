@@ -42,6 +42,8 @@
 #include "enginioqmlclient.h"
 #include "enginioqmlobjectmodel.h"
 
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QStringList>
 
 class EnginioQmlQueryOperation : public EnginioQueryOperation
@@ -52,6 +54,11 @@ class EnginioQmlQueryOperation : public EnginioQueryOperation
     Q_PROPERTY(EnginioQmlObjectModel* model READ getModel WRITE setModel)
     Q_PROPERTY(QString objectType READ objectType WRITE setObjectType)
     Q_PROPERTY(QStringList objectTypes READ objectTypes WRITE setObjectTypes)
+    Q_PROPERTY(QJsonObject query READ query WRITE setQuery)
+    Q_PROPERTY(QJsonObject search READ search WRITE setSearch)
+    Q_PROPERTY(int limit READ limit WRITE setLimit)
+    Q_PROPERTY(int offset READ offset WRITE setOffset)
+    Q_PROPERTY(QJsonArray sort READ sort WRITE setSort)
 
 public:
     EnginioQmlQueryOperation(EnginioQmlClient *client = 0,
@@ -61,6 +68,16 @@ public:
     EnginioQmlClient * getClient() const;
     EnginioQmlObjectModel * getModel() const;
     Q_INVOKABLE QVariantList takeResults();
+    QJsonObject query() const;
+    void setQuery(const QJsonObject &query);
+    QJsonObject search() const;
+    void setSearch(const QJsonObject &search);
+    int limit() const;
+    void setLimit(int limit);
+    int offset() const;
+    void setOffset(int offset);
+    QJsonArray sort() const;
+    void setSort(const QJsonArray &sort);
 };
 
 #endif // ENGINIOQMLQUERYOPERATION_H

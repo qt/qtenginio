@@ -40,7 +40,6 @@
 #include "enginioqmlclient.h"
 
 #include <QJsonDocument>
-#include <QJsonObject>
 
 /*!
  * \qmltype QueryOperation
@@ -86,6 +85,37 @@
  * \qmlproperty array QueryOperation::objectTypes
  * Types of objects to query. At least one object type must be defined before
  * the operation is executed.
+ */
+
+/*!
+ * \qmlproperty object QueryOperation::query
+ * Parameter for fine-tuning object query. See
+ * \l {https://engin.io/documentation/rest/parameters/queries}
+ * {query parameter documentation.}
+ */
+
+/*!
+ * \qmlproperty object QueryOperation::search
+ * Fulltext search parameters. See
+ * \l {https://engin.io/documentation/rest/parameters/fulltext_query}
+ * {fulltext query documentation.}
+ */
+
+/*!
+ * \qmlproperty int QueryOperation::limit
+ * Maximum number of objects returned from backend.
+ */
+
+/*!
+ * \qmlproperty int QueryOperation::offset
+ * Number of objects skipped from the beginning of returned results.
+ */
+
+/*!
+ * \qmlproperty array QueryOperation::sort
+ * The sort order of results. See
+ * \l {https://engin.io/documentation/rest/parameters/sort}
+ * {sort parameter documentation.}
  */
 
 /*!
@@ -168,4 +198,64 @@ QVariantList EnginioQmlQueryOperation::takeResults()
         delete results.at(i);
     }
     return variantResults;
+}
+
+QJsonObject EnginioQmlQueryOperation::query() const
+{
+    QByteArray queryString = requestParam(QStringLiteral("q")).toUtf8();
+    return QJsonDocument::fromJson(queryString).object();
+}
+
+void EnginioQmlQueryOperation::setQuery(const QJsonObject &query)
+{
+    setRequestParam(QStringLiteral("q"),
+                    QString(QJsonDocument(query).toJson()).simplified());
+}
+
+QJsonObject EnginioQmlQueryOperation::search() const
+{
+    QByteArray searchString = requestParam(QStringLiteral("search")).toUtf8();
+    return QJsonDocument::fromJson(searchString).object();
+}
+
+void EnginioQmlQueryOperation::setSearch(const QJsonObject &search)
+{
+    setRequestParam(QStringLiteral("search"),
+                    QString(QJsonDocument(search).toJson()).simplified());
+}
+
+int EnginioQmlQueryOperation::limit() const
+{
+    bool ok;
+    int limit = requestParam(QStringLiteral("limit")).toInt(&ok);
+    return ok ? limit : -1;
+}
+
+void EnginioQmlQueryOperation::setLimit(int limit)
+{
+    setRequestParam(QStringLiteral("limit"), QString::number(limit));
+}
+
+int EnginioQmlQueryOperation::offset() const
+{
+    bool ok;
+    int offset = requestParam(QStringLiteral("offset")).toInt(&ok);
+    return ok ? offset : -1;
+}
+
+void EnginioQmlQueryOperation::setOffset(int offset)
+{
+    setRequestParam(QStringLiteral("offset"), QString::number(offset));
+}
+
+QJsonArray EnginioQmlQueryOperation::sort() const
+{
+    QByteArray sortString = requestParam(QStringLiteral("sort")).toUtf8();
+    return QJsonDocument::fromJson(sortString).array();
+}
+
+void EnginioQmlQueryOperation::setSort(const QJsonArray &sort)
+{
+    setRequestParam(QStringLiteral("sort"),
+                    QString(QJsonDocument(sort).toJson()).simplified());
 }
