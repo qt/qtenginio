@@ -25,6 +25,8 @@ private Q_SLOTS:
     void testQueryWithType();
     void testQueryWithQuery();
     void testResultList();
+    void testSearchSingleType();
+    void testSearchMultipleTypes();
 
 private:
     QPointer<EnginioClient> m_client;
@@ -51,22 +53,31 @@ void QueryOperationTest::initTestCase()
     QVERIFY(m_model->rowCount() == 0);
 
     // create TEST_OBJECT_TYPE object with intValue < 0
-    EnginioJsonObject *object1 = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
-    object1->insert("stringValue", QString("Query test object #%1").arg(qrand()));
+    EnginioJsonObject *object = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
+    object->insert("stringValue", QString("First query test object #%1").arg(qrand()));
     int randomNum = qrand() % 1000000 + 1;
-    object1->insert("intValue", -randomNum);
-    QVERIFY(EnginioTests::createObject(m_client, object1, m_model));
-    QVERIFY(!object1->id().isEmpty());
-    delete object1;
+    object->insert("intValue", -randomNum);
+    QVERIFY(EnginioTests::createObject(m_client, object, m_model));
+    QVERIFY(!object->id().isEmpty());
+    delete object;
 
     // create TEST_OBJECT_TYPE object with intValue > 0
-    EnginioJsonObject *object2 = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
-    object2->insert("stringValue", QString("Query test object #%1").arg(qrand()));
+    object = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
+    object->insert("stringValue", QString("Second query test object #%1").arg(qrand()));
     randomNum = qrand() % 1000000 + 1;
-    object2->insert("intValue", randomNum);
-    QVERIFY(EnginioTests::createObject(m_client, object2, m_model));
-    QVERIFY(!object2->id().isEmpty());
-    delete object2;
+    object->insert("intValue", randomNum);
+    QVERIFY(EnginioTests::createObject(m_client, object, m_model));
+    QVERIFY(!object->id().isEmpty());
+    delete object;
+
+    // create CUSTOM_OBJECT_TYPE object with intValue > 0
+    object = new EnginioJsonObject(EnginioTests::CUSTOM_OBJECT_TYPE);
+    object->insert("stringValue", QString("Query custom object #%1").arg(qrand()));
+    randomNum = qrand() % 1000000 + 1;
+    object->insert("intValue", randomNum);
+    QVERIFY(EnginioTests::createObject(m_client, object, m_model));
+    QVERIFY(!object->id().isEmpty());
+    delete object;
 
     // create user object
     EnginioJsonObject *user = new EnginioJsonObject("users");
@@ -169,7 +180,7 @@ void QueryOperationTest::testQueryWithQuery()
 
     EnginioObjectModel *model = new EnginioObjectModel();
     EnginioQueryOperation *op = new EnginioQueryOperation(m_client);
-    op->setObjectType(EnginioTests::TEST_OBJECT_TYPE);
+    op->setObjectTypes(QStringList() << EnginioTests::TEST_OBJECT_TYPE);
     op->setModel(model);
     op->setRequestParam("q", "{\"intValue\": {\"$lt\": 0}}");
     QCOMPARE(model->rowCount(), 0);
@@ -207,7 +218,7 @@ void QueryOperationTest::testResultList()
     QVERIFY2(m_client, "Null client");
 
     EnginioQueryOperation *op = new EnginioQueryOperation(m_client);
-    op->setObjectType(EnginioTests::TEST_OBJECT_TYPE);
+    op->addObjectType(EnginioTests::TEST_OBJECT_TYPE);
     op->setRequestParam("q", "{\"intValue\": {\"$lt\": 0}}");
 
     QSignalSpy finishedSpy(op, SIGNAL(finished()));
@@ -234,6 +245,108 @@ void QueryOperationTest::testResultList()
     delete op;
     while (!results.isEmpty())
         delete results.takeFirst();
+}
+
+/*!
+ * Fetch one TEST_OBJECT_TYPE object with SEARCH_STRING in stringValue
+ * property.
+ */
+void QueryOperationTest::testSearchSingleType()
+{
+    // Use string that is not found in first TEST_OBJECT_TYPE object. That way
+    // we can detect if object query API is used instead of seach API.
+    const QString SEARCH_STRING("Second");
+
+    QVERIFY2(m_client, "Null client");
+
+    EnginioObjectModel *model = new EnginioObjectModel();
+    EnginioQueryOperation *op = new EnginioQueryOperation(m_client);
+    op->addObjectType(EnginioTests::TEST_OBJECT_TYPE);
+    op->setRequestParam("search", QString("{\"phrase\":\"%1\",\"properties\":[\"stringValue\"]}").arg(SEARCH_STRING));
+    op->setRequestParam("limit", "1");
+    op->setModel(model);
+    QCOMPARE(model->rowCount(), 0);
+
+    QSignalSpy finishedSpy(op, SIGNAL(finished()));
+    QSignalSpy errorSpy(op, SIGNAL(error(EnginioError*)));
+    QSignalSpy insertSpy(model, SIGNAL(rowsInserted(QModelIndex,int,int)));
+
+    op->execute();
+
+    QVERIFY2(finishedSpy.wait(EnginioTests::NETWORK_TIMEOUT),
+             "Operation timeout");
+    QCOMPARE(finishedSpy.count(), 1);
+    QCOMPARE(errorSpy.count(), 0);
+    QCOMPARE(insertSpy.count(), 1);
+    QCOMPARE(model->rowCount(), 1);
+
+    EnginioJsonObject *obj = dynamic_cast<EnginioJsonObject*>(
+                model->getObject(model->index(0)));
+    QVERIFY2(obj, "Invalid object in model");
+    QCOMPARE(obj->value("objectType").toString(),
+             EnginioTests::TEST_OBJECT_TYPE);
+    QString stringValue = obj->value("stringValue").toString();
+    QVERIFY2(stringValue.contains(SEARCH_STRING), "Invalid search result");
+
+    delete op;
+    delete model;
+}
+
+/*!
+ * Fetch all TEST_OBJECT_TYPE and CUSTOM_OBJECT_TYPE obejcts with SEARCH_STRING
+ * in stringValue property.
+ */
+void QueryOperationTest::testSearchMultipleTypes()
+{
+    const QString SEARCH_STRING("Query");
+
+    QVERIFY2(m_client, "Null client");
+
+    EnginioObjectModel *model = new EnginioObjectModel();
+    EnginioQueryOperation *op = new EnginioQueryOperation(m_client);
+    op->setObjectTypes(QStringList() <<
+                       EnginioTests::TEST_OBJECT_TYPE <<
+                       EnginioTests::CUSTOM_OBJECT_TYPE);
+    op->setRequestParam("search", QString("{\"phrase\":\"%1\",\"properties\":[\"stringValue\"]}").arg(SEARCH_STRING));
+    op->setModel(model);
+    QCOMPARE(model->rowCount(), 0);
+
+    QSignalSpy finishedSpy(op, SIGNAL(finished()));
+    QSignalSpy errorSpy(op, SIGNAL(error(EnginioError*)));
+    QSignalSpy insertSpy(model, SIGNAL(rowsInserted(QModelIndex,int,int)));
+
+    op->execute();
+
+    QVERIFY2(finishedSpy.wait(EnginioTests::NETWORK_TIMEOUT),
+             "Operation timeout");
+    QCOMPARE(finishedSpy.count(), 1);
+    QCOMPARE(errorSpy.count(), 0);
+    QCOMPARE(insertSpy.count(), 1);
+    QVERIFY2(model->rowCount() > 0, "No objects added to model");
+
+    int testObjectsFound = 0;
+    int customObjectsFound = 0;
+    for (int i = 0; i < model->rowCount(); i++) {
+        EnginioJsonObject *obj = dynamic_cast<EnginioJsonObject*>(
+                    model->getObject(model->index(i)));
+        QVERIFY2(obj, "Invalid object in model");
+        QString type = obj->value("objectType").toString();
+        if (type == EnginioTests::TEST_OBJECT_TYPE)
+            testObjectsFound++;
+        else if (type == EnginioTests::CUSTOM_OBJECT_TYPE)
+            customObjectsFound++;
+        else
+            QFAIL("Invalid object type");
+
+        QString stringValue = obj->value("stringValue").toString();
+        QVERIFY2(stringValue.contains(SEARCH_STRING, Qt::CaseInsensitive),
+                 "Invalid search result");
+    }
+    QVERIFY2(testObjectsFound > 1, "Failed to find all test objects");
+    QVERIFY2(customObjectsFound > 0, "Failed to find all custom objects");
+
+    delete op;
+    delete model;
 }
 
 QTEST_MAIN(QueryOperationTest)

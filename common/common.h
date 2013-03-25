@@ -12,16 +12,17 @@ namespace EnginioTests
 {
 
 // Production
-const QString TESTAPP_ID("5118f33d5a3d8b0ef9004f31");
-const QString TESTAPP_SECRET("e467813ef35abece844df968e61e1824");
-const QString TESTAPP_URL("https://api.engin.io");
+//const QString TESTAPP_ID("5118f33d5a3d8b0ef9004f31");
+//const QString TESTAPP_SECRET("e467813ef35abece844df968e61e1824");
+//const QString TESTAPP_URL("https://api.engin.io");
 
 // Staging
-//const QString TESTAPP_ID("5138456cb094254c4a0001f0");
-//const QString TESTAPP_SECRET("fced61b838a603b97f034db923970dac");
-//const QString TESTAPP_URL("https://api.staging.engin.io");
+const QString TESTAPP_ID("5138456cb094254c4a0001f0");
+const QString TESTAPP_SECRET("fced61b838a603b97f034db923970dac");
+const QString TESTAPP_URL("https://api.staging.engin.io");
 
 const QString TEST_OBJECT_TYPE("objects.SelfLinkedObject");
+const QString CUSTOM_OBJECT_TYPE("objects.CustomObject");
 const int NETWORK_TIMEOUT = 5000;
 
 static const char ALPHANUM_CHARS[] =
