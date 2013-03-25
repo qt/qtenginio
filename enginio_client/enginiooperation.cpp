@@ -108,6 +108,23 @@ QUrlQuery EnginioOperationPrivate::urlQuery() const
     return query;
 }
 
+QNetworkRequest EnginioOperationPrivate::enginioRequest(const QUrl &url)
+{
+    QNetworkRequest req(url);
+    req.setHeader(QNetworkRequest::ContentTypeHeader,
+                  QStringLiteral("application/json"));
+    req.setRawHeader("Enginio-Backend-Id",
+                     m_client->backendId().toLatin1());
+    req.setRawHeader("Enginio-Backend-Secret",
+                     m_client->backendSecret().toLatin1());
+    QString sessionToken = m_client->sessionToken();
+    if (!sessionToken.isEmpty()) {
+        qDebug() << Q_FUNC_INFO << "Using session token" << sessionToken;
+        req.setRawHeader("Enginio-Backend-Session", sessionToken.toLatin1());
+    }
+    return req;
+}
+
 /*!
  * \brief Set error and emit \c error signal
  */

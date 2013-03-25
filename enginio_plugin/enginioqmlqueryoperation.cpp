@@ -46,7 +46,22 @@
  * \qmltype QueryOperation
  * \instantiates EnginioQmlQueryOperation
  * \inqmlmodule enginio-plugin
- * \brief Operation for fetching the Enginio objects by type.
+ * \brief Operation for fetching multiple Enginio objects from backend.
+ *
+ * Enginio Rest API provides two separate API endpoints for fetching objects
+ * from backend. \l {https://engin.io/documentation/rest/endpoints/objects/query}
+ * {Object queries} can be used to fetch objects of single type using MongoDB
+ * style query parameter. Alternatively,
+ * \l {https://engin.io/documentation/rest/endpoints/search/fulltext}
+ * {fulltext search} can be used to search objects of multiple types where
+ * object property contains a search string (defined in \c search parameter).
+ *
+ * EnginioQueryOperation selects correct API endpoint based on given object
+ * types and request parameters. If more than one object type and \c search
+ * parameter is defined, search API is used, otherwise object query API is used.
+ *
+ * Operation with more than one object type and no \c search parameter is
+ * invalid will cause an error when executed.
  */
 
 /*!
@@ -61,8 +76,16 @@
 
 /*!
  * \qmlproperty string QueryOperation::objectType
+ * \obsolete
+ * Use objectTypes property instead.
  * Type of objects to query. This property must be set before the operation is
  * executed.
+ */
+
+/*!
+ * \qmlproperty array QueryOperation::objectTypes
+ * Types of objects to query. At least one object type must be defined before
+ * the operation is executed.
  */
 
 /*!
@@ -106,6 +129,11 @@
  *
  * Refer to the Enginio REST API documentation for valid parameters and value
  * syntax.
+ */
+
+/*!
+ * \qmlmethod void QueryOperation::addObjectType(string objectType)
+ * Add \a objectType to \c objectTypes array.
  */
 
 EnginioQmlQueryOperation::EnginioQmlQueryOperation(EnginioQmlClient *client,

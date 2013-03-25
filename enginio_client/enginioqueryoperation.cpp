@@ -46,13 +46,28 @@
 /*!
  * \class EnginioQueryOperation
  * \inmodule enginio-client
- * \brief Operation for fetching the Enginio objects by type.
+ * \brief Operation for fetching multiple Enginio objects from backend.
+ *
+ * Enginio Rest API provides two separate API endpoints for fetching objects
+ * from backend. \l {https://engin.io/documentation/rest/endpoints/objects/query}
+ * {Object queries} can be used to fetch objects of single type using MongoDB
+ * style query parameter. Alternatively,
+ * \l {https://engin.io/documentation/rest/endpoints/search/fulltext}
+ * {fulltext search} can be used to search objects of multiple types where
+ * object property contains a search string (defined in \c search parameter).
+ *
+ * EnginioQueryOperation selects correct API endpoint based on given object
+ * types and request parameters. If more than one object type and \c search
+ * parameter is defined, search API is used, otherwise object query API is used.
+ *
+ * Operation with more than one object type and no \c search parameter is
+ * invalid will cause an error when executed.
  */
 
 EnginioQueryOperationPrivate::EnginioQueryOperationPrivate(
         EnginioQueryOperation *op) :
     EnginioOperationPrivate(op),
-    m_objectType(),
+    m_objectTypes(),
     m_model(0),
     m_modelIndex(),
     m_resultMetadata(),
@@ -69,12 +84,18 @@ EnginioQueryOperationPrivate::~EnginioQueryOperationPrivate()
 
 QString EnginioQueryOperationPrivate::requestPath() const
 {
-    if (m_objectType.isEmpty())
+    if (m_objectTypes.isEmpty())
         return QString();
+
+    if (m_objectTypes.size() > 1 ||
+       !m_requestParams.value(QStringLiteral("search")).isEmpty())
+    {
+        return "/v1/search";
+    }
 
     // If object type starts with "objects.", url should be "/v1/objects/type".
     // If not, url should be /v1/type.
-    QString objectType(m_objectType);
+    QString objectType(m_objectTypes.at(0));
     if (objectType.startsWith(QStringLiteral("objects.")))
         objectType[7] = QChar('/');
 
@@ -86,11 +107,14 @@ QNetworkReply * EnginioQueryOperationPrivate::doRequest(const QUrl &backendUrl)
     QString path = requestPath();
     QString error;
 
-    if (m_objectType.isEmpty())
+    if (m_objectTypes.isEmpty())
         error = "Unknown object type";
     else if (path.isEmpty())
         error = "Request URL creation failed";
-
+    else if (m_objectTypes.size() > 1 &&
+             m_requestParams.value(QStringLiteral("search")).isEmpty()) {
+        error = "Missing search parameter";
+    }
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
         emit finished();
@@ -101,19 +125,18 @@ QNetworkReply * EnginioQueryOperationPrivate::doRequest(const QUrl &backendUrl)
     url.setPath(path);
     url.setQuery(urlQuery());
 
-    QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader,
-                  QStringLiteral("application/json"));
-    req.setRawHeader("Enginio-Backend-Id",
-                     m_client->backendId().toLatin1());
-    req.setRawHeader("Enginio-Backend-Secret",
-                     m_client->backendSecret().toLatin1());
-    QString sessionToken = m_client->sessionToken();
-    if (!sessionToken.isEmpty()) {
-        qDebug() << Q_FUNC_INFO << "Using session token" << sessionToken;
-        req.setRawHeader("Enginio-Backend-Session", sessionToken.toLatin1());
+    if (m_objectTypes.size() > 1 ||
+        !m_requestParams.value(QStringLiteral("search")).isEmpty())
+    {
+        QUrlQuery query(url.query());
+        for (int i = 0; i < m_objectTypes.size(); i++) {
+            query.addQueryItem(QStringLiteral("objectTypes[]"),
+                               m_objectTypes.at(i));
+        }
+        url.setQuery(query);
     }
 
+    QNetworkRequest req = enginioRequest(url);
     return m_client->networkManager()->get(req);
 }
 
@@ -215,23 +238,29 @@ EnginioQueryOperation::~EnginioQueryOperation()
 }
 
 /*!
+ * \obsolete
+ * Use objectTypes() instead.
+ *
  * Get object type defined for this operation.
  */
 QString EnginioQueryOperation::objectType() const
 {
     Q_D(const EnginioQueryOperation);
-    return d->m_objectType;
+    return d->m_objectTypes.at(0);
 }
 
 /*!
- * Define what type of objects should be queried. Query will search and return
- * only objects of type \a objectType. If you need to search objects of varous
- * types, use EnginioSearchOperation instead.
+ * \obsolete
+ * Use setObjectTypes() or addObjectType() instead.
+ *
+ * Define what types of objects should be queried. Query will search and return
+ * only objects of type \a objectType.
  */
 void EnginioQueryOperation::setObjectType(const QString &objectType)
 {
     Q_D(EnginioQueryOperation);
-    d->m_objectType = objectType;
+    d->m_objectTypes.clear();
+    d->m_objectTypes.append(objectType);
 }
 
 /*!
@@ -285,4 +314,35 @@ QList<EnginioAbstractObject*> EnginioQueryOperation::takeResults()
     QList<EnginioAbstractObject*> result(d->m_resultList);
     d->m_resultList.clear();
     return result;
+}
+
+/*!
+ * List of object types to be queried.
+ */
+QStringList EnginioQueryOperation::objectTypes() const
+{
+    Q_D(const EnginioQueryOperation);
+    return d->m_objectTypes;
+}
+
+/*!
+ * Define what types of objects should be queried. All previously defined object
+ * types will be overwritten by \a objectTypes. At least one object type must be
+ * defined before operation is executed.
+ */
+void EnginioQueryOperation::setObjectTypes(const QStringList &objectTypes)
+{
+    Q_D(EnginioQueryOperation);
+    d->m_objectTypes = objectTypes;
+}
+
+/*!
+ * Add \a objectType to list of object types to be queried. At least one object
+ * type must be defined before operation is executed.
+ */
+void EnginioQueryOperation::addObjectType(const QString &objectType)
+{
+    Q_D(EnginioQueryOperation);
+    if (!d->m_objectTypes.contains(objectType))
+        d->m_objectTypes.append(objectType);
 }

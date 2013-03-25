@@ -60,6 +60,9 @@ public:
     QModelIndex modelIndex() const;
     void setModelIndex(QModelIndex index);
     QList<EnginioAbstractObject*> takeResults();
+    QStringList objectTypes() const;
+    void setObjectTypes(const QStringList &objectTypes);
+    Q_INVOKABLE void addObjectType(const QString &objectType);
 
 protected:
     EnginioQueryOperation(EnginioClient *client,

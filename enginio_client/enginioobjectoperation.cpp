@@ -135,19 +135,7 @@ QNetworkReply * EnginioObjectOperationPrivate::doRequest(const QUrl &backendUrl)
     url.setPath(path);
     url.setQuery(urlQuery());
 
-    QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader,
-                  QStringLiteral("application/json"));
-    req.setRawHeader("Enginio-Backend-Id",
-                     m_client->backendId().toLatin1());
-    req.setRawHeader("Enginio-Backend-Secret",
-                     m_client->backendSecret().toLatin1());
-    QString sessionToken = m_client->sessionToken();
-    if (!sessionToken.isEmpty()) {
-        qDebug() << Q_FUNC_INFO << "Using session token" << sessionToken;
-        req.setRawHeader("Enginio-Backend-Session", sessionToken.toLatin1());
-    }
-
+    QNetworkRequest req = enginioRequest(url);
     QNetworkAccessManager *netManager = m_client->networkManager();
 
     switch (m_type) {

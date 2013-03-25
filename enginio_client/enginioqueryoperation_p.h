@@ -43,6 +43,7 @@
 #include "enginioqueryoperation.h"
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QStringList>
 
 class EnginioQueryOperationPrivate : public EnginioOperationPrivate
 {
@@ -58,7 +59,7 @@ public:
     virtual QNetworkReply * doRequest(const QUrl &backendUrl);
     virtual void handleResults();
 
-    QString m_objectType;
+    QStringList m_objectTypes;
     EnginioObjectModel *m_model;
     QModelIndex m_modelIndex;
     QJsonObject m_resultMetadata;

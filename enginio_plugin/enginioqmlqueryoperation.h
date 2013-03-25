@@ -42,6 +42,8 @@
 #include "enginioqmlclient.h"
 #include "enginioqmlobjectmodel.h"
 
+#include <QStringList>
+
 class EnginioQmlQueryOperation : public EnginioQueryOperation
 {
     Q_OBJECT
@@ -49,6 +51,7 @@ class EnginioQmlQueryOperation : public EnginioQueryOperation
     Q_PROPERTY(EnginioQmlClient* client READ getClient WRITE setClient)
     Q_PROPERTY(EnginioQmlObjectModel* model READ getModel WRITE setModel)
     Q_PROPERTY(QString objectType READ objectType WRITE setObjectType)
+    Q_PROPERTY(QStringList objectTypes READ objectTypes WRITE setObjectTypes)
 
 public:
     EnginioQmlQueryOperation(EnginioQmlClient *client = 0,
