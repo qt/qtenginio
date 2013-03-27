@@ -49,12 +49,12 @@
  * \list
  *     \li Create EnginioAclOperation object.
  *     \li Define Controlled Object (i.e. which object's permissions operation
- *         reads or modifies) with \l setObject().
- *     \li Define desired actions by calling \l grantPermissions(),
- *         \l withdrawPermissions() or \l readPermissions().
- *     \li Execute operation by calling \l execute().
- *     \li After \c finished signal is emitted, get read/modified permissions
- *         by calling \l resultAcl().
+ *         reads or modifies) with setObject().
+ *     \li Define desired actions by calling grantPermission(),
+ *         withdrawPermission() or readPermissions().
+ *     \li Execute operation by calling execute().
+ *     \li After \c finished signal is emitted, get the read/modified
+ *         permissions by calling resultAcl().
  * \endlist
  *
  * Note that operation can only act on single object and can be used to
@@ -62,14 +62,14 @@
  * \code
  *     // Add read and update permissions to object "p1" for users "1" and "2"
  *     aclOperation->setObject(qMakePair("p1", "objects.places"));
- *     aclOperation->grantPermissions(qMakePair("1", "users"),
- *                                    EnginioACL::ReadPermission);
- *     aclOperation->grantPermissions(qMakePair("1", "users"),
- *                                    EnginioACL::UpdatePermission);
- *     aclOperation->grantPermissions(qMakePair("2", "users"),
- *                                    EnginioACL::ReadPermission);
- *     aclOperation->grantPermissions(qMakePair("2", "users"),
- *                                    EnginioACL::UpdatePermission);
+ *     aclOperation->grantPermission(qMakePair("1", "users"),
+ *                                   EnginioACL::ReadPermission);
+ *     aclOperation->grantPermission(qMakePair("1", "users"),
+ *                                   EnginioACL::UpdatePermission);
+ *     aclOperation->grantPermission(qMakePair("2", "users"),
+ *                                   EnginioACL::ReadPermission);
+ *     aclOperation->grantPermission(qMakePair("2", "users"),
+ *                                   EnginioACL::UpdatePermission);
  *     aclOperation->execute();
  * \endcode
  *
@@ -78,17 +78,17 @@
  *     // Add read permission and remove delete permission to object "p1" for
  *     // user "1"
  *     aclOperation->setObject(qMakePair("p1", "objects.places"));
- *     aclOperation->grantPermissions(qMakePair("1", "users"),
- *                                    EnginioACL::ReadPermission);
- *     aclOperation->withdrawPermissions(qMakePair("1", "users"),
- *                                       EnginioACL::DeletePermission);
+ *     aclOperation->grantPermission(qMakePair("1", "users"),
+ *                                   EnginioACL::ReadPermission);
+ *     aclOperation->withdrawPermission(qMakePair("1", "users"),
+ *                                      EnginioACL::DeletePermission);
  *     aclOperation->execute();
  * \endcode
  */
 
 EnginioAclOperationPrivate::EnginioAclOperationPrivate(EnginioAclOperation *op) :
     EnginioOperationPrivate(op),
-    m_type(NullAclOperation),
+    m_type(ReadAclOperation),
     m_object(),
     m_requestAcl(),
     m_resultAcl(),
@@ -356,4 +356,38 @@ void EnginioAclOperation::readPermissions()
 {
     Q_D(EnginioAclOperation);
     d->m_type = EnginioAclOperationPrivate::ReadAclOperation;
+}
+
+/*!
+ * \internal
+ * Returns access control list that is sent to server.
+ */
+QSharedPointer<EnginioAcl> EnginioAclOperation::requestAcl()
+{
+    Q_D(const EnginioAclOperation);
+    return d->m_requestAcl;
+}
+
+/*!
+ * \internal
+ * Sets permission to be granted. Overwrites all permissions set to this
+ * operation.
+ */
+void EnginioAclOperation::setAddPermissions(QSharedPointer<EnginioAcl> acl)
+{
+    Q_D(EnginioAclOperation);
+    d->m_requestAcl = acl;
+    d->m_type = EnginioAclOperationPrivate::AddAclOperation;
+}
+
+/*!
+ * \internal
+ * Sets permission to be withdrawn. Overwrites all permissions set to this
+ * operation.
+ */
+void EnginioAclOperation::setDeletePermissions(QSharedPointer<EnginioAcl> acl)
+{
+    Q_D(EnginioAclOperation);
+    d->m_requestAcl = acl;
+    d->m_type = EnginioAclOperationPrivate::DeleteAclOperation;
 }

@@ -40,6 +40,7 @@
 
 #include "enginioclient.h"
 
+class EnginioQmlAclOperation;
 class EnginioQmlIdentityAuthOperation;
 class EnginioQmlObjectModel;
 class EnginioQmlObjectOperation;
@@ -67,6 +68,7 @@ public:
     Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
             EnginioQmlObjectModel *model = 0);
     Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
+    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
 };
 
 #endif // ENGINIOQMLCLIENT_H

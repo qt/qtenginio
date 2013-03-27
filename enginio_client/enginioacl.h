@@ -40,6 +40,7 @@
 
 #include "enginioclient_global.h"
 #include <QObject>
+#include <QJsonArray>
 
 class EnginioAclPrivate;
 
@@ -47,6 +48,11 @@ class ENGINIOCLIENT_EXPORT EnginioAcl : public QObject
 {
     Q_OBJECT
     Q_ENUMS(Permission)
+
+    Q_PROPERTY(QJsonArray readPermissions READ readJson WRITE setReadJson)
+    Q_PROPERTY(QJsonArray updatePermissions READ updateJson WRITE setUpdateJson)
+    Q_PROPERTY(QJsonArray deletePermissions READ deleteJson WRITE setDeleteJson)
+    Q_PROPERTY(QJsonArray adminPermissions READ adminJson WRITE setAdminJson)
 
 public:
     enum Permission {
@@ -57,6 +63,7 @@ public:
     };
 
     explicit EnginioAcl(QObject *parent = 0);
+    EnginioAcl(const QJsonObject &object, QObject *parent = 0);
     ~EnginioAcl();
 
     bool fromJson(const QByteArray &json);
@@ -72,14 +79,29 @@ public:
                                      EnginioAcl::Permission permission);
     void clear();
 
+    QJsonArray readJson() const;
+    void setReadJson(const QJsonArray &json);
+    QJsonArray updateJson() const;
+    void setUpdateJson(const QJsonArray &json);
+    QJsonArray deleteJson() const;
+    void setDeleteJson(const QJsonArray &json);
+    QJsonArray adminJson() const;
+    void setAdminJson(const QJsonArray &json);
+
 protected:
     EnginioAclPrivate *d_ptr;
     EnginioAcl(EnginioAclPrivate &dd,
                QObject *parent = 0);
 
+    static QJsonObject objectPairToJson(QPair<QString, QString> pair);
+    static QPair<QString, QString> objectJsonToPair(QJsonObject json);
+    static QJsonArray permissionListToArray(QList< QPair<QString, QString> > list);
+    static QList< QPair<QString, QString> > permissionArrayToList(QJsonArray array);
+
 private:
     Q_DECLARE_PRIVATE(EnginioAcl)
     friend class EnginioAclOperation;
+    friend class EnginioQmlAclOperation;
 };
 
 Q_DECLARE_METATYPE(EnginioAcl*)

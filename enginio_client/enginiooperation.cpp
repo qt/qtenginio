@@ -289,10 +289,18 @@ void EnginioOperation::execute()
 {
     Q_D(EnginioOperation);
 
-    if (d->m_state == StateExecuting) {
+    if (Q_UNLIKELY(d->m_state == StateExecuting)) {
         qWarning() << Q_FUNC_INFO << "Already executing";
         return;
     }
+
+    if (Q_UNLIKELY(!d->m_client)) {
+        qWarning() << Q_FUNC_INFO << "Unknown client";
+        d->setError(EnginioError::RequestError, "Unknown client");
+        emit d->finished();
+        return;
+    }
+
     if (!d->m_reply.isNull()) {
         delete d->m_reply;
     }

@@ -35,7 +35,9 @@
 **
 ****************************************************************************/
 
+#include "enginioacl.h"
 #include "enginioplugin.h"
+#include "enginioqmlacloperation.h"
 #include "enginioqmlclient.h"
 #include "enginioqmlidentityauthoperation.h"
 #include "enginioqmlobjectmodel.h"
@@ -72,6 +74,69 @@
  * \endlist
  */
 
+/*!
+ * \qmltype Acl
+ * \instantiates EnginioAcl
+ * \inqmlmodule enginio-plugin
+ * \brief Access control list for Enginio objects.
+ *
+ * Access control list contains a list of subjects and set of permissions
+ * granted for each subject.
+ *
+ * Subjects can be:
+ * \list
+ *   \li Users
+ *   \li Usergroups
+ *   \li Well known subjects like "everyone"
+ * \endlist
+ *
+ * And possible permissions in ACL for objects are:
+ * \list
+ *   \li "read"
+ *   \li "update"
+ *   \li "delete"
+ *   \li "admin"
+ * \endlist
+ *
+ * Subjects are presented as objects with \c id and \c objectType and
+ * permissions as Acl::Permission type enumerations.
+ *
+ * Well known subjects are constants which identify generic Users or Usergroups.
+ * For example 'everyone' subject presents all Users (even anonymous) and its
+ * value is \c {{ "id": "*", "objectType": "aclSubject" }}.
+ */
+
+/*!
+ * \qmlproperty enumeration Acl::Permission
+ * \list
+ * \li Acl.ReadPermission - Permission to read object data
+ * \li Acl.UpdatePermission - Permission to update object data
+ * \li Acl.DeletePermission - Permission to delete object
+ * \li Acl.AdminPermission - Permission to read, update and delete object and to
+ *     read and change object permissions
+ * \endlist
+ */
+
+/*!
+ * \qmlproperty object Acl::readPermissions
+ * List of subjects that have "read" permission.
+ */
+
+/*!
+ * \qmlproperty object Acl::updatePermissions
+ * List of subjects that have "update" permission.
+ */
+
+/*!
+ * \qmlproperty object Acl::deletePermissions
+ * List of subjects that have "delete" permission.
+ */
+
+/*!
+ * \qmlproperty object Acl::adminPermissions
+ * List of subjects that have "admin" permission.
+ */
+
 QQmlEngine *g_qmlEngine = 0;
 
 void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
@@ -88,5 +153,7 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterType<EnginioQmlObjectOperation>(uri, 1, 0, "ObjectOperation");
     qmlRegisterType<EnginioQmlQueryOperation>(uri, 1, 0, "QueryOperation");
     qmlRegisterType<EnginioQmlIdentityAuthOperation>(uri, 1, 0, "IdentityAuthOperation");
+    qmlRegisterType<EnginioQmlAclOperation>(uri, 1, 0, "AclOperation");
     qmlRegisterType<EnginioError>(uri, 1, 0, "Error");
+    qmlRegisterType<EnginioAcl>(uri, 1, 0, "Acl");
 }

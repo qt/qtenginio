@@ -35,6 +35,7 @@
 **
 ****************************************************************************/
 
+#include "enginioqmlacloperation.h"
 #include "enginioqmlclient.h"
 #include "enginioqmlidentityauthoperation.h"
 #include "enginioqmlobjectoperation.h"
@@ -140,4 +141,15 @@ EnginioQmlQueryOperation * EnginioQmlClient::createQueryOperation(
 EnginioQmlIdentityAuthOperation * EnginioQmlClient::createIdentityAuthOperation()
 {
     return new EnginioQmlIdentityAuthOperation(this);
+}
+
+/*!
+ * \qmlmethod Client::createAclOperation()
+ *
+ * Returns new \l AclOperation which can be used to read and modify permissions
+ * of Enginio objects. Returned operation can be deleted with \c destroy().
+ */
+EnginioQmlAclOperation * EnginioQmlClient::createAclOperation()
+{
+    return new EnginioQmlAclOperation(this);
 }

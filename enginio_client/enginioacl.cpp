@@ -44,6 +44,7 @@
 
 /*!
  * \class EnginioAcl
+ * \inmodule enginio-client
  * \brief EnginioAcl defines access control list for Enginio objects.
  *
  * Access control list contains a list of subjects and set of permissions
@@ -62,13 +63,15 @@
  *   \li "update"
  *   \li "delete"
  *   \li "admin"
+ * \endlist
  *
- * Subjects are presented as <ID, ObjectType> pairs and permissions as
- * \c EnginioAcl::Permission type enumerations.
+ * Subjects are presented as \c {<ID, ObjectType>} pairs and permissions as
+ * EnginioAcl::Permission type enumerations.
  *
  * Well known subjects are constants which identify generic Users or Usergroups.
  * For example 'everyone' subject presents all Users (even anonymous) and its
- * value is <"*", "aclSubject"> (that is, ID is "*" and ObjectType is "aclSubject").
+ * value is \c {<"*", "aclSubject">} (that is, ID is "*" and ObjectType is
+ * "aclSubject").
  */
 
 /*!
@@ -98,19 +101,46 @@ EnginioAclPrivate::~EnginioAclPrivate()
 {
 }
 
-
+/*!
+ * Create new EnginioAcl object with optional parent \a parent.
+ */
 EnginioAcl::EnginioAcl(QObject *parent) :
     QObject(parent),
     d_ptr(new EnginioAclPrivate(this))
 {
 }
 
+/*!
+ * Create new EnginioAcl object with optional parent \a parent and initialize it
+ * from \a object. \a object should contain properties for permission names
+ * ("read", "update", etc) as arrays of subjects. Subjects are QJsonObjects with
+ * "id" and "objectType" properties.
+ */
+EnginioAcl::EnginioAcl(const QJsonObject &object, QObject *parent) :
+    QObject(parent),
+    d_ptr(new EnginioAclPrivate(this))
+{
+    Q_D(EnginioAcl);
+    for (int perm = 0; perm < d->m_numPermissions; perm++) {
+        if (object.contains(d->m_permissionNames[perm])) {
+            d->m_accessLists[perm] = permissionArrayToList(
+                        object[d->m_permissionNames[perm]].toArray());
+        }
+    }
+}
+
+/*!
+ * Constructor used in inheriting classes.
+ */
 EnginioAcl::EnginioAcl(EnginioAclPrivate &dd, QObject *parent) :
     QObject(parent),
     d_ptr(&dd)
 {
 }
 
+/*!
+ * Destructor.
+ */
 EnginioAcl::~EnginioAcl()
 {
     delete d_ptr;
@@ -272,4 +302,142 @@ void EnginioAcl::clear()
     for (int i = 0; i < d->m_numPermissions; i++) {
         d->m_accessLists[i].clear();
     }
+}
+
+/*!
+ * Returns subjects in "read" access list. Returned array contains subjects as
+ * QJsonObjects with \c id and \c objectType properties.
+ */
+QJsonArray EnginioAcl::readJson() const
+{
+    Q_D(const EnginioAcl);
+    return permissionListToArray(d->m_accessLists.at(ReadPermission));
+}
+
+/*!
+ * Sets subjects in "read" access list to be same as in \a json array. \a json
+ * array should contain subjects as QJsonObjects with \c id and \c objectType
+ * properties set. Existing subjects in "read" list will be overwritten.
+ */
+void EnginioAcl::setReadJson(const QJsonArray &json)
+{
+    Q_D(EnginioAcl);
+    d->m_accessLists[ReadPermission] = permissionArrayToList(json);
+}
+
+/*!
+ * Returns subjects in "update" access list. Returned array contains subjects as
+ * QJsonObjects with \c id and \c objectType properties.
+ */
+QJsonArray EnginioAcl::updateJson() const
+{
+    Q_D(const EnginioAcl);
+    return permissionListToArray(d->m_accessLists.at(UpdatePermission));
+}
+
+/*!
+ * Sets subjects in "update" access list to be same as in \a json array. \a json
+ * array should contain subjects as QJsonObjects with \c id and \c objectType
+ * properties set. Existing subjects in "update" list will be overwritten.
+ */
+void EnginioAcl::setUpdateJson(const QJsonArray &json)
+{
+    Q_D(EnginioAcl);
+    d->m_accessLists[UpdatePermission] = permissionArrayToList(json);
+}
+
+/*!
+ * Returns subjects in "delete" access list. Returned array contains subjects as
+ * QJsonObjects with \c id and \c objectType properties.
+ */
+QJsonArray EnginioAcl::deleteJson() const
+{
+    Q_D(const EnginioAcl);
+    return permissionListToArray(d->m_accessLists.at(DeletePermission));
+}
+
+/*!
+ * Sets subjects in "delete" access list to be same as in \a json array. \a json
+ * array should contain subjects as QJsonObjects with \c id and \c objectType
+ * properties set. Existing subjects in "delete" list will be overwritten.
+ */
+void EnginioAcl::setDeleteJson(const QJsonArray &json)
+{
+    Q_D(EnginioAcl);
+    d->m_accessLists[DeletePermission] = permissionArrayToList(json);
+}
+
+/*!
+ * Returns subjects in "admin" access list. Returned array contains subjects as
+ * QJsonObjects with \c id and \c objectType properties.
+ */
+QJsonArray EnginioAcl::adminJson() const
+{
+    Q_D(const EnginioAcl);
+    return permissionListToArray(d->m_accessLists.at(AdminPermission));
+}
+
+/*!
+ * Sets subjects in "admin" access list to be same as in \a json array. \a json
+ * array should contain subjects as QJsonObjects with \c id and \c objectType
+ * properties set. Existing subjects in "admin" list will be overwritten.
+ */
+void EnginioAcl::setAdminJson(const QJsonArray &json)
+{
+    Q_D(EnginioAcl);
+    d->m_accessLists[AdminPermission] = permissionArrayToList(json);
+}
+
+/*!
+ * \internal
+ * Converts Enginio object represented as <ID, objectType> pair to QJsonObject.
+ */
+QJsonObject EnginioAcl::objectPairToJson(QPair<QString, QString> pair)
+{
+    QJsonObject json;
+    json.insert(QStringLiteral("id"), pair.first);
+    json.insert(QStringLiteral("objectType"), pair.second);
+    return json;
+}
+
+/*!
+ * \internal
+ * Converts Enginio object represented as QJsonObject to <ID, objectType> pair.
+ */
+QPair<QString, QString> EnginioAcl::objectJsonToPair(QJsonObject json)
+{
+    QPair<QString, QString> pair;
+    pair.first = json.value(QStringLiteral("id")).toString();
+    pair.second = json.value(QStringLiteral("objectType")).toString();
+    return pair;
+}
+
+/*!
+ * \internal
+ * Converts Enginio object list represented as QList of <ID, objectType> pairs
+ * to QJsonArray of QJsonObjects.
+ */
+QJsonArray EnginioAcl::permissionListToArray(QList< QPair<QString, QString> > list)
+{
+    QJsonArray array;
+    for (int i = 0; i < list.size(); i++) {
+        array.append(objectPairToJson(list.at(i)));
+    }
+    return array;
+}
+
+/*!
+ * \internal
+ * Converts Enginio object list represented as QJsonArray of QJsonObjects to
+ * QList of <ID, objectType> pairs.
+ */
+QList< QPair<QString, QString> > EnginioAcl::permissionArrayToList(QJsonArray array)
+{
+    QList< QPair<QString, QString> > list;
+    QJsonArray::const_iterator iter = array.constBegin();
+    while (iter != array.constEnd()) {
+        list.append(objectJsonToPair((*iter).toObject()));
+        iter++;
+    }
+    return list;
 }

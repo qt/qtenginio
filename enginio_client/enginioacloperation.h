@@ -62,12 +62,16 @@ public:
     void withdrawPermission(QPair<QString, QString> subject,
                             EnginioAcl::Permission permission);
     void setPermissions(QSharedPointer<EnginioAcl> permissions);
-    void readPermissions();
+    Q_INVOKABLE void readPermissions();
 
 protected:
     EnginioAclOperation(EnginioClient *client,
                         EnginioAclOperationPrivate &dd,
                         QObject *parent = 0);
+
+    QSharedPointer<EnginioAcl> requestAcl();
+    void setAddPermissions(QSharedPointer<EnginioAcl> acl);
+    void setDeletePermissions(QSharedPointer<EnginioAcl> acl);
 
 private:
     Q_DECLARE_PRIVATE(EnginioAclOperation)
