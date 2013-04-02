@@ -439,6 +439,13 @@ void AuthenticationTest::testCustomUserProperties()
     QCOMPARE(creator.value("objectType").toString(), QString("users"));
     QCOMPARE(creator.value("stringValue").toString(),
              user->value("stringValue").toString());
+    QCOMPARE(creator.value("username").toString(),
+             user->value("username").toString());
+    QCOMPARE(creator.value("firstName").toString(),
+             user->value("firstName").toString());
+    QCOMPARE(creator.value("lastName").toString(),
+             user->value("lastName").toString());
+    QVERIFY(creator.value("password").isUndefined());
 
     updater = readObject->value("updater").toObject();
     QVERIFY2(!updater.isEmpty(), "Object updater not found");
@@ -446,6 +453,13 @@ void AuthenticationTest::testCustomUserProperties()
     QCOMPARE(updater.value("objectType").toString(), QString("users"));
     QCOMPARE(updater.value("stringValue").toString(),
              user->value("stringValue").toString());
+    QCOMPARE(updater.value("username").toString(),
+             user->value("username").toString());
+    QCOMPARE(updater.value("firstName").toString(),
+             user->value("firstName").toString());
+    QCOMPARE(updater.value("lastName").toString(),
+             user->value("lastName").toString());
+    QVERIFY(updater.value("password").isUndefined());
 
     delete objOp;
     delete readObject;
