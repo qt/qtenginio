@@ -112,7 +112,7 @@ void EnginioJsonWriter::valueToJson(const QJsonValue &v, QByteArray &json)
         arrayToJson(v.toArray(), json);
         break;
     case QJsonValue::Object:
-        objectToJson(v.toObject(), json, true);
+        objectToJson(v.toObject(), json, false);
         break;
     default:
         break;
