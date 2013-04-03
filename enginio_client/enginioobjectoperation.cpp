@@ -136,6 +136,8 @@ QNetworkReply * EnginioObjectOperationPrivate::doRequest(const QUrl &backendUrl)
     url.setQuery(urlQuery());
 
     QNetworkRequest req = enginioRequest(url);
+    req.setHeader(QNetworkRequest::ContentTypeHeader,
+                  QStringLiteral("application/json"));
     QNetworkAccessManager *netManager = m_client->networkManager();
 
     switch (m_type) {

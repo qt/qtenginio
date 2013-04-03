@@ -24,7 +24,8 @@ SOURCES += \
     enginiojsonwriter.cpp \
     enginioidentityauthoperation.cpp \
     enginioacl.cpp \
-    enginioacloperation.cpp
+    enginioacloperation.cpp \
+    enginiofileoperation.cpp
 
 HEADERS += \
     enginioclient.h\
@@ -50,7 +51,9 @@ HEADERS += \
     enginioacl.h \
     enginioacl_p.h \
     enginioacloperation.h \
-    enginioacloperation_p.h
+    enginioacloperation_p.h \
+    enginiofileoperation.h \
+    enginiofileoperation_p.h
 
 headers.files = $$HEADERS
 headers.path = $$[QT_INSTALL_HEADERS]/Enginio

@@ -111,8 +111,6 @@ QUrlQuery EnginioOperationPrivate::urlQuery() const
 QNetworkRequest EnginioOperationPrivate::enginioRequest(const QUrl &url)
 {
     QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader,
-                  QStringLiteral("application/json"));
     req.setRawHeader("Enginio-Backend-Id",
                      m_client->backendId().toLatin1());
     req.setRawHeader("Enginio-Backend-Secret",

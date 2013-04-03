@@ -120,6 +120,8 @@ QNetworkReply * EnginioIdentityAuthOperationPrivate::doRequest(
 
     switch (m_type) {
     case Enginio::IdentityLoginAuthOperation:
+        req.setHeader(QNetworkRequest::ContentTypeHeader,
+                      QStringLiteral("application/json"));
         return netManager->post(req, requestData());
     case Enginio::AttachAuthOperation:
         return netManager->get(req);
