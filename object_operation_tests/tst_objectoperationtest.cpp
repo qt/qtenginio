@@ -171,10 +171,11 @@ void ObjectOperationTest::testCreate()
     qDebug() << "update:" << updateTime.toString(EnginioAbstractObject::timeFormat());
     qDebug() << "after:" << after.toString(EnginioAbstractObject::timeFormat());
 
-    QVERIFY(createTime > before);
-    QVERIFY(createTime < after);
-    QVERIFY(updateTime > before);
-    QVERIFY(updateTime < after);
+    // Comparing local time and server time
+//    QVERIFY(createTime > before);
+//    QVERIFY(createTime < after);
+//    QVERIFY(updateTime > before);
+//    QVERIFY(updateTime < after);
 
     delete op;
     delete newObject;
@@ -333,10 +334,11 @@ void ObjectOperationTest::testUpdate()
     qDebug() << "update:" << updateTime.toString(EnginioAbstractObject::timeFormat());
     qDebug() << "afterUpdate:" << afterUpdate.toString(EnginioAbstractObject::timeFormat());
 
-    QVERIFY(createTime > beforeCreate);
-    QVERIFY(createTime < beforeUpdate);
-    QVERIFY(updateTime > beforeUpdate);
-    QVERIFY(updateTime < afterUpdate);
+    // Comparing local time and server time :(
+//    QVERIFY(createTime > beforeCreate);
+//    QVERIFY(createTime < beforeUpdate);
+//    QVERIFY(updateTime > beforeUpdate);
+//    QVERIFY(updateTime < afterUpdate);
 
     delete op;
     delete originalObject;
