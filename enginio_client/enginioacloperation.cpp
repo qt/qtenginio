@@ -118,6 +118,8 @@ QString EnginioAclOperationPrivate::requestPath() const
 
 QNetworkReply * EnginioAclOperationPrivate::doRequest(const QUrl &backendUrl)
 {
+    Q_Q(EnginioAclOperation);
+
     QString path = requestPath();
     QString error;
 
@@ -130,7 +132,7 @@ QNetworkReply * EnginioAclOperationPrivate::doRequest(const QUrl &backendUrl)
 
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
-        emit finished();
+        emit q->finished();
         return 0;
     }
 

@@ -114,6 +114,9 @@ EnginioError::~EnginioError()
     delete d_ptr;
 }
 
+/*!
+ * Error type.
+ */
 EnginioError::ErrorType EnginioError::error() const
 {
     Q_D(const EnginioError);
@@ -129,14 +132,44 @@ QString EnginioError::errorString() const
     return d->m_errorString;
 }
 
+/*!
+ * If error is \c NetworkError this returns the type of network error.
+ */
 QNetworkReply::NetworkError EnginioError::networkError() const
 {
     Q_D(const EnginioError);
     return d->m_networkError;
 }
 
+/*!
+ * HTTP reply code. If there's no error, this will return 0.
+ */
 int EnginioError::httpCode() const
 {
     Q_D(const EnginioError);
     return d->m_httpCode;
+}
+
+void EnginioError::setError(ErrorType type)
+{
+    Q_D(EnginioError);
+    d->m_error = type;
+}
+
+void EnginioError::setErrorString(const QString &errorString)
+{
+    Q_D(EnginioError);
+    d->m_errorString = errorString;
+}
+
+void EnginioError::setNetworkError(QNetworkReply::NetworkError networkError)
+{
+    Q_D(EnginioError);
+    d->m_networkError = networkError;
+}
+
+void EnginioError::setHttpCode(int httpCode)
+{
+    Q_D(EnginioError);
+    d->m_httpCode = httpCode;
 }

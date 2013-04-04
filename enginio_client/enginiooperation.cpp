@@ -131,15 +131,18 @@ void EnginioOperationPrivate::setError(EnginioError::ErrorType type,
                                        int httpCode,
                                        QNetworkReply::NetworkError networkError)
 {
+    Q_Q(EnginioOperation);
+
     qDebug() << "setError:" << description << "; http:"<< httpCode <<
                 "; network:" << networkError;
 
-    if (m_error)
-        delete m_error;
-    m_error = new EnginioError(type, description, networkError, httpCode);
+    m_error->setError(type);
+    m_error->setErrorString(description);
+    m_error->setNetworkError(networkError);
+    m_error->setHttpCode(httpCode);
 
     if (type != EnginioError::NoError)
-        emit error(m_error);
+        emit q->error(m_error);
 }
 
 void EnginioOperationPrivate::onRequestFinished()
@@ -157,7 +160,7 @@ void EnginioOperationPrivate::onRequestFinished()
     if (!m_reply.isNull())
         m_reply->deleteLater();
 
-    emit finished();
+    emit q->finished();
 }
 
 void EnginioOperationPrivate::onRequestError(QNetworkReply::NetworkError error)
@@ -197,10 +200,6 @@ EnginioOperation::EnginioOperation(EnginioClient *client,
     d_ptr(&dd)
 {
     d_ptr->m_client = client;
-    connect(d_ptr, SIGNAL(finished()),
-            this, SIGNAL(finished()));
-    connect(d_ptr, SIGNAL(error(EnginioError*)),
-            this, SIGNAL(error(EnginioError*)));
 }
 
 /*!
@@ -295,12 +294,12 @@ void EnginioOperation::execute()
     if (Q_UNLIKELY(!d->m_client)) {
         qWarning() << Q_FUNC_INFO << "Unknown client";
         d->setError(EnginioError::RequestError, "Unknown client");
-        emit d->finished();
+        emit finished();
         return;
     }
 
     if (!d->m_reply.isNull()) {
-        delete d->m_reply;
+        d->m_reply->deleteLater();
     }
 
     d->m_reply = d->doRequest(d->m_client->apiUrl());

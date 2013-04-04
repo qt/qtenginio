@@ -82,8 +82,14 @@ protected:
                  EnginioErrorPrivate &dd,
                  QObject *parent = 0);
 
+    void setError(ErrorType type);
+    void setErrorString(const QString &errorString);
+    void setNetworkError(QNetworkReply::NetworkError networkError);
+    void setHttpCode(int httpCode);
+
 private:
     Q_DECLARE_PRIVATE(EnginioError)
+    friend class EnginioOperationPrivate;
 };
 
 Q_DECLARE_METATYPE(EnginioError*)

@@ -72,10 +72,6 @@ public:
     EnginioOperation::State m_state;
     QMap<QString, QString> m_requestParams;
 
-signals:
-    void finished() const;
-    void error(EnginioError *error) const;
-
 public slots:
     void onRequestFinished();
     void onRequestError(QNetworkReply::NetworkError error);

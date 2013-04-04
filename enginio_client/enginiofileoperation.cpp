@@ -82,6 +82,8 @@ QString EnginioFileOperationPrivate::requestPath() const
  */
 QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
 {
+    Q_Q(EnginioFileOperation);
+
     QString path = requestPath();
     QString error;
 
@@ -92,7 +94,7 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
 
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
-        emit finished();
+        emit q->finished();
         return 0;
     }
 
@@ -108,7 +110,7 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
         if (!m_fileDevice->isReadable()) {
             setError(EnginioError::RequestError,
                      QStringLiteral("File is not open for reading"));
-            emit finished();
+            emit q->finished();
             return 0;
         }
         return netManager->post(req, m_multiPart);

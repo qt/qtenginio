@@ -91,6 +91,8 @@ QString EnginioIdentityAuthOperationPrivate::requestPath() const
 QNetworkReply * EnginioIdentityAuthOperationPrivate::doRequest(
         const QUrl &backendUrl)
 {
+    Q_Q(EnginioIdentityAuthOperation);
+
     QString path = requestPath();
     QString error;
 
@@ -101,7 +103,7 @@ QNetworkReply * EnginioIdentityAuthOperationPrivate::doRequest(
 
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
-        emit finished();
+        emit q->finished();
         return 0;
     }
 
