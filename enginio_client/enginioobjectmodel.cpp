@@ -280,3 +280,15 @@ EnginioAbstractObject * EnginioObjectModel::getObject(const QModelIndex &index)
 
     return object;
 }
+
+/*!
+ * Call this method to notify model that one of the objects in it has changed.
+ * If object with \a id is in the model, \c dataChanged() signal will be
+ * emitted.
+ */
+void EnginioObjectModel::notifyObjectUpdated(const QString &id)
+{
+    QModelIndex index = indexFromId(id);
+    if (index.isValid())
+        emit dataChanged(index, index);
+}

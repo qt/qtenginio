@@ -76,6 +76,7 @@ public:
     Q_INVOKABLE bool clear();
     QModelIndex indexFromId(const QString &id) const;
     EnginioAbstractObject * getObject(const QModelIndex &index);
+    void notifyObjectUpdated(const QString &id);
 
 signals:
     void rowCountChanged(int newCount) const;

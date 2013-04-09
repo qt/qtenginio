@@ -72,6 +72,7 @@ public:
     QString m_objectType;
     QPointer<QHttpMultiPart> m_multiPart;
     QIODevice *m_fileDevice;
+    bool m_fromFile;
 };
 
 #endif // ENGINIOFILEOPERATION_P_H

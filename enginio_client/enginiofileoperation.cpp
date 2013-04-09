@@ -37,9 +37,11 @@
 
 #include "enginiofileoperation_p.h"
 #include <QDebug>
+#include <QFile>
 #include <QHttpPart>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QStringList>
 
 /*!
  * \class EnginioFileOperation
@@ -51,7 +53,8 @@
 EnginioFileOperationPrivate::EnginioFileOperationPrivate(EnginioFileOperation *op) :
     EnginioOperationPrivate(op),
     m_type(NullFileOperation),
-    m_fileDevice(0)
+    m_fileDevice(0),
+    m_fromFile(false)
 {
 }
 
@@ -91,6 +94,8 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
         error = "Unknown operation type";
     else if (path.isEmpty())
         error = "Request URL creation failed";
+    else if (m_fromFile && m_fileDevice && !m_fileDevice->open(QIODevice::ReadOnly))
+        error = "Can't open file for reading";
 
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
@@ -124,6 +129,10 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
 
 void EnginioFileOperationPrivate::handleResults()
 {
+    if (m_fromFile && m_fileDevice) {
+        m_fileDevice->close();
+    }
+
     QByteArray data = m_reply->readAll();
 
     qDebug() << "=== Reply" << q_ptr << m_reply->operation() << m_reply->url();
@@ -211,12 +220,25 @@ EnginioFileOperation::~EnginioFileOperation()
     qDebug() << this << "deleted";
 }
 
+/*!
+ * Returns the ID of the file object.
+ */
 QString EnginioFileOperation::fileId() const
 {
     Q_D(const EnginioFileOperation);
     return d->m_fileId;
 }
 
+/*!
+ * Returns the status of file being uploaded. Possible values are:
+ * \list
+ *   \li Empty string if operation has not been executed
+ *   \li "empty" when file reference has been created but no chunks have been
+ *       uploaded
+ *   \li "incomplete" when some chunks have been uploaded
+ *   \li "complete" when file has been uploaded completely
+ * \endlist
+ */
 QString EnginioFileOperation::uploadStatus() const
 {
     Q_D(const EnginioFileOperation);
@@ -224,9 +246,19 @@ QString EnginioFileOperation::uploadStatus() const
 }
 
 /*!
- * Uploads file to Enginio backend. File is read from QIODevice \a data which
- * must be open for reading when operation is executed and must remain valid
- * until the finished() signal is emitted.
+ * Uploads file to Enginio backend.
+ *
+ * \list
+ * \li \a fileName is the name of the file including possible extension.
+ * \li \a contentType describes the type of the file (for example "image/jpeg").
+ * \li \a objectId and \a objectType describe existing Enginio object which is
+ *     linked to uploaded file. Each uploaded file must be linked to an object.
+ * \li \a data is the QIODevice which can be used to read file data. This device
+ *     must be open for reading when operation is executed and must remain valid
+ *     until the finished() signal is emitted.
+ * \li If \a uploadInChunks is true large files are uploaded in smaller pieces
+ *     (currently unsupported)
+ * \endlist
  */
 void EnginioFileOperation::upload(const QString &fileName,
                                   const QString &contentType,
@@ -266,4 +298,52 @@ void EnginioFileOperation::upload(const QString &fileName,
 
     d->m_multiPart->append(objectPart);
     d->m_multiPart->append(filePart);
+}
+
+/*!
+ * Uploads file to Enginio backend.
+ *
+ * \list
+ * \li \a filePath is path pointing to file in local file system. Last part of
+ *     the path will be used as file name. Directory separator is '/'.
+ * \li \a contentType describes the type of the file (for example "image/jpeg").
+ * \li \a objectId and \a objectType describe existing Enginio object which is
+ *     linked to uploaded file. Each uploaded file must be linked to an object.
+ * \li If \a uploadInChunks is true large files are uploaded in smaller pieces
+ *     (currently unsupported)
+ * \endlist
+ */
+void EnginioFileOperation::upload(const QString &filePath,
+                                  const QString &contentType,
+                                  const QString &objectId,
+                                  const QString &objectType,
+                                  bool uploadInChunks)
+{
+    Q_D(EnginioFileOperation);
+    d->m_fromFile = true;
+
+    upload(filePath.split('/').last(),
+           contentType,
+           objectId,
+           objectType,
+           new QFile(filePath),
+           uploadInChunks);
+}
+
+/*!
+ * Returns the ID of the referenced Enginio object.
+ */
+QString EnginioFileOperation::objectId() const
+{
+    Q_D(const EnginioFileOperation);
+    return d->m_objectId;
+}
+
+/*!
+ * Returns the type of the referenced Enginio object.
+ */
+QString EnginioFileOperation::objectType() const
+{
+    Q_D(const EnginioFileOperation);
+    return d->m_objectType;
 }

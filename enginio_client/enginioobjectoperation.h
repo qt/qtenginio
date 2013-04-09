@@ -72,6 +72,8 @@ public:
     void remove(const EnginioAbstractObject &object);
     void remove(const QString &id, const QString &objectType);
 
+    QString objectId() const;
+
 signals:
     void objectUpdated() const;
 

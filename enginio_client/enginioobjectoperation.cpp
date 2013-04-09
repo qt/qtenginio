@@ -187,7 +187,10 @@ void EnginioObjectOperationPrivate::handleResults()
         setError(EnginioError::InternalError,
                  QStringLiteral("Unknown ID on returned object"));
         return;
+    } else {
+        m_objectId = id;
     }
+
     if (objectType.isEmpty()) {
         setError(EnginioError::InternalError,
                  QStringLiteral("Unknown type on returned object"));
@@ -493,4 +496,13 @@ void EnginioObjectOperation::remove(const QString &id, const QString &objectType
     d->m_type = Enginio::RemoveObjectOperation;
     d->m_objectId = id;
     d->m_objectType = objectType;
+}
+
+/*!
+ * Returns the ID of the object created/read/updated/deleted by this operation.
+ */
+QString EnginioObjectOperation::objectId() const
+{
+    Q_D(const EnginioObjectOperation);
+    return d->m_objectId;
 }

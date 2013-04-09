@@ -45,6 +45,7 @@ class EnginioFileOperationPrivate;
 
 class ENGINIOCLIENT_EXPORT EnginioFileOperation : public EnginioOperation
 {
+    Q_OBJECT
 public:
     explicit EnginioFileOperation(EnginioClient *client,
                                     QObject *parent = 0);
@@ -58,6 +59,13 @@ public:
                 const QString &objectType,
                 QIODevice *data,
                 bool uploadInChunks = false);
+    void upload(const QString &filePath,
+                const QString &contentType,
+                const QString &objectId,
+                const QString &objectType,
+                bool uploadInChunks = false);
+    QString objectId() const;
+    QString objectType() const;
 
 protected:
     EnginioFileOperation(EnginioClient *client,
