@@ -20,6 +20,8 @@ private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void testUploadDownload();
+    void testUploadFromFile();
+    void testUploadInvalid();
 
 private:
     QPointer<EnginioClient> m_client;
@@ -61,7 +63,7 @@ void FileTest::cleanupTestCase()
 
 /*!
  * 1. Create new object
- * 2. Upload image file and attach it to object
+ * 2. Open image file, upload it and attach it to object
  * 3. Download object and attached file info
  */
 void FileTest::testUploadDownload()
@@ -153,6 +155,117 @@ void FileTest::testUploadDownload()
     delete object;
 }
 
+/*!
+ * 1. Create new object
+ * 2. Upload image file and attach it to object
+ * 3. Download object and attached file info
+ */
+void FileTest::testUploadFromFile()
+{
+    QVERIFY2(m_client, "Null client");
+
+    /* Create new object */
+
+    EnginioJsonObject *object = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
+    object->insert("stringValue", QString("testUploadFromFile #%1").arg(qrand()));
+    QVERIFY(EnginioTests::createObject(m_client, object));
+    QVERIFY(!object->id().isEmpty());
+
+    /* Upload image file */
+
+    EnginioFileOperation *fileOp = new EnginioFileOperation(m_client);
+    fileOp->upload(TEST_IMAGE_PATH,
+                   TEST_IMAGE_CONTENT_TYPE,
+                   object->id(),
+                   object->objectType());
+
+    QSignalSpy finishedSpy1(fileOp, SIGNAL(finished()));
+    QSignalSpy errorSpy1(fileOp, SIGNAL(error(EnginioError*)));
+
+    fileOp->execute();
+
+    QVERIFY2(finishedSpy1.wait(EnginioTests::NETWORK_TIMEOUT),
+             "Operation timeout");
+    QCOMPARE(finishedSpy1.count(), 1);
+    QCOMPARE(errorSpy1.count(), 0);
+    QVERIFY(!fileOp->fileId().isEmpty());
+    QCOMPARE(fileOp->uploadStatus(), QStringLiteral("complete"));
+
+    /* Add image reference to object */
+
+    QJsonObject fileRef;
+    fileRef.insert("id", fileOp->fileId());
+    fileRef.insert("objectType", QStringLiteral("files"));
+    object->insert("file", fileRef);
+
+    EnginioObjectOperation *objOp = new EnginioObjectOperation(m_client);
+    objOp->update(object);
+
+    QSignalSpy finishedSpy2(objOp, SIGNAL(finished()));
+    QSignalSpy errorSpy2(objOp, SIGNAL(error(EnginioError*)));
+
+    objOp->execute();
+
+    QVERIFY2(finishedSpy2.wait(EnginioTests::NETWORK_TIMEOUT),
+             "Operation timeout");
+    QCOMPARE(finishedSpy2.count(), 1);
+    QCOMPARE(errorSpy2.count(), 0);
+
+    /* Download object and attached file info */
+
+    QMap<QString, QString> requestParams;
+    requestParams[QStringLiteral("include")] = QStringLiteral("{\"file\":{}}");
+    EnginioJsonObject *readObject = dynamic_cast<EnginioJsonObject*>(
+                EnginioTests::readObject(m_client,
+                                         object->id(),
+                                         object->objectType(),
+                                         0,
+                                         requestParams));
+
+    QVERIFY(readObject);
+    QJsonObject objectFile = readObject->value("file").toObject();
+    QVERIFY(!objectFile.isEmpty());
+    QCOMPARE(objectFile.value("id").toString(),
+             fileRef.value("id").toString());
+    QCOMPARE(objectFile.value("objectType").toString(),
+             fileRef.value("objectType").toString());
+    QCOMPARE(objectFile.value("fileName").toString(), TEST_IMAGE);
+    QCOMPARE(objectFile.value("contentType").toString(), TEST_IMAGE_CONTENT_TYPE);
+    QVERIFY(!objectFile.value("url").toString().isEmpty());
+    QCOMPARE(objectFile.value("object").toObject().value("id").toString(),
+             object->id());
+    QCOMPARE(objectFile.value("object").toObject().value("objectType").toString(),
+             object->objectType());
+
+    delete fileOp;
+    delete object;
+}
+
+/*!
+ * Try to upload file from invalid path.
+ */
+void FileTest::testUploadInvalid()
+{
+    QVERIFY2(m_client, "Null client");
+
+    EnginioFileOperation *fileOp = new EnginioFileOperation(m_client);
+    fileOp->upload(QStringLiteral("dummy/path"),
+                   TEST_IMAGE_CONTENT_TYPE,
+                   "fakeId",
+                   EnginioTests::TEST_OBJECT_TYPE);
+
+    QSignalSpy finishedSpy1(fileOp, SIGNAL(finished()));
+    QSignalSpy errorSpy1(fileOp, SIGNAL(error(EnginioError*)));
+
+    fileOp->execute();
+
+    QCOMPARE(finishedSpy1.count(), 1);
+    QCOMPARE(errorSpy1.count(), 1);
+    QVERIFY(fileOp->fileId().isEmpty());
+    QVERIFY(fileOp->uploadStatus().isEmpty());
+
+    delete fileOp;
+}
 
 QTEST_MAIN(FileTest)
 
