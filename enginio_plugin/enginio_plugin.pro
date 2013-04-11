@@ -46,7 +46,7 @@ INSTALLS += target qmldir
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../enginio_client/release/ -lenginioclient
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../enginio_client/debug/ -lenginioclient
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../enginio_client/debug/ -lenginioclientd
 else:unix: LIBS += -L$$OUT_PWD/../enginio_client/ -lenginioclient
 
 INCLUDEPATH += $$PWD/../enginio_client

@@ -9,7 +9,15 @@ VERSION = 0.1.1
 win32: TARGET_EXT = .dll
 
 DEFINES += ENGINIOCLIENT_LIBRARY
-CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
+
+CONFIG += debug_and_release
+win32:CONFIG += build_all
+
+build_pass:CONFIG(debug, debug|release):win32: TARGET = $$join(TARGET,,,d)
+build_pass:CONFIG(release, debug|release) {
+    DEFINES += QT_NO_DEBUG_OUTPUT
+}
+
 
 SOURCES += \
     enginioclient.cpp \
