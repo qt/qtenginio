@@ -46,13 +46,22 @@ class EnginioFileOperationPrivate;
 class ENGINIOCLIENT_EXPORT EnginioFileOperation : public EnginioOperation
 {
     Q_OBJECT
+    Q_ENUMS(UploadStatus)
+
 public:
+    enum UploadStatus {
+        UploadStatusUnknown = 0,
+        UploadStatusEmpty,
+        UploadStatusIncomplete,
+        UploadStatusComplete
+    };
+
     explicit EnginioFileOperation(EnginioClient *client,
                                     QObject *parent = 0);
     virtual ~EnginioFileOperation();
 
     QString fileId() const;
-    QString uploadStatus() const;
+    UploadStatus uploadStatus() const;
     void upload(const QString &fileName,
                 const QString &contentType,
                 const QString &objectId,
@@ -66,6 +75,9 @@ public:
                 bool uploadInChunks = false);
     QString objectId() const;
     QString objectType() const;
+
+signals:
+    void uploadStatusChanged() const;
 
 protected:
     EnginioFileOperation(EnginioClient *client,

@@ -62,12 +62,14 @@ public:
     virtual void handleResults();
 
     QByteArray requestMetadata(bool includeFileName) const;
+    EnginioFileOperation::UploadStatus uploadStatusFromString(
+            const QString &statusString) const;
 
     FileOperationType m_type;
     QString m_fileId;
     QString m_fileName;
     QString m_contentType;
-    QString m_uploadStatus;
+    EnginioFileOperation::UploadStatus m_uploadStatus;
     QString m_objectId;
     QString m_objectType;
     QPointer<QHttpMultiPart> m_multiPart;

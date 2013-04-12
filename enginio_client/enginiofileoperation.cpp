@@ -46,13 +46,34 @@
 /*!
  * \class EnginioFileOperation
  * \inmodule enginio-client
- * \brief Operation for uploading and downloading binary files to/from Enginio
- *        backend
+ * \brief Operation for uploading binary files to Enginio backend.
  */
+
+/*!
+ * \enum EnginioFileOperation::UploadStatus
+ * \value UploadStatusUnknown
+ *        Upload has not started yet.
+ * \value UploadStatusEmpty
+ *        In chunked upload mode, when new file reference has been created but
+ *        no data chunks have been uploaded.
+ * \value UploadStatusIncomplete
+ *        In chunked upload mode, when some (but not all) data chunks have been
+ *        uploaded.
+ * \value UploadStatusComplete
+ *        File has been uploaded completely.
+ */
+
+/*!
+ * \fn void EnginioFileOperation::uploadStatusChanged() const
+ *
+ * Emitted when file upload status changes.
+ */
+
 
 EnginioFileOperationPrivate::EnginioFileOperationPrivate(EnginioFileOperation *op) :
     EnginioOperationPrivate(op),
     m_type(NullFileOperation),
+    m_uploadStatus(EnginioFileOperation::UploadStatusUnknown),
     m_fileDevice(0),
     m_fromFile(false)
 {
@@ -129,6 +150,8 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
 
 void EnginioFileOperationPrivate::handleResults()
 {
+    Q_Q(EnginioFileOperation);
+
     if (m_fromFile && m_fileDevice) {
         m_fileDevice->close();
     }
@@ -155,7 +178,13 @@ void EnginioFileOperationPrivate::handleResults()
     }
 
     m_fileId = id;
-    m_uploadStatus = json.value(QStringLiteral("status")).toString();
+
+    EnginioFileOperation::UploadStatus oldStatus = m_uploadStatus;
+    m_uploadStatus = uploadStatusFromString(
+                json.value(QStringLiteral("status")).toString());
+    if (oldStatus != m_uploadStatus) {
+        emit q->uploadStatusChanged();
+    }
 }
 
 QByteArray EnginioFileOperationPrivate::requestMetadata(bool includeFileName) const
@@ -188,6 +217,19 @@ QByteArray EnginioFileOperationPrivate::requestMetadata(bool includeFileName) co
     qDebug() << json;
 
     return json;
+}
+
+EnginioFileOperation::UploadStatus EnginioFileOperationPrivate::uploadStatusFromString(
+        const QString &statusString) const
+{
+    qDebug() << Q_FUNC_INFO << statusString << "####";
+    if (statusString == QStringLiteral("empty"))
+        return EnginioFileOperation::UploadStatusEmpty;
+    if (statusString == QStringLiteral("incomplete"))
+        return EnginioFileOperation::UploadStatusIncomplete;
+    if (statusString == QStringLiteral("complete"))
+        return EnginioFileOperation::UploadStatusComplete;
+    return EnginioFileOperation::UploadStatusUnknown;
 }
 
 /*!
@@ -230,16 +272,9 @@ QString EnginioFileOperation::fileId() const
 }
 
 /*!
- * Returns the status of file being uploaded. Possible values are:
- * \list
- *   \li Empty string if operation has not been executed
- *   \li "empty" when file reference has been created but no chunks have been
- *       uploaded
- *   \li "incomplete" when some chunks have been uploaded
- *   \li "complete" when file has been uploaded completely
- * \endlist
+ * Returns the status of file being uploaded.
  */
-QString EnginioFileOperation::uploadStatus() const
+EnginioFileOperation::UploadStatus EnginioFileOperation::uploadStatus() const
 {
     Q_D(const EnginioFileOperation);
     return d->m_uploadStatus;
