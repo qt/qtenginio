@@ -22,7 +22,8 @@ SOURCES += \
     enginioqmlqueryoperation.cpp \
     enginioqmlobjectoperation.cpp \
     enginioqmlidentityauthoperation.cpp \
-    enginioqmlacloperation.cpp
+    enginioqmlacloperation.cpp \
+    enginioqmlfileoperation.cpp
 
 HEADERS += \
     enginioqmlclient.h \
@@ -31,7 +32,8 @@ HEADERS += \
     enginioqmlqueryoperation.h \
     enginioqmlobjectoperation.h \
     enginioqmlidentityauthoperation.h \
-    enginioqmlacloperation.h
+    enginioqmlacloperation.h \
+    enginioqmlfileoperation.h
 
 OTHER_FILES = qmldir
 

@@ -42,6 +42,7 @@
 #include "enginioqmlclient.h"
 #include "enginioqmlobjectmodel.h"
 
+#include <QJsonObject>
 #include <QJSValue>
 
 class EnginioJsonObject;
@@ -53,6 +54,8 @@ class EnginioQmlObjectOperation : public EnginioObjectOperation
     Q_PROPERTY(EnginioQmlClient* client READ getClient WRITE setClient)
     Q_PROPERTY(EnginioQmlObjectModel* model READ getModel WRITE setModelQml)
     Q_PROPERTY(int modelIndex READ modelIndexRow WRITE setModelIndexRow)
+    Q_PROPERTY(QJSValue object READ object)
+    Q_PROPERTY(QJsonObject include READ include WRITE setInclude)
 
 public:
     EnginioQmlObjectOperation(EnginioQmlClient *client = 0,
@@ -62,6 +65,9 @@ public:
     EnginioQmlClient * getClient() const;
     EnginioQmlObjectModel * getModel() const;
     void setModelQml(EnginioQmlObjectModel *model);
+    QJSValue object();
+    QJsonObject include() const;
+    void setInclude(const QJsonObject &include);
 
     Q_INVOKABLE void create(QJSValue object);
     Q_INVOKABLE void read(QJSValue object);

@@ -59,6 +59,7 @@ class EnginioQmlQueryOperation : public EnginioQueryOperation
     Q_PROPERTY(int limit READ limit WRITE setLimit)
     Q_PROPERTY(int offset READ offset WRITE setOffset)
     Q_PROPERTY(QJsonArray sort READ sort WRITE setSort)
+    Q_PROPERTY(QJsonObject include READ include WRITE setInclude)
 
 public:
     EnginioQmlQueryOperation(EnginioQmlClient *client = 0,
@@ -78,6 +79,8 @@ public:
     void setOffset(int offset);
     QJsonArray sort() const;
     void setSort(const QJsonArray &sort);
+    QJsonObject include() const;
+    void setInclude(const QJsonObject &include);
 };
 
 #endif // ENGINIOQMLQUERYOPERATION_H

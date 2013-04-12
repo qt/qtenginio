@@ -119,6 +119,13 @@
  */
 
 /*!
+ * \qmlproperty object QueryOperation::include
+ * Parameter for defining what data should be included in result objects. See
+ * \l {https://engin.io/documentation/rest/parameters/include}
+ * {include parameter documentation.}
+ */
+
+/*!
  * \qmlsignal QueryOperation::finished()
  *
  * Emitted when the operation completes execution.
@@ -258,4 +265,16 @@ void EnginioQmlQueryOperation::setSort(const QJsonArray &sort)
 {
     setRequestParam(QStringLiteral("sort"),
                     QString(QJsonDocument(sort).toJson()).simplified());
+}
+
+QJsonObject EnginioQmlQueryOperation::include() const
+{
+    QByteArray includeString = requestParam(QStringLiteral("include")).toUtf8();
+    return QJsonDocument::fromJson(includeString).object();
+}
+
+void EnginioQmlQueryOperation::setInclude(const QJsonObject &include)
+{
+    setRequestParam(QStringLiteral("include"),
+                    QString(QJsonDocument(include).toJson()).simplified());
 }

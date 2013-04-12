@@ -47,6 +47,7 @@ class ENGINIOCLIENT_EXPORT EnginioFileOperation : public EnginioOperation
 {
     Q_OBJECT
     Q_ENUMS(UploadStatus)
+    Q_PROPERTY(UploadStatus uploadStatus READ uploadStatus NOTIFY uploadStatusChanged)
 
 public:
     enum UploadStatus {
@@ -68,11 +69,11 @@ public:
                 const QString &objectType,
                 QIODevice *data,
                 bool uploadInChunks = false);
-    void upload(const QString &filePath,
-                const QString &contentType,
-                const QString &objectId,
-                const QString &objectType,
-                bool uploadInChunks = false);
+    Q_INVOKABLE void upload(const QString &filePath,
+                            const QString &contentType,
+                            const QString &objectId,
+                            const QString &objectType,
+                            bool uploadInChunks = false);
     QString objectId() const;
     QString objectType() const;
 

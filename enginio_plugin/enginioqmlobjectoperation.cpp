@@ -70,6 +70,18 @@
  */
 
 /*!
+ * \qmlproperty object ObjectOperation::object
+ * The object given as argument to create, read, update or remove function.
+ */
+
+/*!
+ * \qmlproperty object ObjectOperation::include
+ * Parameter for defining what data should be included in result. See
+ * \l {https://engin.io/documentation/rest/parameters/include}
+ * {include parameter documentation.}
+ */
+
+/*!
  * \qmlsignal ObjectOperation::finished()
  * Emitted when the operation completes execution.
  */
@@ -134,6 +146,23 @@ void EnginioQmlObjectOperation::setModelQml(EnginioQmlObjectModel *model)
 {
     setModel(model);
     setModelIndexRow(m_modelIndexRow);
+}
+
+QJSValue EnginioQmlObjectOperation::object()
+{
+    return m_jsObject;
+}
+
+QJsonObject EnginioQmlObjectOperation::include() const
+{
+    QByteArray includeString = requestParam(QStringLiteral("include")).toUtf8();
+    return QJsonDocument::fromJson(includeString).object();
+}
+
+void EnginioQmlObjectOperation::setInclude(const QJsonObject &include)
+{
+    setRequestParam(QStringLiteral("include"),
+                    QString(QJsonDocument(include).toJson()).simplified());
 }
 
 /*!
