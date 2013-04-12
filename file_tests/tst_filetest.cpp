@@ -12,7 +12,7 @@
 class FileTest : public QObject
 {
     Q_OBJECT
-    
+
 public:
     FileTest();
     
@@ -85,6 +85,8 @@ void FileTest::testUploadDownload()
     QVERIFY(file->isReadable());
 
     EnginioFileOperation *fileOp = new EnginioFileOperation(m_client);
+    QSignalSpy uploadStatusSpy(fileOp, SIGNAL(uploadStatusChanged()));
+
     fileOp->upload(TEST_IMAGE,
                    TEST_IMAGE_CONTENT_TYPE,
                    object->id(),
@@ -101,7 +103,8 @@ void FileTest::testUploadDownload()
     QCOMPARE(finishedSpy1.count(), 1);
     QCOMPARE(errorSpy1.count(), 0);
     QVERIFY(!fileOp->fileId().isEmpty());
-    QCOMPARE(fileOp->uploadStatus(), QStringLiteral("complete"));
+    QCOMPARE(uploadStatusSpy.count(), 1);
+    QCOMPARE(fileOp->uploadStatus(), EnginioFileOperation::UploadStatusComplete);
 
     /* Add image reference to object */
 
@@ -174,6 +177,8 @@ void FileTest::testUploadFromFile()
     /* Upload image file */
 
     EnginioFileOperation *fileOp = new EnginioFileOperation(m_client);
+    QSignalSpy uploadStatusSpy(fileOp, SIGNAL(uploadStatusChanged()));
+
     fileOp->upload(TEST_IMAGE_PATH,
                    TEST_IMAGE_CONTENT_TYPE,
                    object->id(),
@@ -189,7 +194,8 @@ void FileTest::testUploadFromFile()
     QCOMPARE(finishedSpy1.count(), 1);
     QCOMPARE(errorSpy1.count(), 0);
     QVERIFY(!fileOp->fileId().isEmpty());
-    QCOMPARE(fileOp->uploadStatus(), QStringLiteral("complete"));
+    QCOMPARE(uploadStatusSpy.count(), 1);
+    QCOMPARE(fileOp->uploadStatus(), EnginioFileOperation::UploadStatusComplete);
 
     /* Add image reference to object */
 
@@ -249,6 +255,8 @@ void FileTest::testUploadInvalid()
     QVERIFY2(m_client, "Null client");
 
     EnginioFileOperation *fileOp = new EnginioFileOperation(m_client);
+    QSignalSpy uploadStatusSpy(fileOp, SIGNAL(uploadStatusChanged()));
+
     fileOp->upload(QStringLiteral("dummy/path"),
                    TEST_IMAGE_CONTENT_TYPE,
                    "fakeId",
@@ -262,7 +270,8 @@ void FileTest::testUploadInvalid()
     QCOMPARE(finishedSpy1.count(), 1);
     QCOMPARE(errorSpy1.count(), 1);
     QVERIFY(fileOp->fileId().isEmpty());
-    QVERIFY(fileOp->uploadStatus().isEmpty());
+    QCOMPARE(uploadStatusSpy.count(), 0);
+    QCOMPARE(fileOp->uploadStatus(), EnginioFileOperation::UploadStatusUnknown);
 
     delete fileOp;
 }
