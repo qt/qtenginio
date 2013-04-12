@@ -1,0 +1,16 @@
+#ifndef ENGINIO_CLIENT_LIBRARY_H
+#define ENGINIO_CLIENT_LIBRARY_H
+#include <Enginio/enginioclient.h>
+#include <Enginio/enginioabstractobject.h>
+#include <Enginio/enginiojsonobject.h>
+#include <Enginio/enginiooperation.h>
+#include <Enginio/enginioobjectoperation.h>
+#include <Enginio/enginioabstractobjectfactory.h>
+#include <Enginio/enginioerror.h>
+#include <Enginio/enginioqueryoperation.h>
+#include <Enginio/enginioobjectmodel.h>
+#include <Enginio/enginioidentityauthoperation.h>
+#include <Enginio/enginioacl.h>
+#include <Enginio/enginioacloperation.h>
+#include <Enginio/enginiofileoperation.h>
+#endif

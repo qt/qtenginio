@@ -36,6 +36,7 @@ SOURCES += \
     enginiofileoperation.cpp
 
 HEADERS += \
+    Enginio \
     enginioclient.h\
     enginioclient_global.h \
     enginioclient_p.h \
