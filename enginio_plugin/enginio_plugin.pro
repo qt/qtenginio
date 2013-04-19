@@ -3,6 +3,14 @@ TARGET = enginioplugin
 QT += qml quick
 CONFIG += qt plugin
 
+CONFIG += debug_and_release
+win32:CONFIG += build_all
+
+build_pass:CONFIG(debug, debug|release):win32: TARGET = $$join(TARGET,,,d)
+build_pass:CONFIG(release, debug|release) {
+    DEFINES += QT_NO_DEBUG_OUTPUT
+}
+
 uri = io.engin
 DESTDIR = io/engin
 
@@ -39,11 +47,10 @@ URIDIR = $$replace(uri, \\., /)
 
 qmldir.files = qmldir
 
-installPath = $$[QT_INSTALL_IMPORTS]/$$replace(uri, \\., /)
+installPath = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
 qmldir.path = $$installPath
 target.path = $$installPath
 INSTALLS += target qmldir
-
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../enginio_client/release/ -lenginioclient
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../enginio_client/debug/ -lenginioclientd
