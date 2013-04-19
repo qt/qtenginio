@@ -3,7 +3,7 @@ QT       -= gui
 
 TARGET = enginioclient
 TEMPLATE = lib
-VERSION = 0.2.0
+VERSION = 0.2.1
 
 # Don't include major version in DLL name
 win32: TARGET_EXT = .dll

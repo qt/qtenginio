@@ -1,5 +1,9 @@
 # Enginio Qt Library Changelog
 
+## 0.2.1 (April 19th 2013)
+Fixes:
+* QML plugin is installed under <QML_INSTALL_DIR>/qml
+
 ## 0.2.0 (April 16th 2013)
 New:
 * QueryOperation now supports fulltext search
