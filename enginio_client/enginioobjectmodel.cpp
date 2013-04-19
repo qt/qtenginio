@@ -267,7 +267,7 @@ QModelIndex EnginioObjectModel::indexFromId(const QString &id) const
  * or null pointer if index is invalid. Please note that returned object is
  * owned by model and will be deleted with it.
  */
-EnginioAbstractObject * EnginioObjectModel::getObject(const QModelIndex &index)
+EnginioAbstractObject * EnginioObjectModel::getObject(const QModelIndex &index) const
 {
     if (!index.isValid() || index.row() >= rowCount()) {
         qWarning() << "invalid index";

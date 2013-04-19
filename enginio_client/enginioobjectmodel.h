@@ -75,7 +75,7 @@ public:
     bool removeFromModel(int row, int count);
     Q_INVOKABLE bool clear();
     QModelIndex indexFromId(const QString &id) const;
-    EnginioAbstractObject * getObject(const QModelIndex &index);
+    EnginioAbstractObject * getObject(const QModelIndex &index) const;
     void notifyObjectUpdated(const QString &id);
 
 signals:
