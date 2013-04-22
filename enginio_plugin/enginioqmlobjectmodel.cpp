@@ -41,7 +41,50 @@
  * \qmltype ObjectModel
  * \instantiates EnginioQmlObjectModel
  * \inqmlmodule enginio-plugin
- * \brief List model for the Enginio objects.
+ * \brief List model for Enginio objects.
+ *
+ * ObjectModel can be used as container for Enginio objects on client side.
+ *
+ * Objects can be read from backend to the model with normal QueryOperation by
+ * specifying operation's model property. When query operation finishes results
+ * are added to the model.
+ *
+ * ObjectOperation also has model property. Depending on object operation's type
+ * new objects are added to the model, modified objects are updated and deleted
+ * objects are removed from the model.
+ *
+ * Example of creating new object in backend and adding it to model:
+ * \code
+ * Enginio.ObjectModel {
+ *     id: cityModel
+ * }
+ *
+ * Enginio.ObjectOperation {
+ *     id: cityCreator
+ *     client: client
+ *     model: cityModel
+ * }
+ *
+ * Component.onCompleted: {
+ *     cityCreator.create({ objectType: "objects.city", name: "Berlin" });
+ *     cityCreator.execute();
+ *     // When operation finishes, new object is added to cityModel
+ * }
+ * \endcode
+ *
+ * ObjectModel can be used as a data source for QML's view elements (such as
+ * ListView and GridView). In view delegate object data is accessed through
+ * model's \c jsondata role.
+ *
+ * \code
+ * ListView {
+ *     id: cityList
+ *     model: cityModel
+ *     delegate: Text {
+ *         text: jsondata.name
+ *     }
+ * }
+ * \endcode
  */
 
 /*!
