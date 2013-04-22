@@ -13,10 +13,9 @@ Client library for accessing Enginio service from Qt and QML code.
 # Install
 
 ## Linux and Windows (MinGW)
-* `qmake && make install` will try install client library (libenginioclient) to {QT_INSTALL_DIR}/lib, copy headers to {QT_INSTALL_DIR}/import/Enginio and install QML extension plugin (libenginioplugin) to {QT_INSTALL_DIR}/imports/io/engin/
+* `qmake && make install` will try install client library (libenginioclient) to {QT_INSTALL_DIR}/lib, copy headers to {QT_INSTALL_DIR}/import/Enginio and install QML extension plugin (libenginioplugin) to {QT_INSTALL_DIR}/qml/io/engin/
 * In C++ applications include headers as usual (for example: `#include <Enginio/enginioclient.h>`) and link the client library into the project by adding `LIBS += -lenginioclient` to pro file.
 * In QML applications import Enginio components with `import io.engin 1.0 as Enginio`
-* When running your QML application make sure plugins are searched from {QT_INSTALL_DIR}/imports path. For example: `qmlscene -I {QT_INSTALL_DIR}/imports MyQmlApp.qml`
 
 
 # Contributing
