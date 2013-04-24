@@ -50,8 +50,6 @@ class EnginioQmlClient : public EnginioClient
 {
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlClient)
-    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId)
-    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret)
     Q_PROPERTY(QString apiUrl READ apiUrlAsString WRITE setApiUrlFromString)
     Q_PROPERTY(QString sessionToken READ sessionToken)
 

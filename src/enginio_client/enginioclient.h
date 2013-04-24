@@ -59,10 +59,14 @@ public:
                            QObject *parent = 0);
     ~EnginioClient();
 
+    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged)
+    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
+
     QString backendId() const;
     void setBackendId(const QString &backendId);
     QString backendSecret() const;
     void setBackendSecret(const QString &backendSecret);
+
     QUrl apiUrl() const;
     void setApiUrl(const QUrl &apiUrl);
     QNetworkAccessManager * networkManager();
@@ -78,6 +82,8 @@ public:
 signals:
     void sessionAuthenticated() const;
     void sessionTerminated() const;
+    void backendIdChanged(const QString &backendId);
+    void backendSecretChanged(const QString &backendSecret);
 
 private slots:
     void ignoreSslErrors(QNetworkReply* reply, const QList<QSslError> &errors);

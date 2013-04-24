@@ -170,7 +170,10 @@ QString EnginioClient::backendId() const
 void EnginioClient::setBackendId(const QString &backendId)
 {
     Q_D(EnginioClient);
-    d->m_backendId = backendId;
+    if (d->m_backendId != backendId) {
+        d->m_backendId = backendId;
+        emit backendIdChanged(backendId);
+    }
 }
 
 /*!
@@ -188,7 +191,10 @@ QString EnginioClient::backendSecret() const
 void EnginioClient::setBackendSecret(const QString &backendSecret)
 {
     Q_D(EnginioClient);
-    d->m_backendSecret = backendSecret;
+    if (d->m_backendSecret != backendSecret) {
+        d->m_backendSecret = backendSecret;
+        emit backendSecretChanged(backendSecret);
+    }
 }
 
 /*!
