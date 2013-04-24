@@ -40,6 +40,8 @@
 
 #include "enginioclient_global.h"
 #include <QObject>
+#include <QtCore/qtypeinfo.h>
+#include <QtCore/qmetatype.h>
 
 class EnginioAbstractObject;
 class EnginioAbstractObjectFactory;
@@ -54,6 +56,9 @@ class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
     Q_OBJECT
 public:
+    enum Area { ObjectsArea, UsersArea, SearchArea }; // TODO add more areas
+    Q_ENUMS(Area);
+
     explicit EnginioClient(const QString &backendId,
                            const QString &backendSecret,
                            QObject *parent = 0);
@@ -98,5 +103,8 @@ protected:
 private:
     Q_DECLARE_PRIVATE(EnginioClient)
 };
+
+Q_DECLARE_TYPEINFO(EnginioClient::Area, Q_PRIMITIVE_TYPE);
+Q_DECLARE_METATYPE(EnginioClient::Area);
 
 #endif // ENGINIOCLIENT_H
