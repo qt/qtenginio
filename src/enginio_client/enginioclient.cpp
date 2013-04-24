@@ -37,6 +37,7 @@
 
 #include "enginioclient_p.h"
 #include "enginiojsonobjectfactory.h"
+#include "enginioreply.h"
 
 #include <QDebug>
 #include <QNetworkReply>
@@ -76,6 +77,9 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     m_deleteNetworkManager(true)
 {
     addFactory(new EnginioJsonObjectFactory());
+
+    _request.setHeader(QNetworkRequest::ContentTypeHeader,
+                          QString("application/json"));
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
@@ -172,6 +176,7 @@ void EnginioClient::setBackendId(const QString &backendId)
     Q_D(EnginioClient);
     if (d->m_backendId != backendId) {
         d->m_backendId = backendId;
+        d->_request.setRawHeader("Enginio-Backend-Id", d->m_backendId.toLatin1());
         emit backendIdChanged(backendId);
     }
 }
@@ -193,6 +198,7 @@ void EnginioClient::setBackendSecret(const QString &backendSecret)
     Q_D(EnginioClient);
     if (d->m_backendSecret != backendSecret) {
         d->m_backendSecret = backendSecret;
+        d->_request.setRawHeader("Enginio-Backend-Secret", d->m_backendSecret.toLatin1());
         emit backendSecretChanged(backendSecret);
     }
 }
@@ -224,6 +230,7 @@ QNetworkAccessManager * EnginioClient::networkManager()
     Q_D(EnginioClient);
     if (d->m_networkManager.isNull()) {
         d->m_networkManager = new QNetworkAccessManager(this);
+        QObject::connect(d->m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor{d});
         d->m_deleteNetworkManager = true;
 
         // Ignore SSL errors when staging backend is used.
@@ -249,6 +256,8 @@ void EnginioClient::setNetworkManager(QNetworkAccessManager *networkManager)
         delete d->m_networkManager;
 
     d->m_networkManager = networkManager;
+    // TODO it will crash soon, we need to disconnect in ~EnginioClient
+    QObject::connect(d->m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor{d});
     d->m_deleteNetworkManager = false;
 }
 
@@ -333,3 +342,54 @@ void EnginioClient::ignoreSslErrors(QNetworkReply* reply,
     reply->ignoreSslErrors(errors);
 }
 
+EnginioReply* EnginioClient::query(const QJsonObject &query, const Area area)
+{
+    Q_D(EnginioClient);
+
+    QNetworkReply *nreply = d->query(query, area);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+    return ereply;
+}
+
+EnginioReply* EnginioClient::create(const QJsonObject &object, const Area area)
+{
+    Q_D(EnginioClient);
+
+    if (object.empty())
+        return 0;
+
+    QNetworkReply *nreply = d->create(object, area);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+EnginioReply* EnginioClient::update(const QJsonObject &object, const Area area)
+{
+    Q_D(EnginioClient);
+
+    if (object.empty())
+        return 0;
+
+    QNetworkReply *nreply = d->update(object, area);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+EnginioReply* EnginioClient::remove(const QJsonObject &object, const Area area)
+{
+    Q_D(EnginioClient);
+
+    if (object.empty())
+        return 0;
+
+    QNetworkReply *nreply = d->remove(object, area);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}

@@ -49,19 +49,24 @@
 
 class EnginioClient;
 class EnginioReplyPrivate;
+class EnginioClientPrivate;
 
 class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
 {
     Q_OBJECT
+    explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
 public:
-    explicit EnginioReply(EnginioClient *parent, QNetworkReply *reply);
+    EnginioReply(); //dummy
     ~EnginioReply();
 
     Q_INVOKABLE QNetworkReply::NetworkError errorCode() const;
     Q_INVOKABLE QString errorString() const;
     Q_INVOKABLE QJsonObject data() const;
+signals:
+    void finished();
 private:
     EnginioReplyPrivate *d;
+    friend class EnginioClient;
 };
 
 Q_DECLARE_TYPEINFO(const EnginioReply*, Q_PRIMITIVE_TYPE);

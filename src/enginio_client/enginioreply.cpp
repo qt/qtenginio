@@ -42,6 +42,7 @@
 
 #include "enginioreply.h"
 #include "enginioclient.h"
+#include "enginioclient_p.h"
 
 class EnginioReplyPrivate {
     QNetworkReply *_nreply;
@@ -72,10 +73,12 @@ public:
     }
 };
 
-EnginioReply::EnginioReply(EnginioClient *parent, QNetworkReply *reply)
-    : QObject(parent)
+EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
+    : QObject(p->q_ptr)
     , d(new EnginioReplyPrivate(reply))
-{}
+{
+    p->registerReply(reply, this);
+}
 
 EnginioReply::~EnginioReply()
 {

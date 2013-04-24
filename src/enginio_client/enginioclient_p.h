@@ -40,9 +40,16 @@
 
 #include "enginioabstractobjectfactory.h"
 #include "enginioclient.h"
+#include "enginioreply.h"
+
 #include <QNetworkAccessManager>
 #include <QPointer>
 #include <QUrl>
+#include <QtCore/qjsondocument.h>
+#include <QtNetwork/qnetworkrequest.h>
+#include <QtNetwork/qnetworkreply.h>
+#include <QtCore/qurlquery.h>
+
 
 class FactoryUnit
 {
@@ -59,6 +66,50 @@ class EnginioClientPrivate : public QObject
     Q_OBJECT
     Q_DECLARE_PUBLIC(EnginioClient)
 
+    enum PathOptions { Default, IncludeIdInPath = 1};
+    static QString getPath(const QJsonObject &object, const EnginioClient::Area area, PathOptions flags = Default)
+    {
+        QString result;
+        result.reserve(32);
+        result.append("/v1/");
+
+        if (area == EnginioClient::ObjectsArea) {
+            QString objectType = object["objectType"].toString();
+            if (objectType.isEmpty())
+                return QString();
+
+            result.append(objectType.replace('.', '/'));
+        }
+
+        if (area == EnginioClient::UsersArea) {
+            result.append("users");
+        }
+
+        if (flags & IncludeIdInPath) {
+            QString id = object["id"].toString();
+            if (id.isEmpty())
+                return QString();
+            result.append('/');
+            result.append(id);
+        }
+
+        return result;
+    }
+
+    struct ReplyFinishedFunctor {
+        EnginioClientPrivate *d;
+        void operator ()(QNetworkReply *nreply)
+        {
+            Q_ASSERT(d);
+            EnginioClient *q = static_cast<EnginioClient*>(d->q_func());
+            EnginioReply *ereply = d->_replyReplyMap.take(nreply);
+            Q_ASSERT(ereply);
+
+            q->finished(ereply);
+            ereply->finished();
+        }
+    };
+
 public:
     EnginioClientPrivate(EnginioClient *client = 0);
     virtual ~EnginioClientPrivate();
@@ -74,6 +125,69 @@ public:
     QPointer<QNetworkAccessManager> m_networkManager;
     bool m_deleteNetworkManager;
     QList<FactoryUnit*> m_factories;
+    QNetworkRequest _request;
+    QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
+
+    void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
+    {
+        _replyReplyMap[nreply] = ereply;
+    }
+
+    QNetworkReply *update(const QJsonObject &object, const EnginioClient::Area area)
+    {
+        QUrl url(m_apiUrl);
+        url.setPath(getPath(object, area, IncludeIdInPath));
+
+        QNetworkRequest req(_request);
+        req.setUrl(url);
+
+        QByteArray data = QJsonDocument(object).toJson(QJsonDocument::Compact);
+        return q_ptr->networkManager()->put(req, data);
+    }
+
+    QNetworkReply *remove(const QJsonObject &object, const EnginioClient::Area area)
+    {
+        QUrl url(m_apiUrl);
+        url.setPath(getPath(object, area, IncludeIdInPath));
+
+        QNetworkRequest req(_request);
+        req.setUrl(url);
+
+        return q_ptr->networkManager()->deleteResource(req);
+    }
+
+    QNetworkReply *create(const QJsonObject &object, const EnginioClient::Area area)
+    {
+        QUrl url(m_apiUrl);
+        url.setPath(getPath(object, area));
+
+        QNetworkRequest req(_request);
+        req.setUrl(url);
+
+        QByteArray data = QJsonDocument(object).toJson(QJsonDocument::Compact);
+        return q_ptr->networkManager()->post(req, data);
+    }
+
+    QNetworkReply *query(const QJsonObject &object, const EnginioClient::Area area)
+    {
+        QUrl url(m_apiUrl);
+        url.setPath(getPath(object, area));
+
+        // TODO add all params here
+        QUrlQuery urlQuery;
+        if (int limit = object["limit"].toDouble()) {
+            urlQuery.addQueryItem("limit", QString::number(limit));
+        }
+        if (object["query"].isObject()) { // TODO docs are inconsistent on that
+            urlQuery.addQueryItem(QStringLiteral("q"), QJsonDocument(object["query"].toObject()).toJson(QJsonDocument::Compact));
+        }
+        url.setQuery(urlQuery);
+
+        QNetworkRequest req(_request);
+        req.setUrl(url);
+
+        return q_ptr->networkManager()->get(req);
+    }
 };
 
 #endif // ENGINIOCLIENT_P_H

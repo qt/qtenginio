@@ -42,6 +42,7 @@
 #include <QObject>
 #include <QtCore/qtypeinfo.h>
 #include <QtCore/qmetatype.h>
+#include <QtCore/qjsonobject.h>
 
 class EnginioAbstractObject;
 class EnginioAbstractObjectFactory;
@@ -51,6 +52,7 @@ class QUrl;
 
 class QNetworkReply;
 class QSslError;
+class EnginioReply;
 
 class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
@@ -84,11 +86,17 @@ public:
     EnginioAbstractObject * createObject(const QString &type,
                                          const QString &id = QString()) const;
 
+    Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Area area = ObjectsArea);
+    Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Area area = ObjectsArea);
+    Q_INVOKABLE EnginioReply *update(const QJsonObject &object, const Area area = ObjectsArea);
+    Q_INVOKABLE EnginioReply *remove(const QJsonObject &object, const Area area = ObjectsArea);
+
 signals:
     void sessionAuthenticated() const;
     void sessionTerminated() const;
     void backendIdChanged(const QString &backendId);
     void backendSecretChanged(const QString &backendSecret);
+    void finished(EnginioReply *reply);
 
 private slots:
     void ignoreSslErrors(QNetworkReply* reply, const QList<QSslError> &errors);
