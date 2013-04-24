@@ -25,7 +25,8 @@ SOURCES += \
     enginioidentityauthoperation.cpp \
     enginioacl.cpp \
     enginioacloperation.cpp \
-    enginiofileoperation.cpp
+    enginiofileoperation.cpp \
+    enginioreply.cpp
 
 HEADERS += \
     enginioclient.h\
@@ -53,4 +54,4 @@ HEADERS += \
     enginioacloperation.h \
     enginioacloperation_p.h \
     enginiofileoperation.h \
-    enginiofileoperation_p.h
+    enginioreply.h
