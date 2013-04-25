@@ -1,6 +1,7 @@
 TARGET = Enginio
-QT       += network
+QT += network
 DEFINES += ENGINIOCLIENT_LIBRARY
+MODULE = enginio
 
 load(qt_module)
 

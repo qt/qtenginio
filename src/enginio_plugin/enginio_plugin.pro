@@ -1,6 +1,7 @@
 TARGET = enginioplugin
-TARGETPATH = io/engin
-QT += qml quick
+TARGETPATH = Enginio
+TARGET.module_name = Enginio
+QT += qml quick enginio
 
 SOURCES += \
     enginioqmlclient.cpp \
@@ -22,11 +23,7 @@ HEADERS += \
     enginioqmlacloperation.h \
     enginioqmlfileoperation.h
 
-OTHER_FILES = qmldir
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../enginio_client/release/ -lEnginio
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../enginio_client/debug/ -lEnginiod
-else:unix: LIBS += -L$$OUT_PWD/../enginio_client/ -lEnginio
+QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 
 INCLUDEPATH += $$PWD/../enginio_client
 DEPENDPATH += $$PWD/../enginio_client
