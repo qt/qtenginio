@@ -2,10 +2,10 @@ QT       += testlib enginio
 QT       -= gui
 
 TARGET = tst_objectoperationtest
-CONFIG   += console
+CONFIG   += console testcase
 CONFIG   -= app_bundle
 
-DESTDIR = ../../bin
+DESTDIR += ../../../bin
 
 TEMPLATE = app
 

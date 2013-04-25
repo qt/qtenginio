@@ -2,12 +2,12 @@ QT       += testlib enginio
 QT       -= gui
 
 TARGET = tst_filetest
-CONFIG   += console
+CONFIG   += console testcase
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-DESTDIR = ../../bin
+DESTDIR += ../../../bin
 
 HEADERS += ../common/common.h
 
