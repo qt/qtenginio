@@ -5,8 +5,6 @@ TARGET = tst_queryoperationtest
 CONFIG   += console testcase
 CONFIG   -= app_bundle
 
-DESTDIR += ../../../bin
-
 TEMPLATE = app
 
 SOURCES += \

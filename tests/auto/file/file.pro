@@ -7,8 +7,6 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-DESTDIR += ../../../bin
-
 HEADERS += ../common/common.h
 
 SOURCES += \

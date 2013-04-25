@@ -5,8 +5,6 @@ TARGET = tst_authenticationtest
 CONFIG   += console testcase
 CONFIG   -= app_bundle
 
-DESTDIR += ../../../bin
-
 TEMPLATE = app
 
 SOURCES += \

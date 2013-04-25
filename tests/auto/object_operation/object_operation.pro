@@ -5,8 +5,6 @@ TARGET = tst_objectoperationtest
 CONFIG   += console testcase
 CONFIG   -= app_bundle
 
-DESTDIR += ../../../bin
-
 TEMPLATE = app
 
 SOURCES += tst_objectoperationtest.cpp \

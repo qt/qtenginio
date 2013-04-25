@@ -5,8 +5,6 @@ TARGET = tst_acloperationtest
 CONFIG   += console testcase
 CONFIG   -= app_bundle
 
-DESTDIR += ../../../bin
-
 TEMPLATE = app
 
 SOURCES += \
