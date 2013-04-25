@@ -6,4 +6,5 @@ SUBDIRS += \
     object_operation \
     authentication \
     acl_operation \
-    file
+    file \
+    enginioclient
