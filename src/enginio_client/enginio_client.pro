@@ -26,7 +26,8 @@ SOURCES += \
     enginioacl.cpp \
     enginioacloperation.cpp \
     enginiofileoperation.cpp \
-    enginioreply.cpp
+    enginioreply.cpp \
+    enginiomodel.cpp
 
 HEADERS += \
     enginioclient.h\
@@ -54,4 +55,6 @@ HEADERS += \
     enginioacloperation.h \
     enginioacloperation_p.h \
     enginiofileoperation.h \
-    enginioreply.h
+    enginiofileoperation_p.h \
+    enginioreply.h \
+    enginiomodel.h
