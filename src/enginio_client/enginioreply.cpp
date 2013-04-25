@@ -80,6 +80,11 @@ EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
     p->registerReply(reply, this);
 }
 
+EnginioReply::EnginioReply()
+{
+    Q_ASSERT(false);
+}
+
 EnginioReply::~EnginioReply()
 {
     delete d;

@@ -64,6 +64,7 @@ public:
     explicit EnginioClient(const QString &backendId,
                            const QString &backendSecret,
                            QObject *parent = 0);
+    explicit EnginioClient(QObject *parent = 0);
     ~EnginioClient();
 
     Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged)

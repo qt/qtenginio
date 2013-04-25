@@ -45,6 +45,8 @@
 #include "enginioqmlobjectoperation.h"
 #include "enginioqmlqueryoperation.h"
 #include "enginioerror.h"
+#include "enginiomodel.h"
+#include "enginioreply.h"
 
 #include <qqml.h>
 
@@ -150,6 +152,9 @@ void EnginioPlugin::registerTypes(const char *uri)
 {
     // @uri io.engin
     qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Client");
+    qmlRegisterType<EnginioClient>(uri, 1, 0, "Enginio");
+    qmlRegisterType<EnginioModel>(uri, 1, 0, "EnginioModel");
+    qmlRegisterType<EnginioReply>(uri, 1, 0, "EnginioReply");
     qmlRegisterType<EnginioQmlObjectModel>(uri, 1, 0, "ObjectModel");
     qmlRegisterType<EnginioQmlObjectOperation>(uri, 1, 0, "ObjectOperation");
     qmlRegisterType<EnginioQmlQueryOperation>(uri, 1, 0, "QueryOperation");

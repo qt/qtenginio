@@ -133,6 +133,12 @@ EnginioClient::EnginioClient(const QString &backendId,
     d->m_backendSecret = backendSecret;
 }
 
+EnginioClient::EnginioClient(QObject *parent)
+    : QObject(parent)
+    , d_ptr(new EnginioClientPrivate(this))
+{
+}
+
 /*!
  * Constructor used in inheriting classes.
  */
