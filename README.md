@@ -1,21 +1,19 @@
-# Enginio Qt Library 
+# Enginio Qt Library development branch
 Client library for accessing Enginio service from Qt and QML code. 
-
 
 # System Requirements
 * Qt 5.0 or newer
 * OpenSSL library 
   * Windows: Get the installer from http://slproweb.com/products/Win32OpenSSL.html (light version is enough, copy DLLs to windows system directory when asked).
   * Linux: Seach for `libssl` in your distribution's package repository.
-* Enginio library and examples have been tested in Linux and in Windows with MinGW compiler. Other platforms are not currently officially supported.
-
+* To install the library on a Windows system ActivePerl (http://www.activestate.com/activeperl/downloads) is needed which is also a dependency for building Qt
+  (For additional information see http://qt-project.org/wiki/Building_Qt_Desktop_for_Windows_with_MSVC).
 
 # Install
 
-## Linux and Windows (MinGW)
-* `qmake && make install` will try install client library (libenginioclient) to {QT_INSTALL_DIR}/lib, copy headers to {QT_INSTALL_DIR}/import/Enginio and install QML extension plugin (libenginioplugin) to {QT_INSTALL_DIR}/qml/io/engin/
-* In C++ applications include headers as usual (for example: `#include <Enginio/enginioclient.h>`) and link the client library into the project by adding `LIBS += -lenginioclient` to pro file.
-* In QML applications import Enginio components with `import io.engin 1.0 as Enginio`
+* `qmake && make install` will install the client library as a Qt5 module (enginio) to the Qt installation.
+* In C++ applications include headers as usual (for example: `#include <Enginio/enginioclient.h>`) and add 'Qt += enginio' to the project file of your application.
+* In QML applications import Enginio components with 'import Enginio 1.0'
 
 
 # Contributing
