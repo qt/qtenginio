@@ -38,6 +38,7 @@
 #include "enginioclient_p.h"
 #include "enginiojsonobjectfactory.h"
 #include "enginioreply.h"
+#include "enginiomodel.h"
 
 #include <QDebug>
 #include <QNetworkReply>
@@ -80,6 +81,9 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
 
     _request.setHeader(QNetworkRequest::ContentTypeHeader,
                           QString("application/json"));
+    qRegisterMetaType<EnginioClient*>();
+    qRegisterMetaType<EnginioModel*>();
+    qRegisterMetaType<EnginioReply*>();
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
