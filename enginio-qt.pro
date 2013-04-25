@@ -1,7 +1,3 @@
-TEMPLATE = subdirs
+load(configure)
+load(qt_parts)
 
-CONFIG += ordered
-
-SUBDIRS += \
-    enginio_client \
-    enginio_plugin
