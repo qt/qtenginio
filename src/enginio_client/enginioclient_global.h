@@ -39,6 +39,7 @@
 #define ENGINIOCLIENT_GLOBAL_H
 
 #include <QtCore/qglobal.h>
+#include <QDebug>
 
 #if defined(ENGINIOCLIENT_LIBRARY)
 #  define ENGINIOCLIENT_EXPORT Q_DECL_EXPORT
