@@ -22,6 +22,8 @@ private Q_SLOTS:
     void testUploadDownload();
     void testUploadFromFile();
     void testUploadInvalid();
+    void testUploadRefless();
+    void testUploadMultipart();
 
 private:
     QPointer<EnginioClient> m_client;
@@ -86,12 +88,15 @@ void FileTest::testUploadDownload()
 
     EnginioFileOperation *fileOp = new EnginioFileOperation(m_client);
     QSignalSpy uploadStatusSpy(fileOp, SIGNAL(uploadStatusChanged()));
+    QSignalSpy uploadProgressSpy(fileOp, SIGNAL(uploadProgressChanged()));
+    QCOMPARE(fileOp->uploadProgress(), 0.0);
 
-    fileOp->upload(TEST_IMAGE,
+    fileOp->upload(file,
+                   TEST_IMAGE,
                    TEST_IMAGE_CONTENT_TYPE,
-                   object->id(),
                    object->objectType(),
-                   file);
+                   object->id(),
+                   Q_INT64_C(4 * 1024));
 
     QSignalSpy finishedSpy1(fileOp, SIGNAL(finished()));
     QSignalSpy errorSpy1(fileOp, SIGNAL(error(EnginioError*)));
@@ -103,8 +108,10 @@ void FileTest::testUploadDownload()
     QCOMPARE(finishedSpy1.count(), 1);
     QCOMPARE(errorSpy1.count(), 0);
     QVERIFY(!fileOp->fileId().isEmpty());
-    QCOMPARE(uploadStatusSpy.count(), 1);
+    QCOMPARE(uploadStatusSpy.count(), 3); // unknown -> empty, empty -> incomplete, incomplete -> complete
     QCOMPARE(fileOp->uploadStatus(), EnginioFileOperation::UploadStatusComplete);
+    QCOMPARE(uploadProgressSpy.count(), 2);
+    QCOMPARE(fileOp->uploadProgress(), 100.0);
 
     /* Add image reference to object */
 
@@ -181,8 +188,9 @@ void FileTest::testUploadFromFile()
 
     fileOp->upload(TEST_IMAGE_PATH,
                    TEST_IMAGE_CONTENT_TYPE,
+                   object->objectType(),
                    object->id(),
-                   object->objectType());
+                   Q_INT64_C(4 * 1024));
 
     QSignalSpy finishedSpy1(fileOp, SIGNAL(finished()));
     QSignalSpy errorSpy1(fileOp, SIGNAL(error(EnginioError*)));
@@ -194,7 +202,7 @@ void FileTest::testUploadFromFile()
     QCOMPARE(finishedSpy1.count(), 1);
     QCOMPARE(errorSpy1.count(), 0);
     QVERIFY(!fileOp->fileId().isEmpty());
-    QCOMPARE(uploadStatusSpy.count(), 1);
+    QCOMPARE(uploadStatusSpy.count(), 3); // unknown -> empty, empty -> incomplete, incomplete -> complete
     QCOMPARE(fileOp->uploadStatus(), EnginioFileOperation::UploadStatusComplete);
 
     /* Add image reference to object */
@@ -259,8 +267,8 @@ void FileTest::testUploadInvalid()
 
     fileOp->upload(QStringLiteral("dummy/path"),
                    TEST_IMAGE_CONTENT_TYPE,
-                   "fakeId",
-                   EnginioTests::TEST_OBJECT_TYPE);
+                   EnginioTests::TEST_OBJECT_TYPE,
+                   "fakeId");
 
     QSignalSpy finishedSpy1(fileOp, SIGNAL(finished()));
     QSignalSpy errorSpy1(fileOp, SIGNAL(error(EnginioError*)));
@@ -274,6 +282,166 @@ void FileTest::testUploadInvalid()
     QCOMPARE(fileOp->uploadStatus(), EnginioFileOperation::UploadStatusUnknown);
 
     delete fileOp;
+}
+
+/*!
+ * 1. Upload image file
+ * 2. Create new object with reference to file
+ * 3. Download object and attached file info
+ */
+void FileTest::testUploadRefless()
+{
+    QVERIFY2(m_client, "Null client");
+
+    /* Upload image file */
+
+    EnginioFileOperation *fileOp = new EnginioFileOperation(m_client);
+    QSignalSpy uploadStatusSpy(fileOp, SIGNAL(uploadStatusChanged()));
+
+    fileOp->upload(TEST_IMAGE_PATH,
+                   TEST_IMAGE_CONTENT_TYPE,
+                   EnginioTests::TEST_OBJECT_TYPE,
+                   QString(),
+                   Q_INT64_C(4 * 1024));
+
+    QSignalSpy finishedSpy1(fileOp, SIGNAL(finished()));
+    QSignalSpy errorSpy1(fileOp, SIGNAL(error(EnginioError*)));
+
+    fileOp->execute();
+
+    QVERIFY2(finishedSpy1.wait(EnginioTests::NETWORK_TIMEOUT),
+             "Operation timeout");
+    QCOMPARE(finishedSpy1.count(), 1);
+    QCOMPARE(errorSpy1.count(), 0);
+    QVERIFY(!fileOp->fileId().isEmpty());
+    QCOMPARE(uploadStatusSpy.count(), 3); // unknown -> empty, empty -> incomplete, incomplete -> complete
+    QCOMPARE(fileOp->uploadStatus(), EnginioFileOperation::UploadStatusComplete);
+
+    /* Create new object containing reference to image */
+
+    EnginioJsonObject *object = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
+    object->insert("stringValue", QString("testUploadRefless #%1").arg(qrand()));
+
+    QJsonObject fileRef;
+    fileRef.insert("id", fileOp->fileId());
+    fileRef.insert("objectType", QStringLiteral("files"));
+    object->insert("file", fileRef);
+
+    QVERIFY(EnginioTests::createObject(m_client, object));
+    QVERIFY(!object->id().isEmpty());
+
+    /* Download object and attached file info */
+
+    QMap<QString, QString> requestParams;
+    requestParams[QStringLiteral("include")] = QStringLiteral("{\"file\":{}}");
+    EnginioJsonObject *readObject = dynamic_cast<EnginioJsonObject*>(
+                EnginioTests::readObject(m_client,
+                                         object->id(),
+                                         object->objectType(),
+                                         0,
+                                         requestParams));
+
+    QVERIFY(readObject);
+    QCOMPARE(readObject->id(), object->id());
+    QJsonObject objectFile = readObject->value("file").toObject();
+    QVERIFY(!objectFile.isEmpty());
+    QCOMPARE(objectFile.value("id").toString(),
+             fileRef.value("id").toString());
+    QCOMPARE(objectFile.value("objectType").toString(),
+             fileRef.value("objectType").toString());
+    QCOMPARE(objectFile.value("fileName").toString(), TEST_IMAGE);
+    QCOMPARE(objectFile.value("contentType").toString(), TEST_IMAGE_CONTENT_TYPE);
+    QVERIFY(!objectFile.value("url").toString().isEmpty());
+    QCOMPARE(objectFile.value("object").toObject().value("id").toString(),
+             object->id());
+    QCOMPARE(objectFile.value("object").toObject().value("objectType").toString(),
+             object->objectType());
+
+    delete fileOp;
+    delete object;
+}
+
+/*!
+ * 1. Upload image file using default chunk size. Chunk size should be bigger
+ *    than size of the test image so that image is uploaded as multipart
+ *    request.
+ * 2. Create new object with reference to file
+ * 3. Download object and attached file info
+ */
+
+void FileTest::testUploadMultipart()
+{
+    QVERIFY2(m_client, "Null client");
+
+    /* Upload image file */
+
+    EnginioFileOperation *fileOp = new EnginioFileOperation(m_client);
+
+    QSignalSpy uploadStatusSpy(fileOp, SIGNAL(uploadStatusChanged()));
+    QSignalSpy uploadProgressSpy(fileOp, SIGNAL(uploadProgressChanged()));
+    QCOMPARE(fileOp->uploadProgress(), 0.0);
+
+    fileOp->upload(TEST_IMAGE_PATH,
+                   TEST_IMAGE_CONTENT_TYPE,
+                   EnginioTests::TEST_OBJECT_TYPE);
+
+    QSignalSpy finishedSpy1(fileOp, SIGNAL(finished()));
+    QSignalSpy errorSpy1(fileOp, SIGNAL(error(EnginioError*)));
+
+    fileOp->execute();
+
+    QVERIFY2(finishedSpy1.wait(EnginioTests::NETWORK_TIMEOUT),
+             "Operation timeout");
+    QCOMPARE(finishedSpy1.count(), 1);
+    QCOMPARE(errorSpy1.count(), 0);
+    QVERIFY(!fileOp->fileId().isEmpty());
+    QCOMPARE(uploadStatusSpy.count(), 1); // unknown -> complete
+    QCOMPARE(fileOp->uploadStatus(), EnginioFileOperation::UploadStatusComplete);
+    QCOMPARE(uploadProgressSpy.count(), 1);
+    QCOMPARE(fileOp->uploadProgress(), 100.0);
+
+    /* Create new object containing reference to image */
+
+    EnginioJsonObject *object = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
+    object->insert("stringValue", QString("testUploadChunked #%1").arg(qrand()));
+
+    QJsonObject fileRef;
+    fileRef.insert("id", fileOp->fileId());
+    fileRef.insert("objectType", QStringLiteral("files"));
+    object->insert("file", fileRef);
+
+    QVERIFY(EnginioTests::createObject(m_client, object));
+    QVERIFY(!object->id().isEmpty());
+
+    /* Download object and attached file info */
+
+    QMap<QString, QString> requestParams;
+    requestParams[QStringLiteral("include")] = QStringLiteral("{\"file\":{}}");
+    EnginioJsonObject *readObject = dynamic_cast<EnginioJsonObject*>(
+                EnginioTests::readObject(m_client,
+                                         object->id(),
+                                         object->objectType(),
+                                         0,
+                                         requestParams));
+
+    QVERIFY(readObject);
+    QCOMPARE(readObject->id(), object->id());
+    QJsonObject objectFile = readObject->value("file").toObject();
+    QVERIFY(!objectFile.isEmpty());
+    QCOMPARE(objectFile.value("id").toString(),
+             fileRef.value("id").toString());
+    QCOMPARE(objectFile.value("objectType").toString(),
+             fileRef.value("objectType").toString());
+    QCOMPARE(objectFile.value("fileName").toString(), TEST_IMAGE);
+    QCOMPARE(objectFile.value("contentType").toString(), TEST_IMAGE_CONTENT_TYPE);
+    QVERIFY(!objectFile.value("url").toString().isEmpty());
+    QCOMPARE(objectFile.value("object").toObject().value("id").toString(),
+             object->id());
+    QCOMPARE(objectFile.value("object").toObject().value("objectType").toString(),
+             object->objectType());
+
+    delete fileOp;
+    delete object;
 }
 
 QTEST_MAIN(FileTest)
