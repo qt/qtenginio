@@ -48,6 +48,7 @@ class ENGINIOCLIENT_EXPORT EnginioFileOperation : public EnginioOperation
     Q_OBJECT
     Q_ENUMS(UploadStatus)
     Q_PROPERTY(UploadStatus uploadStatus READ uploadStatus NOTIFY uploadStatusChanged)
+    Q_PROPERTY(double uploadProgress READ uploadProgress NOTIFY uploadProgressChanged)
 
 public:
     enum UploadStatus {
@@ -58,27 +59,31 @@ public:
     };
 
     explicit EnginioFileOperation(EnginioClient *client,
-                                    QObject *parent = 0);
+                                  QObject *parent = 0);
     virtual ~EnginioFileOperation();
 
     QString fileId() const;
     UploadStatus uploadStatus() const;
-    void upload(const QString &fileName,
+    void upload(QIODevice *data,
+                const QString &fileName,
                 const QString &contentType,
-                const QString &objectId,
                 const QString &objectType,
-                QIODevice *data,
-                bool uploadInChunks = false);
+                const QString &objectId = QString(),
+                qint64 chunkSize = Q_INT64_C(1024*1024));
+
     Q_INVOKABLE void upload(const QString &filePath,
                             const QString &contentType,
-                            const QString &objectId,
                             const QString &objectType,
-                            bool uploadInChunks = false);
+                            const QString &objectId = QString(),
+                            qint64 chunkSize = Q_INT64_C(1024*1024));
+
     QString objectId() const;
     QString objectType() const;
+    double uploadProgress() const;
 
 signals:
     void uploadStatusChanged() const;
+    void uploadProgressChanged() const;
 
 protected:
     EnginioFileOperation(EnginioClient *client,

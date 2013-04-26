@@ -60,10 +60,14 @@ public:
     virtual QString requestPath() const;
     virtual QNetworkReply * doRequest(const QUrl &backendUrl);
     virtual void handleResults();
+    virtual bool isFinished();
+    virtual void reset();
 
     QByteArray requestMetadata(bool includeFileName) const;
     EnginioFileOperation::UploadStatus uploadStatusFromString(
             const QString &statusString) const;
+    QByteArray nextChunk(QString *rangeString = 0);
+    bool initializeOperation();
 
     FileOperationType m_type;
     QString m_fileId;
@@ -75,6 +79,9 @@ public:
     QPointer<QHttpMultiPart> m_multiPart;
     QIODevice *m_fileDevice;
     bool m_fromFile;
+    qint64 m_chunkSize;
+    qint64 m_bytesUploaded;
+    int m_lastChunkSize;
 };
 
 #endif // ENGINIOFILEOPERATION_P_H

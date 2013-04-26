@@ -60,6 +60,8 @@ public:
     virtual QNetworkReply * doRequest(const QUrl &backendUrl) = 0;
     virtual void handleResults() = 0;
     virtual QNetworkRequest enginioRequest(const QUrl &url);
+    virtual bool isFinished() { return true; }
+    virtual void reset() {}
 
     void setError(EnginioError::ErrorType type,
                   const QString &description,
