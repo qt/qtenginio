@@ -1,23 +1,15 @@
-QT       += network
-QT       -= gui
-
-TARGET = enginioclient
-TEMPLATE = lib
-VERSION = 0.2.1
-
-# Don't include major version in DLL name
-win32: TARGET_EXT = .dll
-
+TARGET = Enginio
+QT += network
 DEFINES += ENGINIOCLIENT_LIBRARY
+MODULE = enginio
 
-CONFIG += debug_and_release
-win32:CONFIG += build_all
+load(qt_module)
 
-build_pass:CONFIG(debug, debug|release):win32: TARGET = $$join(TARGET,,,d)
-build_pass:CONFIG(release, debug|release) {
-    DEFINES += QT_NO_DEBUG_OUTPUT
-}
-
+###FIXME make lib compile with QT_NO_CAST_FROM_ASCII
+DEFINES -= QT_NO_CAST_TO_ASCII
+DEFINES -= QT_NO_CAST_FROM_ASCII
+DEFINES -= QT_NO_CAST_FROM_BYTEARRAY
+DEFINES -= QT_NO_CAST_TO_BYTEARRAY
 
 SOURCES += \
     enginioclient.cpp \
@@ -36,7 +28,6 @@ SOURCES += \
     enginiofileoperation.cpp
 
 HEADERS += \
-    Enginio \
     enginioclient.h\
     enginioclient_global.h \
     enginioclient_p.h \
@@ -63,11 +54,3 @@ HEADERS += \
     enginioacloperation_p.h \
     enginiofileoperation.h \
     enginiofileoperation_p.h
-
-headers.files = $$HEADERS
-headers.path = $$[QT_INSTALL_HEADERS]/Enginio
-target.path = $$[QT_INSTALL_LIBS]
-
-INSTALLS += \
-    target \
-    headers
