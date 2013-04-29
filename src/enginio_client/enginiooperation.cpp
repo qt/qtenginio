@@ -152,15 +152,29 @@ void EnginioOperationPrivate::onRequestFinished()
     if (!m_reply.isNull() && m_reply->error() == QNetworkReply::NoError)
         handleResults();
 
-    if (m_state != EnginioOperation::StateCanceled) {
-        m_state = EnginioOperation::StateFinished;
-        emit q->stateChanged(m_state);
-    }
-
     if (!m_reply.isNull())
         m_reply->deleteLater();
 
-    emit q->finished();
+    if (isFinished() || m_state == EnginioOperation::StateCanceled) {
+        if (m_state != EnginioOperation::StateCanceled) {
+            m_state = EnginioOperation::StateFinished;
+            emit q->stateChanged(m_state);
+        }
+        emit q->finished();
+
+    } else {
+        m_reply = doRequest(m_client->apiUrl());
+
+        if (!m_reply.isNull()) {
+            qDebug() << "=== Request" << this << m_reply->operation() << m_reply->url();
+            connect(m_reply, SIGNAL(finished()),
+                    this, SLOT(onRequestFinished()),
+                    Qt::QueuedConnection);
+            connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
+                    this, SLOT(onRequestError(QNetworkReply::NetworkError)),
+                    Qt::QueuedConnection);
+        }
+    }
 }
 
 void EnginioOperationPrivate::onRequestError(QNetworkReply::NetworkError error)
@@ -176,8 +190,8 @@ void EnginioOperationPrivate::onRequestError(QNetworkReply::NetworkError error)
         QJsonDocument replyDoc = QJsonDocument::fromJson(data);
         if (replyDoc.isObject()) {
             QJsonObject replyObject = replyDoc.object();
-            errorString = replyObject.value("errors").toArray().first()
-                    .toObject().value("message").toString();
+            errorString = replyObject.value(QStringLiteral("errors")).toArray().first()
+                    .toObject().value(QStringLiteral("message")).toString();
         }
     }
     if (errorString.isEmpty())
@@ -293,7 +307,7 @@ void EnginioOperation::execute()
 
     if (Q_UNLIKELY(!d->m_client)) {
         qWarning() << Q_FUNC_INFO << "Unknown client";
-        d->setError(EnginioError::RequestError, "Unknown client");
+        d->setError(EnginioError::RequestError, QStringLiteral("Unknown client"));
         emit finished();
         return;
     }
@@ -301,6 +315,8 @@ void EnginioOperation::execute()
     if (!d->m_reply.isNull()) {
         d->m_reply->deleteLater();
     }
+
+    d->reset();
 
     d->m_reply = d->doRequest(d->m_client->apiUrl());
 

@@ -90,16 +90,16 @@ QString EnginioQueryOperationPrivate::requestPath() const
     if (m_objectTypes.size() > 1 ||
        !m_requestParams.value(QStringLiteral("search")).isEmpty())
     {
-        return "/v1/search";
+        return QStringLiteral("/v1/search");
     }
 
     // If object type starts with "objects.", url should be "/v1/objects/type".
     // If not, url should be /v1/type.
     QString objectType(m_objectTypes.at(0));
     if (objectType.startsWith(QStringLiteral("objects.")))
-        objectType[7] = QChar('/');
+        objectType[7] = QChar::fromLatin1('/');
 
-    return "/v1/" + objectType;
+    return QStringLiteral("/v1/") + objectType;
 }
 
 QNetworkReply * EnginioQueryOperationPrivate::doRequest(const QUrl &backendUrl)
@@ -110,12 +110,12 @@ QNetworkReply * EnginioQueryOperationPrivate::doRequest(const QUrl &backendUrl)
     QString error;
 
     if (m_objectTypes.isEmpty())
-        error = "Unknown object type";
+        error = QStringLiteral("Unknown object type");
     else if (path.isEmpty())
-        error = "Request URL creation failed";
+        error = QStringLiteral("Request URL creation failed");
     else if (m_objectTypes.size() > 1 &&
              m_requestParams.value(QStringLiteral("search")).isEmpty()) {
-        error = "Missing search parameter";
+        error = QStringLiteral("Missing search parameter");
     }
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
@@ -152,7 +152,7 @@ void EnginioQueryOperationPrivate::handleResults()
 
     QJsonDocument doc = QJsonDocument::fromJson(data);
     if (!doc.isObject()) {
-        setError(EnginioError::RequestError, "Invalid reply data");
+        setError(EnginioError::RequestError, QStringLiteral("Invalid reply data"));
         return;
     }
 

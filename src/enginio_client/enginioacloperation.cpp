@@ -111,9 +111,9 @@ QString EnginioAclOperationPrivate::requestPath() const
     // If not, url should be /v1/type.
     QString objectType(m_object.second);
     if (objectType.startsWith(QStringLiteral("objects.")))
-        objectType[7] = QChar('/');
+        objectType[7] = QChar::fromLatin1('/');
 
-    return QString("/v1/%1/%2/access").arg(objectType).arg(m_object.first);
+    return QStringLiteral("/v1/%1/%2/access").arg(objectType).arg(m_object.first);
 }
 
 QNetworkReply * EnginioAclOperationPrivate::doRequest(const QUrl &backendUrl)
@@ -124,11 +124,11 @@ QNetworkReply * EnginioAclOperationPrivate::doRequest(const QUrl &backendUrl)
     QString error;
 
     if (m_object.first.isEmpty())
-        error = "Unknown object ID";
+        error = QStringLiteral("Unknown object ID");
     if (m_object.second.isEmpty())
-        error = "Unknown object type";
+        error = QStringLiteral("Unknown object type");
     else if (path.isEmpty())
-        error = "Request URL creation failed";
+        error = QStringLiteral("Request URL creation failed");
 
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
@@ -180,7 +180,7 @@ void EnginioAclOperationPrivate::handleResults()
     }
 
     if (!m_resultAcl->fromJson(data)) {
-        setError(EnginioError::RequestError, "Invalid reply data");
+        setError(EnginioError::RequestError, QStringLiteral("Invalid reply data"));
     }
 }
 
