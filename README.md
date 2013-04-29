@@ -10,11 +10,12 @@ Client library for accessing Enginio service from Qt and QML code.
   (For additional information see http://qt-project.org/wiki/Building_Qt_Desktop_for_Windows_with_MSVC).
 
 # Install
-
 * `qmake && make install` will install the client library as a Qt5 module (enginio) to the Qt installation.
 * In C++ applications include headers as usual (for example: `#include <Enginio/enginioclient.h>`) and add 'Qt += enginio' to the project file of your application.
 * In QML applications import Enginio components with 'import Enginio 1.0'
 
+# Independent package build
+* `qmake CONFIG+=package -r && make` will build the module as a static library. Standalone examples that link against this library can be built with `make sub-examples`.
 
 # Contributing
 * Fork the repository on [GitHub](https://github.com/enginio/enginio-qt)
