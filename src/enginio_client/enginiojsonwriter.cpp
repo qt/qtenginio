@@ -47,8 +47,8 @@ void EnginioJsonWriter::objectToJson(const QJsonObject &o,
     json += '{';
 
     if (isObjectRef) {
-        QString id = o.value("id").toString();
-        QString objectType = o.value("objectType").toString();
+        QString id = o.value(QStringLiteral("id")).toString();
+        QString objectType = o.value(QStringLiteral("objectType")).toString();
 
         if (!id.isEmpty()) {
             json += "\"id\":\"";

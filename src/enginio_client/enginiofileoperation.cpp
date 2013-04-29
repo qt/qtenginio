@@ -99,7 +99,7 @@ EnginioFileOperationPrivate::~EnginioFileOperationPrivate()
 QString EnginioFileOperationPrivate::requestPath() const
 {
     if (m_type == UploadMultipartOperation)
-        return "/v1/files";
+        return QStringLiteral("/v1/files");
 
     if (m_type == UploadChunkedOperation) {
         if (m_fileId.isEmpty())
@@ -128,12 +128,12 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
     QString error;
 
     if (m_type == NullFileOperation)
-        error = "Unknown operation type";
+        error = QStringLiteral("Unknown operation type");
     else if (path.isEmpty())
-        error = "Request URL creation failed";
+        error = QStringLiteral("Request URL creation failed");
     else if (m_fromFile && m_fileDevice && !m_fileDevice->isOpen()) {
         if (!m_fileDevice->open(QIODevice::ReadOnly))
-            error = "Can't open file for reading";
+            error = QStringLiteral("Can't open file for reading");
     }
 
     if (!error.isEmpty()) {
