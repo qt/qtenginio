@@ -71,10 +71,10 @@ class EnginioClientPrivate : public QObject
     {
         QString result;
         result.reserve(32);
-        result.append("/v1/");
+        result.append(QStringLiteral("/v1/"));
 
         if (area == EnginioClient::ObjectsArea) {
-            QString objectType = object["objectType"].toString();
+            QString objectType = object[QStringLiteral("objectType")].toString();
             if (objectType.isEmpty())
                 return QString();
 
@@ -82,11 +82,11 @@ class EnginioClientPrivate : public QObject
         }
 
         if (area == EnginioClient::UsersArea) {
-            result.append("users");
+            result.append(QStringLiteral("users"));
         }
 
         if (flags & IncludeIdInPath) {
-            QString id = object["id"].toString();
+            QString id = object[QStringLiteral("id")].toString();
             if (id.isEmpty())
                 return QString();
             result.append('/');
@@ -175,11 +175,12 @@ public:
 
         // TODO add all params here
         QUrlQuery urlQuery;
-        if (int limit = object["limit"].toDouble()) {
-            urlQuery.addQueryItem("limit", QString::number(limit));
+        if (int limit = object[QStringLiteral("limit")].toDouble()) {
+            urlQuery.addQueryItem(QStringLiteral("limit"), QString::number(limit));
         }
-        if (object["query"].isObject()) { // TODO docs are inconsistent on that
-            urlQuery.addQueryItem(QStringLiteral("q"), QJsonDocument(object["query"].toObject()).toJson(QJsonDocument::Compact));
+        if (object[QStringLiteral("query")].isObject()) { // TODO docs are inconsistent on that
+            urlQuery.addQueryItem(QStringLiteral("q"),
+                QString::fromUtf8(QJsonDocument(object[QStringLiteral("query")].toObject()).toJson(QJsonDocument::Compact)));
         }
         url.setQuery(urlQuery);
 

@@ -80,7 +80,7 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     addFactory(new EnginioJsonObjectFactory());
 
     _request.setHeader(QNetworkRequest::ContentTypeHeader,
-                          QString("application/json"));
+                          QStringLiteral("application/json"));
     qRegisterMetaType<EnginioClient*>();
     qRegisterMetaType<EnginioModel*>();
     qRegisterMetaType<EnginioReply*>();

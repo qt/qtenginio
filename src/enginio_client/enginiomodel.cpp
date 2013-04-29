@@ -109,8 +109,8 @@ class EnginioModelPrivate {
 public:
     EnginioModelPrivate(EnginioModel *q_ptr)
         : _enginio(0)
-        , q(q_ptr)
         , _area()
+        , q(q_ptr)
     {}
 
     EnginioClient *enginio() const
@@ -171,7 +171,7 @@ public:
         int row = requestInfo.first;
         if (row == FullModelReset) {
             q->beginResetModel();
-            _data = response->data()["results"].toArray();
+            _data = response->data()[QStringLiteral("results")].toArray();
             syncRoles();
             q->endResetModel();
         } else {
@@ -184,7 +184,7 @@ public:
         // estimate new roles:
         _roles.clear();
         int idx = SyncedRole;
-        _roles[idx++] = "_synced"; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
+        _roles[idx++] = QStringLiteral("_synced"); // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
         QJsonObject firstObject(_data.first().toObject()); // TODO it expects certain data structure in all objects, add way to specify roles
         for (QJsonObject::const_iterator i = firstObject.constBegin(); i != firstObject.constEnd(); ++i) {
             _roles[idx++] = i.key();
