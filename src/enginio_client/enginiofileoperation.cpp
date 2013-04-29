@@ -69,6 +69,11 @@
  * Emitted when file upload status changes.
  */
 
+/*!
+ * \fn void EnginioFileOperation::uploadProgressChanged() const
+ *
+ * Emitted when file upload progress changes.
+ */
 
 EnginioFileOperationPrivate::EnginioFileOperationPrivate(EnginioFileOperation *op) :
     EnginioOperationPrivate(op),
@@ -77,6 +82,9 @@ EnginioFileOperationPrivate::EnginioFileOperationPrivate(EnginioFileOperation *o
     m_fileDevice(0),
     m_fromFile(false)
 {
+    m_chunkSize =  Q_INT64_C(1024 * 1024);
+    m_bytesUploaded =  Q_INT64_C(0);
+    m_lastChunkSize = 0;
 }
 
 EnginioFileOperationPrivate::~EnginioFileOperationPrivate()
@@ -91,10 +99,13 @@ EnginioFileOperationPrivate::~EnginioFileOperationPrivate()
 QString EnginioFileOperationPrivate::requestPath() const
 {
     if (m_type == UploadMultipartOperation)
-        return "/v1/files";
+        return QStringLiteral("/v1/files");
 
-    if (m_type == UploadChunkedOperation)
-        qWarning() << "UploadChunkedOperation not implemented";
+    if (m_type == UploadChunkedOperation) {
+        if (m_fileId.isEmpty())
+            return "/v1/files";
+        return QString("/v1/files/%1/chunk").arg(m_fileId);
+    }
 
     return QString();
 }
@@ -108,15 +119,22 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
 {
     Q_Q(EnginioFileOperation);
 
+    if (m_type == NullFileOperation && !initializeOperation()) {
+        emit q->finished();
+        return 0;
+    }
+
     QString path = requestPath();
     QString error;
 
     if (m_type == NullFileOperation)
-        error = "Unknown operation type";
+        error = QStringLiteral("Unknown operation type");
     else if (path.isEmpty())
-        error = "Request URL creation failed";
-    else if (m_fromFile && m_fileDevice && !m_fileDevice->open(QIODevice::ReadOnly))
-        error = "Can't open file for reading";
+        error = QStringLiteral("Request URL creation failed");
+    else if (m_fromFile && m_fileDevice && !m_fileDevice->isOpen()) {
+        if (!m_fileDevice->open(QIODevice::ReadOnly))
+            error = QStringLiteral("Can't open file for reading");
+    }
 
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
@@ -131,30 +149,44 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
     QNetworkRequest req = enginioRequest(url);
     QNetworkAccessManager *netManager = m_client->networkManager();
 
-    switch (m_type) {
-    case UploadMultipartOperation:
-        if (!m_fileDevice->isReadable()) {
-            setError(EnginioError::RequestError,
-                     QStringLiteral("File is not open for reading"));
-            emit q->finished();
-            return 0;
-        }
-        return netManager->post(req, m_multiPart);
-    case UploadChunkedOperation:
-        qWarning() << "UploadChunkedOperation not implemented";
-        return 0;
-    default:
+    if (!m_fileDevice->isReadable()) {
+        setError(EnginioError::RequestError,
+                 QStringLiteral("File is not open for reading"));
+        emit q->finished();
         return 0;
     }
+
+    QByteArray data;
+    QString range;
+
+    switch (m_type) {
+    case UploadMultipartOperation:
+        return netManager->post(req, m_multiPart);
+    case UploadChunkedOperation:
+        if (m_fileId.isEmpty()) {
+            req.setHeader(QNetworkRequest::ContentTypeHeader,
+                          QStringLiteral("application/json"));
+            return netManager->post(req, requestMetadata(true));
+        }
+        data = nextChunk(&range);
+        if (data.isEmpty())
+            return 0;
+
+        req.setHeader(QNetworkRequest::ContentTypeHeader,
+                      QStringLiteral("application/octet-stream"));
+        req.setRawHeader("Content-Range", range.toLatin1());
+        m_lastChunkSize = data.size();
+        return netManager->put(req, data);
+    default:
+        break;
+    }
+
+    return 0;
 }
 
 void EnginioFileOperationPrivate::handleResults()
 {
     Q_Q(EnginioFileOperation);
-
-    if (m_fromFile && m_fileDevice) {
-        m_fileDevice->close();
-    }
 
     QByteArray data = m_reply->readAll();
 
@@ -185,18 +217,53 @@ void EnginioFileOperationPrivate::handleResults()
     if (oldStatus != m_uploadStatus) {
         emit q->uploadStatusChanged();
     }
+
+    m_bytesUploaded += m_lastChunkSize;
+    if (m_lastChunkSize > 0 || m_type == UploadMultipartOperation)
+        emit q->uploadProgressChanged();
+
+    if (m_fromFile && m_fileDevice && isFinished())
+        m_fileDevice->close();
+}
+
+bool EnginioFileOperationPrivate::isFinished()
+{
+    return m_uploadStatus == EnginioFileOperation::UploadStatusComplete;
+}
+
+void EnginioFileOperationPrivate::reset()
+{
+    Q_Q(EnginioFileOperation);
+
+    m_type = NullFileOperation;
+    m_bytesUploaded = Q_INT64_C(0);
+    m_lastChunkSize = 0;
+
+    EnginioFileOperation::UploadStatus oldStatus = m_uploadStatus;
+    m_uploadStatus = EnginioFileOperation::UploadStatusUnknown;
+    if (oldStatus != m_uploadStatus) {
+        emit q->uploadStatusChanged();
+    }
+
+    if (m_fileDevice) {
+        if (m_fromFile) {
+            if (m_fileDevice->isOpen())
+                m_fileDevice->close();
+        } else {
+            if (m_fileDevice->isOpen())
+                m_fileDevice->seek(Q_INT64_C(0));
+        }
+    }
 }
 
 QByteArray EnginioFileOperationPrivate::requestMetadata(bool includeFileName) const
 {
-    qDebug() << Q_FUNC_INFO;
-
     QByteArray json;
     bool objectWritten = false;
 
     json += '{';
 
-    if (!m_objectId.isEmpty() && !m_objectType.isEmpty()) {
+    if (!m_objectType.isEmpty()) {
         json += "\"object\":{\"id\":\"";
         json += m_objectId;
         json += "\",\"objectType\":\"";
@@ -214,15 +281,12 @@ QByteArray EnginioFileOperationPrivate::requestMetadata(bool includeFileName) co
     }
 
     json += '}';
-    qDebug() << json;
-
     return json;
 }
 
 EnginioFileOperation::UploadStatus EnginioFileOperationPrivate::uploadStatusFromString(
         const QString &statusString) const
 {
-    qDebug() << Q_FUNC_INFO << statusString << "####";
     if (statusString == QStringLiteral("empty"))
         return EnginioFileOperation::UploadStatusEmpty;
     if (statusString == QStringLiteral("incomplete"))
@@ -230,6 +294,74 @@ EnginioFileOperation::UploadStatus EnginioFileOperationPrivate::uploadStatusFrom
     if (statusString == QStringLiteral("complete"))
         return EnginioFileOperation::UploadStatusComplete;
     return EnginioFileOperation::UploadStatusUnknown;
+}
+
+QByteArray EnginioFileOperationPrivate::nextChunk(QString *rangeString)
+{
+    QByteArray data;
+
+    if (m_fileDevice && m_fileDevice->isReadable())
+        data = m_fileDevice->read(m_chunkSize);
+
+    if (rangeString) {
+        rangeString->clear();
+        rangeString->append(QString("%1-%2/%3").arg(m_bytesUploaded)
+                            .arg(m_bytesUploaded + data.size())
+                            .arg(m_fileDevice->size()));
+    }
+
+    return data;
+}
+
+bool EnginioFileOperationPrivate::initializeOperation()
+{
+    if (!m_fileDevice) {
+        setError(EnginioError::RequestError, "No data to upload");
+        return false;
+    }
+
+    if (m_fromFile) {
+        if (!m_fileDevice->isOpen()) {
+            if (!m_fileDevice->open(QIODevice::ReadOnly)) {
+                setError(EnginioError::RequestError, "Can't open file for reading");
+                return false;
+            }
+        }
+    } else if (!m_fileDevice->isOpen()){
+        setError(EnginioError::RequestError, "File is not open for reading");
+        return false;
+    }
+
+    qint64 fileSize = m_fileDevice->size();
+    if (fileSize == Q_INT64_C(0) || fileSize < m_chunkSize) {
+        // If file size is unknown or smaller than one chunk, we upload whole
+        // file in one request.
+        m_type = EnginioFileOperationPrivate::UploadMultipartOperation;
+
+        if (m_multiPart)
+            delete m_multiPart;
+        m_multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
+        if (!m_objectType.isEmpty()) {
+            QHttpPart objectPart;
+            objectPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                                 QVariant("form-data; name=\"object\""));
+            objectPart.setBody(requestMetadata(false));
+            m_multiPart->append(objectPart);
+        }
+
+        QHttpPart filePart;
+        filePart.setHeader(QNetworkRequest::ContentTypeHeader, m_contentType);
+        filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                           QString("form-data; name=\"file\"; filename=\"%1\"").arg(m_fileName));
+        filePart.setBodyDevice(m_fileDevice);
+        m_multiPart->append(filePart);
+
+    } else {
+        m_type = EnginioFileOperationPrivate::UploadChunkedOperation;
+    }
+
+    return true;
 }
 
 /*!
@@ -284,55 +416,36 @@ EnginioFileOperation::UploadStatus EnginioFileOperation::uploadStatus() const
  * Uploads file to Enginio backend.
  *
  * \list
- * \li \a fileName is the name of the file including possible extension.
- * \li \a contentType describes the type of the file (for example "image/jpeg").
- * \li \a objectId and \a objectType describe existing Enginio object which is
- *     linked to uploaded file. Each uploaded file must be linked to an object.
- * \li \a data is the QIODevice which can be used to read file data. This device
+ * \li \a data is the QIODevice which is be used to read file data. This device
  *     must be open for reading when operation is executed and must remain valid
  *     until the finished() signal is emitted.
- * \li If \a uploadInChunks is true large files are uploaded in smaller pieces
- *     (currently unsupported)
+ * \li \a fileName is the name of the file including possible extension.
+ * \li \a contentType describes the type of the file (for example "image/jpeg").
+ * \li \a objectType and \a objectId describe existing Enginio object which
+ *     refernces uploaded file. Each uploaded file must be referenced by an
+ *     object but you can give empty \a objectId if referencing object is not
+ *     yet created.
+ * \li If \a chunkSize is smaller than size of the file, file is uploaded in two
+ *     or more parts.
  * \endlist
  */
-void EnginioFileOperation::upload(const QString &fileName,
+
+void EnginioFileOperation::upload(QIODevice *data,
+                                  const QString &fileName,
                                   const QString &contentType,
-                                  const QString &objectId,
                                   const QString &objectType,
-                                  QIODevice *data,
-                                  bool uploadInChunks)
+                                  const QString &objectId,
+                                  qint64 chunkSize)
 {
-    if (uploadInChunks) {
-        qWarning() << "uploadInChunks not implemented";
-        return;
-    }
+    qDebug() << Q_FUNC_INFO << fileName << contentType << objectType << objectId << chunkSize;
 
     Q_D(EnginioFileOperation);
+    d->m_fileDevice = data;
     d->m_fileName = fileName;
     d->m_contentType = contentType;
-    d->m_objectId = objectId;
     d->m_objectType = objectType;
-    d->m_fileDevice = data;
-
-    d->m_type = EnginioFileOperationPrivate::UploadMultipartOperation;
-
-    if (d->m_multiPart)
-        delete d->m_multiPart;
-    d->m_multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-
-    QHttpPart objectPart;
-    objectPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                         QVariant("form-data; name=\"object\""));
-    objectPart.setBody(d->requestMetadata(false));
-
-    QHttpPart filePart;
-    filePart.setHeader(QNetworkRequest::ContentTypeHeader, d->m_contentType);
-    filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                       QString("form-data; name=\"file\"; filename=\"%1\"").arg(fileName));
-    filePart.setBodyDevice(data);
-
-    d->m_multiPart->append(objectPart);
-    d->m_multiPart->append(filePart);
+    d->m_objectId = objectId;
+    d->m_chunkSize = chunkSize;
 }
 
 /*!
@@ -340,29 +453,34 @@ void EnginioFileOperation::upload(const QString &fileName,
  *
  * \list
  * \li \a filePath is path pointing to file in local file system. Last part of
- *     the path will be used as file name. Directory separator is '/'.
+ *     the path (everything after last '/') will be used as file name.
  * \li \a contentType describes the type of the file (for example "image/jpeg").
- * \li \a objectId and \a objectType describe existing Enginio object which is
- *     linked to uploaded file. Each uploaded file must be linked to an object.
- * \li If \a uploadInChunks is true large files are uploaded in smaller pieces
- *     (currently unsupported)
+ * \li \a objectType and \a objectId describe existing Enginio object which
+ *     refernces uploaded file. Each uploaded file must be referenced by an
+ *     object but you can give empty \a objectId if referencing object is not
+ *     yet created.
+ * \li If \a chunkSize is smaller than size of the file, file is uploaded in two
+ *     or more parts.
  * \endlist
  */
+
 void EnginioFileOperation::upload(const QString &filePath,
                                   const QString &contentType,
-                                  const QString &objectId,
                                   const QString &objectType,
-                                  bool uploadInChunks)
+                                  const QString &objectId,
+                                  qint64 chunkSize)
 {
+    qDebug() << Q_FUNC_INFO << filePath << contentType << objectType << objectId << chunkSize;
+
     Q_D(EnginioFileOperation);
     d->m_fromFile = true;
 
-    upload(filePath.split('/').last(),
+    upload(new QFile(filePath),
+           filePath.split('/').last(),
            contentType,
-           objectId,
            objectType,
-           new QFile(filePath),
-           uploadInChunks);
+           objectId,
+           chunkSize);
 }
 
 /*!
@@ -381,4 +499,23 @@ QString EnginioFileOperation::objectType() const
 {
     Q_D(const EnginioFileOperation);
     return d->m_objectType;
+}
+
+/*!
+ * Returns the upload progress as percentage.
+ */
+double EnginioFileOperation::uploadProgress() const
+{
+    Q_D(const EnginioFileOperation);
+
+    switch (d->m_uploadStatus) {
+    case UploadStatusComplete:
+        return 100.0;
+    case UploadStatusIncomplete:
+        if (d->m_fileDevice)
+            return (double)d->m_bytesUploaded / d->m_fileDevice->size();
+    default:
+        break;
+    }
+    return 0.0;
 }

@@ -97,9 +97,9 @@ QNetworkReply * EnginioIdentityAuthOperationPrivate::doRequest(
     QString error;
 
     if (m_type == Enginio::NullAuthOperation)
-        error = "Unknown operation type";
+        error = QStringLiteral("Unknown operation type");
     else if (path.isEmpty())
-        error = "Request URL creation failed";
+        error = QStringLiteral("Request URL creation failed");
 
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
@@ -158,13 +158,13 @@ void EnginioIdentityAuthOperationPrivate::handleResults()
 
     QJsonDocument doc = QJsonDocument::fromJson(data);
     if (!doc.isObject()) {
-        setError(EnginioError::RequestError, "Invalid reply data");
+        setError(EnginioError::RequestError, QStringLiteral("Invalid reply data"));
         return;
     }
 
     QJsonObject json = doc.object();
     if (!json.contains(QStringLiteral("sessionToken"))) {
-        setError(EnginioError::RequestError, "Invalid reply data");
+        setError(EnginioError::RequestError, QStringLiteral("Invalid reply data"));
         return;
     }
 
@@ -174,14 +174,14 @@ void EnginioIdentityAuthOperationPrivate::handleResults()
     if (!userJson.isEmpty()) {
         if (m_loggedInUser)
             delete m_loggedInUser;
-        m_loggedInUser = m_client->createObject("users");
+        m_loggedInUser = m_client->createObject(QStringLiteral("users"));
         m_loggedInUser->fromEnginioJson(userJson);
     }
 
     QJsonArray groupsJson = json.value(QStringLiteral("usergroups")).toArray();
     for (int i = 0; i < groupsJson.size(); i++) {
         QJsonObject groupJson = groupsJson.at(i).toObject();
-        QString objectType = groupJson.value("objectType").toString();
+        QString objectType = groupJson.value(QStringLiteral("objectType")).toString();
         if (objectType == QStringLiteral("usergroups")) {
             EnginioAbstractObject *group = m_client->createObject(objectType);
             group->fromEnginioJson(groupJson);
