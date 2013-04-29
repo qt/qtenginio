@@ -190,8 +190,8 @@ void EnginioOperationPrivate::onRequestError(QNetworkReply::NetworkError error)
         QJsonDocument replyDoc = QJsonDocument::fromJson(data);
         if (replyDoc.isObject()) {
             QJsonObject replyObject = replyDoc.object();
-            errorString = replyObject.value("errors").toArray().first()
-                    .toObject().value("message").toString();
+            errorString = replyObject.value(QStringLiteral("errors")).toArray().first()
+                    .toObject().value(QStringLiteral("message")).toString();
         }
     }
     if (errorString.isEmpty())
@@ -307,7 +307,7 @@ void EnginioOperation::execute()
 
     if (Q_UNLIKELY(!d->m_client)) {
         qWarning() << Q_FUNC_INFO << "Unknown client";
-        d->setError(EnginioError::RequestError, "Unknown client");
+        d->setError(EnginioError::RequestError, QStringLiteral("Unknown client"));
         emit finished();
         return;
     }

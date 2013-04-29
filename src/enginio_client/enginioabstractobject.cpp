@@ -93,5 +93,5 @@
  */
 QString EnginioAbstractObject::timeFormat()
 {
-    return QString("yyyy-MM-ddThh:mm:ss.zzzZ");
+    return QStringLiteral("yyyy-MM-ddThh:mm:ss.zzzZ");
 }

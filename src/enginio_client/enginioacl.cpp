@@ -211,7 +211,7 @@ QByteArray EnginioAcl::toJson() const
         if (i > 0)
             json += ',';
 
-        json += QString("\"%1\":[").arg(d->m_permissionNames[i]);
+        json += QByteArray("\"") + d->m_permissionNames[i] + "\":[";
 
         const QList< QPair<QString, QString> > list = d->m_accessLists.at(i);
         QList< QPair<QString, QString> >::ConstIterator iter = list.constBegin();
@@ -219,8 +219,7 @@ QByteArray EnginioAcl::toJson() const
             if (iter != list.constBegin())
                 json += ',';
 
-            json += QString("{\"id\":\"%1\",\"objectType\":\"%2\"}")
-                    .arg(iter->first).arg(iter->second);
+            json += QByteArray("{\"id\":\"") + iter->first + "\",\"objectType\":\"" + iter->second + "\"}";
             iter++;
         }
         json += ']';

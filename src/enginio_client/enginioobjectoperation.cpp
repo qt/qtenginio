@@ -95,15 +95,15 @@ QString EnginioObjectOperationPrivate::requestPath() const
     // If not, url should be /v1/type.
     QString objectType(m_objectType);
     if (objectType.startsWith(QStringLiteral("objects.")))
-        objectType[7] = QChar('/');
+        objectType[7] = QChar::fromLatin1('/');
 
     if (m_type == Enginio::CreateObjectOperation)
-        return "/v1/" + objectType;
+        return QStringLiteral("/v1/") + objectType;
 
     if (m_objectId.isEmpty())
         return QString();
 
-    return "/v1/" + objectType + "/" + m_objectId;
+    return QStringLiteral("/v1/") + objectType + QChar::fromLatin1('/') + m_objectId;
 }
 
 /*!
@@ -119,13 +119,13 @@ QNetworkReply * EnginioObjectOperationPrivate::doRequest(const QUrl &backendUrl)
     QString error;
 
     if (m_type == Enginio::NullObjectOperation)
-        error = "Unknown operation type";
+        error = QStringLiteral("Unknown operation type");
     else if (m_objectType.isEmpty())
-        error = "Unknown object type";
+        error = QStringLiteral("Unknown object type");
     else if (m_type != Enginio::CreateObjectOperation && m_objectId.isEmpty())
-        error = "Unknown object ID";
+        error = QStringLiteral("Unknown object ID");
     else if (path.isEmpty())
-        error = "Request URL creation failed";
+        error = QStringLiteral("Request URL creation failed");
 
     if (!error.isEmpty()) {
         setError(EnginioError::RequestError, error);
