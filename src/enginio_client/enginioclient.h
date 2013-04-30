@@ -95,6 +95,7 @@ public:
 signals:
     void sessionAuthenticated() const;
     void sessionTerminated() const;
+    void clientInitialized() const;
     void backendIdChanged(const QString &backendId);
     void backendSecretChanged(const QString &backendSecret);
     void finished(EnginioReply *reply);

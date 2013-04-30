@@ -66,6 +66,11 @@ public:
     virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE;
+
+    Q_INVOKABLE void append(const QJsonObject &value);
+    Q_INVOKABLE void remove(int row);
+    Q_INVOKABLE void setValue(int row, const QVariant &value, const QString &role);
 
 protected:
     virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;

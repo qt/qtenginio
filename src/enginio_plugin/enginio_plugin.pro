@@ -5,6 +5,7 @@ QT += qml quick enginio
 
 SOURCES += \
     enginioqmlclient.cpp \
+    enginioqmlmodel.cpp \
     enginioplugin.cpp \
     enginioqmlobjectmodel.cpp \
     enginioqmlqueryoperation.cpp \
@@ -15,6 +16,7 @@ SOURCES += \
 
 HEADERS += \
     enginioqmlclient.h \
+    enginioqmlmodel.h \
     enginioplugin.h \
     enginioqmlobjectmodel.h \
     enginioqmlqueryoperation.h \

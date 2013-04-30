@@ -52,8 +52,13 @@ class EnginioModelPrivate {
 
     const static int FullModelReset;
     mutable QMap<const EnginioReply*, QPair<int /*row*/, QJsonObject> > _dataChanged;
+    QSet<int> _rowsToSync;
 
-    const static int SyncedRole = Qt::UserRole + 1;
+    enum {
+        InvalidRole = -1,
+        SyncedRole = Qt::UserRole + 1
+    };
+
     QHash<int, QString> _roles;
 
     QJsonArray _data; // TODO replace by a sparse array, and add laziness
@@ -127,6 +132,7 @@ public:
         _enginio = const_cast<EnginioClient*>(enginio);
         if (_enginio) {
             _connections.append(QObject::connect(_enginio, &EnginioClient::finished, FinishedRequest(this)));
+            _connections.append(QObject::connect(_enginio, &EnginioClient::clientInitialized, QueryChanged(this)));
             _connections.append(QObject::connect(_enginio, &QObject::destroyed, EnginioDestroyed(this)));
         }
         emit q->enginioChanged(_enginio);
@@ -135,6 +141,35 @@ public:
     QJsonObject query()
     {
         return _query;
+    }
+
+    void append(const QJsonObject &value)
+    {
+        QJsonObject object(value);
+        object["objectType"] = _query["objectType"]; // TODO think about it, it means that not all queries are valid
+        q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
+        const EnginioReply* id = _enginio->create(object, _area);
+        _data.append(value);
+        const int row = _data.count() - 1;
+        _rowsToSync.insert(row);
+        _dataChanged.insert(id, qMakePair(row, object));
+        q->endInsertRows();
+    }
+
+    void remove(int row)
+    {
+        QJsonObject oldObject = _data.at(row).toObject();
+        const EnginioReply* id = _enginio->remove(oldObject, _area);
+        _dataChanged.insert(id, qMakePair(row, oldObject));
+        emit q->dataChanged(q->index(row), q->index(row) , QVector<int>{SyncedRole,});
+    }
+
+    void setValue(int row, const QVariant &value, const QString &role)
+    {
+        int key = _roles.key(role, InvalidRole);
+        if (key != InvalidRole) {
+            setData(row, value, key);
+        }
     }
 
     void setQuery(const QJsonObject &query)
@@ -169,14 +204,60 @@ public:
     {
         QPair<int, QJsonObject> requestInfo = _dataChanged.take(response);
         int row = requestInfo.first;
+        _rowsToSync.remove(row);
         if (row == FullModelReset) {
             q->beginResetModel();
+            _rowsToSync.clear();
             _data = response->data()[QStringLiteral("results")].toArray();
             syncRoles();
             q->endResetModel();
         } else {
             // TODO update, insert and remove
+            Q_ASSERT(row < _data.count());
+            // update or insert data
+            QJsonObject currentValue = _data.at(row).toObject();
+            QJsonObject oldValue = requestInfo.second;
+            QJsonObject newValue(response->data());
+
+            if (response->errorCode() != QNetworkReply::NoError) {
+                _data.replace(row, oldValue); // FIXME do we have to do more here?
+                return;
+            }
+
+            if (newValue.isEmpty()) {
+                qDebug() << "Removing";
+                q->beginRemoveRows(QModelIndex(), row, row);
+                _data.removeAt(row);
+                q->endRemoveRows();
+            } else {
+                _data.replace(row, newValue);
+                if (_data.count() == 1) {
+                    q->beginResetModel();
+                    syncRoles();
+                    q->endResetModel();
+                } else {
+                    emit q->dataChanged(q->index(row), q->index(row));
+                }
+            }
         }
+    }
+
+    bool setData(const int row, const QVariant &value, int role)
+    {
+        if (role > SyncedRole) {
+            _rowsToSync.insert(row);
+            QJsonObject oldObject = _data.at(row).toObject();
+            QJsonObject newObject = oldObject;
+            newObject[_roles.value(role)] = QJsonValue::fromVariant(value);
+            const EnginioReply* id = _enginio->update(newObject, _area);
+            _dataChanged.insert(id, qMakePair(row, oldObject));
+            _data.replace(row, newObject);
+            emit q->dataChanged(q->index(row), q->index(row));
+            return true;
+        }
+
+        Q_UNIMPLEMENTED();
+        return false;
     }
 
     void syncRoles()
@@ -211,6 +292,9 @@ public:
 
     QVariant data(unsigned row, int role)
     {
+        if (role == SyncedRole)
+            return !_rowsToSync.contains(row);
+
         const QJsonValue value = _data.at(row);
         const QJsonObject object = value.toObject();
         if (role > Qt::UserRole && !object.isEmpty())
@@ -263,6 +347,28 @@ void EnginioModel::setArea(const int area)
         return;
     d->setArea(area);
 }
+
+void EnginioModel::append(const QJsonObject &value)
+{
+    d->append(value);
+}
+
+void EnginioModel::remove(int row)
+{
+    if (row >= d->rowCount())
+        return;
+
+    d->remove(row);
+}
+
+void EnginioModel::setValue(int row, const QVariant &value, const QString &role)
+{
+    if (row >= d->rowCount())  // TODO remove as soon as we have a sparse array.
+        return;
+
+    d->setValue(row, value, role);
+}
+
 void EnginioModel::execute()
 {
     d->execute();
@@ -285,6 +391,14 @@ int EnginioModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return d->rowCount();
+}
+
+bool EnginioModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.row() >= d->rowCount()) // TODO remove as soon as we have a sparse array.
+        return false;
+
+    return d->setData(index.row(), value, role);
 }
 
 QHash<int, QByteArray> EnginioModel::roleNames() const

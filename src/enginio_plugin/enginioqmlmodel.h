@@ -35,44 +35,30 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLCLIENT_H
-#define ENGINIOQMLCLIENT_H
+#ifndef ENGINIOQMLMODEL_H
+#define ENGINIOQMLMODEL_H
 
-#include "enginioclient.h"
-#include <QQmlParserStatus>
+#include "enginiomodel.h"
+#include "enginioqmlclient.h"
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
-
-class EnginioQmlClient : public EnginioClient, public QQmlParserStatus
+class EnginioQmlModel : public EnginioModel
 {
+    // FIXME: Dirty hack. Revise this!
     Q_OBJECT
-    Q_DISABLE_COPY(EnginioQmlClient)
-    Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QString apiUrl READ apiUrlAsString WRITE setApiUrlFromString)
-    Q_PROPERTY(QString sessionToken READ sessionToken)
+    Q_DISABLE_COPY(EnginioQmlModel)
+
+signals:
+    void enginioChanged();
 
 public:
-    EnginioQmlClient(const QString &backendId = QString(),
-                     const QString &backendSecret = QString(),
-                     QObject *parent = 0);
+    // TODO: Downcast does not work in QML (when assigning EnginioQmlClient to a property that expects EnginioClient)
+    // thus we need to find a proper abstraction instead and this has to be removed.
+    Q_PROPERTY(EnginioQmlClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
 
-    QString apiUrlAsString() const;
-    void setApiUrlFromString(const QString &apiUrl);
+    EnginioQmlClient *enginio() const;
+    void setEnginio(const EnginioQmlClient *enginio);
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
-
-    virtual void classBegin() { }
-    virtual void componentComplete();
+    EnginioQmlModel(QObject *parent = 0);
 };
 
-#endif // ENGINIOQMLCLIENT_H
-
+#endif // ENGINIOQMLOBJECTMODEL_H

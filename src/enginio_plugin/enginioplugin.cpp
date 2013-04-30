@@ -39,6 +39,7 @@
 #include "enginioplugin.h"
 #include "enginioqmlacloperation.h"
 #include "enginioqmlclient.h"
+#include "enginioqmlmodel.h"
 #include "enginioqmlfileoperation.h"
 #include "enginioqmlidentityauthoperation.h"
 #include "enginioqmlobjectmodel.h"
@@ -150,10 +151,10 @@ void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
 
 void EnginioPlugin::registerTypes(const char *uri)
 {
-    // @uri io.engin
+    // @uri Enginio
     qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Client");
-    qmlRegisterType<EnginioClient>(uri, 1, 0, "Enginio");
-    qmlRegisterType<EnginioModel>(uri, 1, 0, "EnginioModel");
+    qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Enginio");
+    qmlRegisterType<EnginioQmlModel>(uri, 1, 0, "EnginioModel");
     qmlRegisterType<EnginioReply>(uri, 1, 0, "EnginioReply");
     qmlRegisterType<EnginioQmlObjectModel>(uri, 1, 0, "ObjectModel");
     qmlRegisterType<EnginioQmlObjectOperation>(uri, 1, 0, "ObjectOperation");
