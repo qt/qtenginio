@@ -22,3 +22,6 @@ Makefile
 # Docs
 
 doc/html
+
+# Prevent leaking of secret when working on this repo
+examples/qml/config.js
