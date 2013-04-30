@@ -3,6 +3,8 @@ QT += network
 DEFINES += ENGINIOCLIENT_LIBRARY
 MODULE = enginio
 
+package: CONFIG += force_independent staticlib
+
 load(qt_module)
 
 ###FIXME make lib compile with QT_NO_CAST_FROM_ASCII
