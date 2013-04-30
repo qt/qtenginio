@@ -31,7 +31,7 @@ Rectangle {
 
         onFinished: {
             console.log(reply)
-            var data = reply.toObject().results[0];
+            var data = reply.data().results[0];
             switch (reply) {
                 case requests.newest: tnewest.text = data.title + " (" + data.createdAt +")" ; break
                 case requests.oldest: toldest.text = data.title + " (" + data.createdAt +")" ; break

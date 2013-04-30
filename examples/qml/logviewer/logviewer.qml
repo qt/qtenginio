@@ -12,8 +12,8 @@ Rectangle {
         id: emodel
         enginio: Enginio
                  {
-                     backendId: "5130a6f0e5bde55ab200076c"
-                     backendSecret: "002e99b3ba45465f2a27e14c66c717a2"
+                     backendId: AppConfig.backendData.id
+                     backendSecret: AppConfig.backendData.secret
 
                      onFinished: { busyIndicator.visible = false }
                  }

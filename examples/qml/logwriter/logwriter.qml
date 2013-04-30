@@ -10,6 +10,24 @@ Item {
         id: enginio
         backendId: AppConfig.backendData.id
         backendSecret: AppConfig.backendData.secret
+        onFinished: sync.color = "green"
+    }
+
+    Rectangle {
+        id: sync
+        width: 20
+        height: 20
+        RotationAnimation on rotation {
+            loops: Animation.Infinite
+            from: 0
+            to: 360
+        }
+
+        anchors {
+            centerIn: parent
+        }
+
+        color: "yellow"
     }
 
     Timer {
@@ -18,6 +36,7 @@ Item {
         repeat: true
 
         onTriggered: {
+            sync.color = "red"
             var event = { "status": Math.random(1) > 0.5 ? "busy" : "idle",
                           "objectType" : "objects.log" }
             enginio.create(event)
