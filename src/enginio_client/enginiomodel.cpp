@@ -361,7 +361,7 @@ void EnginioModel::remove(int row)
     d->remove(row);
 }
 
-void EnginioModel::setValue(int row, const QString &role, const QVariant &value)
+void EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
     if (row >= d->rowCount())  // TODO remove as soon as we have a sparse array.
         return;

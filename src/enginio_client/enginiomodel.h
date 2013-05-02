@@ -70,7 +70,7 @@ public:
 
     Q_INVOKABLE void append(const QJsonObject &value);
     Q_INVOKABLE void remove(int row);
-    Q_INVOKABLE void setValue(int row, const QString &role, const QVariant &value);
+    Q_INVOKABLE void setProperty(int row, const QString &role, const QVariant &value);
 
 protected:
     virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
