@@ -103,7 +103,11 @@ class EnginioClientPrivate : public QObject
             Q_ASSERT(d);
             EnginioClient *q = static_cast<EnginioClient*>(d->q_func());
             EnginioReply *ereply = d->_replyReplyMap.take(nreply);
-            Q_ASSERT(ereply);
+
+            // FIXME
+            if (!ereply)
+                return;
+//            Q_ASSERT(ereply);
 
             q->finished(ereply);
             ereply->finished();
