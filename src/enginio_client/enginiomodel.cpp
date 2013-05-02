@@ -146,7 +146,7 @@ public:
     void append(const QJsonObject &value)
     {
         QJsonObject object(value);
-        object["objectType"] = _query["objectType"]; // TODO think about it, it means that not all queries are valid
+        object[QLatin1String("objectType")] = _query[QLatin1String("objectType")]; // TODO think about it, it means that not all queries are valid
         q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
         const EnginioReply* id = _enginio->create(object, _area);
         _data.append(value);
