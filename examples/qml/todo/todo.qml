@@ -30,7 +30,7 @@ Rectangle {
                 hoverEnabled: true
                 onClicked: {
                     if (index !== -1) {
-                        emodel.setValue(index, !completed, "completed")
+                        emodel.setValue(index, "completed", !completed)
                     }
                 }
             }
@@ -45,7 +45,7 @@ Rectangle {
                 font.pointSize: 23
                 onAccepted: {
                      if (index !== -1) {
-                        emodel.setValue(index, text, "title")
+                        emodel.setValue(index, "title", text)
                     }
                 }
             }

@@ -164,7 +164,7 @@ public:
         emit q->dataChanged(q->index(row), q->index(row) , QVector<int>{SyncedRole,});
     }
 
-    void setValue(int row, const QVariant &value, const QString &role)
+    void setValue(int row, const QString &role, const QVariant &value)
     {
         int key = _roles.key(role, InvalidRole);
         if (key != InvalidRole) {
@@ -361,12 +361,12 @@ void EnginioModel::remove(int row)
     d->remove(row);
 }
 
-void EnginioModel::setValue(int row, const QVariant &value, const QString &role)
+void EnginioModel::setValue(int row, const QString &role, const QVariant &value)
 {
     if (row >= d->rowCount())  // TODO remove as soon as we have a sparse array.
         return;
 
-    d->setValue(row, value, role);
+    d->setValue(row, role, value);
 }
 
 void EnginioModel::execute()
