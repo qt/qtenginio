@@ -5,8 +5,6 @@ TARGET = tst_enginioclient
 CONFIG   += console testcase
 CONFIG   -= app_bundle
 
-DESTDIR += ../../../bin
-
 TEMPLATE = app
 
 SOURCES += \
