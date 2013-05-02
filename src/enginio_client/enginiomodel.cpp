@@ -202,6 +202,10 @@ public:
 
     void finishedRequest(const EnginioReply *response)
     {
+        // We get all finished requests, check if we started this one
+        if (!_dataChanged.contains(response))
+            return;
+
         QPair<int, QJsonObject> requestInfo = _dataChanged.take(response);
         int row = requestInfo.first;
         _rowsToSync.remove(row);
