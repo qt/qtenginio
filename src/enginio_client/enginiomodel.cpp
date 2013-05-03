@@ -229,7 +229,6 @@ public:
             }
 
             if (newValue.isEmpty()) {
-                qDebug() << "Removing";
                 q->beginRemoveRows(QModelIndex(), row, row);
                 _data.removeAt(row);
                 q->endRemoveRows();
@@ -250,10 +249,14 @@ public:
     {
         if (role > SyncedRole) {
             _rowsToSync.insert(row);
+            const QString roleName(_roles.value(role));
             QJsonObject oldObject = _data.at(row).toObject();
+            QJsonObject deltaObject;
             QJsonObject newObject = oldObject;
-            newObject[_roles.value(role)] = QJsonValue::fromVariant(value);
-            const EnginioReply* id = _enginio->update(newObject, _area);
+            deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
+            deltaObject[QString::fromUtf8("id")] = newObject[QString::fromUtf8("id")];
+            deltaObject[QString::fromUtf8("objectType")] = newObject[QString::fromUtf8("objectType")];
+            const EnginioReply* id = _enginio->update(deltaObject, _area);
             _dataChanged.insert(id, qMakePair(row, oldObject));
             _data.replace(row, newObject);
             emit q->dataChanged(q->index(row), q->index(row));
