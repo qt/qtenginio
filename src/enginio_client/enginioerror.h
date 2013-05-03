@@ -89,6 +89,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioError)
+    Q_DISABLE_COPY(EnginioError)
     friend class EnginioOperationPrivate;
 };
 
