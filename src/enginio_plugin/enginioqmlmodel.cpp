@@ -40,15 +40,4 @@
 EnginioQmlModel::EnginioQmlModel(QObject *parent)
     : EnginioModel(parent)
 {
-    connect(this, SIGNAL(enginioChanged(const EnginioClient*)), SIGNAL(enginioChanged()));
-}
-
-EnginioQmlClient *EnginioQmlModel::enginio() const
-{
-    return qobject_cast<EnginioQmlClient*>(EnginioModel::enginio());
-}
-
-void EnginioQmlModel::setEnginio(const EnginioQmlClient *enginio)
-{
-    EnginioModel::setEnginio(enginio);
 }
