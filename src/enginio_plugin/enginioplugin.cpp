@@ -156,7 +156,7 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Enginio");
     qmlRegisterType<EnginioClient>(uri, 1, 0, "__Enginio");
     qmlRegisterType<EnginioQmlModel>(uri, 1, 0, "EnginioModel");
-    qmlRegisterType<EnginioReply>(uri, 1, 0, "EnginioReply");
+    qmlRegisterUncreatableType<EnginioReply>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
     qmlRegisterType<EnginioQmlObjectModel>(uri, 1, 0, "ObjectModel");
     qmlRegisterType<EnginioQmlObjectOperation>(uri, 1, 0, "ObjectOperation");
     qmlRegisterType<EnginioQmlQueryOperation>(uri, 1, 0, "QueryOperation");
