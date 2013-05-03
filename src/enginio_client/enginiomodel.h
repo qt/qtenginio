@@ -84,6 +84,7 @@ public slots:
     void execute();
 
 private:
+    Q_DISABLE_COPY(EnginioModel)
     EnginioModelPrivate *d;
     friend class EnginioModelPrivate;
 };

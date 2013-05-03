@@ -58,7 +58,7 @@ public:
 
     // From EnginioOperationPrivate
     virtual QString requestPath() const;
-    virtual QNetworkReply * doRequest(const QUrl &backendUrl);
+    virtual QNetworkReply *doRequest(const QUrl &backendUrl);
     virtual void handleResults();
     virtual bool isFinished();
     virtual void reset();

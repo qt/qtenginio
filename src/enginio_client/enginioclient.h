@@ -77,14 +77,14 @@ public:
 
     QUrl apiUrl() const;
     void setApiUrl(const QUrl &apiUrl);
-    QNetworkAccessManager * networkManager();
+    QNetworkAccessManager *networkManager();
     void setNetworkManager(QNetworkAccessManager *networkManager);
     QString sessionToken() const;
     void setSessionToken(const QString &sessionToken);
 
     int registerObjectFactory(EnginioAbstractObjectFactory *factory);
     void unregisterObjectFactory(int factoryId);
-    EnginioAbstractObject * createObject(const QString &type,
+    EnginioAbstractObject *createObject(const QString &type,
                                          const QString &id = QString()) const;
 
     Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Area area = ObjectsArea);
@@ -101,7 +101,7 @@ signals:
     void finished(EnginioReply *reply);
 
 private slots:
-    void ignoreSslErrors(QNetworkReply* reply, const QList<QSslError> &errors);
+    void ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
 
 protected:
     EnginioClientPrivate *d_ptr;

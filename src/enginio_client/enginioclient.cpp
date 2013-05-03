@@ -126,9 +126,9 @@ void EnginioClientPrivate::removeFactory(int factoryId)
  */
 EnginioClient::EnginioClient(const QString &backendId,
                              const QString &backendSecret,
-                             QObject *parent) :
-    QObject(parent),
-    d_ptr(new EnginioClientPrivate(this))
+                             QObject *parent)
+    : QObject(parent)
+    , d_ptr(new EnginioClientPrivate(this))
 {
     qDebug() << this << "created. Backend ID:" << backendId;
 
