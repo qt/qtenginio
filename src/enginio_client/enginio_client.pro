@@ -7,12 +7,6 @@ package: CONFIG += force_independent staticlib
 
 load(qt_module)
 
-###FIXME make lib compile with QT_NO_CAST_FROM_ASCII
-DEFINES -= QT_NO_CAST_TO_ASCII
-DEFINES -= QT_NO_CAST_FROM_ASCII
-DEFINES -= QT_NO_CAST_FROM_BYTEARRAY
-DEFINES -= QT_NO_CAST_TO_BYTEARRAY
-
 SOURCES += \
     enginioclient.cpp \
     enginiojsonobject.cpp \

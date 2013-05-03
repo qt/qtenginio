@@ -200,9 +200,9 @@ QByteArray EnginioIdentityAuthOperationPrivate::requestData() const
     QByteArray data;
     if (m_type == Enginio::IdentityLoginAuthOperation) {
         data += "{\"username\":\"";
-        data += m_username;
+        data += m_username.toUtf8();
         data += "\",\"password\":\"";
-        data += m_password;
+        data += m_password.toUtf8();
         data += "\"}";
     }
     return data;
