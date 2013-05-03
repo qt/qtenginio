@@ -3,7 +3,9 @@ QT += network
 DEFINES += ENGINIOCLIENT_LIBRARY
 MODULE = enginio
 
-package: CONFIG += force_independent staticlib
+CONFIG += force_independent
+
+package: CONFIG += staticlib
 
 load(qt_module)
 
