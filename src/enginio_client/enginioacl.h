@@ -100,6 +100,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioAcl)
+    Q_DISABLE_COPY(EnginioAcl)
     friend class EnginioAclOperation;
     friend class EnginioQmlAclOperation;
 };

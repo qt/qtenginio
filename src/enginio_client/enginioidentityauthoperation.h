@@ -67,6 +67,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioIdentityAuthOperation)
+    Q_DISABLE_COPY(EnginioIdentityAuthOperation)
 };
 
 #endif // ENGINIOIDENTITYAUTHOPERATION_H

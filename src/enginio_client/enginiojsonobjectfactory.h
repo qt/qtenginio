@@ -46,6 +46,9 @@ public:
     EnginioJsonObjectFactory();
     EnginioAbstractObject * createObjectForType(const QString &objectType,
                                                 const QString &id) const;
+
+private:
+    Q_DISABLE_COPY(EnginioJsonObjectFactory)
 };
 
 #endif // ENGINIOJSONOBJECTFACTORY_H
