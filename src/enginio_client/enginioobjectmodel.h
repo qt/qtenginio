@@ -88,6 +88,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioObjectModel)
+    Q_DISABLE_COPY(EnginioObjectModel)
 };
 
 #endif // ENGINIOOBJECTMODEL_H

@@ -91,6 +91,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioClient)
+    Q_DISABLE_COPY(EnginioClient)
 };
 
 #endif // ENGINIOCLIENT_H

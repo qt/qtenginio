@@ -86,6 +86,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioOperation)
+    Q_DISABLE_COPY(EnginioOperation)
 };
 
 #endif // ENGINIOOPERATION_H
