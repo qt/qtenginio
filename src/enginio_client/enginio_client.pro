@@ -5,7 +5,13 @@ MODULE = enginio
 
 CONFIG += force_independent
 
-package: CONFIG += staticlib
+!no-package {
+    win32: CONFIG -= build_all
+    else {
+        CONFIG -= debug_and_release
+        CONFIG += staticlib
+    }
+}
 
 load(qt_module)
 

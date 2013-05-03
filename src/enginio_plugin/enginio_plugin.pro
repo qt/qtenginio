@@ -1,9 +1,12 @@
 TARGETPATH = Enginio
-TARGET.module_name = Enginio
+
+CONFIG += force_independent building_plugin
 
 load(qml_plugin)
+include($$PWD/../../enginio.pri)
 
 TARGET = enginioplugin
+TARGET.module_name = Enginio
 
 QT += qml quick enginio
 
@@ -34,10 +37,10 @@ CONFIG += no_cxx_module
 lessThan(QT_MINOR_VERSION, 1) {
     # CONFIG += force_independent does not work properly prior Qt 5.1.
     # Make sure we do not overwrite the release plugin with the debug.
-    DESTDIR = ../../qml/$${TARGET.module_name}$$qtPlatformTargetSuffix()
+    DESTDIR = ../../qml/$${TARGET.module_name}
+    TARGET = $$TARGET$$qtPlatformTargetSuffix()
 }
 
-CONFIG += force_independent
 copy2build.input = QMLDIRFILE
 copy2build.output = ../../qml/$${TARGET.module_name}/qmldir
 !contains(TEMPLATE_PREFIX, vc):copy2build.variable_out = PRE_TARGETDEPS
