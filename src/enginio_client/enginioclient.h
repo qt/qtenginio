@@ -112,6 +112,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioClient)
+    Q_DISABLE_COPY(EnginioClient)
 };
 
 Q_DECLARE_TYPEINFO(EnginioClient::Area, Q_PRIMITIVE_TYPE);

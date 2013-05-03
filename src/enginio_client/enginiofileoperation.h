@@ -92,6 +92,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioFileOperation)
+    Q_DISABLE_COPY(EnginioFileOperation)
 };
 
 #endif // ENGINIOFILEOPERATION_H

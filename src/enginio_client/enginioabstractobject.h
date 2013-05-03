@@ -46,6 +46,7 @@ class QJsonObject;
 class ENGINIOCLIENT_EXPORT EnginioAbstractObject
 {
 public:
+    EnginioAbstractObject() {}
     virtual ~EnginioAbstractObject() {}
     virtual QByteArray toEnginioJson(bool isObjectRef = false) const = 0;
     virtual bool fromEnginioJson(const QJsonObject &json) = 0;
@@ -53,6 +54,9 @@ public:
     virtual QString objectType() const = 0;
 
     static QString timeFormat();
+
+private:
+    Q_DISABLE_COPY(EnginioAbstractObject)
 };
 
 Q_DECLARE_METATYPE(EnginioAbstractObject*)

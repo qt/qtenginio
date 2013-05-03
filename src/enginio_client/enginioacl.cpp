@@ -122,9 +122,9 @@ EnginioAcl::EnginioAcl(const QJsonObject &object, QObject *parent) :
 {
     Q_D(EnginioAcl);
     for (int perm = 0; perm < d->m_numPermissions; perm++) {
-        if (object.contains(d->m_permissionNames[perm])) {
+        if (object.contains(QLatin1String(d->m_permissionNames[perm]))) {
             d->m_accessLists[perm] = permissionArrayToList(
-                        object[d->m_permissionNames[perm]].toArray());
+                        object[QLatin1String(d->m_permissionNames[perm])].toArray());
         }
     }
 }
@@ -175,7 +175,7 @@ bool EnginioAcl::fromJson(const QByteArray &json)
     for (int listItem = 0; listItem < d->m_numPermissions; listItem++) {
         d->m_accessLists[listItem].clear();
 
-        QJsonValue listValue = jsonObject.value(d->m_permissionNames[listItem]);
+        QJsonValue listValue = jsonObject.value(QLatin1String(d->m_permissionNames[listItem]));
         if (!listValue.isArray()) {
             error = true;
             continue;
@@ -219,7 +219,7 @@ QByteArray EnginioAcl::toJson() const
             if (iter != list.constBegin())
                 json += ',';
 
-            json += QByteArray("{\"id\":\"") + iter->first + "\",\"objectType\":\"" + iter->second + "\"}";
+            json += QByteArray("{\"id\":\"") + iter->first.toUtf8() + "\",\"objectType\":\"" + iter->second.toUtf8() + "\"}";
             iter++;
         }
         json += ']';

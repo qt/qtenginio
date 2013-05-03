@@ -72,6 +72,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioQueryOperation)
+    Q_DISABLE_COPY(EnginioQueryOperation)
 };
 
 #endif // ENGINIOQUERYOPERATION_H
