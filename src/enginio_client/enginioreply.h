@@ -56,7 +56,6 @@ class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
     Q_OBJECT
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
 public:
-    EnginioReply(); //dummy
     ~EnginioReply();
 
     Q_INVOKABLE QNetworkReply::NetworkError errorCode() const;
@@ -65,6 +64,7 @@ public:
 signals:
     void finished();
 private:
+    Q_DISABLE_COPY(EnginioReply)
     EnginioReplyPrivate *d;
     friend class EnginioClient;
 };
