@@ -41,23 +41,11 @@
 #include "enginiomodel.h"
 #include "enginioqmlclient.h"
 
-class EnginioQmlModel : public EnginioModel
+class ENGINIOCLIENT_EXPORT EnginioQmlModel : public EnginioModel
 {
-    // FIXME: Dirty hack. Revise this!
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlModel)
-
-signals:
-    void enginioChanged();
-
 public:
-    // TODO: Downcast does not work in QML (when assigning EnginioQmlClient to a property that expects EnginioClient)
-    // thus we need to find a proper abstraction instead and this has to be removed.
-    Q_PROPERTY(EnginioQmlClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
-
-    EnginioQmlClient *enginio() const;
-    void setEnginio(const EnginioQmlClient *enginio);
-
     EnginioQmlModel(QObject *parent = 0);
 };
 
