@@ -52,7 +52,7 @@ void EnginioJsonWriter::objectToJson(const QJsonObject &o,
 
         if (!id.isEmpty()) {
             json += "\"id\":\"";
-            json += id;
+            json += id.toUtf8();
             json += '"';
             if (!objectType.isEmpty())
                 json += ',';
@@ -60,14 +60,14 @@ void EnginioJsonWriter::objectToJson(const QJsonObject &o,
 
         if (!objectType.isEmpty()) {
             json += "\"objectType\":\"";
-            json += objectType;
+            json += objectType.toUtf8();
             json += '"';
         }
     } else {
         QJsonObject::ConstIterator i = o.constBegin();
         while (i != o.constEnd()) {
             json += '"';
-            json += i.key();
+            json += i.key().toUtf8();
             json += "\":";
             valueToJson(i.value(), json);
             i++;
@@ -105,7 +105,7 @@ void EnginioJsonWriter::valueToJson(const QJsonValue &v, QByteArray &json)
         break;
     case QJsonValue::String:
         json += '"';
-        json += v.toString();
+        json += v.toString().toUtf8();
         json += '"';
         break;
     case QJsonValue::Array:

@@ -53,6 +53,9 @@ public:
     virtual QString objectType() const = 0;
 
     static QString timeFormat();
+
+private:
+    Q_DISABLE_COPY(EnginioAbstractObject)
 };
 
 Q_DECLARE_METATYPE(EnginioAbstractObject*)

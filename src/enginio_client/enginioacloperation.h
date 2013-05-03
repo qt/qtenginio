@@ -75,6 +75,7 @@ protected:
 
 private:
     Q_DECLARE_PRIVATE(EnginioAclOperation)
+    Q_DISABLE_COPY(EnginioAclOperation)
 };
 
 #endif // ENGINIOACLOPERATION_H

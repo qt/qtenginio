@@ -103,8 +103,8 @@ QString EnginioFileOperationPrivate::requestPath() const
 
     if (m_type == UploadChunkedOperation) {
         if (m_fileId.isEmpty())
-            return "/v1/files";
-        return QString("/v1/files/%1/chunk").arg(m_fileId);
+            return QStringLiteral("/v1/files");
+        return QStringLiteral("/v1/files/%1/chunk").arg(m_fileId);
     }
 
     return QString();
@@ -265,9 +265,9 @@ QByteArray EnginioFileOperationPrivate::requestMetadata(bool includeFileName) co
 
     if (!m_objectType.isEmpty()) {
         json += "\"object\":{\"id\":\"";
-        json += m_objectId;
+        json += m_objectId.toUtf8();
         json += "\",\"objectType\":\"";
-        json += m_objectType;
+        json += m_objectType.toUtf8();
         json += "\"}";
         objectWritten = true;
     }
@@ -276,7 +276,7 @@ QByteArray EnginioFileOperationPrivate::requestMetadata(bool includeFileName) co
         if (objectWritten)
             json += ',';
         json += "\"fileName\":\"";
-        json += m_fileName;
+        json += m_fileName.toUtf8();
         json += '"';
     }
 
@@ -305,7 +305,7 @@ QByteArray EnginioFileOperationPrivate::nextChunk(QString *rangeString)
 
     if (rangeString) {
         rangeString->clear();
-        rangeString->append(QString("%1-%2/%3").arg(m_bytesUploaded)
+        rangeString->append(QStringLiteral("%1-%2/%3").arg(m_bytesUploaded)
                             .arg(m_bytesUploaded + data.size())
                             .arg(m_fileDevice->size()));
     }
@@ -316,19 +316,19 @@ QByteArray EnginioFileOperationPrivate::nextChunk(QString *rangeString)
 bool EnginioFileOperationPrivate::initializeOperation()
 {
     if (!m_fileDevice) {
-        setError(EnginioError::RequestError, "No data to upload");
+        setError(EnginioError::RequestError, QStringLiteral("No data to upload"));
         return false;
     }
 
     if (m_fromFile) {
         if (!m_fileDevice->isOpen()) {
             if (!m_fileDevice->open(QIODevice::ReadOnly)) {
-                setError(EnginioError::RequestError, "Can't open file for reading");
+                setError(EnginioError::RequestError, QStringLiteral("Can't open file for reading"));
                 return false;
             }
         }
     } else if (!m_fileDevice->isOpen()){
-        setError(EnginioError::RequestError, "File is not open for reading");
+        setError(EnginioError::RequestError, QStringLiteral("File is not open for reading"));
         return false;
     }
 
@@ -345,7 +345,7 @@ bool EnginioFileOperationPrivate::initializeOperation()
         if (!m_objectType.isEmpty()) {
             QHttpPart objectPart;
             objectPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                                 QVariant("form-data; name=\"object\""));
+                                 QVariant(QStringLiteral("form-data; name=\"object\"")));
             objectPart.setBody(requestMetadata(false));
             m_multiPart->append(objectPart);
         }
@@ -353,7 +353,7 @@ bool EnginioFileOperationPrivate::initializeOperation()
         QHttpPart filePart;
         filePart.setHeader(QNetworkRequest::ContentTypeHeader, m_contentType);
         filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                           QString("form-data; name=\"file\"; filename=\"%1\"").arg(m_fileName));
+                           QStringLiteral("form-data; name=\"file\"; filename=\"%1\"").arg(m_fileName));
         filePart.setBodyDevice(m_fileDevice);
         m_multiPart->append(filePart);
 

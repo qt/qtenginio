@@ -59,6 +59,7 @@ public:
 
 private:
     QJsonObject m_object;
+    Q_DISABLE_COPY(EnginioJsonObject)
 };
 
 #endif // ENGINIOJSONOBJECT_H
