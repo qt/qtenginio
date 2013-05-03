@@ -229,7 +229,6 @@ public:
             }
 
             if (newValue.isEmpty()) {
-                qDebug() << "Removing";
                 q->beginRemoveRows(QModelIndex(), row, row);
                 _data.removeAt(row);
                 q->endRemoveRows();
