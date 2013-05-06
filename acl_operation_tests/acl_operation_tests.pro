@@ -1,3 +1,5 @@
+include($$PWD/../enginio-qt/enginio.pri)
+
 QT       += network testlib
 QT       -= gui
 
@@ -16,10 +18,3 @@ SOURCES += \
 HEADERS += ../common/common.h
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
-
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../enginio-qt/enginio_client/release/ -lenginioclient
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../enginio-qt/enginio_client/debug/ -lenginioclientd
-else:unix: LIBS += -L$$OUT_PWD/../enginio-qt/enginio_client/ -lenginioclient
-
-INCLUDEPATH += $$PWD/../enginio-qt/enginio_client
-DEPENDPATH += $$PWD/../enginio-qt/enginio_client
