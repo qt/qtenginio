@@ -393,7 +393,17 @@ Qt::ItemFlags EnginioModel::flags(const QModelIndex &index) const
 
 QVariant EnginioModel::data(const QModelIndex &index, int role) const
 {
-    if (index.row() >= d->rowCount())
+    if (!index.isValid() || index.row() < 0 || index.row() >= d->rowCount())
+        return QVariant();
+
+    if (role == Qt::DisplayRole) {
+        // Randomly return the first really user-defined role
+        // so that the user sees something when plugging the model
+        // into a view.
+        return d->data(index.row(), Qt::UserRole + 3);
+    }
+
+    if (role < Qt::UserRole)
         return QVariant();
 
     return d->data(index.row(), role);
