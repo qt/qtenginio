@@ -57,6 +57,7 @@ private slots:
     void query_users();
     void query_users_filter();
     void create_todos();
+    void user_crud();
     void update_todos();
     void update_invalidId();
     void remove_todos();
@@ -209,6 +210,81 @@ void tst_EnginioClient::create_todos()
     QCOMPARE(response->data()["completed"], obj["completed"]);
     QCOMPARE(response->data()["title"], obj["title"]);
     QCOMPARE(response->data()["objectType"], obj["objectType"]);
+}
+
+void tst_EnginioClient::user_crud()
+{
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+
+    QString name = QUuid::createUuid().toString();
+    QString pass = QString::fromUtf8("Metaphysics");
+    QString id;
+    {
+        // CREATE
+        int spyCount = spy.count();
+        QJsonObject obj;
+        obj["username"] = name;
+        obj["password"] = pass;
+
+        const EnginioReply* reqId = client.create(obj, EnginioClient::UsersArea);
+        QVERIFY(reqId);
+
+        QTRY_COMPARE(spy.count(), spyCount + 1);
+
+        const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+        QJsonObject data = response->data();
+        QCOMPARE(response, reqId);
+        QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+        QVERIFY(!data.isEmpty());
+        QCOMPARE(data["username"], obj["username"]);
+        QVERIFY(!data["id"].toString().isEmpty());
+        id = data["id"].toString();
+    }
+    {
+        // READ
+        int spyCount = spy.count();
+        QJsonObject query;
+        query["username"] = name;
+        QJsonObject obj;
+        obj["query"] = query;
+        const EnginioReply* reqId = client.query(obj, EnginioClient::UsersArea);
+        QVERIFY(reqId);
+        QTRY_COMPARE(spy.count(), spyCount + 1);
+        QCOMPARE(reqId->errorCode(), QNetworkReply::NoError);
+        QJsonArray data = reqId->data()["results"].toArray();
+        QCOMPARE(data.count(), 1);
+        QCOMPARE(data[0].toObject()["id"].toString(), id);
+        QCOMPARE(data[0].toObject()["username"].toString(), name);
+    }
+    {
+        // UPDATE
+        int spyCount = spy.count();
+        QJsonObject obj;
+        obj["password"] = pass + "pass";
+        obj["id"] = id;
+        const EnginioReply* reqId = client.update(obj, EnginioClient::UsersArea);
+        QVERIFY(reqId);
+        QTRY_COMPARE(spy.count(), spyCount + 1);
+        QCOMPARE(reqId->errorCode(), QNetworkReply::NoError);
+        QJsonObject data = reqId->data();
+        QCOMPARE(data["id"].toString(), id);
+        QCOMPARE(data["username"].toString(), name);
+    }
+    {
+        int spyCount = spy.count();
+        // DELETE it
+        QJsonObject obj;
+        obj["id"] = id;
+        const EnginioReply* reqId = client.remove(obj, EnginioClient::UsersArea);
+        QVERIFY(reqId);
+
+        QTRY_COMPARE(spy.count(), spyCount + 1);
+    }
 }
 
 void tst_EnginioClient::update_todos()
