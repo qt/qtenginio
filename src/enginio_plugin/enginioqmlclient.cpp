@@ -95,11 +95,6 @@ EnginioQmlClient::EnginioQmlClient(const QString &backendId,
 {
 }
 
-void EnginioQmlClient::componentComplete()
-{
-    emit clientInitialized();
-}
-
 QString EnginioQmlClient::apiUrlAsString() const
 {
     return apiUrl().toString();

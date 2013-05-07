@@ -186,6 +186,8 @@ void EnginioClient::setBackendId(const QString &backendId)
         d->m_backendId = backendId;
         d->_request.setRawHeader("Enginio-Backend-Id", d->m_backendId.toLatin1());
         emit backendIdChanged(backendId);
+        if (isInitialized())
+            emit clientInitialized();
     }
 }
 
@@ -208,6 +210,8 @@ void EnginioClient::setBackendSecret(const QString &backendSecret)
         d->m_backendSecret = backendSecret;
         d->_request.setRawHeader("Enginio-Backend-Secret", d->m_backendSecret.toLatin1());
         emit backendSecretChanged(backendSecret);
+        if (isInitialized())
+            emit clientInitialized();
     }
 }
 
@@ -290,6 +294,12 @@ void EnginioClient::setSessionToken(const QString &sessionToken)
         emit sessionTerminated();
     else
         emit sessionAuthenticated();
+}
+
+bool EnginioClient::isInitialized() const
+{
+    Q_D(const EnginioClient);
+    return !d->m_backendId.isEmpty() && !d->m_backendSecret.isEmpty();
 }
 
 /*!

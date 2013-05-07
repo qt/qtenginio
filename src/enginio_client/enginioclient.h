@@ -69,6 +69,7 @@ public:
 
     Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged)
     Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
+    Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
 
     QString backendId() const;
     void setBackendId(const QString &backendId);
@@ -81,6 +82,8 @@ public:
     void setNetworkManager(QNetworkAccessManager *networkManager);
     QString sessionToken() const;
     void setSessionToken(const QString &sessionToken);
+
+    bool isInitialized() const;
 
     int registerObjectFactory(EnginioAbstractObjectFactory *factory);
     void unregisterObjectFactory(int factoryId);
