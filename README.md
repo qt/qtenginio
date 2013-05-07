@@ -3,15 +3,18 @@ Set of automated tests for Enginio Qt client library.
 
 
 # System Requirements
-* Qt 5.0 or newer
-* OpenSSL library. Windows installer: http://slproweb.com/products/Win32OpenSSL.html (light version is enough, copy DLLs to windows system directory when asked). In Linux seach for `libssl` in your distribution's package repository.
+* Qt 5.0 or newer (Qt 5.1 recommended)
+* OpenSSL library
+  * Mac OS X: OpenSSL library should be preinstalled.
+  * Linux: Most distributions have preinstalled OpenSSL library. If yours doesn't, seach for `libssl` in package repository.
+  * Windows: Get the installer from http://slproweb.com/products/Win32OpenSSL.html (light version is enough, copy DLLs to windows system directory when asked).
+* Perl 5.10 or newer
+  * Mac and Linux: Perl should be preinstalled.
+  * Windows: http://www.perl.org/get.html
 
 
 # Get the code
-* Clone the repository
-* Test project includes Enginio client library as Git submodule under enginio-qt directory. After fresh clone submodule directories are empty. You must tell Git to fetch submodule code by giving following commands (in root directory enginio-qt-tests):
-  * `git submodule init`
-  * `git submodule update`
+* Clone the repository and Enginio library submodule `git clone --recursive ...`
 * Please note that there's no need to install Enginio client library. Tests build and link to included library.
 
 
@@ -25,7 +28,6 @@ Set of automated tests for Enginio Qt client library.
 * `qmake`
 * `make`
 * `./run-all-tests.sh`
-* If you run individual test executables from bin directory, library path must be specified. For example: `LD_LIBRARY_PATH=enginio-qt/enginio_client/ bin/tst_objectoperationtest`
 
 
 # Contributing
