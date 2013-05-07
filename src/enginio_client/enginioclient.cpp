@@ -186,6 +186,8 @@ void EnginioClient::setBackendId(const QString &backendId)
         d->m_backendId = backendId;
         d->_request.setRawHeader("Enginio-Backend-Id", d->m_backendId.toLatin1());
         emit backendIdChanged(backendId);
+        if (isInitialized())
+            emit clientInitialized();
     }
 }
 
@@ -208,11 +210,16 @@ void EnginioClient::setBackendSecret(const QString &backendSecret)
         d->m_backendSecret = backendSecret;
         d->_request.setRawHeader("Enginio-Backend-Secret", d->m_backendSecret.toLatin1());
         emit backendSecretChanged(backendSecret);
+        if (isInitialized())
+            emit clientInitialized();
     }
 }
 
 /*!
- * Get the Enginio backend URL.
+ * \qproperty EnginioClient::apiUrl
+ * \brief Enginio backend URL.
+ *
+ * Usually it is not needed to change the default URL.
  */
 QUrl EnginioClient::apiUrl() const
 {
@@ -220,13 +227,13 @@ QUrl EnginioClient::apiUrl() const
     return d->m_apiUrl;
 }
 
-/*!
- * Change Enginio backend URL to \a apiUrl.
- */
 void EnginioClient::setApiUrl(const QUrl &apiUrl)
 {
     Q_D(EnginioClient);
-    d->m_apiUrl = apiUrl;
+    if (d->m_apiUrl != apiUrl) {
+        d->m_apiUrl = apiUrl;
+        emit apiUrlChanged();
+    }
 }
 
 /*!
@@ -270,8 +277,10 @@ void EnginioClient::setNetworkManager(QNetworkAccessManager *networkManager)
 }
 
 /*!
- * Get the token of currently authenticated session. Returns empty string if
- * there's no authenticated session.
+ * \property EnginioClient::sessionToken
+ * \brief The token of currently authenticated session.
+ *
+ * Returns empty string if there is no authenticated session.
  *
  * \sa EnginioIdentityAuthOperation::attachToSessionWithToken()
  */
@@ -284,12 +293,21 @@ QString EnginioClient::sessionToken() const
 void EnginioClient::setSessionToken(const QString &sessionToken)
 {
     Q_D(EnginioClient);
-    d->m_sessionToken = sessionToken;
+    if (d->m_sessionToken != sessionToken) {
+        d->m_sessionToken = sessionToken;
 
-    if (sessionToken.isEmpty())
-        emit sessionTerminated();
-    else
-        emit sessionAuthenticated();
+        emit sessionTokenChanged();
+        if (sessionToken.isEmpty())
+            emit sessionTerminated();
+        else
+            emit sessionAuthenticated();
+    }
+}
+
+bool EnginioClient::isInitialized() const
+{
+    Q_D(const EnginioClient);
+    return !d->m_backendId.isEmpty() && !d->m_backendSecret.isEmpty();
 }
 
 /*!

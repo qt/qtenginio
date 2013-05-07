@@ -134,6 +134,8 @@ public:
             _connections.append(QObject::connect(_enginio, &EnginioClient::finished, FinishedRequest(this)));
             _connections.append(QObject::connect(_enginio, &EnginioClient::clientInitialized, QueryChanged(this)));
             _connections.append(QObject::connect(_enginio, &QObject::destroyed, EnginioDestroyed(this)));
+            if (_enginio->isInitialized())
+                execute();
         }
         emit q->enginioChanged(_enginio);
     }

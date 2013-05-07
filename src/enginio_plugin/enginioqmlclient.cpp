@@ -41,7 +41,6 @@
 #include "enginioqmlobjectoperation.h"
 #include "enginioqmlqueryoperation.h"
 
-#include <QUrl>
 #include <QDebug>
 
 /*!
@@ -67,11 +66,6 @@
  */
 
 /*!
- * \qmlproperty string Client::apiUrl
- * Enginio backend URL. Normally there's no need to change the default URL.
- */
-
-/*!
  * \qmlproperty string Client::sessionToken
  * Token of currently authenticated session. This is empty string if there's no
  * authenticated session.
@@ -93,21 +87,6 @@ EnginioQmlClient::EnginioQmlClient(const QString &backendId,
                                    QObject *parent) :
     EnginioClient(backendId, backendSecret, parent)
 {
-}
-
-void EnginioQmlClient::componentComplete()
-{
-    emit clientInitialized();
-}
-
-QString EnginioQmlClient::apiUrlAsString() const
-{
-    return apiUrl().toString();
-}
-
-void EnginioQmlClient::setApiUrlFromString(const QString &apiUrl)
-{
-    setApiUrl(QUrl(apiUrl));
 }
 
 /*!

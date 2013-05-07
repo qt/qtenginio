@@ -47,21 +47,15 @@ class EnginioQmlObjectModel;
 class EnginioQmlObjectOperation;
 class EnginioQmlQueryOperation;
 
-class EnginioQmlClient : public EnginioClient, public QQmlParserStatus
+class EnginioQmlClient : public EnginioClient
 {
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlClient)
-    Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QString apiUrl READ apiUrlAsString WRITE setApiUrlFromString)
-    Q_PROPERTY(QString sessionToken READ sessionToken)
 
 public:
     EnginioQmlClient(const QString &backendId = QString(),
                      const QString &backendSecret = QString(),
                      QObject *parent = 0);
-
-    QString apiUrlAsString() const;
-    void setApiUrlFromString(const QString &apiUrl);
 
     Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
             EnginioQmlObjectModel *model = 0);
@@ -69,9 +63,6 @@ public:
             EnginioQmlObjectModel *model = 0);
     Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
     Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
-
-    virtual void classBegin() { }
-    virtual void componentComplete();
 };
 
 #endif // ENGINIOQMLCLIENT_H

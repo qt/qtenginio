@@ -43,12 +43,12 @@
 #include <QtCore/qtypeinfo.h>
 #include <QtCore/qmetatype.h>
 #include <QtCore/qjsonobject.h>
+#include <QtCore/qurl.h>
 
 class EnginioAbstractObject;
 class EnginioAbstractObjectFactory;
 class EnginioClientPrivate;
 class QNetworkAccessManager;
-class QUrl;
 
 class QNetworkReply;
 class QSslError;
@@ -69,6 +69,9 @@ public:
 
     Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged)
     Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
+    Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
+    Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
+    Q_PROPERTY(QString sessionToken READ sessionToken WRITE setSessionToken NOTIFY sessionTokenChanged)
 
     QString backendId() const;
     void setBackendId(const QString &backendId);
@@ -81,6 +84,8 @@ public:
     void setNetworkManager(QNetworkAccessManager *networkManager);
     QString sessionToken() const;
     void setSessionToken(const QString &sessionToken);
+
+    bool isInitialized() const;
 
     int registerObjectFactory(EnginioAbstractObjectFactory *factory);
     void unregisterObjectFactory(int factoryId);
@@ -98,6 +103,8 @@ signals:
     void clientInitialized() const;
     void backendIdChanged(const QString &backendId);
     void backendSecretChanged(const QString &backendSecret);
+    void apiUrlChanged();
+    void sessionTokenChanged();
     void finished(EnginioReply *reply);
 
 private slots:
