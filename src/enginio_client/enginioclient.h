@@ -43,12 +43,12 @@
 #include <QtCore/qtypeinfo.h>
 #include <QtCore/qmetatype.h>
 #include <QtCore/qjsonobject.h>
+#include <QtCore/qurl.h>
 
 class EnginioAbstractObject;
 class EnginioAbstractObjectFactory;
 class EnginioClientPrivate;
 class QNetworkAccessManager;
-class QUrl;
 
 class QNetworkReply;
 class QSslError;
@@ -69,6 +69,7 @@ public:
 
     Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged)
     Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
+    Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
     Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
 
     QString backendId() const;
@@ -101,6 +102,7 @@ signals:
     void clientInitialized() const;
     void backendIdChanged(const QString &backendId);
     void backendSecretChanged(const QString &backendSecret);
+    void apiUrlChanged();
     void finished(EnginioReply *reply);
 
 private slots:

@@ -216,7 +216,10 @@ void EnginioClient::setBackendSecret(const QString &backendSecret)
 }
 
 /*!
- * Get the Enginio backend URL.
+ * \qproperty EnginioClient::apiUrl
+ * \brief Enginio backend URL.
+ *
+ * Usually it is not needed to change the default URL.
  */
 QUrl EnginioClient::apiUrl() const
 {
@@ -224,13 +227,13 @@ QUrl EnginioClient::apiUrl() const
     return d->m_apiUrl;
 }
 
-/*!
- * Change Enginio backend URL to \a apiUrl.
- */
 void EnginioClient::setApiUrl(const QUrl &apiUrl)
 {
     Q_D(EnginioClient);
-    d->m_apiUrl = apiUrl;
+    if (d->m_apiUrl != apiUrl) {
+        d->m_apiUrl = apiUrl;
+        emit apiUrlChanged();
+    }
 }
 
 /*!
