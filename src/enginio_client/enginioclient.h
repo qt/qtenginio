@@ -53,6 +53,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QSslError;
 class EnginioReply;
+class EnginioIdentity;
 
 class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
@@ -72,11 +73,15 @@ public:
     Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
     Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
     Q_PROPERTY(QByteArray sessionToken READ sessionToken WRITE setSessionToken NOTIFY sessionTokenChanged)
+    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged)
 
     QString backendId() const;
     void setBackendId(const QString &backendId);
     QString backendSecret() const;
     void setBackendSecret(const QString &backendSecret);
+    EnginioIdentity *identity() const;
+    void setIdentity(EnginioIdentity *identity);
+
 
     QUrl apiUrl() const;
     void setApiUrl(const QUrl &apiUrl);
@@ -105,6 +110,7 @@ signals:
     void backendSecretChanged(const QString &backendSecret);
     void apiUrlChanged();
     void sessionTokenChanged();
+    void identityChanged(const EnginioIdentity *identity);
     void finished(EnginioReply *reply);
 
 private slots:

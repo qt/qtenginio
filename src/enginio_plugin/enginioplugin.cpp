@@ -48,6 +48,7 @@
 #include "enginioerror.h"
 #include "enginiomodel.h"
 #include "enginioreply.h"
+#include "enginioidentity.h"
 
 #include <qqml.h>
 
@@ -165,4 +166,6 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterType<EnginioQmlFileOperation>(uri, 1, 0, "FileOperation");
     qmlRegisterType<EnginioError>(uri, 1, 0, "Error");
     qmlRegisterType<EnginioAcl>(uri, 1, 0, "Acl");
+    qmlRegisterUncreatableType<EnginioIdentity>(uri, 1, 0, "EnginioIdentity", "EnginioIdentity can not be instantiated directly");
+    qmlRegisterType<EnginioAuthentication>(uri, 1, 0, "EnginioAuthentication");
 }

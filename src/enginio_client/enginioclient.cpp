@@ -39,6 +39,7 @@
 #include "enginiojsonobjectfactory.h"
 #include "enginioreply.h"
 #include "enginiomodel.h"
+#include "enginioidentity.h"
 
 #include <QDebug>
 #include <QNetworkReply>
@@ -73,6 +74,7 @@ int FactoryUnit::nextId = 0;
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
+    _identity(),
     m_apiUrl(QStringLiteral("https://api.engin.io")),
     m_networkManager(),
     m_deleteNetworkManager(true)
@@ -84,6 +86,8 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     qRegisterMetaType<EnginioClient*>();
     qRegisterMetaType<EnginioModel*>();
     qRegisterMetaType<EnginioReply*>();
+    qRegisterMetaType<EnginioIdentity*>();
+    qRegisterMetaType<EnginioAuthentication*>();
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
@@ -295,6 +299,7 @@ void EnginioClient::setSessionToken(const QByteArray &sessionToken)
     Q_D(EnginioClient);
     if (d->m_sessionToken != sessionToken) {
         d->m_sessionToken = sessionToken;
+        d->_request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
 
         emit sessionTokenChanged();
         if (sessionToken.isEmpty())
@@ -418,4 +423,18 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Area area)
     nreply->setParent(ereply);
 
     return ereply;
+}
+
+EnginioIdentity *EnginioClient::identity() const
+{
+    Q_D(const EnginioClient);
+    return d->identity();
+}
+
+void EnginioClient::setIdentity(EnginioIdentity *identity)
+{
+    Q_D(EnginioClient);
+    if (d->_identity == identity)
+        return;
+    d->setIdentity(identity);
 }

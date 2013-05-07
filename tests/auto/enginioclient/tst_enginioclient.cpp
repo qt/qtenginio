@@ -43,6 +43,7 @@
 
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
+#include <Enginio/enginioidentity.h>
 
 #include "../common/common.h"
 
@@ -61,6 +62,7 @@ private slots:
     void update_todos();
     void update_invalidId();
     void remove_todos();
+    void identity();
 };
 
 void tst_EnginioClient::query_todos()
@@ -393,6 +395,90 @@ void tst_EnginioClient::remove_todos()
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
     QVERIFY(response->data()["results"].toArray().isEmpty());
+}
+
+void tst_EnginioClient::identity()
+{
+    {
+        EnginioClient client;
+        EnginioAuthentication identity;
+        QSignalSpy spy(&client, SIGNAL(sessionAuthenticated()));
+
+        identity.setUser("logintest");
+        identity.setPassword("logintest");
+
+
+        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setIdentity(&identity);
+
+        QTRY_COMPARE(spy.count(), 1);
+        QVERIFY(!client.sessionToken().isEmpty());
+    }
+    {
+        // Different initialization order
+        EnginioClient client;
+        EnginioAuthentication identity;
+        QSignalSpy spy(&client, SIGNAL(sessionAuthenticated()));
+
+        identity.setUser("logintest");
+        identity.setPassword("logintest");
+
+
+        client.setIdentity(&identity);
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+
+        QTRY_COMPARE(spy.count(), 1);
+        QVERIFY(!client.sessionToken().isEmpty());
+    }
+    {
+        // login / logout
+        EnginioClient client;
+        EnginioAuthentication identity;
+        QSignalSpy spy(&client, SIGNAL(sessionTokenChanged()));
+
+        identity.setUser("logintest");
+        identity.setPassword("logintest");
+        client.setIdentity(&identity);
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+
+        QTRY_COMPARE(spy.count(), 1);
+        QVERIFY(!client.sessionToken().isEmpty());
+
+        client.setIdentity(0);
+        QTRY_COMPARE(spy.count(), 2);
+        QVERIFY(client.sessionToken().isEmpty());
+
+        client.setIdentity(&identity);
+        QTRY_COMPARE(spy.count(), 3);
+        QVERIFY(!client.sessionToken().isEmpty());
+    }
+    {
+        // change backend id
+        EnginioClient client;
+        EnginioAuthentication identity;
+        QSignalSpy spy(&client, SIGNAL(sessionTokenChanged()));
+
+        identity.setUser("logintest");
+        identity.setPassword("logintest");
+        client.setIdentity(&identity);
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+
+        QTRY_COMPARE(spy.count(), 1);
+        QVERIFY(!client.sessionToken().isEmpty());
+
+        client.setBackendId(QString());
+        client.setBackendId(EnginioTests::TESTAPP_ID);
+        QTRY_COMPARE(spy.count(), 2); // we got another EnginioClient::clientInitialized signal TODO is it ok?
+        QVERIFY(!client.sessionToken().isEmpty());
+    }
 }
 
 QTEST_MAIN(tst_EnginioClient)
