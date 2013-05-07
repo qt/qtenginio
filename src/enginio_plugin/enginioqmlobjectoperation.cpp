@@ -41,6 +41,7 @@
 
 #include <QDebug>
 #include <QJsonDocument>
+#include <QJSValueIterator>
 #include <QQmlEngine>
 
 /*!
@@ -230,11 +231,16 @@ void EnginioQmlObjectOperation::remove(QJSValue object)
 
 void EnginioQmlObjectOperation::updateObject()
 {
-    if (m_object)
-        m_jsObject = g_qmlEngine->toScriptValue<QJsonObject>(
+    if (m_object) {
+        QJSValue object = g_qmlEngine->toScriptValue<QJsonObject>(
                     QJsonDocument::fromJson(m_object->toEnginioJson()).object());
+        QJSValueIterator iter(object);
+        while (iter.hasNext()) {
+            iter.next();
+            m_jsObject.setProperty(iter.name(), iter.value());
+        }
+    }
 }
-
 
 bool EnginioQmlObjectOperation::setObject(const QJSValue &object)
 {
