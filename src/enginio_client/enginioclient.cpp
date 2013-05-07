@@ -277,8 +277,10 @@ void EnginioClient::setNetworkManager(QNetworkAccessManager *networkManager)
 }
 
 /*!
- * Get the token of currently authenticated session. Returns empty string if
- * there's no authenticated session.
+ * \property EnginioClient::sessionToken
+ * \brief The token of currently authenticated session.
+ *
+ * Returns empty string if there is no authenticated session.
  *
  * \sa EnginioIdentityAuthOperation::attachToSessionWithToken()
  */
@@ -291,12 +293,15 @@ QString EnginioClient::sessionToken() const
 void EnginioClient::setSessionToken(const QString &sessionToken)
 {
     Q_D(EnginioClient);
-    d->m_sessionToken = sessionToken;
+    if (d->m_sessionToken != sessionToken) {
+        d->m_sessionToken = sessionToken;
 
-    if (sessionToken.isEmpty())
-        emit sessionTerminated();
-    else
-        emit sessionAuthenticated();
+        emit sessionTokenChanged();
+        if (sessionToken.isEmpty())
+            emit sessionTerminated();
+        else
+            emit sessionAuthenticated();
+    }
 }
 
 bool EnginioClient::isInitialized() const

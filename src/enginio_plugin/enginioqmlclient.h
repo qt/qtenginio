@@ -52,8 +52,6 @@ class EnginioQmlClient : public EnginioClient
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlClient)
 
-    Q_PROPERTY(QString sessionToken READ sessionToken)
-
 public:
     EnginioQmlClient(const QString &backendId = QString(),
                      const QString &backendSecret = QString(),

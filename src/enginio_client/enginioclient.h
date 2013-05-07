@@ -71,6 +71,7 @@ public:
     Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
     Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
     Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
+    Q_PROPERTY(QString sessionToken READ sessionToken WRITE setSessionToken NOTIFY sessionTokenChanged)
 
     QString backendId() const;
     void setBackendId(const QString &backendId);
@@ -103,6 +104,7 @@ signals:
     void backendIdChanged(const QString &backendId);
     void backendSecretChanged(const QString &backendSecret);
     void apiUrlChanged();
+    void sessionTokenChanged();
     void finished(EnginioReply *reply);
 
 private slots:
