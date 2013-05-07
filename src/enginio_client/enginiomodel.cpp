@@ -206,6 +206,11 @@ public:
         if (!_dataChanged.contains(response))
             return;
 
+        // ### TODO proper error handling
+        // this kind of response happens when the backend id/secret is missing
+        if (!response->data()[QStringLiteral("message")].isNull())
+            qWarning() << "Enginio: " << response->data()[QStringLiteral("message")].toString();
+
         QPair<int, QJsonObject> requestInfo = _dataChanged.take(response);
         int row = requestInfo.first;
         _rowsToSync.remove(row);
