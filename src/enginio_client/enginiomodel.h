@@ -48,12 +48,14 @@ class ENGINIOCLIENT_EXPORT EnginioModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
+    // TODO: ctor with client
     explicit EnginioModel(QObject *parent = 0);
 
     Q_PROPERTY(EnginioClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
     Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged)
     Q_PROPERTY(int area READ area WRITE setArea NOTIFY areaChanged)
 
+    // TODO: that is a pretty silly name
     EnginioClient *enginio() const;
     void setEnginio(const EnginioClient *enginio);
 
