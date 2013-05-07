@@ -71,7 +71,7 @@ public:
     Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
     Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
     Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
-    Q_PROPERTY(QString sessionToken READ sessionToken WRITE setSessionToken NOTIFY sessionTokenChanged)
+    Q_PROPERTY(QByteArray sessionToken READ sessionToken WRITE setSessionToken NOTIFY sessionTokenChanged)
 
     QString backendId() const;
     void setBackendId(const QString &backendId);
@@ -82,8 +82,8 @@ public:
     void setApiUrl(const QUrl &apiUrl);
     QNetworkAccessManager *networkManager();
     void setNetworkManager(QNetworkAccessManager *networkManager);
-    QString sessionToken() const;
-    void setSessionToken(const QString &sessionToken);
+    QByteArray sessionToken() const;
+    void setSessionToken(const QByteArray &sessionToken);
 
     bool isInitialized() const;
 

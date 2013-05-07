@@ -124,7 +124,7 @@ public:
     EnginioClient *q_ptr;
     QString m_backendId;
     QString m_backendSecret;
-    QString m_sessionToken;
+    QByteArray m_sessionToken;
     QUrl m_apiUrl;
     QPointer<QNetworkAccessManager> m_networkManager;
     bool m_deleteNetworkManager;

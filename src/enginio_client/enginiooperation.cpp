@@ -115,10 +115,10 @@ QNetworkRequest EnginioOperationPrivate::enginioRequest(const QUrl &url)
                      m_client->backendId().toLatin1());
     req.setRawHeader("Enginio-Backend-Secret",
                      m_client->backendSecret().toLatin1());
-    QString sessionToken = m_client->sessionToken();
+    QByteArray sessionToken = m_client->sessionToken();
     if (!sessionToken.isEmpty()) {
         qDebug() << Q_FUNC_INFO << "Using session token" << sessionToken;
-        req.setRawHeader("Enginio-Backend-Session", sessionToken.toLatin1());
+        req.setRawHeader("Enginio-Backend-Session", sessionToken);
     }
     return req;
 }

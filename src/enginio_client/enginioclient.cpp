@@ -284,13 +284,13 @@ void EnginioClient::setNetworkManager(QNetworkAccessManager *networkManager)
  *
  * \sa EnginioIdentityAuthOperation::attachToSessionWithToken()
  */
-QString EnginioClient::sessionToken() const
+QByteArray EnginioClient::sessionToken() const
 {
     Q_D(const EnginioClient);
     return d->m_sessionToken;
 }
 
-void EnginioClient::setSessionToken(const QString &sessionToken)
+void EnginioClient::setSessionToken(const QByteArray &sessionToken)
 {
     Q_D(EnginioClient);
     if (d->m_sessionToken != sessionToken) {

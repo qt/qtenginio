@@ -146,7 +146,7 @@ void EnginioIdentityAuthOperationPrivate::handleResults()
             delete m_loggedInUserGroups.takeFirst();
         }
 
-        m_client->setSessionToken(QString());
+        m_client->setSessionToken(QByteArray());
         return;
     }
 
@@ -191,7 +191,7 @@ void EnginioIdentityAuthOperationPrivate::handleResults()
 
     if (!token.isEmpty()) {
         qDebug() << Q_FUNC_INFO << "Got session token" << token;
-        m_client->setSessionToken(token);
+        m_client->setSessionToken(token.toLatin1());
     }
 }
 
