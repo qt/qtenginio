@@ -89,8 +89,7 @@ EnginioFileOperationPrivate::EnginioFileOperationPrivate(EnginioFileOperation *o
 
 EnginioFileOperationPrivate::~EnginioFileOperationPrivate()
 {
-    if (m_multiPart)
-        delete m_multiPart;
+    delete m_multiPart;
 }
 
 /*!
@@ -338,8 +337,7 @@ bool EnginioFileOperationPrivate::initializeOperation()
         // file in one request.
         m_type = EnginioFileOperationPrivate::UploadMultipartOperation;
 
-        if (m_multiPart)
-            delete m_multiPart;
+        delete m_multiPart;
         m_multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
         if (!m_objectType.isEmpty()) {
