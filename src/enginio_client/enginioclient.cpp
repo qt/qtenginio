@@ -132,9 +132,8 @@ EnginioClient::EnginioClient(const QString &backendId,
 {
     qDebug() << this << "created. Backend ID:" << backendId;
 
-    Q_D(EnginioClient);
-    d->m_backendId = backendId;
-    d->m_backendSecret = backendSecret;
+    setBackendId(backendId);
+    setBackendSecret(backendSecret);
 }
 
 EnginioClient::EnginioClient(QObject *parent)
@@ -155,9 +154,8 @@ EnginioClient::EnginioClient(const QString &backendId,
 {
     qDebug() << this << "created. Backend ID:" << backendId;
 
-    Q_D(EnginioClient);
-    d->m_backendId = backendId;
-    d->m_backendSecret = backendSecret;
+    setBackendId(backendId);
+    setBackendSecret(backendSecret);
 }
 
 /*!
