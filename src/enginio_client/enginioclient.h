@@ -58,7 +58,7 @@ class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
     Q_OBJECT
 public:
-    enum Area { ObjectsArea, UsersArea, SearchArea }; // TODO add more areas
+    enum Area { ObjectsArea, UsersArea, UsergroupsArea, UsergroupMembersArea, AuthenticationArea, SessionArea, FulltextSearchArea };
     Q_ENUMS(Area);
 
     explicit EnginioClient(const QString &backendId,
