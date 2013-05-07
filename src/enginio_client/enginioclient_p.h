@@ -193,6 +193,11 @@ public:
 
         return q_ptr->networkManager()->get(req);
     }
+
+    bool isInitialized() const
+    {
+        return !m_backendId.isEmpty() && !m_backendSecret.isEmpty();
+    }
 };
 
 #endif // ENGINIOCLIENT_P_H

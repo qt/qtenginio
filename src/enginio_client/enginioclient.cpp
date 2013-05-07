@@ -307,7 +307,7 @@ void EnginioClient::setSessionToken(const QString &sessionToken)
 bool EnginioClient::isInitialized() const
 {
     Q_D(const EnginioClient);
-    return !d->m_backendId.isEmpty() && !d->m_backendSecret.isEmpty();
+    return d->isInitialized();
 }
 
 /*!
