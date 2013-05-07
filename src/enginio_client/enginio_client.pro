@@ -3,7 +3,15 @@ QT += network
 DEFINES += ENGINIOCLIENT_LIBRARY
 MODULE = enginio
 
-package: CONFIG += force_independent staticlib
+CONFIG += force_independent
+
+!no-package {
+    win32: CONFIG -= build_all
+    else {
+        CONFIG -= debug_and_release
+        CONFIG += staticlib
+    }
+}
 
 
 load(qt_module)

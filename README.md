@@ -2,20 +2,20 @@
 Client library for accessing Enginio service from Qt and QML code. 
 
 # System Requirements
-* Qt 5.0 or newer
-* OpenSSL library 
+* Qt 5.0 or newer (Qt 5.1 recommended)
+* OpenSSL library
+  * Mac OS X: OpenSSL library should be preinstalled.
+  * Linux: Most distributions have preinstalled OpenSSL library. If yours doesn't, seach for `libssl` in package repository.
   * Windows: Get the installer from http://slproweb.com/products/Win32OpenSSL.html (light version is enough, copy DLLs to windows system directory when asked).
-  * Linux: Seach for `libssl` in your distribution's package repository.
-* To install the library on a Windows system ActivePerl (http://www.activestate.com/activeperl/downloads) is needed which is also a dependency for building Qt
-  (For additional information see http://qt-project.org/wiki/Building_Qt_Desktop_for_Windows_with_MSVC).
+
+* Perl 5.10 or newer
+  * Mac and Linux: Perl should be preinstalled.
+  * Windows: http://www.perl.org/get.html
 
 # Install
-* `qmake && make install` will install the client library as a Qt5 module (enginio) to the Qt installation.
-* In C++ applications include headers as usual (for example: `#include <Enginio/enginioclient.h>`) and add 'Qt += enginio' to the project file of your application.
-* In QML applications import Enginio components with 'import Enginio 1.0'
-
-# Independent package build
-* `qmake CONFIG+=package -r && make` will build the module as a static library. Standalone examples that link against this library can be built with `make sub-examples`.
+* `qmake && make install` will build and install Enginio library as Qt5 module.
+* In C++ applications include Enginio headers from <Enginio/...> (for example: `#include <Enginio/enginioclient.h>`) and use Enginio module by adding `QT += enginio` to pro file.
+* In QML applications import Enginio components with `import Enginio 1.0`
 
 # Contributing
 * Fork the repository on [GitHub](https://github.com/enginio/enginio-qt)
