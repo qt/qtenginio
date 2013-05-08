@@ -48,17 +48,11 @@ EnginioIdentity::EnginioIdentity(QObject *parent) :
 {
 }
 
-void EnginioIdentity::prepareSessionToken()
-{
-    // by default there is nothing to do
-}
-
 struct EnginioAuthenticationPrivate
 {
     class IdentifyFunctor {
         struct SessionSetterFunctor {
             EnginioClientPrivate *enginio;
-            EnginioAuthenticationPrivate *authentication;
             QNetworkReply *reply;
             void operator ()()
             {
@@ -82,7 +76,7 @@ struct EnginioAuthenticationPrivate
             data[QStringLiteral("username")] = authentication->_user;
             data[QStringLiteral("password")] = authentication->_pass;
             QNetworkReply *reply = enginio->identify(data);
-            QObject::connect(reply, &QNetworkReply::finished, SessionSetterFunctor{enginio, authentication, reply});
+            QObject::connect(reply, &QNetworkReply::finished, SessionSetterFunctor{enginio, reply});
         }
     };
 
@@ -126,9 +120,9 @@ void EnginioAuthentication::setPassword(const QString &password)
     emit userChanged(password);
 }
 
-void EnginioAuthentication::prepareSessionToken()
+void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
 {
-    EnginioAuthenticationPrivate::IdentifyFunctor ident{_enginio, d_ptr};
+    EnginioAuthenticationPrivate::IdentifyFunctor ident{enginio, d_ptr};
     ident();
 }
 

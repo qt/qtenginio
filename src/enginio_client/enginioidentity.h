@@ -51,13 +51,8 @@ class ENGINIOCLIENT_EXPORT EnginioIdentity : public QObject
 public:
     explicit EnginioIdentity(QObject *parent = 0);
 
-protected slots:
-    virtual void prepareSessionToken();
-
-protected:
-    EnginioClientPrivate *_enginio;
-
 private:
+    virtual void prepareSessionToken(EnginioClientPrivate *enginio) = 0;
     friend class EnginioClientPrivate;
 };
 
@@ -65,8 +60,7 @@ class EnginioAuthenticationPrivate;
 class ENGINIOCLIENT_EXPORT EnginioAuthentication : public EnginioIdentity
 {
     Q_OBJECT
-protected:
-    virtual void prepareSessionToken() Q_DECL_OVERRIDE;
+
 public:
     EnginioAuthentication(QObject *parent = 0);
 
@@ -84,6 +78,7 @@ signals:
     void passwordChanged(const QString &password);
 
 private:
+    virtual void prepareSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
     EnginioAuthenticationPrivate *d_ptr;
 };
 

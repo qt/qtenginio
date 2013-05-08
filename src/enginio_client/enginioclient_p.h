@@ -170,15 +170,21 @@ public:
             q_ptr->setSessionToken(QByteArray());
             return;
         }
-        identity->_enginio = this;
-        if (isInitialized())
-            identity->prepareSessionToken();
-        else
-            QObject::connect(q_ptr, &EnginioClient::clientInitialized, identity, &EnginioIdentity::prepareSessionToken); // TODO it hast to be unique
+        if (!isInitialized()) {
+            struct CallPrepareSessionToken
+            {
+                EnginioClientPrivate *enginio;
+                EnginioIdentity *identity;
+                void operator ()()
+                {
+                    identity->prepareSessionToken(enginio);
+                }
+            };
+            QObject::connect(q_ptr, &EnginioClient::clientInitialized, CallPrepareSessionToken{this, identity}); // TODO it hast to be unique
+        } else
+            identity->prepareSessionToken(this);
         emit q_ptr->identityChanged(identity);
-        QObject::connect(q_ptr, &EnginioClient::identityChanged, identity, &EnginioIdentity::prepareSessionToken); // TODO it hast to be unique and tested!
     }
-
 
     QNetworkReply *identify(const QJsonObject &object)
     {
