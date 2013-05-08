@@ -85,16 +85,27 @@ class EnginioClientPrivate : public QObject
             result.append(objectType.replace('.', '/'));
             break;
         }
-        case EnginioClient::UsersArea:
-            result.append(QStringLiteral("users"));
+        case EnginioClient::AuthenticationArea:
+            result.append(QStringLiteral("auth/identity"));
             break;
-
         case EnginioClient::FileArea:
             result.append(QStringLiteral("files"));
             break;
-
-        case EnginioClient::AuthenticationArea:
-            result.append(QStringLiteral("auth/identity"));
+        case EnginioClient::FulltextSearchArea:
+            result.append(QStringLiteral("search"));
+            break;
+        case EnginioClient::SessionArea:
+            result.append(QStringLiteral("session"));
+            break;
+        case EnginioClient::UsersArea:
+            result.append(QStringLiteral("users"));
+            break;
+        case EnginioClient::UsergroupsArea:
+            result.append(QStringLiteral("usergroups"));
+            break;
+        case EnginioClient::UsergroupMembersArea:
+            // FIXME usergroups/{id}/members
+            result.append(QStringLiteral("usergroups"));
             break;
         }
 
