@@ -87,6 +87,17 @@ EnginioQmlClient::EnginioQmlClient(const QString &backendId,
                                    QObject *parent) :
     EnginioClient(backendId, backendSecret, parent)
 {
+    struct IsAuthenticatedFunctor
+    {
+        EnginioQmlClient *qmlEnginio;
+        bool status;
+        void operator ()()
+        {
+            qmlEnginio->isAuthenticatedChanged(status);
+        }
+    };
+    QObject::connect(this, &EnginioClient::sessionAuthenticated, IsAuthenticatedFunctor{this, true});
+    QObject::connect(this, &EnginioClient::sessionTerminated, IsAuthenticatedFunctor{this, false});
 }
 
 /*!
@@ -136,4 +147,9 @@ EnginioQmlIdentityAuthOperation * EnginioQmlClient::createIdentityAuthOperation(
 EnginioQmlAclOperation * EnginioQmlClient::createAclOperation()
 {
     return new EnginioQmlAclOperation(this);
+}
+
+bool EnginioQmlClient::isAuthenticated() const
+{
+    return sessionToken().isEmpty();
 }

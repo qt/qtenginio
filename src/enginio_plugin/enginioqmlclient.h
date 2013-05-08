@@ -56,6 +56,7 @@ public:
     EnginioQmlClient(const QString &backendId = QString(),
                      const QString &backendSecret = QString(),
                      QObject *parent = 0);
+    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged);
 
     Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
             EnginioQmlObjectModel *model = 0);
@@ -63,6 +64,10 @@ public:
             EnginioQmlObjectModel *model = 0);
     Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
     Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
+
+    bool isAuthenticated() const;
+signals:
+    void isAuthenticatedChanged(bool isAuthenticated);
 };
 
 #endif // ENGINIOQMLCLIENT_H
