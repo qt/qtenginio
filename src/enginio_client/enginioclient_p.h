@@ -49,8 +49,10 @@
 #include <QtCore/qjsondocument.h>
 #include <QtNetwork/qnetworkrequest.h>
 #include <QtNetwork/qnetworkreply.h>
+#include <QtNetwork/qhttpmultipart.h>
 #include <QtCore/qurlquery.h>
-
+#include <QtCore/qfile.h>
+#include <QtCore/qmimedatabase.h>
 
 class FactoryUnit
 {
@@ -265,6 +267,70 @@ public:
     bool isInitialized() const
     {
         return !m_backendId.isEmpty() && !m_backendSecret.isEmpty();
+    }
+
+    QNetworkReply *uploadFile(const QJsonObject &associatedObject, const QUrl &fileUrl)
+    {
+        Q_ASSERT_X(fileUrl.isLocalFile(), "", "Upload must be local file.");
+        QFile *file = new QFile(fileUrl.toLocalFile());
+        if (!file->open(QFile::ReadOnly))
+            return 0;
+        Q_ASSERT(file->isOpen());
+
+        QString fileName = file->fileName();
+        Q_ASSERT(!fileName.isEmpty());
+        QMimeDatabase mimeDb;
+        QString mimeType = mimeDb.mimeTypeForFile(fileUrl.toLocalFile()).name();
+        return upload(associatedObject, fileName, file, mimeType);
+    }
+
+    QNetworkReply *upload(const QJsonObject &associatedObject, const QString &fileName, QIODevice *device, const QString &mimeType)
+    {
+        QUrl apiUrl = m_apiUrl;
+        apiUrl.setPath(getPath(QJsonObject(), EnginioClient::FileArea));
+
+        QNetworkRequest req(_request);
+        // FIXME: must NOT have the json type as content type,
+        // otherwise enginio thinks we want to download
+        // unsetting it here is ugly
+        req.setHeader(QNetworkRequest::ContentTypeHeader, QString());
+        req.setUrl(apiUrl);
+
+        QByteArray object = QJsonDocument(associatedObject).toJson();
+        QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object);
+        QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
+        multiPart->setParent(reply);
+        return reply;
+    }
+
+private:
+    /* Create a multi part upload:
+     * That means the JSON metadata and the actual file get sent in one http-post.
+     * The associatedObject has to be a valid object type on the server.
+     * If it does not contain an id, it needs to be manually associated later or will get garbage collected eventually.
+     */
+    QHttpMultiPart *createHttpMultiPart(const QString &fileName, QIODevice *data, const QString &mimeType, const QByteArray &associatedObject)
+    {
+        Q_ASSERT(!fileName.isEmpty());
+
+        // check file/chunk size
+        QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+        data->setParent(multiPart);
+
+        QHttpPart objectPart;
+        objectPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                             QStringLiteral("form-data; name=\"object\""));
+
+        objectPart.setBody(associatedObject);
+        multiPart->append(objectPart);
+
+        QHttpPart filePart;
+        filePart.setHeader(QNetworkRequest::ContentTypeHeader, mimeType);
+        filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                           QStringLiteral("form-data; name=\"file\"; filename=\"%1\"").arg(fileName));
+        filePart.setBodyDevice(data);
+        multiPart->append(filePart);
+        return multiPart;
     }
 };
 
