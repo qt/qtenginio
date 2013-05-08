@@ -99,3 +99,25 @@ QJsonObject EnginioReply::data() const
 {
     return d->data();
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const EnginioReply *reply)
+{
+    if (!reply) {
+        d << "EnginioReply(null)";
+        return d;
+    }
+    d.nospace();
+    d << "EnginioReply(" << hex << (void *) reply << dec;
+
+    if (reply->errorCode() == 0) {
+        d << " success data=" << reply->data();
+    } else {
+        d << " errorCode=" << reply->errorCode() << " ";
+        d << " errorString=" << reply->errorString() << " ";
+        d << " errorData=" << reply->data() << " ";
+    }
+    d << ")";
+    return d.space();
+}
+#endif

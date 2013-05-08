@@ -59,8 +59,8 @@ class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
     Q_OBJECT
 public:
-    enum Area { ObjectsArea, UsersArea, UsergroupsArea, UsergroupMembersArea, AuthenticationArea, SessionArea, FulltextSearchArea };
-    Q_ENUMS(Area);
+    enum Area { ObjectsArea, UsersArea, UsergroupsArea, UsergroupMembersArea, AuthenticationArea, SessionArea, FulltextSearchArea, FileArea };
+    Q_ENUMS(Area)
 
     explicit EnginioClient(const QString &backendId,
                            const QString &backendSecret,
@@ -101,6 +101,8 @@ public:
     Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Area area = ObjectsArea);
     Q_INVOKABLE EnginioReply *update(const QJsonObject &object, const Area area = ObjectsArea);
     Q_INVOKABLE EnginioReply *remove(const QJsonObject &object, const Area area = ObjectsArea);
+
+    EnginioReply *uploadFile(const QJsonObject &associatedObject, const QUrl &file);
 
 signals:
     void sessionAuthenticated() const;

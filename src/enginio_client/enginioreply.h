@@ -61,8 +61,10 @@ public:
     Q_INVOKABLE QNetworkReply::NetworkError errorCode() const;
     Q_INVOKABLE QString errorString() const;
     Q_INVOKABLE QJsonObject data() const;
+
 signals:
     void finished();
+
 private:
     Q_DISABLE_COPY(EnginioReply)
     EnginioReplyPrivate *d;
@@ -71,6 +73,10 @@ private:
 
 Q_DECLARE_TYPEINFO(const EnginioReply*, Q_PRIMITIVE_TYPE);
 Q_DECLARE_METATYPE(const EnginioReply*);
+
+#ifndef QT_NO_DEBUG_STREAM
+ENGINIOCLIENT_EXPORT QDebug operator<<(QDebug d, const EnginioReply *reply);
+#endif
 
 
 #endif // ENGINIOREPLY_H

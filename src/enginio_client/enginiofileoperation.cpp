@@ -89,8 +89,7 @@ EnginioFileOperationPrivate::EnginioFileOperationPrivate(EnginioFileOperation *o
 
 EnginioFileOperationPrivate::~EnginioFileOperationPrivate()
 {
-    if (m_multiPart)
-        delete m_multiPart;
+    delete m_multiPart;
 }
 
 /*!
@@ -156,13 +155,13 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
         return 0;
     }
 
-    QByteArray data;
-    QString range;
 
     switch (m_type) {
     case UploadMultipartOperation:
         return netManager->post(req, m_multiPart);
-    case UploadChunkedOperation:
+    case UploadChunkedOperation: {
+        QByteArray data;
+        QString range;
         if (m_fileId.isEmpty()) {
             req.setHeader(QNetworkRequest::ContentTypeHeader,
                           QStringLiteral("application/json"));
@@ -177,6 +176,7 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
         req.setRawHeader("Content-Range", range.toLatin1());
         m_lastChunkSize = data.size();
         return netManager->put(req, data);
+    }
     default:
         break;
     }
@@ -338,8 +338,7 @@ bool EnginioFileOperationPrivate::initializeOperation()
         // file in one request.
         m_type = EnginioFileOperationPrivate::UploadMultipartOperation;
 
-        if (m_multiPart)
-            delete m_multiPart;
+        delete m_multiPart;
         m_multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
         if (!m_objectType.isEmpty()) {
