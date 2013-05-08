@@ -479,6 +479,50 @@ void tst_EnginioClient::identity()
         QTRY_COMPARE(spy.count(), 2); // we got another EnginioClient::clientInitialized signal TODO is it ok?
         QVERIFY(!client.sessionToken().isEmpty());
     }
+    {
+        // fast identity change before initialization
+        EnginioClient client;
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+
+        QSignalSpy spy(&client, SIGNAL(sessionTokenChanged()));
+        QSignalSpy spyInit(&client, SIGNAL(clientInitialized()));
+
+        EnginioAuthentication identity1;
+        EnginioAuthentication identity2;
+        EnginioAuthentication identity3;
+
+        identity1.setUser("logintest");
+        identity1.setPassword("logintest");
+        identity2.setUser("logintest2");
+        identity2.setPassword("logintest2");
+        identity3.setUser("logintest3");
+        identity3.setPassword("logintest3");
+
+        QCOMPARE(spy.count(), 0);
+        QVERIFY(client.sessionToken().isEmpty());
+
+        for (uint i = 0; i < 4; ++i) {
+            client.setIdentity(&identity1);
+            client.setIdentity(&identity2);
+            client.setIdentity(&identity3);
+        }
+
+        QCOMPARE(spyInit.count(), 0);
+        QCOMPARE(spy.count(), 0);
+        QVERIFY(client.sessionToken().isEmpty());
+
+        client.setBackendId(EnginioTests::TESTAPP_ID); // trigger clientInitialized signal
+
+        QTRY_COMPARE(spyInit.count(), 1);
+        QTRY_COMPARE(spy.count(), 1);
+
+        for (uint i = 0; spy.count() == 1 && i < 5; ++i)
+            QTest::qWait(100);
+
+        QCOMPARE(spy.count(), 1);
+        QVERIFY(!client.sessionToken().isEmpty());
+    }
 }
 
 QTEST_MAIN(tst_EnginioClient)

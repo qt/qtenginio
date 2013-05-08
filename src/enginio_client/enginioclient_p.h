@@ -130,6 +130,7 @@ public:
     QString m_backendId;
     QString m_backendSecret;
     EnginioIdentity *_identity;
+    QMetaObject::Connection _identityConnection;
     QUrl m_apiUrl;
     QPointer<QNetworkAccessManager> m_networkManager;
     bool m_deleteNetworkManager;
@@ -165,6 +166,7 @@ public:
 
     void setIdentity(EnginioIdentity *identity)
     {
+        QObject::disconnect(_identityConnection);
         if (!(_identity = identity)) {
             // invalidate old token
             q_ptr->setSessionToken(QByteArray());
@@ -180,7 +182,7 @@ public:
                     identity->prepareSessionToken(enginio);
                 }
             };
-            QObject::connect(q_ptr, &EnginioClient::clientInitialized, CallPrepareSessionToken{this, identity}); // TODO it hast to be unique
+            _identityConnection = QObject::connect(q_ptr, &EnginioClient::clientInitialized, CallPrepareSessionToken{this, identity});
         } else
             identity->prepareSessionToken(this);
         emit q_ptr->identityChanged(identity);
