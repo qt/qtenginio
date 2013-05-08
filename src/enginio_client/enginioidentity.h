@@ -35,40 +35,51 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLCLIENT_H
-#define ENGINIOQMLCLIENT_H
+#ifndef ENGINIOIDENTITY_H
+#define ENGINIOIDENTITY_H
 
-#include "enginioclient.h"
-#include <QQmlParserStatus>
+#include "enginioclient_global.h"
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
+#include <QtCore/qobject.h>
+#include <QtCore/qstring.h>
 
-class EnginioQmlClient : public EnginioClient
+class EnginioClientPrivate;
+class ENGINIOCLIENT_EXPORT EnginioIdentity : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(EnginioQmlClient)
 
 public:
-    EnginioQmlClient(const QString &backendId = QString(),
-                     const QString &backendSecret = QString(),
-                     QObject *parent = 0);
-    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged);
+    explicit EnginioIdentity(QObject *parent = 0);
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
-
-    bool isAuthenticated() const;
-signals:
-    void isAuthenticatedChanged(bool isAuthenticated);
+private:
+    virtual void prepareSessionToken(EnginioClientPrivate *enginio) = 0;
+    friend class EnginioClientPrivate;
 };
 
-#endif // ENGINIOQMLCLIENT_H
+class EnginioAuthenticationPrivate;
+class ENGINIOCLIENT_EXPORT EnginioAuthentication : public EnginioIdentity
+{
+    Q_OBJECT
 
+public:
+    EnginioAuthentication(QObject *parent = 0);
+
+    Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
+    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
+
+    QString user() const;
+    void setUser(const QString &user);
+
+    QString password() const;
+    void setPassword(const QString &password);
+
+signals:
+    void userChanged(const QString &user);
+    void passwordChanged(const QString &password);
+
+private:
+    virtual void prepareSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
+    EnginioAuthenticationPrivate *d_ptr;
+};
+
+#endif // ENGINIOIDENTITY_H

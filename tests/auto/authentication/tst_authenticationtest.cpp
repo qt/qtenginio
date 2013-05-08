@@ -302,7 +302,7 @@ void AuthenticationTest::testAttachToSession()
     QCOMPARE(finishedSpy1.count(), 1);
     QCOMPARE(errorSpy1.count(), 0);
     QVERIFY2(!m_client->sessionToken().isEmpty(), "Empty session token");
-    QString sessionToken = m_client->sessionToken();
+    QByteArray sessionToken = m_client->sessionToken();
 
     delete op;
 

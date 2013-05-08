@@ -53,12 +53,13 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QSslError;
 class EnginioReply;
+class EnginioIdentity;
 
 class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
     Q_OBJECT
 public:
-    enum Area { ObjectsArea, UsersArea, SearchArea }; // TODO add more areas
+    enum Area { ObjectsArea, UsersArea, UsergroupsArea, UsergroupMembersArea, AuthenticationArea, SessionArea, FulltextSearchArea };
     Q_ENUMS(Area);
 
     explicit EnginioClient(const QString &backendId,
@@ -71,19 +72,23 @@ public:
     Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
     Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
     Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
-    Q_PROPERTY(QString sessionToken READ sessionToken WRITE setSessionToken NOTIFY sessionTokenChanged)
+    Q_PROPERTY(QByteArray sessionToken READ sessionToken WRITE setSessionToken NOTIFY sessionTokenChanged)
+    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged)
 
     QString backendId() const;
     void setBackendId(const QString &backendId);
     QString backendSecret() const;
     void setBackendSecret(const QString &backendSecret);
+    EnginioIdentity *identity() const;
+    void setIdentity(EnginioIdentity *identity);
+
 
     QUrl apiUrl() const;
     void setApiUrl(const QUrl &apiUrl);
     QNetworkAccessManager *networkManager();
     void setNetworkManager(QNetworkAccessManager *networkManager);
-    QString sessionToken() const;
-    void setSessionToken(const QString &sessionToken);
+    QByteArray sessionToken() const;
+    void setSessionToken(const QByteArray &sessionToken);
 
     bool isInitialized() const;
 
@@ -105,6 +110,7 @@ signals:
     void backendSecretChanged(const QString &backendSecret);
     void apiUrlChanged();
     void sessionTokenChanged();
+    void identityChanged(const EnginioIdentity *identity);
     void finished(EnginioReply *reply);
 
 private slots:

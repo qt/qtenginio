@@ -41,6 +41,7 @@
 #include "enginioabstractobjectfactory.h"
 #include "enginioclient.h"
 #include "enginioreply.h"
+#include "enginioidentity.h"
 
 #include <QNetworkAccessManager>
 #include <QPointer>
@@ -85,6 +86,10 @@ class EnginioClientPrivate : public QObject
             result.append(QStringLiteral("users"));
         }
 
+        if (area == EnginioClient::AuthenticationArea) {
+            result.append(QStringLiteral("auth/identity"));
+        }
+
         if (flags & IncludeIdInPath) {
             QString id = object[QStringLiteral("id")].toString();
             if (id.isEmpty())
@@ -124,7 +129,8 @@ public:
     EnginioClient *q_ptr;
     QString m_backendId;
     QString m_backendSecret;
-    QString m_sessionToken;
+    EnginioIdentity *_identity;
+    QMetaObject::Connection _identityConnection;
     QUrl m_apiUrl;
     QPointer<QNetworkAccessManager> m_networkManager;
     bool m_deleteNetworkManager;
@@ -132,9 +138,65 @@ public:
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
 
+    QByteArray sessionToken() const
+    {
+        return _request.rawHeader(QByteArrayLiteral("Enginio-Backend-Session"));
+    }
+
+    void setSessionToken(const QByteArray &sessionToken)
+    {
+        _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
+
+        emit q_ptr->sessionTokenChanged();
+        if (sessionToken.isEmpty())
+            emit q_ptr->sessionTerminated();
+        else
+            emit q_ptr->sessionAuthenticated();
+    }
+
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
     {
         _replyReplyMap[nreply] = ereply;
+    }
+
+    EnginioIdentity *identity() const
+    {
+        return _identity;
+    }
+
+    void setIdentity(EnginioIdentity *identity)
+    {
+        QObject::disconnect(_identityConnection);
+        if (!(_identity = identity)) {
+            // invalidate old token
+            q_ptr->setSessionToken(QByteArray());
+            return;
+        }
+        if (!isInitialized()) {
+            struct CallPrepareSessionToken
+            {
+                EnginioClientPrivate *enginio;
+                EnginioIdentity *identity;
+                void operator ()()
+                {
+                    identity->prepareSessionToken(enginio);
+                }
+            };
+            _identityConnection = QObject::connect(q_ptr, &EnginioClient::clientInitialized, CallPrepareSessionToken{this, identity});
+        } else
+            identity->prepareSessionToken(this);
+        emit q_ptr->identityChanged(identity);
+    }
+
+    QNetworkReply *identify(const QJsonObject &object)
+    {
+        QUrl url(m_apiUrl);
+        url.setPath(getPath(object, EnginioClient::AuthenticationArea));
+
+        QNetworkRequest req(_request);
+        req.setUrl(url);
+        QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
+        return q_ptr->networkManager()->post(req, data);
     }
 
     QNetworkReply *update(const QJsonObject &object, const EnginioClient::Area area)
@@ -192,6 +254,11 @@ public:
         req.setUrl(url);
 
         return q_ptr->networkManager()->get(req);
+    }
+
+    bool isInitialized() const
+    {
+        return !m_backendId.isEmpty() && !m_backendSecret.isEmpty();
     }
 };
 
