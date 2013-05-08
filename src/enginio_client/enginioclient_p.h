@@ -311,6 +311,7 @@ public:
         QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object);
         QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
         multiPart->setParent(reply);
+        device->setParent(multiPart);
         return reply;
     }
 
