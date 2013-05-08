@@ -171,7 +171,6 @@ public:
             return;
         }
         identity->_enginio = this;
-        QObject::connect(identity, &EnginioIdentity::sessionTokenReceived, q_ptr, &EnginioClient::setSessionToken);
         if (isInitialized())
             identity->prepareSessionToken();
         else

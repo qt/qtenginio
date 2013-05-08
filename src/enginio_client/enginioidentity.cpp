@@ -42,7 +42,6 @@
 #include <QtCore/qjsondocument.h>
 #include <QtCore/qstring.h>
 #include <QtNetwork/qnetworkreply.h>
-#include <QtCore/qeventloop.h>
 
 EnginioIdentity::EnginioIdentity(QObject *parent) :
     QObject(parent)
@@ -63,11 +62,10 @@ struct EnginioAuthenticationPrivate
             QNetworkReply *reply;
             void operator ()()
             {
-                QByteArray data(authentication->_token = reply->readAll());
+                QByteArray data(reply->readAll());
                 QJsonObject message(QJsonDocument::fromJson(data).object());
                 QByteArray token = message[QStringLiteral("sessionToken")].toString().toLatin1();
-                authentication->_token = token;
-                emit authentication->q_ptr->sessionTokenReceived(token);
+                enginio->setSessionToken(token);
                 reply->deleteLater();
             }
         };
@@ -94,7 +92,6 @@ struct EnginioAuthenticationPrivate
     EnginioAuthentication *q_ptr;
     QString _user;
     QString _pass;
-    QByteArray _token;
 };
 
 EnginioAuthentication::EnginioAuthentication(QObject *parent)
@@ -135,16 +132,3 @@ void EnginioAuthentication::prepareSessionToken()
     ident();
 }
 
-QByteArray EnginioAuthentication::sessionToken()
-{
-    if (d_ptr->_token.isEmpty()) {
-        // TODO think what happen if someone call prepareSessionToken() and directly after
-        // sessionToken(), will token be different?
-        QEventLoop loop;
-        QObject::connect(this, &EnginioAuthentication::sessionTokenReceived, &loop, &QEventLoop::quit);
-        prepareSessionToken();
-        loop.exec();
-    }
-
-    return d_ptr->_token;
-}

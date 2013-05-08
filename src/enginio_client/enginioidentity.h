@@ -53,16 +53,12 @@ public:
 
 protected slots:
     virtual void prepareSessionToken();
-    virtual QByteArray sessionToken()=0;
 
 protected:
     EnginioClientPrivate *_enginio;
 
 private:
     friend class EnginioClientPrivate;
-
-signals:
-    void sessionTokenReceived(const QByteArray &token);
 };
 
 class EnginioAuthenticationPrivate;
@@ -71,7 +67,6 @@ class ENGINIOCLIENT_EXPORT EnginioAuthentication : public EnginioIdentity
     Q_OBJECT
 protected:
     virtual void prepareSessionToken() Q_DECL_OVERRIDE;
-    virtual QByteArray sessionToken() Q_DECL_OVERRIDE;
 public:
     EnginioAuthentication(QObject *parent = 0);
 
