@@ -155,13 +155,13 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
         return 0;
     }
 
-    QByteArray data;
-    QString range;
 
     switch (m_type) {
     case UploadMultipartOperation:
         return netManager->post(req, m_multiPart);
-    case UploadChunkedOperation:
+    case UploadChunkedOperation: {
+        QByteArray data;
+        QString range;
         if (m_fileId.isEmpty()) {
             req.setHeader(QNetworkRequest::ContentTypeHeader,
                           QStringLiteral("application/json"));
@@ -176,6 +176,7 @@ QNetworkReply * EnginioFileOperationPrivate::doRequest(const QUrl &backendUrl)
         req.setRawHeader("Content-Range", range.toLatin1());
         m_lastChunkSize = data.size();
         return netManager->put(req, data);
+    }
     default:
         break;
     }
