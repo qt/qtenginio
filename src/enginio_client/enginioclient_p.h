@@ -130,13 +130,28 @@ public:
     QString m_backendId;
     QString m_backendSecret;
     EnginioIdentity *_identity;
-    QByteArray m_sessionToken;
     QUrl m_apiUrl;
     QPointer<QNetworkAccessManager> m_networkManager;
     bool m_deleteNetworkManager;
     QList<FactoryUnit*> m_factories;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
+
+    QByteArray sessionToken() const
+    {
+        return _request.rawHeader(QByteArrayLiteral("Enginio-Backend-Session"));
+    }
+
+    void setSessionToken(const QByteArray &sessionToken)
+    {
+        _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
+
+        emit q_ptr->sessionTokenChanged();
+        if (sessionToken.isEmpty())
+            emit q_ptr->sessionTerminated();
+        else
+            emit q_ptr->sessionAuthenticated();
+    }
 
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
     {

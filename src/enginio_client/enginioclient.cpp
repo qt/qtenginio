@@ -291,21 +291,14 @@ void EnginioClient::setNetworkManager(QNetworkAccessManager *networkManager)
 QByteArray EnginioClient::sessionToken() const
 {
     Q_D(const EnginioClient);
-    return d->m_sessionToken;
+    return d->sessionToken();
 }
 
 void EnginioClient::setSessionToken(const QByteArray &sessionToken)
 {
     Q_D(EnginioClient);
-    if (d->m_sessionToken != sessionToken) {
-        d->m_sessionToken = sessionToken;
-        d->_request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
-
-        emit sessionTokenChanged();
-        if (sessionToken.isEmpty())
-            emit sessionTerminated();
-        else
-            emit sessionAuthenticated();
+    if (d->sessionToken() != sessionToken) {
+        d->setSessionToken(sessionToken);
     }
 }
 
