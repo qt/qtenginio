@@ -59,8 +59,8 @@ class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
     Q_OBJECT
 public:
-    enum Area { ObjectsArea, UsersArea, UsergroupsArea, UsergroupMembersArea, AuthenticationArea, SessionArea, FulltextSearchArea };
-    Q_ENUMS(Area);
+    enum Area { ObjectsArea, UsersArea, UsergroupsArea, UsergroupMembersArea, AuthenticationArea, SessionArea, FulltextSearchArea, FileArea };
+    Q_ENUMS(Area)
 
     explicit EnginioClient(const QString &backendId,
                            const QString &backendSecret,

@@ -74,20 +74,26 @@ class EnginioClientPrivate : public QObject
         result.reserve(32);
         result.append(QStringLiteral("/v1/"));
 
-        if (area == EnginioClient::ObjectsArea) {
+        switch (area) {
+        case EnginioClient::ObjectsArea: {
             QString objectType = object[QStringLiteral("objectType")].toString();
             if (objectType.isEmpty())
                 return QString();
 
             result.append(objectType.replace('.', '/'));
+            break;
         }
-
-        if (area == EnginioClient::UsersArea) {
+        case EnginioClient::UsersArea:
             result.append(QStringLiteral("users"));
-        }
+            break;
 
-        if (area == EnginioClient::AuthenticationArea) {
+        case EnginioClient::FileArea:
+            result.append(QStringLiteral("files"));
+            break;
+
+        case EnginioClient::AuthenticationArea:
             result.append(QStringLiteral("auth/identity"));
+            break;
         }
 
         if (flags & IncludeIdInPath) {
