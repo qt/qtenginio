@@ -91,8 +91,8 @@ void tst_EnginioClient::query_todos()
 void tst_EnginioClient::query_todos_filter()
 {
     EnginioClient client;
-    client.setBackendId("5130a6f0e5bde55ab200076c");
-    client.setBackendSecret("002e99b3ba45465f2a27e14c66c717a2");
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -143,8 +143,8 @@ void tst_EnginioClient::query_todos_limit()
 void tst_EnginioClient::query_users()
 {
     EnginioClient client;
-    client.setBackendId("5130a6f0e5bde55ab200076c");
-    client.setBackendSecret("002e99b3ba45465f2a27e14c66c717a2");
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -166,8 +166,8 @@ void tst_EnginioClient::query_users()
 void tst_EnginioClient::query_users_filter()
 {
     EnginioClient client;
-    client.setBackendId("5130a6f0e5bde55ab200076c");
-    client.setBackendSecret("002e99b3ba45465f2a27e14c66c717a2");
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -329,8 +329,8 @@ void tst_EnginioClient::update_todos()
 void tst_EnginioClient::update_invalidId()
 {
     EnginioClient client;
-    client.setBackendId("5130a6f0e5bde55ab200076c");
-    client.setBackendSecret("002e99b3ba45465f2a27e14c66c717a2");
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
