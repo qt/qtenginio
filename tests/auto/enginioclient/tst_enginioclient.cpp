@@ -63,6 +63,8 @@ private slots:
     void update_invalidId();
     void remove_todos();
     void identity();
+
+    void file();
 };
 
 void tst_EnginioClient::query_todos()
@@ -523,6 +525,70 @@ void tst_EnginioClient::identity()
         QCOMPARE(spy.count(), 1);
         QVERIFY(!client.sessionToken().isEmpty());
     }
+}
+
+void tst_EnginioClient::file()
+{
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
+
+    // Create a new object
+    QJsonObject obj;
+    obj["objectType"] = QString::fromUtf8("objects.todos");
+    obj["title"] = QString::fromUtf8("Object With File");
+    const EnginioReply* req = client.create(obj);
+    QVERIFY(req);
+
+    QTRY_COMPARE(spy.count(), 1);
+
+    const EnginioReply *responseObjectCreation = spy[0][0].value<EnginioReply*>();
+    QCOMPARE(responseObjectCreation, req);
+    QCOMPARE(responseObjectCreation->errorCode(), QNetworkReply::NoError);
+    QVERIFY(!responseObjectCreation->data().isEmpty());
+    QCOMPARE(responseObjectCreation->data()["title"], obj["title"]);
+    QCOMPARE(responseObjectCreation->data()["objectType"], obj["objectType"]);
+    QString id = responseObjectCreation->data()["id"].toString();
+    QVERIFY(!id.isEmpty());
+
+    QJsonObject object;
+    object["id"] = id;
+    object["objectType"] = QStringLiteral("objects.todos");
+
+    // Attach file to the object
+
+    // FIXME: make this work for out of source builds
+    // FIXME: consider this url mess
+    QString path = "file://" + QDir::currentPath() + "/data/example.txt";
+    const EnginioReply* req2 = client.uploadFile(object, QUrl(path));
+    QVERIFY(req2);
+
+    QTRY_COMPARE(spy.count(), 2);
+    const EnginioReply *responseUpload = spy[1][0].value<EnginioReply*>();
+    qDebug() << responseUpload;
+    // FIXME: write test here
+
+    // Query including files
+    QJsonObject obj2;
+    obj2 = QJsonDocument::fromJson(
+                "{\"include\": {\"file\": {}},"
+                 "\"objectType\": \"objects.todos\","
+                 "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
+
+    const EnginioReply *reply = client.query(obj2);
+    QVERIFY(reply);
+
+    QTRY_COMPARE(spy.count(), 3);
+    const EnginioReply *responseQuery = spy[2][0].value<EnginioReply*>();
+    QVERIFY(responseQuery->data()["results"].isArray());
+    qDebug() << endl << responseQuery->data()["results"].toArray().first().toObject();
+
+    QVERIFY(responseQuery->data()["results"].toArray().first().toObject()["file"].isObject());
+    QVERIFY(!responseQuery->data()["results"].toArray().first().toObject()["file"].toObject()["url"].toString().isEmpty());
+    qDebug() << "Download from here: " << client.apiUrl() << responseQuery->data()["results"].toArray().first().toObject()["file"].toObject()["url"].toString();
 }
 
 QTEST_MAIN(tst_EnginioClient)

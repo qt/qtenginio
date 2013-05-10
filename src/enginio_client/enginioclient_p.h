@@ -139,6 +139,24 @@ class EnginioClientPrivate : public QObject
                 return;
 //            Q_ASSERT(ereply);
 
+
+            if (d->_uploads.contains(nreply)) {
+                d->_uploads.remove(nreply);
+                QJsonObject object;
+                object[QStringLiteral("id")] = ereply->data()[QStringLiteral("object")].toObject()[QStringLiteral("id")].toString();
+                object[QStringLiteral("objectType")] = ereply->data()[QStringLiteral("object")].toObject()[QStringLiteral("objectType")].toString();
+
+                QJsonObject fileRef;
+                fileRef.insert(QStringLiteral("id"), ereply->data()[QStringLiteral("id")].toString());
+                fileRef.insert(QStringLiteral("objectType"), QStringLiteral("files"));
+
+                // FIXME: do not hard-code file here
+                object[QStringLiteral("file")] = fileRef;
+
+                d->_replyReplyMap.insert(d->update(object, EnginioClient::ObjectsArea), ereply);
+                return;
+            }
+
             q->finished(ereply);
             ereply->finished();
         }
@@ -177,6 +195,7 @@ public:
     QList<FactoryUnit*> m_factories;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
+    QSet<QNetworkReply*> _uploads;
 
     QByteArray sessionToken() const
     {
@@ -326,12 +345,13 @@ public:
         req.setUrl(apiUrl);
 
         QJsonObject obj;
-        obj["object"] = associatedObject;
+        obj[QStringLiteral("object")] = associatedObject;
         QByteArray object = QJsonDocument(obj).toJson();
         QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object);
         QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
         multiPart->setParent(reply);
         device->setParent(multiPart);
+        _uploads.insert(reply);
         return reply;
     }
 

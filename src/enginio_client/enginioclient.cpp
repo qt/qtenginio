@@ -447,7 +447,8 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &associatedObject, con
 {
     Q_D(EnginioClient);
 
-    if (associatedObject[QStringLiteral("objectType")].toString().isEmpty())
+    if (associatedObject[QStringLiteral("objectType")].toString().isEmpty()
+             || associatedObject[QStringLiteral("id")].toString().isEmpty())
         return 0;
 
     QNetworkReply *nreply = d->uploadFile(associatedObject, file);
