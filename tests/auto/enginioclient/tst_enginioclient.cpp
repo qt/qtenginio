@@ -562,7 +562,8 @@ void tst_EnginioClient::file()
 
     // FIXME: make this work for out of source builds
     // FIXME: consider this url mess
-    QString path = "file://" + QDir::currentPath() + "/data/example.txt";
+    QString path = "file://" + QStringLiteral(TEST_FILE_PATH);
+    QVERIFY(QFile::exists(QStringLiteral(TEST_FILE_PATH)));
     const EnginioReply* req2 = client.uploadFile(object, QUrl(path));
     QVERIFY(req2);
 
