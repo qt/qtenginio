@@ -173,7 +173,6 @@ public:
     QMetaObject::Connection _identityConnection;
     QUrl m_apiUrl;
     QPointer<QNetworkAccessManager> m_networkManager;
-    bool m_deleteNetworkManager;
     QList<FactoryUnit*> m_factories;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
