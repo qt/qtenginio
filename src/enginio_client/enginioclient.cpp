@@ -457,3 +457,18 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &associatedObject, con
 
     return ereply;
 }
+
+EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
+{
+    Q_D(EnginioClient);
+
+    if (object[QStringLiteral("objectType")].toString().isEmpty()
+            || object[QStringLiteral("id")].toString().isEmpty())
+        return 0;
+
+    QNetworkReply *nreply = d->downloadFile(object);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
