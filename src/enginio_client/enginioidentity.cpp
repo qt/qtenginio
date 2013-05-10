@@ -48,35 +48,25 @@ EnginioIdentity::EnginioIdentity(QObject *parent) :
 {
 }
 
-struct EnginioAuthenticationPrivate
+class EnginioAuthenticationPrivate
 {
-    class IdentifyFunctor {
-        struct SessionSetterFunctor {
-            EnginioClientPrivate *enginio;
-            QNetworkReply *reply;
-            void operator ()()
-            {
-                QByteArray data(reply->readAll());
-                QJsonObject message(QJsonDocument::fromJson(data).object());
-                QByteArray token = message[QStringLiteral("sessionToken")].toString().toLatin1();
-                enginio->setSessionToken(token);
-                reply->deleteLater();
-            }
-        };
+public:
+    class SessionSetterFunctor
+    {
+        EnginioClientPrivate *_enginio;
+        QNetworkReply *_reply;
     public:
-        EnginioClientPrivate *enginio;
-        EnginioAuthenticationPrivate *authentication;
+        SessionSetterFunctor(EnginioClientPrivate *enginio, QNetworkReply *reply)
+            : _enginio(enginio)
+            , _reply(reply)
+        {}
         void operator ()()
         {
-            Q_ASSERT(enginio);
-            Q_ASSERT(enginio->isInitialized());
-            Q_ASSERT(enginio->identity());
-
-            QJsonObject data;
-            data[QStringLiteral("username")] = authentication->_user;
-            data[QStringLiteral("password")] = authentication->_pass;
-            QNetworkReply *reply = enginio->identify(data);
-            QObject::connect(reply, &QNetworkReply::finished, SessionSetterFunctor{enginio, reply});
+            QByteArray data(_reply->readAll());
+            QJsonObject message(QJsonDocument::fromJson(data).object());
+            QByteArray token = message[QStringLiteral("sessionToken")].toString().toLatin1();
+            _enginio->setSessionToken(token);
+            _reply->deleteLater();
         }
     };
 
@@ -122,7 +112,14 @@ void EnginioAuthentication::setPassword(const QString &password)
 
 void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
 {
-    EnginioAuthenticationPrivate::IdentifyFunctor ident{enginio, d_ptr};
-    ident();
+    Q_ASSERT(enginio);
+    Q_ASSERT(enginio->isInitialized());
+    Q_ASSERT(enginio->identity());
+
+    QJsonObject data;
+    data[QStringLiteral("username")] = d_ptr->_user;
+    data[QStringLiteral("password")] = d_ptr->_pass;
+    QNetworkReply *reply = enginio->identify(data);
+    QObject::connect(reply, &QNetworkReply::finished, EnginioAuthenticationPrivate::SessionSetterFunctor(enginio, reply));
 }
 

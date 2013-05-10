@@ -120,8 +120,14 @@ class EnginioClientPrivate : public QObject
         return result;
     }
 
-    struct ReplyFinishedFunctor {
+    class ReplyFinishedFunctor
+    {
         EnginioClientPrivate *d;
+
+    public:
+        ReplyFinishedFunctor(EnginioClientPrivate *enginio)
+            : d(enginio)
+        {}
         void operator ()(QNetworkReply *nreply)
         {
             Q_ASSERT(d);
@@ -138,6 +144,21 @@ class EnginioClientPrivate : public QObject
         }
     };
 
+    class CallPrepareSessionToken
+    {
+        EnginioClientPrivate *_enginio;
+        EnginioIdentity *_identity;
+
+    public:
+        CallPrepareSessionToken(EnginioClientPrivate *enginio, EnginioIdentity *identity)
+            : _enginio(enginio)
+            , _identity(identity)
+        {}
+        void operator ()()
+        {
+            _identity->prepareSessionToken(_enginio);
+        }
+    };
 public:
     EnginioClientPrivate(EnginioClient *client = 0);
     virtual ~EnginioClientPrivate();
@@ -192,16 +213,7 @@ public:
             return;
         }
         if (!isInitialized()) {
-            struct CallPrepareSessionToken
-            {
-                EnginioClientPrivate *enginio;
-                EnginioIdentity *identity;
-                void operator ()()
-                {
-                    identity->prepareSessionToken(enginio);
-                }
-            };
-            _identityConnection = QObject::connect(q_ptr, &EnginioClient::clientInitialized, CallPrepareSessionToken{this, identity});
+            _identityConnection = QObject::connect(q_ptr, &EnginioClient::clientInitialized, CallPrepareSessionToken(this, identity));
         } else
             identity->prepareSessionToken(this);
         emit q_ptr->identityChanged(identity);

@@ -249,7 +249,7 @@ QNetworkAccessManager * EnginioClient::networkManager()
     Q_D(EnginioClient);
     if (d->m_networkManager.isNull()) {
         d->m_networkManager = new QNetworkAccessManager(this);
-        QObject::connect(d->m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor{d});
+        QObject::connect(d->m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(d));
         d->m_deleteNetworkManager = true;
 
         // Ignore SSL errors when staging backend is used.
@@ -276,7 +276,7 @@ void EnginioClient::setNetworkManager(QNetworkAccessManager *networkManager)
 
     d->m_networkManager = networkManager;
     // TODO it will crash soon, we need to disconnect in ~EnginioClient
-    QObject::connect(d->m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor{d});
+    QObject::connect(d->m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(d));
     d->m_deleteNetworkManager = false;
 }
 
