@@ -82,22 +82,29 @@
  */
 
 
+class IsAuthenticatedFunctor
+{
+    EnginioQmlClient *_qmlEnginio;
+    bool _status;
+
+public:
+    IsAuthenticatedFunctor(EnginioQmlClient *qmlEnginio, bool status)
+        : _qmlEnginio(qmlEnginio)
+        , _status(status)
+    {}
+    void operator ()()
+    {
+        _qmlEnginio->isAuthenticatedChanged(_status);
+    }
+};
+
 EnginioQmlClient::EnginioQmlClient(const QString &backendId,
                                    const QString &backendSecret,
                                    QObject *parent) :
     EnginioClient(backendId, backendSecret, parent)
 {
-    struct IsAuthenticatedFunctor
-    {
-        EnginioQmlClient *qmlEnginio;
-        bool status;
-        void operator ()()
-        {
-            qmlEnginio->isAuthenticatedChanged(status);
-        }
-    };
-    QObject::connect(this, &EnginioClient::sessionAuthenticated, IsAuthenticatedFunctor{this, true});
-    QObject::connect(this, &EnginioClient::sessionTerminated, IsAuthenticatedFunctor{this, false});
+    QObject::connect(this, &EnginioClient::sessionAuthenticated, IsAuthenticatedFunctor(this, true));
+    QObject::connect(this, &EnginioClient::sessionTerminated, IsAuthenticatedFunctor(this, false));
 }
 
 /*!

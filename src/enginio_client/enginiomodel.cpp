@@ -163,7 +163,9 @@ public:
         QJsonObject oldObject = _data.at(row).toObject();
         const EnginioReply* id = _enginio->remove(oldObject, _area);
         _dataChanged.insert(id, qMakePair(row, oldObject));
-        emit q->dataChanged(q->index(row), q->index(row) , QVector<int>{SyncedRole,});
+        QVector<int> roles(1);
+        roles.append(SyncedRole);
+        emit q->dataChanged(q->index(row), q->index(row) , roles);
     }
 
     void setValue(int row, const QString &role, const QVariant &value)
