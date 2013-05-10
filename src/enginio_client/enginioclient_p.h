@@ -275,6 +275,11 @@ public:
         if (int limit = object[QStringLiteral("limit")].toDouble()) {
             urlQuery.addQueryItem(QStringLiteral("limit"), QString::number(limit));
         }
+        QJsonValue include = object[QStringLiteral("include")];
+        if (include.isObject()) {
+            urlQuery.addQueryItem(QStringLiteral("include"),
+                QString::fromUtf8(QJsonDocument(include.toObject()).toJson(QJsonDocument::Compact)));
+        }
         if (object[QStringLiteral("query")].isObject()) { // TODO docs are inconsistent on that
             urlQuery.addQueryItem(QStringLiteral("q"),
                 QString::fromUtf8(QJsonDocument(object[QStringLiteral("query")].toObject()).toJson(QJsonDocument::Compact)));
