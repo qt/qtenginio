@@ -1,4 +1,4 @@
-QT       += testlib enginio
+QT       += testlib enginio enginio-private
 QT       -= gui
 
 TARGET = tst_clientofflinetest

@@ -59,8 +59,13 @@ class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
     Q_OBJECT
 public:
-    enum Area { ObjectsArea, UsersArea, UsergroupsArea, UsergroupMembersArea, AuthenticationArea, SessionArea, FulltextSearchArea, FileArea };
-    Q_ENUMS(Area)
+    enum Operation {
+        // Do not forget to keep in sync with EnginioClientPrivate::Operation!
+        ObjectOperation,
+        UserOperation,
+        UsergroupOperation
+    };
+    Q_ENUMS(Operation)
 
     explicit EnginioClient(const QString &backendId,
                            const QString &backendSecret,
@@ -96,10 +101,10 @@ public:
     EnginioAbstractObject *createObject(const QString &type,
                                          const QString &id = QString()) const;
 
-    Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Area area = ObjectsArea);
-    Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Area area = ObjectsArea);
-    Q_INVOKABLE EnginioReply *update(const QJsonObject &object, const Area area = ObjectsArea);
-    Q_INVOKABLE EnginioReply *remove(const QJsonObject &object, const Area area = ObjectsArea);
+    Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *update(const QJsonObject &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *remove(const QJsonObject &object, const Operation operation = ObjectOperation);
 
     EnginioReply *uploadFile(const QJsonObject &associatedObject, const QUrl &file);
 
@@ -129,7 +134,7 @@ private:
     Q_DISABLE_COPY(EnginioClient)
 };
 
-Q_DECLARE_TYPEINFO(EnginioClient::Area, Q_PRIMITIVE_TYPE);
-Q_DECLARE_METATYPE(EnginioClient::Area);
+Q_DECLARE_TYPEINFO(EnginioClient::Operation, Q_PRIMITIVE_TYPE);
+Q_DECLARE_METATYPE(EnginioClient::Operation);
 
 #endif // ENGINIOCLIENT_H

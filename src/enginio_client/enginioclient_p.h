@@ -70,14 +70,14 @@ class EnginioClientPrivate : public QObject
     Q_DECLARE_PUBLIC(EnginioClient)
 
     enum PathOptions { Default, IncludeIdInPath = 1};
-    static QString getPath(const QJsonObject &object, const EnginioClient::Area area, PathOptions flags = Default)
+    static QString getPath(const QJsonObject &object, int operation, PathOptions flags = Default)
     {
         QString result;
         result.reserve(32);
         result.append(QStringLiteral("/v1/"));
 
-        switch (area) {
-        case EnginioClient::ObjectsArea: {
+        switch (operation) {
+        case ObjectOperation: {
             QString objectType = object[QStringLiteral("objectType")].toString();
             if (objectType.isEmpty())
                 return QString();
@@ -85,25 +85,25 @@ class EnginioClientPrivate : public QObject
             result.append(objectType.replace('.', '/'));
             break;
         }
-        case EnginioClient::AuthenticationArea:
+        case AuthenticationOperation:
             result.append(QStringLiteral("auth/identity"));
             break;
-        case EnginioClient::FileArea:
+        case FileOperation:
             result.append(QStringLiteral("files"));
             break;
-        case EnginioClient::FulltextSearchArea:
+        case SearchOperation:
             result.append(QStringLiteral("search"));
             break;
-        case EnginioClient::SessionArea:
+        case SessionOperation:
             result.append(QStringLiteral("session"));
             break;
-        case EnginioClient::UsersArea:
+        case UserOperation:
             result.append(QStringLiteral("users"));
             break;
-        case EnginioClient::UsergroupsArea:
+        case UsergroupOperation:
             result.append(QStringLiteral("usergroups"));
             break;
-        case EnginioClient::UsergroupMembersArea:
+        case UsergroupMemberOperation:
             // FIXME usergroups/{id}/members
             result.append(QStringLiteral("usergroups"));
             break;
@@ -153,7 +153,7 @@ class EnginioClientPrivate : public QObject
                 // FIXME: do not hard-code file here
                 object[QStringLiteral("file")] = fileRef;
 
-                d->_replyReplyMap.insert(d->update(object, EnginioClient::ObjectsArea), ereply);
+                d->_replyReplyMap.insert(d->update(object, EnginioClient::ObjectOperation), ereply);
                 return;
             }
 
@@ -178,6 +178,22 @@ class EnginioClientPrivate : public QObject
         }
     };
 public:
+    enum Operation {
+        // Do not forget to keep in sync with EnginioClient::Operation!
+        ObjectOperation = EnginioClient::ObjectOperation,
+        UserOperation = EnginioClient::UserOperation,
+        UsergroupOperation = EnginioClient::UsergroupOperation,
+
+        // private
+        UsergroupMemberOperation,
+        AuthenticationOperation,
+        SessionOperation,
+        SearchOperation,
+        FileOperation
+    };
+
+    Q_ENUMS(Operation)
+
     EnginioClientPrivate(EnginioClient *client = 0);
     virtual ~EnginioClientPrivate();
 
@@ -240,7 +256,7 @@ public:
     QNetworkReply *identify(const QJsonObject &object)
     {
         QUrl url(m_apiUrl);
-        url.setPath(getPath(object, EnginioClient::AuthenticationArea));
+        url.setPath(getPath(object, AuthenticationOperation));
 
         QNetworkRequest req(_request);
         req.setUrl(url);
@@ -248,10 +264,10 @@ public:
         return q_ptr->networkManager()->post(req, data);
     }
 
-    QNetworkReply *update(const QJsonObject &object, const EnginioClient::Area area)
+    QNetworkReply *update(const QJsonObject &object, const EnginioClient::Operation operation)
     {
         QUrl url(m_apiUrl);
-        url.setPath(getPath(object, area, IncludeIdInPath));
+        url.setPath(getPath(object, operation, IncludeIdInPath));
 
         QNetworkRequest req(_request);
         req.setUrl(url);
@@ -260,10 +276,10 @@ public:
         return q_ptr->networkManager()->put(req, data);
     }
 
-    QNetworkReply *remove(const QJsonObject &object, const EnginioClient::Area area)
+    QNetworkReply *remove(const QJsonObject &object, const EnginioClient::Operation operation)
     {
         QUrl url(m_apiUrl);
-        url.setPath(getPath(object, area, IncludeIdInPath));
+        url.setPath(getPath(object, operation, IncludeIdInPath));
 
         QNetworkRequest req(_request);
         req.setUrl(url);
@@ -271,10 +287,10 @@ public:
         return q_ptr->networkManager()->deleteResource(req);
     }
 
-    QNetworkReply *create(const QJsonObject &object, const EnginioClient::Area area)
+    QNetworkReply *create(const QJsonObject &object, const EnginioClient::Operation operation)
     {
         QUrl url(m_apiUrl);
-        url.setPath(getPath(object, area));
+        url.setPath(getPath(object, operation));
 
         QNetworkRequest req(_request);
         req.setUrl(url);
@@ -283,10 +299,10 @@ public:
         return q_ptr->networkManager()->post(req, data);
     }
 
-    QNetworkReply *query(const QJsonObject &object, const EnginioClient::Area area)
+    QNetworkReply *query(const QJsonObject &object, const EnginioClient::Operation operation)
     {
         QUrl url(m_apiUrl);
-        url.setPath(getPath(object, area));
+        url.setPath(getPath(object, operation));
 
         // TODO add all params here
         QUrlQuery urlQuery;
@@ -334,7 +350,7 @@ public:
     QNetworkReply *upload(const QJsonObject &associatedObject, const QString &fileName, QIODevice *device, const QString &mimeType)
     {
         QUrl apiUrl = m_apiUrl;
-        apiUrl.setPath(getPath(QJsonObject(), EnginioClient::FileArea));
+        apiUrl.setPath(getPath(QJsonObject(), FileOperation));
 
         QNetworkRequest req(_request);
         // FIXME: must NOT have the json type as content type,

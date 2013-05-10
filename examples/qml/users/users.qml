@@ -15,7 +15,7 @@ Rectangle {
                      backendId: AppConfig.backendData.id
                      backendSecret: AppConfig.backendData.secret
                  }
-        area: Enginio.UsersArea
+        operation: Enginio.UserOperation
     }
 
     Component {

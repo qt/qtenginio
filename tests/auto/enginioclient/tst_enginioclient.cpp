@@ -152,7 +152,7 @@ void tst_EnginioClient::query_users()
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
 
     QJsonObject obj;
-    const EnginioReply* reqId = client.query(obj, EnginioClient::UsersArea);
+    const EnginioReply* reqId = client.query(obj, EnginioClient::UserOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -176,7 +176,7 @@ void tst_EnginioClient::query_users_filter()
 
     QJsonObject obj = QJsonDocument::fromJson("{\"query\":{\"username\": \"john\"}}").object();
     QVERIFY(!obj.isEmpty());
-    const EnginioReply* reqId = client.query(obj, EnginioClient::UsersArea);
+    const EnginioReply* reqId = client.query(obj, EnginioClient::UserOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -235,7 +235,7 @@ void tst_EnginioClient::user_crud()
         obj["username"] = name;
         obj["password"] = pass;
 
-        const EnginioReply* reqId = client.create(obj, EnginioClient::UsersArea);
+        const EnginioReply* reqId = client.create(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
 
         QTRY_COMPARE(spy.count(), spyCount + 1);
@@ -256,7 +256,7 @@ void tst_EnginioClient::user_crud()
         query["username"] = name;
         QJsonObject obj;
         obj["query"] = query;
-        const EnginioReply* reqId = client.query(obj, EnginioClient::UsersArea);
+        const EnginioReply* reqId = client.query(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
         QTRY_COMPARE(spy.count(), spyCount + 1);
         QCOMPARE(reqId->errorCode(), QNetworkReply::NoError);
@@ -271,7 +271,7 @@ void tst_EnginioClient::user_crud()
         QJsonObject obj;
         obj["password"] = pass + "pass";
         obj["id"] = id;
-        const EnginioReply* reqId = client.update(obj, EnginioClient::UsersArea);
+        const EnginioReply* reqId = client.update(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
         QTRY_COMPARE(spy.count(), spyCount + 1);
         QCOMPARE(reqId->errorCode(), QNetworkReply::NoError);
@@ -284,7 +284,7 @@ void tst_EnginioClient::user_crud()
         // DELETE it
         QJsonObject obj;
         obj["id"] = id;
-        const EnginioReply* reqId = client.remove(obj, EnginioClient::UsersArea);
+        const EnginioReply* reqId = client.remove(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
 
         QTRY_COMPARE(spy.count(), spyCount + 1);

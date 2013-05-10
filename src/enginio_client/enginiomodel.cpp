@@ -46,7 +46,7 @@
 class EnginioModelPrivate {
     QJsonObject _query;
     EnginioClient *_enginio;
-    EnginioClient::Area _area;
+    EnginioClient::Operation _operation;
     EnginioModel *q;
     QVector<QMetaObject::Connection> _connections;
 
@@ -114,7 +114,7 @@ class EnginioModelPrivate {
 public:
     EnginioModelPrivate(EnginioModel *q_ptr)
         : _enginio(0)
-        , _area()
+        , _operation()
         , q(q_ptr)
     {}
 
@@ -150,7 +150,7 @@ public:
         QJsonObject object(value);
         object[QLatin1String("objectType")] = _query[QLatin1String("objectType")]; // TODO think about it, it means that not all queries are valid
         q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
-        const EnginioReply* id = _enginio->create(object, _area);
+        const EnginioReply* id = _enginio->create(object, _operation);
         _data.append(value);
         const int row = _data.count() - 1;
         _rowsToSync.insert(row);
@@ -161,7 +161,7 @@ public:
     void remove(int row)
     {
         QJsonObject oldObject = _data.at(row).toObject();
-        const EnginioReply* id = _enginio->remove(oldObject, _area);
+        const EnginioReply* id = _enginio->remove(oldObject, _operation);
         _dataChanged.insert(id, qMakePair(row, oldObject));
         QVector<int> roles(1);
         roles.append(SyncedRole);
@@ -182,25 +182,26 @@ public:
         emit q->queryChanged(query);
     }
 
-    EnginioClient::Area area() const
+    EnginioClient::Operation operation() const
     {
-        return _area;
+        return _operation;
     }
 
-    void setArea(const int area)
+    void setOperation(const int operation)
     {
-        _area = static_cast<EnginioClient::Area>(area);
-        emit q->areaChanged(_area);
+        Q_ASSERT_X(operation >= EnginioClient::ObjectOperation, "setOperation", "Invalid operation specified.");
+        _operation = static_cast<EnginioClient::Operation>(operation);
+        emit q->operationChanged(_operation);
     }
 
     void execute()
     {
         if (!_query.isEmpty()) {
-            const EnginioReply *id = _enginio->query(_query, _area);
+            const EnginioReply *id = _enginio->query(_query, _operation);
             _dataChanged.insert(id, qMakePair(FullModelReset, QJsonObject()));
         }
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
-        QObject::connect(q, &EnginioModel::areaChanged, QueryChanged(this));
+        QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::enginioChanged, QueryChanged(this));
     }
 
@@ -265,7 +266,7 @@ public:
             deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
             deltaObject[QString::fromUtf8("id")] = newObject[QString::fromUtf8("id")];
             deltaObject[QString::fromUtf8("objectType")] = newObject[QString::fromUtf8("objectType")];
-            const EnginioReply* id = _enginio->update(deltaObject, _area);
+            const EnginioReply* id = _enginio->update(deltaObject, _operation);
             _dataChanged.insert(id, qMakePair(row, oldObject));
             _data.replace(row, newObject);
             emit q->dataChanged(q->index(row), q->index(row));
@@ -352,16 +353,16 @@ void EnginioModel::setQuery(const QJsonObject &query)
     return d->setQuery(query);
 }
 
-EnginioClient::Area EnginioModel::area() const
+EnginioClient::Operation EnginioModel::operation() const
 {
-    return d->area();
+    return d->operation();
 }
 
-void EnginioModel::setArea(const int area)
+void EnginioModel::setOperation(const int operation)
 {
-    if (area == d->area())
+    if (operation == d->operation())
         return;
-    d->setArea(area);
+    d->setOperation(operation);
 }
 
 void EnginioModel::append(const QJsonObject &value)
