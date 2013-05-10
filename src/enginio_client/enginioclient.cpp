@@ -76,8 +76,7 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
     _identity(),
     m_apiUrl(QStringLiteral("https://api.engin.io")),
-    m_networkManager(),
-    m_deleteNetworkManager(true)
+    m_networkManager()
 {
     addFactory(new EnginioJsonObjectFactory());
 
@@ -92,8 +91,7 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
 
 EnginioClientPrivate::~EnginioClientPrivate()
 {
-    if (m_deleteNetworkManager)
-        delete m_networkManager;
+    delete m_networkManager;
 
     while (m_factories.size() > 0) {
         FactoryUnit *unit = m_factories.takeFirst();
@@ -250,7 +248,6 @@ QNetworkAccessManager * EnginioClient::networkManager()
     if (d->m_networkManager.isNull()) {
         d->m_networkManager = new QNetworkAccessManager(this);
         QObject::connect(d->m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(d));
-        d->m_deleteNetworkManager = true;
 
         // Ignore SSL errors when staging backend is used.
         if (apiUrl() == QStringLiteral("https://api.staging.engin.io")) {
@@ -262,22 +259,6 @@ QNetworkAccessManager * EnginioClient::networkManager()
         }
     }
     return d->m_networkManager;
-}
-
-/*!
- * Set Enginio library to use existing QNetworkAccessManager instance,
- * \a networkManager, for all network traffic.
- */
-void EnginioClient::setNetworkManager(QNetworkAccessManager *networkManager)
-{
-    Q_D(EnginioClient);
-    if (d->m_deleteNetworkManager && !d->m_networkManager.isNull())
-        delete d->m_networkManager;
-
-    d->m_networkManager = networkManager;
-    // TODO it will crash soon, we need to disconnect in ~EnginioClient
-    QObject::connect(d->m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(d));
-    d->m_deleteNetworkManager = false;
 }
 
 /*!

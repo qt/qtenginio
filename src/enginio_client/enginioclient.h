@@ -86,7 +86,6 @@ public:
     QUrl apiUrl() const;
     void setApiUrl(const QUrl &apiUrl);
     QNetworkAccessManager *networkManager();
-    void setNetworkManager(QNetworkAccessManager *networkManager);
     QByteArray sessionToken() const;
     void setSessionToken(const QByteArray &sessionToken);
 
