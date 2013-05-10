@@ -297,6 +297,7 @@ public:
         Q_ASSERT_X(fileUrl.isLocalFile(), "", "Upload must be local file.");
         QFile *file = new QFile(fileUrl.toLocalFile());
         if (!file->open(QFile::ReadOnly))
+            // FIXME: this is not allowed
             return 0;
         Q_ASSERT(file->isOpen());
 
@@ -319,7 +320,9 @@ public:
         req.setHeader(QNetworkRequest::ContentTypeHeader, QString());
         req.setUrl(apiUrl);
 
-        QByteArray object = QJsonDocument(associatedObject).toJson();
+        QJsonObject obj;
+        obj["object"] = associatedObject;
+        QByteArray object = QJsonDocument(obj).toJson();
         QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object);
         QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
         multiPart->setParent(reply);
