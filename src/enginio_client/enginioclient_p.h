@@ -139,6 +139,24 @@ class EnginioClientPrivate : public QObject
                 return;
 //            Q_ASSERT(ereply);
 
+
+            if (d->_uploads.contains(nreply)) {
+                d->_uploads.remove(nreply);
+                QJsonObject object;
+                object[QStringLiteral("id")] = ereply->data()[QStringLiteral("object")].toObject()[QStringLiteral("id")].toString();
+                object[QStringLiteral("objectType")] = ereply->data()[QStringLiteral("object")].toObject()[QStringLiteral("objectType")].toString();
+
+                QJsonObject fileRef;
+                fileRef.insert(QStringLiteral("id"), ereply->data()[QStringLiteral("id")].toString());
+                fileRef.insert(QStringLiteral("objectType"), QStringLiteral("files"));
+
+                // FIXME: do not hard-code file here
+                object[QStringLiteral("file")] = fileRef;
+
+                d->_replyReplyMap.insert(d->update(object, EnginioClient::ObjectsArea), ereply);
+                return;
+            }
+
             q->finished(ereply);
             ereply->finished();
         }
@@ -176,6 +194,7 @@ public:
     QList<FactoryUnit*> m_factories;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
+    QSet<QNetworkReply*> _uploads;
 
     QByteArray sessionToken() const
     {
@@ -274,6 +293,11 @@ public:
         if (int limit = object[QStringLiteral("limit")].toDouble()) {
             urlQuery.addQueryItem(QStringLiteral("limit"), QString::number(limit));
         }
+        QJsonValue include = object[QStringLiteral("include")];
+        if (include.isObject()) {
+            urlQuery.addQueryItem(QStringLiteral("include"),
+                QString::fromUtf8(QJsonDocument(include.toObject()).toJson(QJsonDocument::Compact)));
+        }
         if (object[QStringLiteral("query")].isObject()) { // TODO docs are inconsistent on that
             urlQuery.addQueryItem(QStringLiteral("q"),
                 QString::fromUtf8(QJsonDocument(object[QStringLiteral("query")].toObject()).toJson(QJsonDocument::Compact)));
@@ -296,6 +320,7 @@ public:
         Q_ASSERT_X(fileUrl.isLocalFile(), "", "Upload must be local file.");
         QFile *file = new QFile(fileUrl.toLocalFile());
         if (!file->open(QFile::ReadOnly))
+            // FIXME: this is not allowed
             return 0;
         Q_ASSERT(file->isOpen());
 
@@ -318,11 +343,14 @@ public:
         req.setHeader(QNetworkRequest::ContentTypeHeader, QString());
         req.setUrl(apiUrl);
 
-        QByteArray object = QJsonDocument(associatedObject).toJson();
+        QJsonObject obj;
+        obj[QStringLiteral("object")] = associatedObject;
+        QByteArray object = QJsonDocument(obj).toJson();
         QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object);
         QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
         multiPart->setParent(reply);
         device->setParent(multiPart);
+        _uploads.insert(reply);
         return reply;
     }
 
