@@ -1,11 +1,39 @@
+#include <QMetaEnum>
+#include <QMetaObject>
 #include <QString>
 #include <QtTest>
 #include <QCoreApplication>
 
 #include "enginioclient.h"
+#include "private/enginioclient_p.h"
 #include "enginiojsonobject.h"
 #include "enginioobjectmodel.h"
 #include "enginioacl.h"
+
+class TestEnginioClient: public EnginioClient
+{
+    Q_OBJECT
+public:
+    TestEnginioClient()
+        : EnginioClient()
+    { }
+
+    const QMetaEnum privateOperationEnum() const
+    {
+        const QMetaObject *privateObject = d_ptr->metaObject();
+        int index = privateObject->indexOfEnumerator("Operation");
+        Q_ASSERT(index != -1);
+        return privateObject->enumerator(index);
+    }
+
+    const QMetaEnum publicOperationEnum() const
+    {
+        const QMetaObject *object = metaObject();
+        int index = object->indexOfEnumerator("Operation");
+         Q_ASSERT(index != -1);
+        return object->enumerator(index);
+    }
+};
 
 class ClientOfflineTest : public QObject
 {
@@ -18,6 +46,7 @@ private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void testCreateClient();
+    void testOperationEnum();
     void testCreateObjectFromClient();
     void testCreateJsonObject();
     void testJsonObjectSerialization();
@@ -53,6 +82,19 @@ void ClientOfflineTest::testCreateClient()
     QVERIFY2(apiUrl.isValid(), "Invalid API URL");
 
     delete client;
+}
+
+void ClientOfflineTest::testOperationEnum()
+{
+    TestEnginioClient client;
+    const QMetaEnum apiEnum = client.publicOperationEnum();
+    const QMetaEnum privateEnum = client.privateOperationEnum();
+    QVERIFY2(apiEnum.keyCount() <= privateEnum.keyCount(), "Public enum has more values than the private.");
+
+    for (int i = 0; i < apiEnum.keyCount(); ++i) {
+        QCOMPARE(apiEnum.value(i), privateEnum.value(i)); // Sanity check for values.
+        QCOMPARE(apiEnum.key(i), privateEnum.key(i));
+    }
 }
 
 void ClientOfflineTest::testCreateObjectFromClient()

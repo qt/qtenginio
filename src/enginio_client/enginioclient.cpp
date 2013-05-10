@@ -347,52 +347,52 @@ void EnginioClient::ignoreSslErrors(QNetworkReply* reply,
     reply->ignoreSslErrors(errors);
 }
 
-EnginioReply* EnginioClient::query(const QJsonObject &query, const Area area)
+EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation operation)
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->query(query, area);
+    QNetworkReply *nreply = d->query(query, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
     return ereply;
 }
 
-EnginioReply* EnginioClient::create(const QJsonObject &object, const Area area)
+EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
 
     if (object.empty())
         return 0;
 
-    QNetworkReply *nreply = d->create(object, area);
+    QNetworkReply *nreply = d->create(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
 
     return ereply;
 }
 
-EnginioReply* EnginioClient::update(const QJsonObject &object, const Area area)
+EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
 
     if (object.empty())
         return 0;
 
-    QNetworkReply *nreply = d->update(object, area);
+    QNetworkReply *nreply = d->update(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
 
     return ereply;
 }
 
-EnginioReply* EnginioClient::remove(const QJsonObject &object, const Area area)
+EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
 
     if (object.empty())
         return 0;
 
-    QNetworkReply *nreply = d->remove(object, area);
+    QNetworkReply *nreply = d->remove(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
 
