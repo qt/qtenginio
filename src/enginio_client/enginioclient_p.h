@@ -53,6 +53,7 @@
 #include <QtCore/qurlquery.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qmimedatabase.h>
+#include <QtCore/qjsonarray.h>
 
 class FactoryUnit
 {
@@ -155,6 +156,10 @@ class EnginioClientPrivate : public QObject
 
                 d->_replyReplyMap.insert(d->update(object, EnginioClient::ObjectOperation), ereply);
                 return;
+            } else if (d->_downloads.contains(nreply)) {
+                QUrl url = d->m_apiUrl;
+                url.setPath(ereply->data()["results"].toArray().first().toObject()["file"].toObject()["url"].toString());
+                qDebug() << "Download URL: " << url;
             }
 
             q->finished(ereply);
@@ -211,6 +216,7 @@ public:
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
     QSet<QNetworkReply*> _uploads;
+    QSet<QNetworkReply*> _downloads;
 
     QByteArray sessionToken() const
     {
@@ -329,6 +335,21 @@ public:
     bool isInitialized() const
     {
         return !m_backendId.isEmpty() && !m_backendSecret.isEmpty();
+    }
+
+    QNetworkReply *downloadFile(const QJsonObject &object)
+    {
+        QString id = object["id"].toString();
+        QString objectType = object["objectType"].toString();
+        QJsonObject obj;
+        obj = QJsonDocument::fromJson(
+                    "{\"include\": {\"file\": {}},"
+                     "\"objectType\": \"" + objectType.toUtf8() + "\","
+                     "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
+
+        QNetworkReply *reply = query(obj, EnginioClient::ObjectsArea);
+        _downloads.insert(reply);
+        return reply;
     }
 
     QNetworkReply *uploadFile(const QJsonObject &associatedObject, const QUrl &fileUrl)

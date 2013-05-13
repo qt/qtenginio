@@ -590,6 +590,16 @@ void tst_EnginioClient::file()
     QVERIFY(responseQuery->data()["results"].toArray().first().toObject()["file"].isObject());
     QVERIFY(!responseQuery->data()["results"].toArray().first().toObject()["file"].toObject()["url"].toString().isEmpty());
     qDebug() << "Download from here: " << client.apiUrl() << responseQuery->data()["results"].toArray().first().toObject()["file"].toObject()["url"].toString();
+
+    // Download
+    const EnginioReply* reqDownload = client.downloadFile(object);
+    QVERIFY(reqDownload);
+
+    QTRY_COMPARE(spy.count(), 4);
+    const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
+    qDebug() << responseDownload;
+    qDebug() << "Download: " << responseDownload;
+
 }
 
 QTEST_MAIN(tst_EnginioClient)

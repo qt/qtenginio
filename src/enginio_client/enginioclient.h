@@ -107,6 +107,7 @@ public:
     Q_INVOKABLE EnginioReply *remove(const QJsonObject &object, const Operation operation = ObjectOperation);
 
     EnginioReply *uploadFile(const QJsonObject &associatedObject, const QUrl &file);
+    EnginioReply *downloadFile(const QJsonObject &object);
 
 signals:
     void sessionAuthenticated() const;
