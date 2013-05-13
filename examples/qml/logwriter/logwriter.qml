@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Enginio 1.0
-import "../config.js" as AppConfig
+import "qrc:///config.js" as AppConfig
 
 Item {
     id: root

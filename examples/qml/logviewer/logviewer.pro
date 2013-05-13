@@ -8,3 +8,4 @@ SOURCES += ../main.cpp
 mac: CONFIG -= app_bundle
 
 OTHER_FILES += ../config.js logviewer.qml
+RESOURCES += ../qml.qrc

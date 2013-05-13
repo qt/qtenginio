@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>config.js</file>
+        <file>loganalyzer/loganalyzer.qml</file>
+        <file>logviewer/logviewer.qml</file>
+        <file>logwriter/logwriter.qml</file>
+        <file>reuseclient/reuseclient.qml</file>
+        <file>todo/todo.qml</file>
+        <file>users/users.qml</file>
+    </qresource>
+</RCC>
