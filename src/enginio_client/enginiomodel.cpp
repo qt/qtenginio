@@ -51,8 +51,11 @@ class EnginioModelPrivate {
     QVector<QMetaObject::Connection> _connections;
 
     const static int FullModelReset;
+    const static int IncrementalModelUpdate;
     mutable QMap<const EnginioReply*, QPair<int /*row*/, QJsonObject> > _dataChanged;
     QSet<int> _rowsToSync;
+    int _latestRequestedOffset;
+    bool _canFetchMore;
 
     enum {
         InvalidRole = -1,
@@ -116,6 +119,8 @@ public:
         : _enginio(0)
         , _operation()
         , q(q_ptr)
+        , _latestRequestedOffset(0)
+        , _canFetchMore(false)
     {}
 
     EnginioClient *enginio() const
@@ -179,6 +184,25 @@ public:
     void setQuery(const QJsonObject &query)
     {
         _query = query;
+        const int pageSize = _query[QStringLiteral("pageSize")].toDouble();
+
+        if (pageSize) {
+            const QString limitString(QStringLiteral("limit"));
+            const QString offsetString(QStringLiteral("offset"));
+            const unsigned limit = _query[limitString].toDouble();
+            const unsigned offset = _query[offsetString].toDouble();
+            if (limit)
+                qWarning() << "EnginioModel::setQuery()" << "'limit' parameter can not be used together with model pagining feature, the value will be ignored";
+
+            if (offset) {
+                qWarning() << "EnginioModel::setQuery()" << "'offset' parameter can not be used together with model pagining feature, the value will be ignored";
+                _query.remove(offsetString);
+            }
+            _query[limitString] = pageSize;
+            _canFetchMore = true;
+        } else {
+            _canFetchMore = false;
+        }
         emit q->queryChanged(query);
     }
 
@@ -198,6 +222,8 @@ public:
     {
         if (!_query.isEmpty()) {
             const EnginioReply *id = _enginio->query(_query, _operation);
+            if (_canFetchMore)
+                _latestRequestedOffset = _query[QStringLiteral("limit")].toDouble();
             _dataChanged.insert(id, qMakePair(FullModelReset, QJsonObject()));
         }
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
@@ -218,14 +244,32 @@ public:
 
         QPair<int, QJsonObject> requestInfo = _dataChanged.take(response);
         int row = requestInfo.first;
-        _rowsToSync.remove(row);
         if (row == FullModelReset) {
             q->beginResetModel();
             _rowsToSync.clear();
             _data = response->data()[QStringLiteral("results")].toArray();
             syncRoles();
+            _canFetchMore = _canFetchMore && _data.count() && (_query[QStringLiteral("limit")].toDouble() <= _data.count());
             q->endResetModel();
+        } else if (row == IncrementalModelUpdate) {
+            Q_ASSERT(_canFetchMore);
+            QJsonArray data(response->data()[QStringLiteral("results")].toArray());
+            QJsonObject query(requestInfo.second);
+            int offset = query[QStringLiteral("offset")].toDouble();
+            int limit = query[QStringLiteral("limit")].toDouble();
+            int dataCount = data.count();
+
+            int startingOffset = qMax(offset, _data.count());
+
+            q->beginInsertRows(QModelIndex(), startingOffset, startingOffset + dataCount -1);
+            for (int i = 0; i < dataCount; ++i) {
+                _data.append(data[i]);
+            }
+
+            _canFetchMore = limit <= dataCount;
+            q->endInsertRows();
         } else {
+            _rowsToSync.remove(row);
             // TODO update, insert and remove
             Q_ASSERT(row < _data.count());
             // update or insert data
@@ -320,9 +364,35 @@ public:
         Q_UNIMPLEMENTED();
         return value;
     }
+
+    bool canFetchMore() const
+    {
+        return _canFetchMore;
+    }
+
+    void fetchMore(int row)
+    {
+        int currentOffset = _data.count();
+        if (!_canFetchMore || currentOffset < _latestRequestedOffset)
+            return; // we do not want to spam the server, lets wait for the last fetch
+
+        QJsonObject query(_query);
+
+        int limit = query[QStringLiteral("limit")].toDouble();
+        limit = qMax(row - currentOffset, limit); // check if default limit is not too small
+
+        query[QStringLiteral("offset")] = currentOffset;
+        query[QStringLiteral("limit")] = limit;
+
+        qDebug() << Q_FUNC_INFO << query;
+        _latestRequestedOffset += limit;
+        const EnginioReply *id = _enginio->query(query, _operation);
+        _dataChanged.insert(id, qMakePair(IncrementalModelUpdate, query));
+    }
 };
 
 const int EnginioModelPrivate::FullModelReset = -1;
+const int EnginioModelPrivate::IncrementalModelUpdate = -2;
 
 EnginioModel::EnginioModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -431,4 +501,15 @@ bool EnginioModel::setData(const QModelIndex &index, const QVariant &value, int 
 QHash<int, QByteArray> EnginioModel::roleNames() const
 {
     return d->roleNames();
+}
+
+void EnginioModel::fetchMore(const QModelIndex &parent)
+{
+    d->fetchMore(parent.row());
+}
+
+bool EnginioModel::canFetchMore(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+    return d->canFetchMore();
 }
