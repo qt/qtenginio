@@ -347,6 +347,16 @@ void EnginioClient::ignoreSslErrors(QNetworkReply* reply,
     reply->ignoreSslErrors(errors);
 }
 
+EnginioReply *EnginioClient::search(const QJsonObject &query)
+{
+    Q_D(EnginioClient);
+
+    QNetworkReply *nreply = d->query(query, EnginioClientPrivate::SearchOperation);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+    return ereply;
+}
+
 EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation operation)
 {
     Q_D(EnginioClient);

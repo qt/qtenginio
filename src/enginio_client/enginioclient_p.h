@@ -305,7 +305,7 @@ public:
         return q_ptr->networkManager()->post(req, data);
     }
 
-    QNetworkReply *query(const QJsonObject &object, const EnginioClient::Operation operation)
+    QNetworkReply *query(const QJsonObject &object, int operation)
     {
         QUrl url(m_apiUrl);
         url.setPath(getPath(object, operation));
@@ -320,6 +320,19 @@ public:
             urlQuery.addQueryItem(QStringLiteral("include"),
                 QString::fromUtf8(QJsonDocument(include.toObject()).toJson(QJsonDocument::Compact)));
         }
+        if (operation == SearchOperation) {
+            QJsonValue search = object[QStringLiteral("search")];
+            QJsonArray objectTypes = object[QStringLiteral("objectTypes")].toArray();
+            if (search.isObject() && !objectTypes.isEmpty()) {
+                for (QJsonArray::const_iterator i = objectTypes.constBegin(); i != objectTypes.constEnd(); ++i) {
+                    urlQuery.addQueryItem(QStringLiteral("objectTypes[]"), (*i).toString());
+                }
+                urlQuery.addQueryItem(QStringLiteral("search"),
+                    QString::fromUtf8(QJsonDocument(search.toObject()).toJson(QJsonDocument::Compact)));
+
+                // FIXME: Think about proper error handling for wrong user input.
+            } else qWarning("!! Fulltext Search: parameter(s) missing !!");
+        } else
         if (object[QStringLiteral("query")].isObject()) { // TODO docs are inconsistent on that
             urlQuery.addQueryItem(QStringLiteral("q"),
                 QString::fromUtf8(QJsonDocument(object[QStringLiteral("query")].toObject()).toJson(QJsonDocument::Compact)));

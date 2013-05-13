@@ -57,6 +57,7 @@ private slots:
     void query_todos_limit();
     void query_users();
     void query_users_filter();
+    void search();
     void create_todos();
     void user_crud();
     void update_todos();
@@ -187,6 +188,59 @@ void tst_EnginioClient::query_users_filter()
     QVERIFY(!response->data().isEmpty());
     QVERIFY(!response->data()["results"].isUndefined());
     QVERIFY(!response->data()["results"].toArray().count());
+}
+
+void tst_EnginioClient::search()
+{
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+    int resultCount1 = 0;
+    {
+        QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+        QJsonObject searchQuery = QJsonDocument::fromJson(
+                    "{\"objectTypes\": [\"objects.CustomObject\"],"
+                    "\"search\": {\"phrase\": \"Query\"}}").object();
+
+        QVERIFY(!searchQuery.isEmpty());
+        const EnginioReply* reqId = client.search(searchQuery);
+        QVERIFY(reqId);
+
+        QTRY_COMPARE(spy.count(), 1);
+
+        const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+
+        QCOMPARE(response, reqId);
+        QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+        QVERIFY(!response->data().isEmpty());
+        QVERIFY(!response->data()["results"].isUndefined());
+        resultCount1 = response->data()["results"].toArray().count();
+        QVERIFY(resultCount1);
+        qDebug() << resultCount1 << "results on objects.CustomObject with phrase \"Query\".";
+    }
+    {
+        QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+        QJsonObject searchQuery = QJsonDocument::fromJson(
+                    "{\"objectTypes\": [\"objects.CustomObject\", \"objects.SelfLinkedObject\"],"
+                    "\"search\": {\"phrase\": \"object OR test\", \"properties\": [\"stringValue\"]}}").object();
+
+        QVERIFY(!searchQuery.isEmpty());
+        const EnginioReply* reqId = client.search(searchQuery);
+        QVERIFY(reqId);
+
+        QTRY_COMPARE(spy.count(), 1);
+
+        const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+
+        QCOMPARE(response, reqId);
+        QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+        QVERIFY(!response->data().isEmpty());
+        QVERIFY(!response->data()["results"].isUndefined());
+        int resultCount2 = response->data()["results"].toArray().count();
+        QVERIFY(resultCount2 > resultCount1);
+        qDebug() << resultCount2 << " results on objects.CustomObject and objects.SelfLinkedObject with phrase\"object OR test\".";
+    }
 }
 
 void tst_EnginioClient::create_todos()

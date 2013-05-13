@@ -101,6 +101,7 @@ public:
     EnginioAbstractObject *createObject(const QString &type,
                                          const QString &id = QString()) const;
 
+    Q_INVOKABLE EnginioReply *search(const QJsonObject &query);
     Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioReply *update(const QJsonObject &object, const Operation operation = ObjectOperation);
