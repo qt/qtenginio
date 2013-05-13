@@ -315,6 +315,9 @@ public:
         if (int limit = object[QStringLiteral("limit")].toDouble()) {
             urlQuery.addQueryItem(QStringLiteral("limit"), QString::number(limit));
         }
+        if (int offset = object[QStringLiteral("offset")].toDouble()) {
+            urlQuery.addQueryItem(QStringLiteral("offset"), QString::number(offset));
+        }
         QJsonValue include = object[QStringLiteral("include")];
         if (include.isObject()) {
             urlQuery.addQueryItem(QStringLiteral("include"),
