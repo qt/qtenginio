@@ -158,7 +158,7 @@ class EnginioClientPrivate : public QObject
                 return;
             } else if (d->_downloads.contains(nreply)) {
                 QUrl url = d->m_apiUrl;
-                url.setPath(ereply->data()["results"].toArray().first().toObject()["file"].toObject()["url"].toString());
+                url.setPath(ereply->data()[QStringLiteral("results")].toArray().first().toObject()[QStringLiteral("file")].toObject()[QStringLiteral("url")].toString());
                 qDebug() << "Download URL: " << url;
             }
 
@@ -339,15 +339,15 @@ public:
 
     QNetworkReply *downloadFile(const QJsonObject &object)
     {
-        QString id = object["id"].toString();
-        QString objectType = object["objectType"].toString();
+        QString id = object[QStringLiteral("id")].toString();
+        QString objectType = object[QStringLiteral("objectType")].toString();
         QJsonObject obj;
-        obj = QJsonDocument::fromJson(
+        obj = QJsonDocument::fromJson(QByteArrayLiteral(
                     "{\"include\": {\"file\": {}},"
-                     "\"objectType\": \"" + objectType.toUtf8() + "\","
+                     "\"objectType\": \"") + objectType.toUtf8() + "\","
                      "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
 
-        QNetworkReply *reply = query(obj, EnginioClient::ObjectsArea);
+        QNetworkReply *reply = query(obj, EnginioClient::ObjectOperation);
         _downloads.insert(reply);
         return reply;
     }
