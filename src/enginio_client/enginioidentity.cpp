@@ -64,7 +64,7 @@ public:
         {
             QByteArray data(_reply->readAll());
             QJsonObject message(QJsonDocument::fromJson(data).object());
-            QByteArray token = message[QStringLiteral("sessionToken")].toString().toLatin1();
+            QByteArray token = message[EnginioString::sessionToken].toString().toLatin1();
             _enginio->setSessionToken(token);
             _reply->deleteLater();
         }
@@ -117,8 +117,8 @@ void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
     Q_ASSERT(enginio->identity());
 
     QJsonObject data;
-    data[QStringLiteral("username")] = d_ptr->_user;
-    data[QStringLiteral("password")] = d_ptr->_pass;
+    data[EnginioString::username] = d_ptr->_user;
+    data[EnginioString::password] = d_ptr->_pass;
     QNetworkReply *reply = enginio->identify(data);
     QObject::connect(reply, &QNetworkReply::finished, EnginioAuthenticationPrivate::SessionSetterFunctor(enginio, reply));
 }

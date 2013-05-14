@@ -37,6 +37,7 @@
 
 #include "enginiomodel.h"
 #include "enginioreply.h"
+#include "enginioclient_p.h"
 
 #include <QtCore/qobject.h>
 #include <QtCore/qvector.h>
@@ -184,11 +185,11 @@ public:
     void setQuery(const QJsonObject &query)
     {
         _query = query;
-        const int pageSize = _query[QStringLiteral("pageSize")].toDouble();
+        const int pageSize = _query[EnginioString::pageSize].toDouble();
 
         if (pageSize) {
-            const QString limitString(QStringLiteral("limit"));
-            const QString offsetString(QStringLiteral("offset"));
+            const QString limitString(EnginioString::limit);
+            const QString offsetString(EnginioString::offset);
             const unsigned limit = _query[limitString].toDouble();
             const unsigned offset = _query[offsetString].toDouble();
             if (limit)
@@ -223,7 +224,7 @@ public:
         if (!_query.isEmpty()) {
             const EnginioReply *id = _enginio->query(_query, _operation);
             if (_canFetchMore)
-                _latestRequestedOffset = _query[QStringLiteral("limit")].toDouble();
+                _latestRequestedOffset = _query[EnginioString::limit].toDouble();
             _dataChanged.insert(id, qMakePair(FullModelReset, QJsonObject()));
         }
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
@@ -239,24 +240,24 @@ public:
 
         // ### TODO proper error handling
         // this kind of response happens when the backend id/secret is missing
-        if (!response->data()[QStringLiteral("message")].isNull())
-            qWarning() << "Enginio: " << response->data()[QStringLiteral("message")].toString();
+        if (!response->data()[EnginioString::message].isNull())
+            qWarning() << "Enginio: " << response->data()[EnginioString::message].toString();
 
         QPair<int, QJsonObject> requestInfo = _dataChanged.take(response);
         int row = requestInfo.first;
         if (row == FullModelReset) {
             q->beginResetModel();
             _rowsToSync.clear();
-            _data = response->data()[QStringLiteral("results")].toArray();
+            _data = response->data()[EnginioString::results].toArray();
             syncRoles();
-            _canFetchMore = _canFetchMore && _data.count() && (_query[QStringLiteral("limit")].toDouble() <= _data.count());
+            _canFetchMore = _canFetchMore && _data.count() && (_query[EnginioString::limit].toDouble() <= _data.count());
             q->endResetModel();
         } else if (row == IncrementalModelUpdate) {
             Q_ASSERT(_canFetchMore);
-            QJsonArray data(response->data()[QStringLiteral("results")].toArray());
+            QJsonArray data(response->data()[EnginioString::results].toArray());
             QJsonObject query(requestInfo.second);
-            int offset = query[QStringLiteral("offset")].toDouble();
-            int limit = query[QStringLiteral("limit")].toDouble();
+            int offset = query[EnginioString::offset].toDouble();
+            int limit = query[EnginioString::limit].toDouble();
             int dataCount = data.count();
 
             int startingOffset = qMax(offset, _data.count());
@@ -326,7 +327,7 @@ public:
         // estimate new roles:
         _roles.clear();
         int idx = SyncedRole;
-        _roles[idx++] = QStringLiteral("_synced"); // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
+        _roles[idx++] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
         QJsonObject firstObject(_data.first().toObject()); // TODO it expects certain data structure in all objects, add way to specify roles
         for (QJsonObject::const_iterator i = firstObject.constBegin(); i != firstObject.constEnd(); ++i) {
             _roles[idx++] = i.key();
@@ -378,11 +379,11 @@ public:
 
         QJsonObject query(_query);
 
-        int limit = query[QStringLiteral("limit")].toDouble();
+        int limit = query[EnginioString::limit].toDouble();
         limit = qMax(row - currentOffset, limit); // check if default limit is not too small
 
-        query[QStringLiteral("offset")] = currentOffset;
-        query[QStringLiteral("limit")] = limit;
+        query[EnginioString::offset] = currentOffset;
+        query[EnginioString::limit] = limit;
 
         qDebug() << Q_FUNC_INFO << query;
         _latestRequestedOffset += limit;
