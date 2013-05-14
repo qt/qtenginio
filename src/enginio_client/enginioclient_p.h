@@ -330,7 +330,7 @@ public:
         return q_ptr->networkManager()->post(req, data);
     }
 
-    QNetworkReply *query(const QJsonObject &object, const EnginioClient::Operation operation)
+    QNetworkReply *query(const QJsonObject &object, const Operation operation)
     {
         QUrl url(m_apiUrl);
         url.setPath(getPath(object, operation));
@@ -348,6 +348,19 @@ public:
             urlQuery.addQueryItem(EnginioString::include,
                 QString::fromUtf8(QJsonDocument(include.toObject()).toJson(QJsonDocument::Compact)));
         }
+        if (operation == SearchOperation) {
+            QJsonValue search = object[EnginioString::search];
+            QJsonArray objectTypes = object[QStringLiteral("objectTypes")].toArray();
+            if (search.isObject() && !objectTypes.isEmpty()) {
+                for (QJsonArray::const_iterator i = objectTypes.constBegin(); i != objectTypes.constEnd(); ++i) {
+                    urlQuery.addQueryItem(QStringLiteral("objectTypes[]"), (*i).toString());
+                }
+                urlQuery.addQueryItem(EnginioString::search,
+                    QString::fromUtf8(QJsonDocument(search.toObject()).toJson(QJsonDocument::Compact)));
+
+                // FIXME: Think about proper error handling for wrong user input.
+            } else qWarning("!! Fulltext Search: parameter(s) missing !!");
+        } else
         if (object[EnginioString::query].isObject()) { // TODO docs are inconsistent on that
             urlQuery.addQueryItem(QStringLiteral("q"),
                 QString::fromUtf8(QJsonDocument(object[EnginioString::query].toObject()).toJson(QJsonDocument::Compact)));
@@ -375,7 +388,7 @@ public:
                      "\"objectType\": \"") + objectType.toUtf8() + "\","
                      "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
 
-        QNetworkReply *reply = query(obj, EnginioClient::ObjectOperation);
+        QNetworkReply *reply = query(obj, ObjectOperation);
         _downloads.insert(reply);
         return reply;
     }
