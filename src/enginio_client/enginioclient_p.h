@@ -65,6 +65,31 @@ public:
 };
 
 
+struct EnginioString
+{
+    static const QString pageSize;
+    static const QString limit;
+    static const QString offset;
+    static const QString include;
+    static const QString query;
+    static const QString message;
+    static const QString results;
+    static const QString _synced;
+    static const QString objectType;
+    static const QString id;
+    static const QString username;
+    static const QString password;
+    static const QString sessionToken;
+    static const QString authIdentity;
+    static const QString files;
+    static const QString search;
+    static const QString session;
+    static const QString users;
+    static const QString usergroups;
+    static const QString object;
+    static const QString url;
+};
+
 class EnginioClientPrivate : public QObject
 {
     Q_OBJECT
@@ -79,7 +104,7 @@ class EnginioClientPrivate : public QObject
 
         switch (operation) {
         case ObjectOperation: {
-            QString objectType = object[QStringLiteral("objectType")].toString();
+            QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty())
                 return QString();
 
@@ -87,31 +112,31 @@ class EnginioClientPrivate : public QObject
             break;
         }
         case AuthenticationOperation:
-            result.append(QStringLiteral("auth/identity"));
+            result.append(EnginioString::authIdentity);
             break;
         case FileOperation:
-            result.append(QStringLiteral("files"));
+            result.append(EnginioString::files);
             break;
         case SearchOperation:
-            result.append(QStringLiteral("search"));
+            result.append(EnginioString::search);
             break;
         case SessionOperation:
-            result.append(QStringLiteral("session"));
+            result.append(EnginioString::session);
             break;
         case UserOperation:
-            result.append(QStringLiteral("users"));
+            result.append(EnginioString::users);
             break;
         case UsergroupOperation:
-            result.append(QStringLiteral("usergroups"));
+            result.append(EnginioString::usergroups);
             break;
         case UsergroupMemberOperation:
             // FIXME usergroups/{id}/members
-            result.append(QStringLiteral("usergroups"));
+            result.append(EnginioString::usergroups);
             break;
         }
 
         if (flags & IncludeIdInPath) {
-            QString id = object[QStringLiteral("id")].toString();
+            QString id = object[EnginioString::id].toString();
             if (id.isEmpty())
                 return QString();
             result.append('/');
@@ -144,12 +169,12 @@ class EnginioClientPrivate : public QObject
             if (d->_uploads.contains(nreply)) {
                 d->_uploads.remove(nreply);
                 QJsonObject object;
-                object[QStringLiteral("id")] = ereply->data()[QStringLiteral("object")].toObject()[QStringLiteral("id")].toString();
-                object[QStringLiteral("objectType")] = ereply->data()[QStringLiteral("object")].toObject()[QStringLiteral("objectType")].toString();
+                object[EnginioString::id] = ereply->data()[EnginioString::object].toObject()[EnginioString::id].toString();
+                object[EnginioString::objectType] = ereply->data()[EnginioString::object].toObject()[EnginioString::objectType].toString();
 
                 QJsonObject fileRef;
-                fileRef.insert(QStringLiteral("id"), ereply->data()[QStringLiteral("id")].toString());
-                fileRef.insert(QStringLiteral("objectType"), QStringLiteral("files"));
+                fileRef.insert(EnginioString::id, ereply->data()[EnginioString::id].toString());
+                fileRef.insert(EnginioString::objectType, QStringLiteral("files"));
 
                 // FIXME: do not hard-code file here
                 object[QStringLiteral("file")] = fileRef;
@@ -158,7 +183,7 @@ class EnginioClientPrivate : public QObject
                 return;
             } else if (d->_downloads.contains(nreply)) {
                 QUrl url = d->m_apiUrl;
-                url.setPath(ereply->data()[QStringLiteral("results")].toArray().first().toObject()[QStringLiteral("file")].toObject()[QStringLiteral("url")].toString());
+                url.setPath(ereply->data()[EnginioString::results].toArray().first().toObject()[QStringLiteral("file")].toObject()[EnginioString::url].toString());
                 qDebug() << "Download URL: " << url;
             }
 
@@ -312,17 +337,20 @@ public:
 
         // TODO add all params here
         QUrlQuery urlQuery;
-        if (int limit = object[QStringLiteral("limit")].toDouble()) {
-            urlQuery.addQueryItem(QStringLiteral("limit"), QString::number(limit));
+        if (int limit = object[EnginioString::limit].toDouble()) {
+            urlQuery.addQueryItem(EnginioString::limit, QString::number(limit));
         }
-        QJsonValue include = object[QStringLiteral("include")];
+        if (int offset = object[EnginioString::offset].toDouble()) {
+            urlQuery.addQueryItem(EnginioString::offset, QString::number(offset));
+        }
+        QJsonValue include = object[EnginioString::include];
         if (include.isObject()) {
-            urlQuery.addQueryItem(QStringLiteral("include"),
+            urlQuery.addQueryItem(EnginioString::include,
                 QString::fromUtf8(QJsonDocument(include.toObject()).toJson(QJsonDocument::Compact)));
         }
-        if (object[QStringLiteral("query")].isObject()) { // TODO docs are inconsistent on that
+        if (object[EnginioString::query].isObject()) { // TODO docs are inconsistent on that
             urlQuery.addQueryItem(QStringLiteral("q"),
-                QString::fromUtf8(QJsonDocument(object[QStringLiteral("query")].toObject()).toJson(QJsonDocument::Compact)));
+                QString::fromUtf8(QJsonDocument(object[EnginioString::query].toObject()).toJson(QJsonDocument::Compact)));
         }
         url.setQuery(urlQuery);
 
@@ -339,8 +367,8 @@ public:
 
     QNetworkReply *downloadFile(const QJsonObject &object)
     {
-        QString id = object[QStringLiteral("id")].toString();
-        QString objectType = object[QStringLiteral("objectType")].toString();
+        QString id = object[EnginioString::id].toString();
+        QString objectType = object[EnginioString::objectType].toString();
         QJsonObject obj;
         obj = QJsonDocument::fromJson(QByteArrayLiteral(
                     "{\"include\": {\"file\": {}},"
@@ -381,7 +409,7 @@ public:
         req.setUrl(apiUrl);
 
         QJsonObject obj;
-        obj[QStringLiteral("object")] = associatedObject;
+        obj[EnginioString::object] = associatedObject;
         QByteArray object = QJsonDocument(obj).toJson();
         QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object);
         QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);

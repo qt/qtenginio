@@ -19,6 +19,7 @@ Rectangle {
                  }
         query: { "objectType": "objects.log"
                , "sort" : [ { "sortBy": "status", "direction": "asc"} ]
+               , "pageSize": 32
                }
     }
 

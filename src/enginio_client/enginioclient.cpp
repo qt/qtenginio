@@ -72,6 +72,28 @@
 
 int FactoryUnit::nextId = 0;
 
+const QString EnginioString::pageSize = QStringLiteral("pageSize");
+const QString EnginioString::limit = QStringLiteral("limit");
+const QString EnginioString::offset = QStringLiteral("offset");
+const QString EnginioString::include = QStringLiteral("include");
+const QString EnginioString::query = QStringLiteral("query");
+const QString EnginioString::message = QStringLiteral("message");
+const QString EnginioString::results = QStringLiteral("results");
+const QString EnginioString::_synced = QStringLiteral("_synced");
+const QString EnginioString::objectType = QStringLiteral("objectType");
+const QString EnginioString::id = QStringLiteral("id");
+const QString EnginioString::username = QStringLiteral("username");
+const QString EnginioString::password = QStringLiteral("password");
+const QString EnginioString::sessionToken = QStringLiteral("sessionToken");
+const QString EnginioString::authIdentity = QStringLiteral("auth/identity");
+const QString EnginioString::files = QStringLiteral("files");
+const QString EnginioString::search = QStringLiteral("search");
+const QString EnginioString::session = QStringLiteral("session");
+const QString EnginioString::users = QStringLiteral("users");
+const QString EnginioString::usergroups = QStringLiteral("usergroups");
+const QString EnginioString::object = QStringLiteral("object");
+const QString EnginioString::url = QStringLiteral("url");
+
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
     _identity(),
@@ -428,8 +450,8 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &associatedObject, con
 {
     Q_D(EnginioClient);
 
-    if (associatedObject[QStringLiteral("objectType")].toString().isEmpty()
-             || associatedObject[QStringLiteral("id")].toString().isEmpty())
+    if (associatedObject[EnginioString::objectType].toString().isEmpty()
+             || associatedObject[EnginioString::id].toString().isEmpty())
         return 0;
 
     QNetworkReply *nreply = d->uploadFile(associatedObject, file);
@@ -443,8 +465,8 @@ EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 {
     Q_D(EnginioClient);
 
-    if (object[QStringLiteral("objectType")].toString().isEmpty()
-            || object[QStringLiteral("id")].toString().isEmpty())
+    if (object[EnginioString::objectType].toString().isEmpty()
+            || object[EnginioString::id].toString().isEmpty())
         return 0;
 
     QNetworkReply *nreply = d->downloadFile(object);

@@ -70,6 +70,9 @@ public:
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
     virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE;
 
+    virtual void fetchMore(const QModelIndex &parent) Q_DECL_OVERRIDE;
+    virtual bool canFetchMore(const QModelIndex &parent) const Q_DECL_OVERRIDE;
+
     Q_INVOKABLE void append(const QJsonObject &value);
     Q_INVOKABLE void remove(int row);
     Q_INVOKABLE void setProperty(int row, const QString &role, const QVariant &value);
