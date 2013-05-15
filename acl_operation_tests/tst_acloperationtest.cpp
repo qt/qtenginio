@@ -24,6 +24,7 @@ private Q_SLOTS:
     void testAddObjectPermissions();
     void testDeleteObjectPermissions();
     void testUpdateObjectPermissions();
+    void testReadFullUsers();
 
 private:
     EnginioClient *m_client;
@@ -350,6 +351,77 @@ void AclOperationTest::testUpdateObjectPermissions()
 
     delete object;
     delete user;
+}
+
+void AclOperationTest::testReadFullUsers()
+{
+    QVERIFY2(m_client, "Null client");
+
+    /* Create user object and login */
+
+    EnginioJsonObject *user = new EnginioJsonObject("users");
+    user->insert("username", EnginioTests::randomString(15));
+    user->insert("firstName", QStringLiteral("firstName_ReadACLUsers"));
+    user->insert("lastName", QStringLiteral("lastName"));
+    user->insert("password", QStringLiteral("password"));
+    QVERIFY(EnginioTests::createObject(m_client, user));
+    QVERIFY(!user->id().isEmpty());
+    QVERIFY(EnginioTests::login(m_client,
+                                user->value("username").toString(),
+                                user->value("password").toString()));
+
+    /* Create new object */
+
+    EnginioJsonObject *object = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
+    object->insert("stringValue", QString("testReadFullUsers #%1").arg(qrand()));
+    object->insert("intValue", qrand());
+    QVERIFY(EnginioTests::createObject(m_client, object));
+    QVERIFY(!object->id().isEmpty());
+
+    /* Get object ACL */
+
+    EnginioAclOperation *op = new EnginioAclOperation(m_client);
+    op->setObject(qMakePair(object->id(), object->objectType()));
+    op->readPermissions();
+    // Use expand=1 parameter to get full user objects
+    op->setRequestParam("expand", "1");
+
+    QSignalSpy finishedSpy(op, SIGNAL(finished()));
+    QSignalSpy errorSpy(op, SIGNAL(error(EnginioError*)));
+
+    op->execute();
+
+    QVERIFY(finishedSpy.wait(EnginioTests::NETWORK_TIMEOUT));
+    QCOMPARE(finishedSpy.count(), 1);
+    QCOMPARE(errorSpy.count(), 0);
+
+    QSharedPointer<EnginioAcl> resultAcl = op->resultAcl();
+    QVERIFY(!resultAcl.isNull());
+
+    delete op;
+
+    QJsonArray adminSubjects = resultAcl->adminJson();
+    bool userFound = false;
+    QJsonArray::ConstIterator iter = adminSubjects.constBegin();
+    while (iter != adminSubjects.constEnd()) {
+        const QJsonObject subject = (*iter).toObject();
+        if (subject.value("id").toString() == user->id()) {
+            userFound = true;
+            QCOMPARE(subject.value("username").toString(),
+                     user->value("username").toString());
+            QCOMPARE(subject.value("firstName").toString(),
+                     user->value("firstName").toString());
+            QCOMPARE(subject.value("lastName").toString(),
+                     user->value("lastName").toString());
+            QVERIFY(subject.value("password").isUndefined());
+        }
+        iter++;
+    }
+    QVERIFY2(userFound, "Failed to find user from admin ACL");
+
+    resultAcl.clear();
+    delete user;
+    delete object;
 }
 
 QTEST_MAIN(AclOperationTest)
