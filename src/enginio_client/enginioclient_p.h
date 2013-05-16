@@ -272,7 +272,7 @@ public:
     {
         _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
 
-        emit q_ptr->sessionTokenChanged();
+        emit q_ptr->sessionTokenChanged(sessionToken);
         if (sessionToken.isEmpty())
             emit q_ptr->sessionTerminated();
         else

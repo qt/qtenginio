@@ -117,8 +117,8 @@ signals:
     void clientInitialized() const;
     void backendIdChanged(const QString &backendId);
     void backendSecretChanged(const QString &backendSecret);
-    void apiUrlChanged();
-    void sessionTokenChanged();
+    void apiUrlChanged(const QUrl& url);
+    void sessionTokenChanged(const QByteArray &sessionToken);
     void identityChanged(const EnginioIdentity *identity);
     void finished(EnginioReply *reply);
     void error(EnginioReply *reply);

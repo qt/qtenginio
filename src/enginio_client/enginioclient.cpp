@@ -257,7 +257,7 @@ void EnginioClient::setApiUrl(const QUrl &apiUrl)
     Q_D(EnginioClient);
     if (d->m_apiUrl != apiUrl) {
         d->m_apiUrl = apiUrl;
-        emit apiUrlChanged();
+        emit apiUrlChanged(apiUrl);
     }
 }
 
