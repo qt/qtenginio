@@ -183,6 +183,12 @@ class EnginioClientPrivate : public QObject
 //            Q_ASSERT(ereply);
 
 
+            if (nreply->error() != QNetworkReply::NoError) {
+                d->_uploads.remove(nreply);
+                d->_downloads.remove(nreply);
+                emit q->error(ereply);
+            }
+
             if (d->_uploads.contains(nreply)) {
                 d->_uploads.remove(nreply);
                 QJsonObject object;
