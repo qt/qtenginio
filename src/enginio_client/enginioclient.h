@@ -62,6 +62,7 @@ public:
     enum Operation {
         // Do not forget to keep in sync with EnginioClientPrivate::Operation!
         ObjectOperation,
+        ObjectAclOperation,
         UserOperation,
         UsergroupOperation
     };

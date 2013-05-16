@@ -64,7 +64,7 @@ private slots:
     void update_invalidId();
     void remove_todos();
     void identity();
-
+    void acl();
     void file();
 };
 
@@ -579,6 +579,177 @@ void tst_EnginioClient::identity()
         QCOMPARE(spy.count(), 1);
         QVERIFY(!client.sessionToken().isEmpty());
     }
+}
+
+void tst_EnginioClient::acl()
+{
+    // create an object
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    EnginioAuthentication identity;
+    identity.setUser("logintest");
+    identity.setPassword("logintest");
+    client.setIdentity(&identity);
+
+    QString id1, id2, id3; // ids of 3 different users id1 is our login
+    QJsonParseError parseError;
+    {
+        QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+        QJsonObject userQuery = QJsonDocument::fromJson("{\"query\": {\"username\": {\"$in\": [\"logintest\", \"logintest2\",\"logintest3\"]}},"
+                                 "\"sort\": {\"sortBy\":\"username\", \"direction\": \"asc\"}}", &parseError).object();
+        QCOMPARE(parseError.error, QJsonParseError::NoError);
+
+        const EnginioReply* reqId = client.query(userQuery, EnginioClient::UserOperation);
+        QVERIFY(reqId);
+        QTRY_COMPARE(spy.count(), 1);
+        QJsonArray data = reqId->data()["results"].toArray();
+        QCOMPARE(data.count(), 3);
+        id1 = data[0].toObject()["id"].toString();
+        id2 = data[1].toObject()["id"].toString();
+        id3 = data[2].toObject()["id"].toString();
+        QVERIFY(!id1.isEmpty());
+        QVERIFY(!id2.isEmpty());
+        QVERIFY(!id3.isEmpty());
+    }
+
+    // wait for authentication, acl requires that
+    QTRY_VERIFY(!client.sessionToken().isEmpty());
+
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+
+    // create an object
+    QJsonObject obj;
+    obj["objectType"] = QString::fromUtf8("objects.todos");
+    obj["title"] = QString::fromUtf8("test title");
+    obj["completed"] = false;
+    const EnginioReply* reqId = client.create(obj);
+    QVERIFY(reqId);
+
+    QTRY_COMPARE(spy.count(), 1);
+
+    const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+    obj = response->data(); // so obj contains valid id
+
+    // view acl of the object
+    reqId = client.query(obj, EnginioClient::ObjectAclOperation);
+    QVERIFY(reqId);
+    QTRY_COMPARE(spy.count(), 2);
+    response = spy[1][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    qDebug() << response->data();
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+
+    QJsonObject data(response->data());
+    QVERIFY(data["admin"].isArray());
+    QVERIFY(data["read"].isArray());
+    QVERIFY(data["delete"].isArray());
+    QVERIFY(data["update"].isArray());
+
+    // update acl of the object
+    QString json = "{ \"read\": [ { \"id\": \"%3\", \"objectType\": \"users\" } ],"
+                     "\"update\": [ { \"id\": \"%2\", \"objectType\": \"users\" } ],"
+                     "\"admin\": [ { \"id\": \"%1\", \"objectType\": \"users\" } ] }";
+    json = json.arg(id1, id2, id3);
+    QJsonObject aclUpdate = QJsonDocument::fromJson(json.toUtf8(), &parseError).object();
+    QCOMPARE(parseError.error, QJsonParseError::NoError);
+    aclUpdate["objectType"] = obj["objectType"];
+    aclUpdate["id"] = obj["id"];
+
+    reqId = client.update(aclUpdate, EnginioClient::ObjectAclOperation);
+    QVERIFY(reqId);
+    QTRY_COMPARE(spy.count(), 3);
+    response = spy[2][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+
+    // confirm that the response is correct
+    data = response->data();
+    QVERIFY(data["admin"].isArray());
+    QVERIFY(data["read"].isArray());
+    QVERIFY(data["delete"].isArray());
+    QVERIFY(data["update"].isArray());
+
+    bool valid = false;
+    foreach(QJsonValue value, data["read"].toArray()) {
+        if (value.toObject()["id"] == id3) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    valid = false;
+    foreach(QJsonValue value, data["update"].toArray()) {
+        if (value.toObject()["id"] == id2) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    valid = false;
+    foreach(QJsonValue value, data["admin"].toArray()) {
+        if (value.toObject()["id"] == id1) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    // view acl again to confirm the change on the server side
+    reqId = client.query(obj, EnginioClient::ObjectAclOperation);
+    QVERIFY(reqId);
+    QTRY_COMPARE(spy.count(), 4);
+    response = spy[3][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+
+    data = response->data();
+    QVERIFY(data["admin"].isArray());
+    QVERIFY(data["read"].isArray());
+    QVERIFY(data["delete"].isArray());
+    QVERIFY(data["update"].isArray());
+    valid = false;
+    foreach(QJsonValue value, data["read"].toArray()) {
+        if (value.toObject()["id"] == id3) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    valid = false;
+    foreach(QJsonValue value, data["update"].toArray()) {
+        if (value.toObject()["id"] == id2) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    valid = false;
+    foreach(QJsonValue value, data["admin"].toArray()) {
+        if (value.toObject()["id"] == id1) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    // TODO FIXME!
+    QSKIP("DELETE requires data, but QNAM currently do not support it");
+    // it seems to work fine, let's delete the acl we created
+    reqId = client.remove(obj, EnginioClient::ObjectAclOperation);
+    QVERIFY(reqId);
+    QTRY_COMPARE(spy.count(), 5);
+    response = spy[4][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
 }
 
 void tst_EnginioClient::file()

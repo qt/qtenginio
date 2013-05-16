@@ -93,6 +93,7 @@ const QString EnginioString::users = QStringLiteral("users");
 const QString EnginioString::usergroups = QStringLiteral("usergroups");
 const QString EnginioString::object = QStringLiteral("object");
 const QString EnginioString::url = QStringLiteral("url");
+const QString EnginioString::access = QStringLiteral("access");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
