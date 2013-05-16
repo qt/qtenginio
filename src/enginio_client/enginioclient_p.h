@@ -186,8 +186,7 @@ class EnginioClientPrivate : public QObject
                 emit q->error(ereply);
             }
 
-            if (d->_uploads.contains(nreply)) {
-                d->_uploads.remove(nreply);
+            if (d->_uploads.remove(nreply)) {
                 QJsonObject object;
                 object[EnginioString::id] = ereply->data()[EnginioString::object].toObject()[EnginioString::id].toString();
                 object[EnginioString::objectType] = ereply->data()[EnginioString::object].toObject()[EnginioString::objectType].toString();
@@ -201,7 +200,7 @@ class EnginioClientPrivate : public QObject
 
                 d->_replyReplyMap.insert(d->update(object, EnginioClient::ObjectOperation), ereply);
                 return;
-            } else if (d->_downloads.contains(nreply)) {
+            } else if (d->_downloads.remove(nreply)) {
                 QUrl url = d->m_apiUrl;
                 url.setPath(ereply->data()[EnginioString::results].toArray().first().toObject()[QStringLiteral("file")].toObject()[EnginioString::url].toString());
                 qDebug() << "Download URL: " << url;
