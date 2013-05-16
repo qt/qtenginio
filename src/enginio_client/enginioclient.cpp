@@ -41,7 +41,6 @@
 #include "enginiomodel.h"
 #include "enginioidentity.h"
 
-#include <QDebug>
 #include <QNetworkReply>
 #include <QSslError>
 
@@ -155,8 +154,6 @@ EnginioClient::EnginioClient(const QString &backendId,
     : QObject(parent)
     , d_ptr(new EnginioClientPrivate(this))
 {
-    qDebug() << this << "created. Backend ID:" << backendId;
-
     setBackendId(backendId);
     setBackendSecret(backendSecret);
 }
@@ -177,8 +174,6 @@ EnginioClient::EnginioClient(const QString &backendId,
     QObject(parent),
     d_ptr(&dd)
 {
-    qDebug() << this << "created. Backend ID:" << backendId;
-
     setBackendId(backendId);
     setBackendSecret(backendSecret);
 }
@@ -187,9 +182,7 @@ EnginioClient::EnginioClient(const QString &backendId,
  * Destructor.
  */
 EnginioClient::~EnginioClient()
-{
-    qDebug() << this << "deleted";
-}
+{}
 
 /*!
  * Get the Enginio backend ID.
