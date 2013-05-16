@@ -177,11 +177,8 @@ class EnginioClientPrivate : public QObject
             EnginioClient *q = static_cast<EnginioClient*>(d->q_func());
             EnginioReply *ereply = d->_replyReplyMap.take(nreply);
 
-            // FIXME
             if (!ereply)
                 return;
-//            Q_ASSERT(ereply);
-
 
             if (nreply->error() != QNetworkReply::NoError) {
                 d->_uploads.remove(nreply);
