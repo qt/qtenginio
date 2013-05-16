@@ -64,7 +64,7 @@ private slots:
     void update_invalidId();
     void remove_todos();
     void identity();
-
+    void acl();
     void file();
 };
 
@@ -76,6 +76,7 @@ void tst_EnginioClient::query_todos()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject obj;
     obj["objectType"] = QString::fromUtf8("objects.todos");
@@ -83,6 +84,7 @@ void tst_EnginioClient::query_todos()
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
@@ -99,6 +101,7 @@ void tst_EnginioClient::query_todos_filter()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject obj;
     obj["objectType"] = QString::fromUtf8("objects.todos");
@@ -107,6 +110,7 @@ void tst_EnginioClient::query_todos_filter()
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
@@ -126,6 +130,7 @@ void tst_EnginioClient::query_todos_limit()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject obj;
     obj["objectType"] = QString::fromUtf8("objects.todos");
@@ -134,6 +139,7 @@ void tst_EnginioClient::query_todos_limit()
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
@@ -151,12 +157,14 @@ void tst_EnginioClient::query_users()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject obj;
     const EnginioReply* reqId = client.query(obj, EnginioClient::UserOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
@@ -174,6 +182,7 @@ void tst_EnginioClient::query_users_filter()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject obj = QJsonDocument::fromJson("{\"query\":{\"username\": \"john\"}}").object();
     QVERIFY(!obj.isEmpty());
@@ -181,6 +190,7 @@ void tst_EnginioClient::query_users_filter()
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
@@ -196,6 +206,9 @@ void tst_EnginioClient::search()
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+
     int resultCount1 = 0;
     {
         QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -208,6 +221,7 @@ void tst_EnginioClient::search()
         QVERIFY(reqId);
 
         QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
 
         const EnginioReply *response = spy[0][0].value<EnginioReply*>();
 
@@ -230,6 +244,7 @@ void tst_EnginioClient::search()
         QVERIFY(reqId);
 
         QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
 
         const EnginioReply *response = spy[0][0].value<EnginioReply*>();
 
@@ -251,6 +266,7 @@ void tst_EnginioClient::create_todos()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject obj;
     obj["objectType"] = QString::fromUtf8("objects.todos");
@@ -260,6 +276,7 @@ void tst_EnginioClient::create_todos()
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
@@ -278,6 +295,7 @@ void tst_EnginioClient::user_crud()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QString name = QUuid::createUuid().toString();
     QString pass = QString::fromUtf8("Metaphysics");
@@ -293,6 +311,7 @@ void tst_EnginioClient::user_crud()
         QVERIFY(reqId);
 
         QTRY_COMPARE(spy.count(), spyCount + 1);
+        QCOMPARE(spyError.count(), 0);
 
         const EnginioReply *response = spy[0][0].value<EnginioReply*>();
         QJsonObject data = response->data();
@@ -313,6 +332,7 @@ void tst_EnginioClient::user_crud()
         const EnginioReply* reqId = client.query(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
         QTRY_COMPARE(spy.count(), spyCount + 1);
+        QCOMPARE(spyError.count(), 0);
         QCOMPARE(reqId->errorCode(), QNetworkReply::NoError);
         QJsonArray data = reqId->data()["results"].toArray();
         QCOMPARE(data.count(), 1);
@@ -328,6 +348,7 @@ void tst_EnginioClient::user_crud()
         const EnginioReply* reqId = client.update(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
         QTRY_COMPARE(spy.count(), spyCount + 1);
+        QCOMPARE(spyError.count(), 0);
         QCOMPARE(reqId->errorCode(), QNetworkReply::NoError);
         QJsonObject data = reqId->data();
         QCOMPARE(data["id"].toString(), id);
@@ -342,6 +363,7 @@ void tst_EnginioClient::user_crud()
         QVERIFY(reqId);
 
         QTRY_COMPARE(spy.count(), spyCount + 1);
+        QCOMPARE(spyError.count(), 0);
     }
 }
 
@@ -353,6 +375,7 @@ void tst_EnginioClient::update_todos()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject query;
     query["objectType"] = QString::fromUtf8("objects.todos");
@@ -361,6 +384,7 @@ void tst_EnginioClient::update_todos()
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
@@ -373,6 +397,7 @@ void tst_EnginioClient::update_todos()
 
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 2);
+    QCOMPARE(spyError.count(), 0);
     response = spy[1][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
@@ -390,6 +415,7 @@ void tst_EnginioClient::update_invalidId()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject object;
     object["objectType"] = QString::fromUtf8("objects.todos");
@@ -398,11 +424,13 @@ void tst_EnginioClient::update_invalidId()
 
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 1);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::ContentNotFoundError);
     QVERIFY(!response->errorString().isEmpty());
+    QCOMPARE(reqId, spyError[0][0].value<EnginioReply*>());
     // TODO how ugly is that, improve JSON api
     QVERIFY(!response->data()["errors"].toArray()[0].toObject()["message"].toString().isEmpty());
     QVERIFY(!response->data()["errors"].toArray()[0].toObject()["reason"].toString().isEmpty());
@@ -416,6 +444,7 @@ void tst_EnginioClient::remove_todos()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject query;
     query["objectType"] = QString::fromUtf8("objects.todos");
@@ -424,6 +453,7 @@ void tst_EnginioClient::remove_todos()
     const EnginioReply* reqId = client.create(query);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
 
     // confirm that a new object was created
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
@@ -434,6 +464,7 @@ void tst_EnginioClient::remove_todos()
     reqId = client.remove(query);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 2);
+    QCOMPARE(spyError.count(), 0);
     response = spy[1][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
@@ -447,6 +478,7 @@ void tst_EnginioClient::remove_todos()
     reqId = client.query(checkQuery);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 3);
+    QCOMPARE(spyError.count(), 0);
     response = spy[2][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
@@ -459,6 +491,7 @@ void tst_EnginioClient::identity()
         EnginioClient client;
         EnginioAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionAuthenticated()));
+        QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         identity.setUser("logintest");
         identity.setPassword("logintest");
@@ -470,6 +503,7 @@ void tst_EnginioClient::identity()
         client.setIdentity(&identity);
 
         QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
     }
     {
@@ -477,10 +511,10 @@ void tst_EnginioClient::identity()
         EnginioClient client;
         EnginioAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionAuthenticated()));
+        QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         identity.setUser("logintest");
         identity.setPassword("logintest");
-
 
         client.setIdentity(&identity);
         client.setApiUrl(EnginioTests::TESTAPP_URL);
@@ -488,6 +522,7 @@ void tst_EnginioClient::identity()
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
         QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
     }
     {
@@ -495,6 +530,7 @@ void tst_EnginioClient::identity()
         EnginioClient client;
         EnginioAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionTokenChanged()));
+        QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         identity.setUser("logintest");
         identity.setPassword("logintest");
@@ -504,14 +540,17 @@ void tst_EnginioClient::identity()
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
         QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
 
         client.setIdentity(0);
         QTRY_COMPARE(spy.count(), 2);
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(client.sessionToken().isEmpty());
 
         client.setIdentity(&identity);
         QTRY_COMPARE(spy.count(), 3);
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
     }
     {
@@ -519,6 +558,7 @@ void tst_EnginioClient::identity()
         EnginioClient client;
         EnginioAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionTokenChanged()));
+        QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         identity.setUser("logintest");
         identity.setPassword("logintest");
@@ -528,11 +568,13 @@ void tst_EnginioClient::identity()
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
         QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
 
         client.setBackendId(QString());
         client.setBackendId(EnginioTests::TESTAPP_ID);
         QTRY_COMPARE(spy.count(), 2); // we got another EnginioClient::clientInitialized signal TODO is it ok?
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
     }
     {
@@ -543,6 +585,7 @@ void tst_EnginioClient::identity()
 
         QSignalSpy spy(&client, SIGNAL(sessionTokenChanged()));
         QSignalSpy spyInit(&client, SIGNAL(clientInitialized()));
+        QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         EnginioAuthentication identity1;
         EnginioAuthentication identity2;
@@ -556,6 +599,7 @@ void tst_EnginioClient::identity()
         identity3.setPassword("logintest3");
 
         QCOMPARE(spy.count(), 0);
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(client.sessionToken().isEmpty());
 
         for (uint i = 0; i < 4; ++i) {
@@ -566,6 +610,7 @@ void tst_EnginioClient::identity()
 
         QCOMPARE(spyInit.count(), 0);
         QCOMPARE(spy.count(), 0);
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(client.sessionToken().isEmpty());
 
         client.setBackendId(EnginioTests::TESTAPP_ID); // trigger clientInitialized signal
@@ -577,8 +622,188 @@ void tst_EnginioClient::identity()
             QTest::qWait(100);
 
         QCOMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
     }
+}
+
+void tst_EnginioClient::acl()
+{
+    // create an object
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    EnginioAuthentication identity;
+    identity.setUser("logintest");
+    identity.setPassword("logintest");
+    client.setIdentity(&identity);
+
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+
+    QString id1, id2, id3; // ids of 3 different users id1 is our login
+    QJsonParseError parseError;
+    {
+        QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+        QJsonObject userQuery = QJsonDocument::fromJson("{\"query\": {\"username\": {\"$in\": [\"logintest\", \"logintest2\",\"logintest3\"]}},"
+                                 "\"sort\": {\"sortBy\":\"username\", \"direction\": \"asc\"}}", &parseError).object();
+        QCOMPARE(parseError.error, QJsonParseError::NoError);
+
+        const EnginioReply* reqId = client.query(userQuery, EnginioClient::UserOperation);
+        QVERIFY(reqId);
+        QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
+        QJsonArray data = reqId->data()["results"].toArray();
+        QCOMPARE(data.count(), 3);
+        id1 = data[0].toObject()["id"].toString();
+        id2 = data[1].toObject()["id"].toString();
+        id3 = data[2].toObject()["id"].toString();
+        QVERIFY(!id1.isEmpty());
+        QVERIFY(!id2.isEmpty());
+        QVERIFY(!id3.isEmpty());
+    }
+
+    // wait for authentication, acl requires that
+    QTRY_VERIFY(!client.sessionToken().isEmpty());
+
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+
+    // create an object
+    QJsonObject obj;
+    obj["objectType"] = QString::fromUtf8("objects.todos");
+    obj["title"] = QString::fromUtf8("test title");
+    obj["completed"] = false;
+    const EnginioReply* reqId = client.create(obj);
+    QVERIFY(reqId);
+
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
+
+    const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+    obj = response->data(); // so obj contains valid id
+
+    // view acl of the object
+    reqId = client.query(obj, EnginioClient::ObjectAclOperation);
+    QVERIFY(reqId);
+    QTRY_COMPARE(spy.count(), 2);
+    response = spy[1][0].value<EnginioReply*>();
+    QCOMPARE(spyError.count(), 0);
+    QCOMPARE(response, reqId);
+    qDebug() << response->data();
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+
+    QJsonObject data(response->data());
+    QVERIFY(data["admin"].isArray());
+    QVERIFY(data["read"].isArray());
+    QVERIFY(data["delete"].isArray());
+    QVERIFY(data["update"].isArray());
+
+    // update acl of the object
+    QString json = "{ \"read\": [ { \"id\": \"%3\", \"objectType\": \"users\" } ],"
+                     "\"update\": [ { \"id\": \"%2\", \"objectType\": \"users\" } ],"
+                     "\"admin\": [ { \"id\": \"%1\", \"objectType\": \"users\" } ] }";
+    json = json.arg(id1, id2, id3);
+    QJsonObject aclUpdate = QJsonDocument::fromJson(json.toUtf8(), &parseError).object();
+    QCOMPARE(parseError.error, QJsonParseError::NoError);
+    aclUpdate["objectType"] = obj["objectType"];
+    aclUpdate["id"] = obj["id"];
+
+    reqId = client.update(aclUpdate, EnginioClient::ObjectAclOperation);
+    QVERIFY(reqId);
+    QTRY_COMPARE(spy.count(), 3);
+    QCOMPARE(spyError.count(), 0);
+    response = spy[2][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+
+    // confirm that the response is correct
+    data = response->data();
+    QVERIFY(data["admin"].isArray());
+    QVERIFY(data["read"].isArray());
+    QVERIFY(data["delete"].isArray());
+    QVERIFY(data["update"].isArray());
+
+    bool valid = false;
+    foreach(QJsonValue value, data["read"].toArray()) {
+        if (value.toObject()["id"] == id3) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    valid = false;
+    foreach(QJsonValue value, data["update"].toArray()) {
+        if (value.toObject()["id"] == id2) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    valid = false;
+    foreach(QJsonValue value, data["admin"].toArray()) {
+        if (value.toObject()["id"] == id1) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    // view acl again to confirm the change on the server side
+    reqId = client.query(obj, EnginioClient::ObjectAclOperation);
+    QVERIFY(reqId);
+    QTRY_COMPARE(spy.count(), 4);
+    QCOMPARE(spyError.count(), 0);
+    response = spy[3][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+
+    data = response->data();
+    QVERIFY(data["admin"].isArray());
+    QVERIFY(data["read"].isArray());
+    QVERIFY(data["delete"].isArray());
+    QVERIFY(data["update"].isArray());
+    valid = false;
+    foreach(QJsonValue value, data["read"].toArray()) {
+        if (value.toObject()["id"] == id3) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    valid = false;
+    foreach(QJsonValue value, data["update"].toArray()) {
+        if (value.toObject()["id"] == id2) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    valid = false;
+    foreach(QJsonValue value, data["admin"].toArray()) {
+        if (value.toObject()["id"] == id1) {
+            valid = true;
+            break;
+        }
+    }
+    QVERIFY(valid);
+
+    // TODO FIXME!
+    QSKIP("DELETE requires data, but QNAM currently do not support it");
+    // it seems to work fine, let's delete the acl we created
+    reqId = client.remove(obj, EnginioClient::ObjectAclOperation);
+    QVERIFY(reqId);
+    QTRY_COMPARE(spy.count(), 5);
+    QCOMPARE(spyError.count(), 0);
+    response = spy[4][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
 }
 
 void tst_EnginioClient::file()
@@ -589,6 +814,7 @@ void tst_EnginioClient::file()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     // Create a new object
     QJsonObject obj;
@@ -598,6 +824,7 @@ void tst_EnginioClient::file()
     QVERIFY(req);
 
     QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *responseObjectCreation = spy[0][0].value<EnginioReply*>();
     QCOMPARE(responseObjectCreation, req);
@@ -622,6 +849,7 @@ void tst_EnginioClient::file()
     QVERIFY(req2);
 
     QTRY_COMPARE(spy.count(), 2);
+    QCOMPARE(spyError.count(), 0);
     const EnginioReply *responseUpload = spy[1][0].value<EnginioReply*>();
     qDebug() << responseUpload;
     // FIXME: write test here
@@ -637,6 +865,7 @@ void tst_EnginioClient::file()
     QVERIFY(reply);
 
     QTRY_COMPARE(spy.count(), 3);
+    QCOMPARE(spyError.count(), 0);
     const EnginioReply *responseQuery = spy[2][0].value<EnginioReply*>();
     QVERIFY(responseQuery->data()["results"].isArray());
     qDebug() << endl << responseQuery->data()["results"].toArray().first().toObject();
@@ -650,6 +879,7 @@ void tst_EnginioClient::file()
     QVERIFY(reqDownload);
 
     QTRY_COMPARE(spy.count(), 4);
+    QCOMPARE(spyError.count(), 0);
     const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
     qDebug() << responseDownload;
     qDebug() << "Download: " << responseDownload;

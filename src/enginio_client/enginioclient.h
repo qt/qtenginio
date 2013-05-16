@@ -62,6 +62,7 @@ public:
     enum Operation {
         // Do not forget to keep in sync with EnginioClientPrivate::Operation!
         ObjectOperation,
+        ObjectAclOperation,
         UserOperation,
         UsergroupOperation
     };
@@ -120,6 +121,7 @@ signals:
     void sessionTokenChanged();
     void identityChanged(const EnginioIdentity *identity);
     void finished(EnginioReply *reply);
+    void error(EnginioReply *reply);
 
 private slots:
     void ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &errors);

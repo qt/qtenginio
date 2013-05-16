@@ -88,6 +88,7 @@ struct EnginioString
     static const QString usergroups;
     static const QString object;
     static const QString url;
+    static const QString access;
 };
 
 class EnginioClientPrivate : public QObject
@@ -99,7 +100,7 @@ class EnginioClientPrivate : public QObject
     static QString getPath(const QJsonObject &object, int operation, PathOptions flags = Default)
     {
         QString result;
-        result.reserve(32);
+        result.reserve(96);
         result.append(QStringLiteral("/v1/"));
 
         switch (operation) {
@@ -110,6 +111,22 @@ class EnginioClientPrivate : public QObject
 
             result.append(objectType.replace('.', '/'));
             break;
+        }
+        case ObjectAclOperation:
+        {
+            QString objectType = object[EnginioString::objectType].toString();
+            if (objectType.isEmpty())
+                return QString();
+
+            result.append(objectType.replace('.', '/'));
+            QString id = object[EnginioString::id].toString();
+            if (id.isEmpty())
+                return QString();
+            result.append('/');
+            result.append(id);
+            result.append('/');
+            result.append(EnginioString::access);
+            return result;
         }
         case AuthenticationOperation:
             result.append(EnginioString::authIdentity);
@@ -160,11 +177,14 @@ class EnginioClientPrivate : public QObject
             EnginioClient *q = static_cast<EnginioClient*>(d->q_func());
             EnginioReply *ereply = d->_replyReplyMap.take(nreply);
 
-            // FIXME
             if (!ereply)
                 return;
-//            Q_ASSERT(ereply);
 
+            if (nreply->error() != QNetworkReply::NoError) {
+                d->_uploads.remove(nreply);
+                d->_downloads.remove(nreply);
+                emit q->error(ereply);
+            }
 
             if (d->_uploads.contains(nreply)) {
                 d->_uploads.remove(nreply);
@@ -211,6 +231,7 @@ public:
     enum Operation {
         // Do not forget to keep in sync with EnginioClient::Operation!
         ObjectOperation = EnginioClient::ObjectOperation,
+        ObjectAclOperation = EnginioClient::ObjectAclOperation,
         UserOperation = EnginioClient::UserOperation,
         UsergroupOperation = EnginioClient::UsergroupOperation,
 
@@ -303,7 +324,15 @@ public:
         QNetworkRequest req(_request);
         req.setUrl(url);
 
-        QByteArray data = QJsonDocument(object).toJson(QJsonDocument::Compact);
+        // TODO FIXME we need to remove "id" and "objectType" because of an internal server error.
+        // It failes at least for ACL but maybe for others too.
+        // Sadly we need to detach here, so it causes at least one allocation. Of course sending
+        // a garbage is also wrong so maybe we should filter out data before sending, the question
+        // is how, and it seems that only enginio server knows...
+        QJsonObject o(object);
+        o.remove(EnginioString::objectType);
+        o.remove(EnginioString::id);
+        QByteArray data = QJsonDocument(o).toJson(QJsonDocument::Compact);
         return q_ptr->networkManager()->put(req, data);
     }
 
