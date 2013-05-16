@@ -129,10 +129,6 @@ private slots:
 
 protected:
     QScopedPointer<EnginioClientPrivate> d_ptr;
-    EnginioClient(const QString &backendId,
-                  const QString &backendSecret,
-                  EnginioClientPrivate &dd,
-                  QObject *parent = 0);
 
 private:
     Q_DECLARE_PRIVATE(EnginioClient)

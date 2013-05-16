@@ -165,20 +165,6 @@ EnginioClient::EnginioClient(QObject *parent)
 }
 
 /*!
- * Constructor used in inheriting classes.
- */
-EnginioClient::EnginioClient(const QString &backendId,
-                             const QString &backendSecret,
-                             EnginioClientPrivate &dd,
-                             QObject *parent) :
-    QObject(parent),
-    d_ptr(&dd)
-{
-    setBackendId(backendId);
-    setBackendSecret(backendSecret);
-}
-
-/*!
  * Destructor.
  */
 EnginioClient::~EnginioClient()
