@@ -64,6 +64,7 @@ public:
     QModelIndex m_modelIndex;
     QJsonObject m_resultMetadata;
     QList<EnginioAbstractObject*> m_resultList;
+    QString m_usergroupId;
 };
 
 #endif // ENGINIOQUERYOPERATION_P_H

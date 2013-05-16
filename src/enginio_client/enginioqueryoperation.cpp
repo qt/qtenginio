@@ -62,6 +62,11 @@
  *
  * Operation with more than one object type and no \c search parameter is
  * invalid will cause an error when executed.
+ *
+ * EnginioQueryOperation can be also used to
+ * \l {https://engin.io/documentation/rest/endpoints/usergroup_members/query}
+ * {query members of usergroup} by defining usergroup with setUsergroupId(). In
+ * this case object type definitions and \c seach parameters will be ignored.
  */
 
 EnginioQueryOperationPrivate::EnginioQueryOperationPrivate(
@@ -84,6 +89,9 @@ EnginioQueryOperationPrivate::~EnginioQueryOperationPrivate()
 
 QString EnginioQueryOperationPrivate::requestPath() const
 {
+    if (!m_usergroupId.isEmpty())
+        return QStringLiteral("/v1/usergroups/%1/members").arg(m_usergroupId);
+
     if (m_objectTypes.isEmpty())
         return QString();
 
@@ -109,26 +117,27 @@ QNetworkReply * EnginioQueryOperationPrivate::doRequest(const QUrl &backendUrl)
     QString path = requestPath();
     QString error;
 
-    if (m_objectTypes.isEmpty())
-        error = QStringLiteral("Unknown object type");
-    else if (path.isEmpty())
-        error = QStringLiteral("Request URL creation failed");
-    else if (m_objectTypes.size() > 1 &&
-             m_requestParams.value(QStringLiteral("search")).isEmpty()) {
-        error = QStringLiteral("Missing search parameter");
+    if (m_usergroupId.isEmpty()) {
+        if (m_objectTypes.isEmpty())
+            error = QStringLiteral("Unknown object type");
+        else if (path.isEmpty())
+            error = QStringLiteral("Request URL creation failed");
+        else if (m_objectTypes.size() > 1 &&
+                 m_requestParams.value(QStringLiteral("search")).isEmpty()) {
+            error = QStringLiteral("Missing search parameter");
+        }
+        if (!error.isEmpty()) {
+            setError(EnginioError::RequestError, error);
+            emit q->finished();
+            return 0;
+        }
     }
-    if (!error.isEmpty()) {
-        setError(EnginioError::RequestError, error);
-        emit q->finished();
-        return 0;
-    }
-
     QUrl url(backendUrl);
     url.setPath(path);
     url.setQuery(urlQuery());
 
-    if (m_objectTypes.size() > 1 ||
-        !m_requestParams.value(QStringLiteral("search")).isEmpty())
+    if (m_usergroupId.isEmpty() && (m_objectTypes.size() > 1 ||
+        !m_requestParams.value(QStringLiteral("search")).isEmpty()))
     {
         QUrlQuery query(url.query());
         for (int i = 0; i < m_objectTypes.size(); i++) {
@@ -347,4 +356,24 @@ void EnginioQueryOperation::addObjectType(const QString &objectType)
     Q_D(EnginioQueryOperation);
     if (!d->m_objectTypes.contains(objectType))
         d->m_objectTypes.append(objectType);
+}
+
+/*!
+ * Get the usergroup ID set for this operation.
+ */
+QString EnginioQueryOperation::usergroupId() const
+{
+    Q_D(const EnginioQueryOperation);
+    return d->m_usergroupId;
+}
+
+/*!
+ * Query all members of given usergroup. Object type of returned objects will be
+ * "users" so all object type definitions will be ignored. Use empty QString as
+ * \a usergroupId to reset the ID.
+ */
+void EnginioQueryOperation::setUsergroupId(const QString &usergroupId)
+{
+    Q_D(EnginioQueryOperation);
+    d->m_usergroupId = usergroupId;
 }

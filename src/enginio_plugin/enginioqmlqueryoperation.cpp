@@ -55,12 +55,17 @@
  * {fulltext search} can be used to search objects of multiple types where
  * object property contains a search string (defined in \c search parameter).
  *
- * EnginioQueryOperation selects correct API endpoint based on given object
+ * QueryOperation selects correct API endpoint based on given object
  * types and request parameters. If more than one object type and \c search
  * parameter is defined, search API is used, otherwise object query API is used.
  *
  * Operation with more than one object type and no \c search parameter is
  * invalid will cause an error when executed.
+ *
+ * QueryOperation can be also used to
+ * \l {https://engin.io/documentation/rest/endpoints/usergroup_members/query}
+ * {query members of usergroup} by defining \c usergroupId property. In this
+ * case \c objectTypes and \c search properties will be ignored.
  */
 
 /*!
@@ -123,6 +128,13 @@
  * Parameter for defining what data should be included in result objects. See
  * \l {https://engin.io/documentation/rest/parameters/include}
  * {include parameter documentation.}
+ */
+
+/*!
+ * \qmlproperty string QueryOperation::usergroupId
+ * Set this property to valid usergroup ID to query members of that usergroup.
+ * Object type of returned objects will be "users" so all object type
+ * definitions will be ignored.
  */
 
 /*!

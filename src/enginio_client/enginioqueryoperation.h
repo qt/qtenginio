@@ -63,6 +63,8 @@ public:
     QStringList objectTypes() const;
     void setObjectTypes(const QStringList &objectTypes);
     Q_INVOKABLE void addObjectType(const QString &objectType);
+    QString usergroupId() const;
+    void setUsergroupId(const QString &usergroupId);
 
 protected:
     EnginioQueryOperation(EnginioClient *client,
