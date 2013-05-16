@@ -40,6 +40,7 @@
 
 #include "enginioclient_global.h"
 #include <QObject>
+#include <QtCore/qscopedpointer.h>
 #include <QtCore/qtypeinfo.h>
 #include <QtCore/qmetatype.h>
 #include <QtCore/qjsonobject.h>
@@ -127,7 +128,7 @@ private slots:
     void ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
 
 protected:
-    EnginioClientPrivate *d_ptr;
+    QScopedPointer<EnginioClientPrivate> d_ptr;
     EnginioClient(const QString &backendId,
                   const QString &backendSecret,
                   EnginioClientPrivate &dd,

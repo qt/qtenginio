@@ -82,7 +82,6 @@ EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
 
 EnginioReply::~EnginioReply()
 {
-    delete d;
 }
 
 QNetworkReply::NetworkError EnginioReply::errorCode() const

@@ -40,6 +40,7 @@
 
 #include <QAbstractListModel>
 #include <QtCore/qjsonobject.h>
+#include <QtCore/qscopedpointer.h>
 
 #include "enginioclient.h"
 
@@ -50,6 +51,7 @@ class ENGINIOCLIENT_EXPORT EnginioModel : public QAbstractListModel
 public:
     // TODO: ctor with client
     explicit EnginioModel(QObject *parent = 0);
+    ~EnginioModel();
 
     Q_PROPERTY(EnginioClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
     Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged)
@@ -90,7 +92,7 @@ public slots:
 
 private:
     Q_DISABLE_COPY(EnginioModel)
-    EnginioModelPrivate *d;
+    QScopedPointer<EnginioModelPrivate> d;
     friend class EnginioModelPrivate;
 };
 

@@ -41,6 +41,7 @@
 #include "enginioclient_global.h"
 
 #include <QtCore/qobject.h>
+#include <QtCore/qscopedpointer.h>
 #include <QtCore/qstring.h>
 
 class EnginioClientPrivate;
@@ -63,6 +64,7 @@ class ENGINIOCLIENT_EXPORT EnginioAuthentication : public EnginioIdentity
 
 public:
     EnginioAuthentication(QObject *parent = 0);
+    ~EnginioAuthentication();
 
     Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
     Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
@@ -79,7 +81,7 @@ signals:
 
 private:
     virtual void prepareSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
-    EnginioAuthenticationPrivate *d_ptr;
+    QScopedPointer<EnginioAuthenticationPrivate> d_ptr;
 };
 
 #endif // ENGINIOIDENTITY_H

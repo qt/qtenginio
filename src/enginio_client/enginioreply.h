@@ -39,6 +39,7 @@
 #define ENGINIOREPLY_H
 
 #include <QtCore/qobject.h>
+#include <QtCore/qscopedpointer.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qtypeinfo.h>
@@ -67,7 +68,7 @@ signals:
 
 private:
     Q_DISABLE_COPY(EnginioReply)
-    EnginioReplyPrivate *d;
+    QScopedPointer<EnginioReplyPrivate> d;
     friend class EnginioClient;
 };
 

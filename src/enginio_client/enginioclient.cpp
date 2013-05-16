@@ -189,7 +189,6 @@ EnginioClient::EnginioClient(const QString &backendId,
 EnginioClient::~EnginioClient()
 {
     qDebug() << this << "deleted";
-    delete d_ptr;
 }
 
 /*!

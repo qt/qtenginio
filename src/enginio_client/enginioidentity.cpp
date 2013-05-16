@@ -84,6 +84,9 @@ EnginioAuthentication::EnginioAuthentication(QObject *parent)
 {
 }
 
+EnginioAuthentication::~EnginioAuthentication()
+{}
+
 QString EnginioAuthentication::user() const
 {
     return d_ptr->_user;

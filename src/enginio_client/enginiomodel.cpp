@@ -400,6 +400,9 @@ EnginioModel::EnginioModel(QObject *parent)
     , d(new EnginioModelPrivate(this))
 {}
 
+EnginioModel::~EnginioModel()
+{}
+
 EnginioClient *EnginioModel::enginio() const
 {
     return d->enginio();
