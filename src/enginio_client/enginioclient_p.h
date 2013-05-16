@@ -254,7 +254,7 @@ public:
     QString m_backendId;
     QString m_backendSecret;
     EnginioIdentity *_identity;
-    QMetaObject::Connection _identityConnection;
+    QVarLengthArray<QMetaObject::Connection, 2> _identityConnections;
     QUrl m_apiUrl;
     QPointer<QNetworkAccessManager> m_networkManager;
     QList<FactoryUnit*> m_factories;
@@ -291,16 +291,21 @@ public:
 
     void setIdentity(EnginioIdentity *identity)
     {
-        QObject::disconnect(_identityConnection);
+        foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
+            QObject::disconnect(identityConnection);
+        _identityConnections.clear();
+
         if (!(_identity = identity)) {
             // invalidate old token
             q_ptr->setSessionToken(QByteArray());
             return;
         }
+        CallPrepareSessionToken callPrepareSessionToken(this, identity);
         if (!isInitialized()) {
-            _identityConnection = QObject::connect(q_ptr, &EnginioClient::clientInitialized, CallPrepareSessionToken(this, identity));
+            _identityConnections.append(QObject::connect(q_ptr, &EnginioClient::clientInitialized, callPrepareSessionToken));
         } else
             identity->prepareSessionToken(this);
+        _identityConnections.append(QObject::connect(identity, &EnginioIdentity::dataChanged, callPrepareSessionToken));
         emit q_ptr->identityChanged(identity);
     }
 

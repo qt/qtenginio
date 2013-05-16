@@ -52,6 +52,8 @@ class ENGINIOCLIENT_EXPORT EnginioIdentity : public QObject
 public:
     explicit EnginioIdentity(QObject *parent = 0);
 
+signals:
+    void dataChanged();
 private:
     virtual void prepareSessionToken(EnginioClientPrivate *enginio) = 0;
     friend class EnginioClientPrivate;

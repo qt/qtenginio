@@ -55,8 +55,8 @@ class EnginioClientPrivate;
 class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
 {
     Q_OBJECT
-    explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
 public:
+    explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
     ~EnginioReply();
 
     Q_INVOKABLE QNetworkReply::NetworkError errorCode() const;

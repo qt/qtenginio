@@ -114,6 +114,7 @@ public:
 
 signals:
     void sessionAuthenticated() const;
+    void sessionAuthenticationError(EnginioReply *reply) const;
     void sessionTerminated() const;
     void clientInitialized() const;
     void backendIdChanged(const QString &backendId);

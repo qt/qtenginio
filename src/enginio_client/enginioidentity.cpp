@@ -37,6 +37,7 @@
 
 #include "enginioidentity.h"
 #include "enginioclient_p.h"
+#include "enginioreply.h"
 
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qjsondocument.h>
@@ -64,9 +65,15 @@ public:
         {
             QByteArray data(_reply->readAll());
             QJsonObject message(QJsonDocument::fromJson(data).object());
-            QByteArray token = message[EnginioString::sessionToken].toString().toLatin1();
-            _enginio->setSessionToken(token);
-            _reply->deleteLater();
+            if (_reply->error() != QNetworkReply::NoError) {
+                EnginioReply *ereply = new EnginioReply(_enginio, _reply);
+                emit _enginio->q_ptr->sessionAuthenticationError(ereply);
+                // TODO does ereply leak? Yes potentially. We need to think about the ownership
+            } else {
+                QByteArray token = message[EnginioString::sessionToken].toString().toLatin1();
+                _enginio->setSessionToken(token);
+                _reply->deleteLater();
+            }
         }
     };
 
@@ -82,6 +89,8 @@ EnginioAuthentication::EnginioAuthentication(QObject *parent)
     : EnginioIdentity(parent)
     , d_ptr(new EnginioAuthenticationPrivate(this))
 {
+    connect(this, &EnginioAuthentication::userChanged, this, &EnginioIdentity::dataChanged);
+    connect(this, &EnginioAuthentication::passwordChanged, this, &EnginioIdentity::dataChanged);
 }
 
 EnginioAuthentication::~EnginioAuthentication()

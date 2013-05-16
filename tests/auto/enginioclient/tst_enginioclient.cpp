@@ -64,6 +64,7 @@ private slots:
     void update_invalidId();
     void remove_todos();
     void identity();
+    void identity_invalid();
     void acl();
     void file();
 };
@@ -491,6 +492,7 @@ void tst_EnginioClient::identity()
         EnginioClient client;
         EnginioAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionAuthenticated()));
+        QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         identity.setUser("logintest");
@@ -504,6 +506,7 @@ void tst_EnginioClient::identity()
 
         QTRY_COMPARE(spy.count(), 1);
         QCOMPARE(spyError.count(), 0);
+        QCOMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
     }
     {
@@ -511,6 +514,7 @@ void tst_EnginioClient::identity()
         EnginioClient client;
         EnginioAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionAuthenticated()));
+        QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         identity.setUser("logintest");
@@ -523,6 +527,7 @@ void tst_EnginioClient::identity()
 
         QTRY_COMPARE(spy.count(), 1);
         QCOMPARE(spyError.count(), 0);
+        QCOMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
     }
     {
@@ -530,6 +535,7 @@ void tst_EnginioClient::identity()
         EnginioClient client;
         EnginioAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionTokenChanged(const QByteArray&)));
+        QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         identity.setUser("logintest");
@@ -552,12 +558,14 @@ void tst_EnginioClient::identity()
         QTRY_COMPARE(spy.count(), 3);
         QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
+        QCOMPARE(spyAuthError.count(), 0);
     }
     {
         // change backend id
         EnginioClient client;
         EnginioAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionTokenChanged(const QByteArray&)));
+        QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         identity.setUser("logintest");
@@ -575,6 +583,7 @@ void tst_EnginioClient::identity()
         client.setBackendId(EnginioTests::TESTAPP_ID);
         QTRY_COMPARE(spy.count(), 2); // we got another EnginioClient::clientInitialized signal TODO is it ok?
         QCOMPARE(spyError.count(), 0);
+        QCOMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
     }
     {
@@ -585,6 +594,7 @@ void tst_EnginioClient::identity()
 
         QSignalSpy spy(&client, SIGNAL(sessionTokenChanged(const QByteArray&)));
         QSignalSpy spyInit(&client, SIGNAL(clientInitialized()));
+        QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
         EnginioAuthentication identity1;
@@ -623,6 +633,72 @@ void tst_EnginioClient::identity()
 
         QCOMPARE(spy.count(), 1);
         QCOMPARE(spyError.count(), 0);
+        QCOMPARE(spyAuthError.count(), 0);
+        QVERIFY(!client.sessionToken().isEmpty());
+    }
+}
+
+void tst_EnginioClient::identity_invalid()
+{
+    {
+        EnginioClient client;
+        EnginioAuthentication identity;
+        QSignalSpy spy(&client, SIGNAL(sessionAuthenticated()));
+        QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+        QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
+
+        identity.setUser("invalidLogin");
+        identity.setPassword("invalidPassword");
+
+        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setIdentity(&identity);
+
+        QTRY_COMPARE(spyAuthError.count(), 1);
+        QTRY_COMPARE(spy.count(), 0);
+        QCOMPARE(spyError.count(), 0);
+        QVERIFY(client.sessionToken().isEmpty());
+    }
+    {   // check if an old session is _not_ invalidated on an invalid re-loggin
+        EnginioClient client;
+        EnginioAuthentication identity;
+        QSignalSpy spy(&client, SIGNAL(sessionAuthenticated()));
+        QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+        QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
+
+        identity.setUser("logintest");
+        identity.setPassword("logintest");
+
+        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setIdentity(&identity);
+
+        QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
+        QTRY_COMPARE(spyAuthError.count(), 0);
+        QVERIFY(!client.sessionToken().isEmpty());
+
+        const QByteArray sessionToken = client.sessionToken();
+
+        // we are logged-in
+        identity.setUser("invalidLogin");
+        QTRY_COMPARE(spyAuthError.count(), 1);
+        QCOMPARE(client.sessionToken(), sessionToken);
+        identity.setPassword("invalidPass");
+        QTRY_COMPARE(spyAuthError.count(), 2);
+        QCOMPARE(client.sessionToken(), sessionToken);
+
+        // get back to logged-in state
+        identity.setUser("logintest2");
+        QTRY_COMPARE(spyAuthError.count(), 3);
+        QCOMPARE(spy.count(), 1);
+        identity.setPassword("logintest2");
+        QTRY_COMPARE(spy.count(), 2);
+        QTRY_COMPARE(spyAuthError.count(), 3);
+
+        QVERIFY(client.sessionToken() != sessionToken);
         QVERIFY(!client.sessionToken().isEmpty());
     }
 }
