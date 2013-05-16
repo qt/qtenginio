@@ -193,7 +193,7 @@ class EnginioClientPrivate : public QObject
 
                 QJsonObject fileRef;
                 fileRef.insert(EnginioString::id, ereply->data()[EnginioString::id].toString());
-                fileRef.insert(EnginioString::objectType, QStringLiteral("files"));
+                fileRef.insert(EnginioString::objectType, EnginioString::files);
 
                 // FIXME: do not hard-code file here
                 object[QStringLiteral("file")] = fileRef;
