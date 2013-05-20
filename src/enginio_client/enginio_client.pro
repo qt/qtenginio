@@ -29,7 +29,8 @@ SOURCES += \
     enginioidentityauthoperation.cpp \
     enginioacl.cpp \
     enginioacloperation.cpp \
-    enginiofileoperation.cpp
+    enginiofileoperation.cpp \
+    enginiousergroupoperation.cpp
 
 HEADERS += \
     enginioclient.h\
@@ -57,4 +58,6 @@ HEADERS += \
     enginioacloperation.h \
     enginioacloperation_p.h \
     enginiofileoperation.h \
-    enginiofileoperation_p.h
+    enginiofileoperation_p.h \
+    enginiousergroupoperation.h \
+    enginiousergroupoperation_p.h

@@ -18,7 +18,8 @@ SOURCES += \
     enginioqmlobjectoperation.cpp \
     enginioqmlidentityauthoperation.cpp \
     enginioqmlacloperation.cpp \
-    enginioqmlfileoperation.cpp
+    enginioqmlfileoperation.cpp \
+    enginioqmlusergroupoperation.cpp
 
 HEADERS += \
     enginioqmlclient.h \
@@ -28,7 +29,8 @@ HEADERS += \
     enginioqmlobjectoperation.h \
     enginioqmlidentityauthoperation.h \
     enginioqmlacloperation.h \
-    enginioqmlfileoperation.h
+    enginioqmlfileoperation.h \
+    enginioqmlusergroupoperation.h
 
 QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 

@@ -35,43 +35,56 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLCLIENT_H
-#define ENGINIOQMLCLIENT_H
+#ifndef ENGINIOQMLUSERGROUPOPERATION_H
+#define ENGINIOQMLUSERGROUPOPERATION_H
 
-#include "enginioclient.h"
+#include "enginiousergroupoperation.h"
+#include "enginioqmlclient.h"
+#include "enginioqmlobjectmodel.h"
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
-class EnginioQmlUsergroupOperation;
+#include <QJsonObject>
+#include <QJSValue>
 
-class EnginioQmlClient : public EnginioClient
+class EnginioJsonObject;
+
+class EnginioQmlUsergroupOperation : public EnginioUsergroupOperation
 {
     Q_OBJECT
-    Q_DISABLE_COPY(EnginioQmlClient)
-    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId)
-    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret)
-    Q_PROPERTY(QString apiUrl READ apiUrlAsString WRITE setApiUrlFromString)
-    Q_PROPERTY(QString sessionToken READ sessionToken)
+    Q_DISABLE_COPY(EnginioQmlUsergroupOperation)
+    Q_PROPERTY(EnginioQmlClient* client READ getClient WRITE setClient)
+    Q_PROPERTY(EnginioQmlObjectModel* model READ getModel WRITE setModelQml)
+    Q_PROPERTY(int modelIndex READ modelIndexRow WRITE setModelIndexRow)
+    Q_PROPERTY(QJSValue user READ user)
+    Q_PROPERTY(QJsonObject include READ include WRITE setInclude)
 
 public:
-    EnginioQmlClient(const QString &backendId = QString(),
-                     const QString &backendSecret = QString(),
-                     QObject *parent = 0);
+    EnginioQmlUsergroupOperation(EnginioQmlClient *client = 0,
+                                 EnginioQmlObjectModel *model = 0,
+                                 QObject *parent = 0);
 
-    QString apiUrlAsString() const;
-    void setApiUrlFromString(const QString &apiUrl);
+    EnginioQmlClient * getClient() const;
+    EnginioQmlObjectModel * getModel() const;
+    void setModelQml(EnginioQmlObjectModel *model);
+    QJSValue user();
+    QJsonObject include() const;
+    void setInclude(const QJsonObject &include);
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
-    Q_INVOKABLE EnginioQmlUsergroupOperation * createUsergroupOperation();
+    Q_INVOKABLE void addMember(QJSValue user, const QString &usergroupId);
+    Q_INVOKABLE void addMemberById(const QString &userId, const QString &usergroupId);
+    Q_INVOKABLE void removeMember(QJSValue user, const QString &usergroupId);
+    Q_INVOKABLE void removeMemberById(const QString &userId, const QString &usergroupId);
+
+private slots:
+    void updateUser();
+
+private:
+    bool setUser(const QJSValue &user);
+    int modelIndexRow() const;
+    void setModelIndexRow(int row);
+
+    QJSValue m_jsObject;
+    EnginioJsonObject *m_user;
+    int m_modelIndexRow;
 };
 
-#endif // ENGINIOQMLCLIENT_H
-
+#endif // ENGINIOQMLUSERGROUPOPERATION_H

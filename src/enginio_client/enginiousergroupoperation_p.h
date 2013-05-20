@@ -35,43 +35,51 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLCLIENT_H
-#define ENGINIOQMLCLIENT_H
+#ifndef ENGINIOUSERGROUPOPERATION_P_H
+#define ENGINIOUSERGROUPOPERATION_P_H
 
-#include "enginioclient.h"
+#include "enginioabstractobject.h"
+#include "enginioobjectmodel.h"
+#include "enginiousergroupoperation.h"
+#include "enginiooperation_p.h"
+#include <QJsonObject>
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
-class EnginioQmlUsergroupOperation;
+class QBuffer;
 
-class EnginioQmlClient : public EnginioClient
+namespace Enginio {
+    enum UsergroupOperationType {
+        NullUsergroupOperation = 0,
+        AddMemberOperation,
+        RemoveMemberOperation
+    };
+}
+
+class EnginioUsergroupOperationPrivate : public EnginioOperationPrivate
 {
     Q_OBJECT
-    Q_DISABLE_COPY(EnginioQmlClient)
-    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId)
-    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret)
-    Q_PROPERTY(QString apiUrl READ apiUrlAsString WRITE setApiUrlFromString)
-    Q_PROPERTY(QString sessionToken READ sessionToken)
+    Q_DECLARE_PUBLIC(EnginioUsergroupOperation)
 
 public:
-    EnginioQmlClient(const QString &backendId = QString(),
-                     const QString &backendSecret = QString(),
-                     QObject *parent = 0);
+    EnginioUsergroupOperationPrivate(EnginioUsergroupOperation *op = 0);
+    ~EnginioUsergroupOperationPrivate();
 
-    QString apiUrlAsString() const;
-    void setApiUrlFromString(const QString &apiUrl);
+    // From EnginioOperationPrivate
+    virtual QString requestPath() const;
+    virtual QNetworkReply * doRequest(const QUrl &backendUrl);
+    virtual void handleResults();
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
-    Q_INVOKABLE EnginioQmlUsergroupOperation * createUsergroupOperation();
+    Enginio::UsergroupOperationType m_type;
+    EnginioAbstractObject *m_user;
+    QString m_userId;
+    QString m_usergroupId;
+    bool m_userOwned;
+    QPointer<EnginioObjectModel> m_model;
+    QModelIndex m_modelIndex;
+    QBuffer *m_requestDataBuffer;
+
+
+signals:
+    void userUpdated() const;
 };
 
-#endif // ENGINIOQMLCLIENT_H
-
+#endif // ENGINIOUSERGROUPOPERATION_P_H

@@ -40,6 +40,7 @@
 #include "enginioqmlidentityauthoperation.h"
 #include "enginioqmlobjectoperation.h"
 #include "enginioqmlqueryoperation.h"
+#include "enginioqmlusergroupoperation.h"
 
 #include <QUrl>
 #include <QDebug>
@@ -152,4 +153,15 @@ EnginioQmlIdentityAuthOperation * EnginioQmlClient::createIdentityAuthOperation(
 EnginioQmlAclOperation * EnginioQmlClient::createAclOperation()
 {
     return new EnginioQmlAclOperation(this);
+}
+
+/*!
+ * \qmlmethod Client::createUsergroupOperation()
+ *
+ * Returns new \l UsergroupOperation which can be used to add and remove members
+ * to/from usergroups. Returned operation can be deleted with \c destroy().
+ */
+EnginioQmlUsergroupOperation * EnginioQmlClient::createUsergroupOperation()
+{
+    return new EnginioQmlUsergroupOperation(this);
 }

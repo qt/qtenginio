@@ -35,43 +35,57 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLCLIENT_H
-#define ENGINIOQMLCLIENT_H
+#ifndef ENGINIOUSERGROUPOPERATION_H
+#define ENGINIOUSERGROUPOPERATION_H
 
-#include "enginioclient.h"
+#include "enginiooperation.h"
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
-class EnginioQmlUsergroupOperation;
+class EnginioAbstractObject;
+class EnginioObjectModel;
+class EnginioUsergroupOperationPrivate;
 
-class EnginioQmlClient : public EnginioClient
+class ENGINIOCLIENT_EXPORT EnginioUsergroupOperation : public EnginioOperation
 {
     Q_OBJECT
-    Q_DISABLE_COPY(EnginioQmlClient)
-    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId)
-    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret)
-    Q_PROPERTY(QString apiUrl READ apiUrlAsString WRITE setApiUrlFromString)
-    Q_PROPERTY(QString sessionToken READ sessionToken)
-
 public:
-    EnginioQmlClient(const QString &backendId = QString(),
-                     const QString &backendSecret = QString(),
-                     QObject *parent = 0);
+    explicit EnginioUsergroupOperation(EnginioClient *client,
+                                       EnginioObjectModel *model = 0,
+                                       QObject *parent = 0);
+    virtual ~EnginioUsergroupOperation();
 
-    QString apiUrlAsString() const;
-    void setApiUrlFromString(const QString &apiUrl);
+    EnginioObjectModel * model() const;
+    void setModel(EnginioObjectModel *model);
+    QModelIndex modelIndex() const;
+    void setModelIndex(QModelIndex index);
+    QString userId() const;
+    QString usergroupId() const;
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
-    Q_INVOKABLE EnginioQmlUsergroupOperation * createUsergroupOperation();
+    void addMember(EnginioAbstractObject *user,
+                   const QString &usergroupId);
+    void addMember(const EnginioAbstractObject &user,
+                   const QString &usergroupId);
+    void addMember(const QString &userId,
+                   const QString &usergroupId);
+
+    void removeMember(EnginioAbstractObject *user,
+                      const QString &usergroupId);
+    void removeMember(const EnginioAbstractObject &user,
+                      const QString &usergroupId);
+    void removeMember(const QString &userId,
+                      const QString &usergroupId);
+
+signals:
+    void userUpdated() const;
+
+protected:
+    EnginioUsergroupOperation(EnginioClient *client,
+                              EnginioObjectModel *model,
+                              EnginioUsergroupOperationPrivate &dd,
+                              QObject *parent = 0);
+
+private:
+    Q_DECLARE_PRIVATE(EnginioUsergroupOperation)
+    Q_DISABLE_COPY(EnginioUsergroupOperation)
 };
 
-#endif // ENGINIOQMLCLIENT_H
-
+#endif // ENGINIOUSERGROUPOPERATION_H
