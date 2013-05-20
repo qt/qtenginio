@@ -12,7 +12,7 @@ class EnginioQmlIdentityAuthOperation : public EnginioIdentityAuthOperation
     Q_DISABLE_COPY(EnginioQmlIdentityAuthOperation)
     Q_PROPERTY(EnginioQmlClient* client READ getClient WRITE setClient)
     Q_PROPERTY(QJSValue loggedInUser READ loggedInUserAsJSValue)
-    // TODO: loggedInUserGroups
+    Q_PROPERTY(QJSValue loggedInUserGroups READ loggedInUserGroupsAsArray)
 
 public:
     EnginioQmlIdentityAuthOperation(EnginioQmlClient *client = 0,
@@ -20,7 +20,7 @@ public:
 
     EnginioQmlClient * getClient() const;
     QJSValue loggedInUserAsJSValue() const;
-
+    QJSValue loggedInUserGroupsAsArray() const;
 };
 
 #endif // ENGINIOQMLIDENTITYAUTHOPERATION_H

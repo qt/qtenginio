@@ -52,7 +52,7 @@ public:
     virtual ~EnginioIdentityAuthOperation();
 
     const EnginioAbstractObject *loggedInUser() const;
-    QList<EnginioAbstractObject*> loggedInUserGroups();
+    QList<EnginioAbstractObject*> loggedInUserGroups() const;
 
 public slots:
     void loginWithUsernameAndPassword(const QString &username,
