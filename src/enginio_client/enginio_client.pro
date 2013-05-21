@@ -65,4 +65,5 @@ HEADERS += \
     enginioreply.h \
     enginiomodel.h \
     enginioidentity.h \
-    enginioobjectadaptor_p.h
+    enginioobjectadaptor_p.h \
+    enginioreply_p.h

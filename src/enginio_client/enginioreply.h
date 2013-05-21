@@ -66,9 +66,12 @@ public:
 signals:
     void finished();
 
+protected:
+    explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
+    QScopedPointer<EnginioReplyPrivate> d;
+
 private:
     Q_DISABLE_COPY(EnginioReply)
-    QScopedPointer<EnginioReplyPrivate> d;
     friend class EnginioClient;
 };
 

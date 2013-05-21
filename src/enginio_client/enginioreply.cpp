@@ -41,43 +41,23 @@
 #include <QtNetwork/qnetworkreply.h>
 
 #include "enginioreply.h"
+#include "enginioreply_p.h"
 #include "enginioclient.h"
 #include "enginioclient_p.h"
-
-class EnginioReplyPrivate {
-    QNetworkReply *_nreply;
-    mutable QJsonObject _data;
-
-public:
-    EnginioReplyPrivate(QNetworkReply *reply)
-        : _nreply(reply)
-    {
-        Q_ASSERT(reply);
-    }
-
-    QNetworkReply::NetworkError errorCode() const
-    {
-        return _nreply->error();
-    }
-
-    QString errorString() const
-    {
-        return _nreply->errorString();
-    }
-
-    QJsonObject data() const
-    {
-        if (_data.isEmpty())
-            _data = QJsonDocument::fromJson(_nreply->readAll()).object();
-        return _data;
-    }
-};
+#include "enginioobjectadaptor_p.h"
 
 EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
     : QObject(p->q_ptr)
     , d(new EnginioReplyPrivate(reply))
 {
     p->registerReply(reply, this);
+}
+
+EnginioReply::EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv)
+    : QObject(parent->q_ptr)
+    , d(priv)
+{
+    parent->registerReply(reply, this);
 }
 
 EnginioReply::~EnginioReply()
@@ -119,4 +99,6 @@ QDebug operator<<(QDebug d, const EnginioReply *reply)
     d << ")";
     return d.space();
 }
+
+
 #endif

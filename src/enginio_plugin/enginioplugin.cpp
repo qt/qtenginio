@@ -48,6 +48,7 @@
 #include "enginioerror.h"
 #include "enginiomodel.h"
 #include "enginioreply.h"
+#include "enginioqmlreply.h"
 #include "enginioidentity.h"
 
 #include <qqml.h>
@@ -157,7 +158,8 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Enginio");
     qmlRegisterType<EnginioClient>(uri, 1, 0, "__Enginio");
     qmlRegisterType<EnginioQmlModel>(uri, 1, 0, "EnginioModel");
-    qmlRegisterUncreatableType<EnginioReply>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
+    qmlRegisterUncreatableType<EnginioReply>(uri, 1, 0, "__EnginioReply", "__EnginioReply cannot be instantiated.");
+    qmlRegisterUncreatableType<EnginioQmlReply>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
     qmlRegisterType<EnginioQmlObjectModel>(uri, 1, 0, "ObjectModel");
     qmlRegisterType<EnginioQmlObjectOperation>(uri, 1, 0, "ObjectOperation");
     qmlRegisterType<EnginioQmlQueryOperation>(uri, 1, 0, "QueryOperation");

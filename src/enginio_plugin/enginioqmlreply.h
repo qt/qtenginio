@@ -35,49 +35,21 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLCLIENT_H
-#define ENGINIOQMLCLIENT_H
+#ifndef ENGINIOQMLREPLY_H
+#define ENGINIOQMLREPLY_H
 
-#include "enginioclient.h"
-#include "enginioqmlreply.h"
+#include "enginioreply.h"
 #include <QtQml/qjsvalue.h>
-#include <QQmlParserStatus>
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
 class EnginioQmlClientPrivate;
-
-class EnginioQmlClient : public EnginioClient
+class ENGINIOCLIENT_EXPORT EnginioQmlReply : public EnginioReply
 {
     Q_OBJECT
-    Q_DISABLE_COPY(EnginioQmlClient)
-
 public:
-    EnginioQmlClient(QObject *parent = 0);
-    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged);
+    explicit EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply);
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
-
-    Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
-
-    bool isAuthenticated() const;
-signals:
-    void isAuthenticatedChanged(bool isAuthenticated);
-
-private:
-    Q_DECLARE_PRIVATE(EnginioQmlClient);
+    Q_INVOKABLE QJSValue data() const;
 };
 
-#endif // ENGINIOQMLCLIENT_H
 
+#endif // ENGINIOQMLREPLY_H

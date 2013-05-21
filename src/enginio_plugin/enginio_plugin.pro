@@ -19,7 +19,8 @@ SOURCES += \
     enginioqmlobjectoperation.cpp \
     enginioqmlidentityauthoperation.cpp \
     enginioqmlacloperation.cpp \
-    enginioqmlfileoperation.cpp
+    enginioqmlfileoperation.cpp \
+    enginioqmlreply.cpp
 
 HEADERS += \
     enginioqmlclient.h \
@@ -32,7 +33,8 @@ HEADERS += \
     enginioqmlacloperation.h \
     enginioqmlfileoperation.h \
     enginioqmloblejctadaptor_p.h \
-    enginioqmlclient_p.h
+    enginioqmlclient_p.h \
+    enginioqmlreply.h
 
 QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 

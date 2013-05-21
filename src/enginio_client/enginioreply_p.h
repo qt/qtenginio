@@ -35,49 +35,42 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLCLIENT_H
-#define ENGINIOQMLCLIENT_H
+#ifndef ENGINIOREPLY_P_H
+#define ENGINIOREPLY_P_H
 
-#include "enginioclient.h"
-#include "enginioqmlreply.h"
-#include <QtQml/qjsvalue.h>
-#include <QQmlParserStatus>
+#include <QtCore/qstring.h>
+#include <QtCore/qjsonobject.h>
+#include <QtCore/qjsondocument.h>
+#include <QtNetwork/qnetworkreply.h>
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
-class EnginioQmlClientPrivate;
-
-class EnginioQmlClient : public EnginioClient
-{
-    Q_OBJECT
-    Q_DISABLE_COPY(EnginioQmlClient)
-
+class EnginioReplyPrivate {
+protected:
+    QNetworkReply *_nreply;
+    mutable QJsonObject _data;
 public:
-    EnginioQmlClient(QObject *parent = 0);
-    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged);
+    EnginioReplyPrivate(QNetworkReply *reply)
+        : _nreply(reply)
+    {
+        Q_ASSERT(reply);
+    }
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
+    QNetworkReply::NetworkError errorCode() const
+    {
+        return _nreply->error();
+    }
 
-    Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
+    QString errorString() const
+    {
+        return _nreply->errorString();
+    }
 
-    bool isAuthenticated() const;
-signals:
-    void isAuthenticatedChanged(bool isAuthenticated);
-
-private:
-    Q_DECLARE_PRIVATE(EnginioQmlClient);
+    QJsonObject data() const
+    {
+        if (_data.isEmpty())
+            _data = QJsonDocument::fromJson(_nreply->readAll()).object();
+        return _data;
+    }
 };
 
-#endif // ENGINIOQMLCLIENT_H
 
+#endif // ENGINIOREPLY_P_H
