@@ -13,6 +13,7 @@ int main(int argc, char* argv[])
     QDir qmlImportDir(appPath);
     qmlImportDir.cd("../../../qml");
     view.engine()->addImportPath(qmlImportDir.canonicalPath());
+    QObject::connect(view.engine(), SIGNAL(quit()), &app, SLOT(quit()));
 
     view.setSource(QUrl("qrc:///" ENGINIO_SAMPLE_NAME "/" ENGINIO_SAMPLE_NAME ".qml"));
     view.setResizeMode(QQuickView::SizeRootObjectToView);
