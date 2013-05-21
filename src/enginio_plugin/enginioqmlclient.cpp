@@ -105,6 +105,9 @@ public:
 EnginioQmlClient::EnginioQmlClient(QObject *parent)
     : EnginioClient(parent, new EnginioQmlClientPrivate(this))
 {
+    qRegisterMetaType<EnginioQmlClient*>();
+    qRegisterMetaType<EnginioQmlReply*>();
+
     QObject::connect(this, &EnginioClient::sessionAuthenticated, IsAuthenticatedFunctor(this, true));
     QObject::connect(this, &EnginioClient::sessionTerminated, IsAuthenticatedFunctor(this, false));
 }
