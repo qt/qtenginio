@@ -29,6 +29,8 @@ Rectangle {
                     }).finished.connect(function() { tmessage.text = "I can connect directly to query object too" } )
         }
 
+        onError:  console.log("Error: " + JSON.stringify(reply.data()) )
+
         onFinished: {
             console.log(reply)
             var data = reply.data().results[0];
