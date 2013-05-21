@@ -42,6 +42,7 @@
 #include "enginioclient.h"
 #include "enginioreply.h"
 #include "enginioidentity.h"
+#include "enginioobjectadaptor_p.h"
 
 #include <QNetworkAccessManager>
 #include <QPointer>
@@ -97,7 +98,9 @@ class EnginioClientPrivate : public QObject
     Q_DECLARE_PUBLIC(EnginioClient)
 
     enum PathOptions { Default, IncludeIdInPath = 1};
-    static QString getPath(const QJsonObject &object, int operation, PathOptions flags = Default)
+
+    template<class T>
+    static QString getPath(const T &object, int operation, PathOptions flags = Default)
     {
         QString result;
         result.reserve(96);
@@ -198,7 +201,7 @@ class EnginioClientPrivate : public QObject
                 // FIXME: do not hard-code file here
                 object[QStringLiteral("file")] = fileRef;
 
-                d->_replyReplyMap.insert(d->update(object, EnginioClient::ObjectOperation), ereply);
+                d->_replyReplyMap.insert(d->update<QJsonObject>(object, EnginioClient::ObjectOperation), ereply);
                 return;
             } else if (d->_downloads.remove(nreply)) {
                 QUrl url = d->m_apiUrl;
@@ -320,7 +323,8 @@ public:
         return q_ptr->networkManager()->post(req, data);
     }
 
-    QNetworkReply *update(const QJsonObject &object, const EnginioClient::Operation operation)
+    template<class T>
+    QNetworkReply *update(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
         QUrl url(m_apiUrl);
         url.setPath(getPath(object, operation, IncludeIdInPath));
@@ -333,14 +337,15 @@ public:
         // Sadly we need to detach here, so it causes at least one allocation. Of course sending
         // a garbage is also wrong so maybe we should filter out data before sending, the question
         // is how, and it seems that only enginio server knows...
-        QJsonObject o(object);
+        ObjectAdaptor<T> o(object);
         o.remove(EnginioString::objectType);
         o.remove(EnginioString::id);
-        QByteArray data = QJsonDocument(o).toJson(QJsonDocument::Compact);
+        QByteArray data = o.toJson();
         return q_ptr->networkManager()->put(req, data);
     }
 
-    QNetworkReply *remove(const QJsonObject &object, const EnginioClient::Operation operation)
+    template<class T>
+    QNetworkReply *remove(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
         QUrl url(m_apiUrl);
         url.setPath(getPath(object, operation, IncludeIdInPath));
@@ -351,7 +356,8 @@ public:
         return q_ptr->networkManager()->deleteResource(req);
     }
 
-    QNetworkReply *create(const QJsonObject &object, const EnginioClient::Operation operation)
+    template<class T>
+    QNetworkReply *create(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
         QUrl url(m_apiUrl);
         url.setPath(getPath(object, operation));
@@ -359,44 +365,45 @@ public:
         QNetworkRequest req(_request);
         req.setUrl(url);
 
-        QByteArray data = QJsonDocument(object).toJson(QJsonDocument::Compact);
+        QByteArray data = object.toJson();
         return q_ptr->networkManager()->post(req, data);
     }
 
-    QNetworkReply *query(const QJsonObject &object, const Operation operation)
+    template<class T>
+    QNetworkReply *query(const ObjectAdaptor<T> &object, const Operation operation)
     {
         QUrl url(m_apiUrl);
         url.setPath(getPath(object, operation));
 
         // TODO add all params here
         QUrlQuery urlQuery;
-        if (int limit = object[EnginioString::limit].toDouble()) {
+        if (int limit = object[EnginioString::limit].toInt()) {
             urlQuery.addQueryItem(EnginioString::limit, QString::number(limit));
         }
-        if (int offset = object[EnginioString::offset].toDouble()) {
+        if (int offset = object[EnginioString::offset].toInt()) {
             urlQuery.addQueryItem(EnginioString::offset, QString::number(offset));
         }
-        QJsonValue include = object[EnginioString::include];
+        ValueAdaptor<T> include = object[EnginioString::include];
         if (include.isObject()) {
             urlQuery.addQueryItem(EnginioString::include,
-                QString::fromUtf8(QJsonDocument(include.toObject()).toJson(QJsonDocument::Compact)));
+                QString::fromUtf8(include.toJson()));
         }
         if (operation == SearchOperation) {
-            QJsonValue search = object[EnginioString::search];
-            QJsonArray objectTypes = object[QStringLiteral("objectTypes")].toArray();
-            if (search.isObject() && !objectTypes.isEmpty()) {
-                for (QJsonArray::const_iterator i = objectTypes.constBegin(); i != objectTypes.constEnd(); ++i) {
+            ValueAdaptor<T> search = object[EnginioString::search];
+            ArrayAdaptor<T> objectTypes = object[QStringLiteral("objectTypes")].toArray();
+            if (search.isObject() /*&& !objectTypes.isEmpty()*/) {
+                for (typename ArrayAdaptor<T>::const_iterator i = objectTypes.constBegin(); i != objectTypes.constEnd(); ++i) {
                     urlQuery.addQueryItem(QStringLiteral("objectTypes[]"), (*i).toString());
                 }
                 urlQuery.addQueryItem(EnginioString::search,
-                    QString::fromUtf8(QJsonDocument(search.toObject()).toJson(QJsonDocument::Compact)));
+                    QString::fromUtf8(search.toJson()));
 
                 // FIXME: Think about proper error handling for wrong user input.
             } else qWarning("!! Fulltext Search: parameter(s) missing !!");
         } else
         if (object[EnginioString::query].isObject()) { // TODO docs are inconsistent on that
             urlQuery.addQueryItem(QStringLiteral("q"),
-                QString::fromUtf8(QJsonDocument(object[EnginioString::query].toObject()).toJson(QJsonDocument::Compact)));
+                QString::fromUtf8(object[EnginioString::query].toJson()));
         }
         url.setQuery(urlQuery);
 
@@ -421,7 +428,7 @@ public:
                      "\"objectType\": \"") + objectType.toUtf8() + "\","
                      "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
 
-        QNetworkReply *reply = query(obj, ObjectOperation);
+        QNetworkReply *reply = query<QJsonObject>(obj, ObjectOperation);
         _downloads.insert(reply);
         return reply;
     }

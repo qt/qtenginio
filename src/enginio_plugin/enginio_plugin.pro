@@ -8,7 +8,7 @@ include($$PWD/../../enginio.pri)
 TARGET = enginioplugin
 TARGET.module_name = Enginio
 
-QT += qml quick enginio
+QT += qml quick enginio enginio-private
 
 SOURCES += \
     enginioqmlclient.cpp \
@@ -30,7 +30,8 @@ HEADERS += \
     enginioqmlobjectoperation.h \
     enginioqmlidentityauthoperation.h \
     enginioqmlacloperation.h \
-    enginioqmlfileoperation.h
+    enginioqmlfileoperation.h \
+    enginioqmloblejctadaptor_p.h
 
 QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 

@@ -131,6 +131,7 @@ private slots:
 protected:
     QScopedPointer<EnginioClientPrivate> d_ptr;
 
+    EnginioClient(QObject *parent, EnginioClientPrivate *d);
 private:
     Q_DECLARE_PRIVATE(EnginioClient)
     Q_DISABLE_COPY(EnginioClient)

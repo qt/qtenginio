@@ -37,9 +37,13 @@
 
 #include "enginioqmlacloperation.h"
 #include "enginioqmlclient.h"
+#include "Enginio/private/enginioclient_p.h"
 #include "enginioqmlidentityauthoperation.h"
 #include "enginioqmlobjectoperation.h"
 #include "enginioqmlqueryoperation.h"
+#include "enginioqmloblejctadaptor_p.h"
+
+#include <QtQml/qjsvalue.h>
 
 #include <QDebug>
 
@@ -98,10 +102,8 @@ public:
     }
 };
 
-EnginioQmlClient::EnginioQmlClient(const QString &backendId,
-                                   const QString &backendSecret,
-                                   QObject *parent) :
-    EnginioClient(backendId, backendSecret, parent)
+EnginioQmlClient::EnginioQmlClient(QObject *parent)
+    : EnginioClient(parent, new EnginioClientPrivate(this))
 {
     QObject::connect(this, &EnginioClient::sessionAuthenticated, IsAuthenticatedFunctor(this, true));
     QObject::connect(this, &EnginioClient::sessionTerminated, IsAuthenticatedFunctor(this, false));
@@ -159,4 +161,48 @@ EnginioQmlAclOperation * EnginioQmlClient::createAclOperation()
 bool EnginioQmlClient::isAuthenticated() const
 {
     return sessionToken().isEmpty();
+}
+
+EnginioReply *EnginioQmlClient::query(const QJSValue &query, const Operation operation)
+{
+    QNetworkReply *nreply = d_ptr->query<QJSValue>(query, static_cast<EnginioClientPrivate::Operation>(operation));
+    EnginioReply *ereply = new EnginioReply(d_ptr.data(), nreply);
+    nreply->setParent(ereply);
+    return ereply;
+}
+
+EnginioReply *EnginioQmlClient::create(const QJSValue &object, const Operation operation)
+{
+    if (!object.isObject())
+        return 0;
+
+    QNetworkReply *nreply = d_ptr->create<QJSValue>(object, operation);
+    EnginioReply *ereply = new EnginioReply(d_ptr.data(), nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+EnginioReply *EnginioQmlClient::update(const QJSValue &object, const Operation operation)
+{
+    if (!object.isObject())
+        return 0;
+
+    QNetworkReply *nreply = d_ptr->update<QJSValue>(object, operation);
+    EnginioReply *ereply = new EnginioReply(d_ptr.data(), nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+EnginioReply *EnginioQmlClient::remove(const QJSValue &object, const Operation operation)
+{
+    if (!object.isObject())
+        return 0;
+
+    QNetworkReply *nreply = d_ptr->remove<QJSValue>(object, operation);
+    EnginioReply *ereply = new EnginioReply(d_ptr.data(), nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
 }

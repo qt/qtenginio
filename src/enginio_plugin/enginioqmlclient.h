@@ -39,6 +39,7 @@
 #define ENGINIOQMLCLIENT_H
 
 #include "enginioclient.h"
+#include <QtQml/qjsvalue.h>
 #include <QQmlParserStatus>
 
 class EnginioQmlAclOperation;
@@ -53,9 +54,7 @@ class EnginioQmlClient : public EnginioClient
     Q_DISABLE_COPY(EnginioQmlClient)
 
 public:
-    EnginioQmlClient(const QString &backendId = QString(),
-                     const QString &backendSecret = QString(),
-                     QObject *parent = 0);
+    EnginioQmlClient(QObject *parent = 0);
     Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged);
 
     Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
@@ -64,6 +63,11 @@ public:
             EnginioQmlObjectModel *model = 0);
     Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
     Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
+
+    Q_INVOKABLE EnginioReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
 
     bool isAuthenticated() const;
 signals:

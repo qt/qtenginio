@@ -164,6 +164,12 @@ EnginioClient::EnginioClient(QObject *parent)
 {
 }
 
+EnginioClient::EnginioClient(QObject *parent, EnginioClientPrivate *d)
+    : QObject(parent)
+    , d_ptr(d)
+{
+}
+
 /*!
  * Destructor.
  */
@@ -352,7 +358,7 @@ EnginioReply *EnginioClient::search(const QJsonObject &query)
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->query(query, EnginioClientPrivate::SearchOperation);
+    QNetworkReply *nreply = d->query<QJsonObject>(query, EnginioClientPrivate::SearchOperation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
     return ereply;
@@ -362,7 +368,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->query(query, static_cast<EnginioClientPrivate::Operation>(operation));
+    QNetworkReply *nreply = d->query<QJsonObject>(query, static_cast<EnginioClientPrivate::Operation>(operation));
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
     return ereply;
@@ -375,7 +381,7 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation o
     if (object.empty())
         return 0;
 
-    QNetworkReply *nreply = d->create(object, operation);
+    QNetworkReply *nreply = d->create<QJsonObject>(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
 
@@ -389,7 +395,7 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
     if (object.empty())
         return 0;
 
-    QNetworkReply *nreply = d->update(object, operation);
+    QNetworkReply *nreply = d->update<QJsonObject>(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
 
@@ -403,7 +409,7 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
     if (object.empty())
         return 0;
 
-    QNetworkReply *nreply = d->remove(object, operation);
+    QNetworkReply *nreply = d->remove<QJsonObject>(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
 
