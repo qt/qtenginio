@@ -90,6 +90,7 @@ struct EnginioString
     static const QString object;
     static const QString url;
     static const QString access;
+    static const QString sort;
 };
 
 class EnginioClientPrivate : public QObject
@@ -386,6 +387,11 @@ public:
         ValueAdaptor<T> include = object[EnginioString::include];
         if (include.isObject()) {
             urlQuery.addQueryItem(EnginioString::include,
+                QString::fromUtf8(include.toJson()));
+        }
+        ValueAdaptor<T> sort = object[EnginioString::sort];
+        if (sort.isObject()) {
+            urlQuery.addQueryItem(EnginioString::sort,
                 QString::fromUtf8(include.toJson()));
         }
         if (operation == SearchOperation) {
