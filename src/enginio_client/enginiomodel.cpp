@@ -332,6 +332,8 @@ public:
         for (QJsonObject::const_iterator i = firstObject.constBegin(); i != firstObject.constEnd(); ++i) {
             _roles[idx++] = i.key();
         }
+        if (firstObject.contains(EnginioString::id))
+            _roles[Qt::DisplayRole] = EnginioString::id;
     }
 
     QHash<int, QByteArray> roleNames() const
@@ -357,13 +359,14 @@ public:
         if (role == SyncedRole)
             return !_rowsToSync.contains(row);
 
-        const QJsonValue value = _data.at(row);
-        const QJsonObject object = value.toObject();
-        if (role > Qt::UserRole && !object.isEmpty())
-            return object[_roles.value(role)];
+        const QJsonObject object = _data.at(row).toObject();
+        if (!object.isEmpty()) {
+            const QString roleName = _roles.value(role);
+            if (!roleName.isEmpty())
+                return object[roleName];
+        }
 
-        Q_UNIMPLEMENTED();
-        return value;
+        return QVariant();
     }
 
     bool canFetchMore() const
@@ -473,16 +476,6 @@ Qt::ItemFlags EnginioModel::flags(const QModelIndex &index) const
 QVariant EnginioModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= d->rowCount())
-        return QVariant();
-
-    if (role == Qt::DisplayRole) {
-        // Randomly return the first really user-defined role
-        // so that the user sees something when plugging the model
-        // into a view.
-        return d->data(index.row(), Qt::UserRole + 3);
-    }
-
-    if (role < Qt::UserRole)
         return QVariant();
 
     return d->data(index.row(), role);
