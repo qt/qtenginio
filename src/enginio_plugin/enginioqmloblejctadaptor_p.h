@@ -38,6 +38,8 @@
 #ifndef ENGINIOQMLOBLEJCTADAPTOR_P_H
 #define ENGINIOQMLOBLEJCTADAPTOR_P_H
 
+#include "enginioqmlclient_p.h"
+
 #include <Enginio/private/enginioobjectadaptor_p.h>
 #include <QtCore/qbytearray.h>
 #include <QtCore/qstring.h>
@@ -52,27 +54,25 @@ template <> struct ArrayAdaptor<QJSValue>;
 template <> struct ValueAdaptor<QJSValue>
 {
     QJSValue _value;
-    ValueAdaptor(const QJSValue &value)
+    EnginioQmlClientPrivate *_client;
+
+    ValueAdaptor(const QJSValue &value, EnginioQmlClientPrivate *client)
         : _value(value)
+        , _client(client)
     {}
 
     bool isObject() const { return _value.isObject(); }
 
     int toInt() const { return _value.toInt(); }
     QString toString() const { return _value.toString(); }
-    ValueAdaptor<QJSValue> operator[](const QString &index) const { return _value.property(index); }
+    ValueAdaptor<QJSValue> operator[](const QString &index) const
+    {
+        return ValueAdaptor<QJSValue>(_value.property(index), _client);
+    }
 
     QByteArray toJson() const
     {
-        QJSEngine *engine = _value.engine();
-        if (!engine) {
-            Q_UNIMPLEMENTED(); // maybe _value.toString().toUtf8(), do we have api to test it?
-            return QByteArray();
-        }
-        QJSValue stringify = engine->evaluate("JSON.stringify"); // TODO make it faster by caching JSON.stringify
-        Q_ASSERT(stringify.isCallable());
-        QString json = stringify.call(QJSValueList() << _value).toString();
-        return json.toUtf8();
+        return _client->toJson(_value);
     }
     void remove(const QString &index) { _value.deleteProperty(index); }
 
@@ -82,15 +82,15 @@ template <> struct ValueAdaptor<QJSValue>
 
 template <> struct ObjectAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
 {
-    ObjectAdaptor(const QJSValue &value)
-        : ValueAdaptor(value)
+    ObjectAdaptor(const QJSValue &value, EnginioQmlClientPrivate *client)
+        : ValueAdaptor(value, client)
     {}
 };
 
 template <> struct ArrayAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
 {
-    ArrayAdaptor(const QJSValue &value)
-        : ValueAdaptor(value)
+    ArrayAdaptor(const QJSValue &value, EnginioQmlClientPrivate *client)
+        : ValueAdaptor(value, client)
     {}
 
     ArrayAdaptor(const ArrayAdaptor<QJSValue> &value)
@@ -127,8 +127,8 @@ template <> struct ArrayAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
     const_iterator constEnd() const { return const_iterator(); }
 };
 
-ObjectAdaptor<QJSValue> ValueAdaptor<QJSValue>::toObject() const { return _value; }
-ArrayAdaptor<QJSValue> ValueAdaptor<QJSValue>::toArray() const { return _value; }
+ObjectAdaptor<QJSValue> ValueAdaptor<QJSValue>::toObject() const { return ObjectAdaptor<QJSValue>(_value, _client); }
+ArrayAdaptor<QJSValue> ValueAdaptor<QJSValue>::toArray() const { return ArrayAdaptor<QJSValue>(_value, _client); }
 
 
 #endif // ENGINIOQMLOBLEJCTADAPTOR_P_H

@@ -35,48 +35,33 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLCLIENT_H
-#define ENGINIOQMLCLIENT_H
+#ifndef ENGINIOQMLCLIENT_P_H
+#define ENGINIOQMLCLIENT_P_H
 
-#include "enginioclient.h"
+#include <Enginio/private/enginioclient_p.h>
+
+#include <QtQml/qjsengine.h>
 #include <QtQml/qjsvalue.h>
-#include <QQmlParserStatus>
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
-class EnginioQmlClientPrivate;
-
-class EnginioQmlClient : public EnginioClient
+class EnginioQmlClientPrivate : public EnginioClientPrivate
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(EnginioQmlClient)
-
+    QJSEngine *_engine;
+    QJSValue _stringify;
 public:
-    EnginioQmlClient(QObject *parent = 0);
-    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged);
+    EnginioQmlClientPrivate(EnginioClient *client)
+        : EnginioClientPrivate(client)
+        , _engine(0)
+    {}
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
+    inline void setEngine(const QJSValue &object)
+    {
+        if (Q_UNLIKELY(!_engine))
+            _setEngine(object.engine());
+    }
 
-    Q_INVOKABLE EnginioReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
-
-    bool isAuthenticated() const;
-signals:
-    void isAuthenticatedChanged(bool isAuthenticated);
-
+    QByteArray toJson(const QJSValue &value);
 private:
-    Q_DECLARE_PRIVATE(EnginioQmlClient);
+    void _setEngine(QJSEngine *engine);
 };
 
-#endif // ENGINIOQMLCLIENT_H
-
+#endif // ENGINIOQMLCLIENT_P_H

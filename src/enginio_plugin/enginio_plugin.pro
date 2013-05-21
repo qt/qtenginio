@@ -31,7 +31,8 @@ HEADERS += \
     enginioqmlidentityauthoperation.h \
     enginioqmlacloperation.h \
     enginioqmlfileoperation.h \
-    enginioqmloblejctadaptor_p.h
+    enginioqmloblejctadaptor_p.h \
+    enginioqmlclient_p.h
 
 QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 

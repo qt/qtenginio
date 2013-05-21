@@ -132,8 +132,8 @@ protected:
     QScopedPointer<EnginioClientPrivate> d_ptr;
 
     EnginioClient(QObject *parent, EnginioClientPrivate *d);
-private:
     Q_DECLARE_PRIVATE(EnginioClient)
+private:
     Q_DISABLE_COPY(EnginioClient)
 };
 

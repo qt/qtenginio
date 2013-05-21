@@ -103,7 +103,7 @@ public:
 };
 
 EnginioQmlClient::EnginioQmlClient(QObject *parent)
-    : EnginioClient(parent, new EnginioClientPrivate(this))
+    : EnginioClient(parent, new EnginioQmlClientPrivate(this))
 {
     QObject::connect(this, &EnginioClient::sessionAuthenticated, IsAuthenticatedFunctor(this, true));
     QObject::connect(this, &EnginioClient::sessionTerminated, IsAuthenticatedFunctor(this, false));
@@ -165,7 +165,11 @@ bool EnginioQmlClient::isAuthenticated() const
 
 EnginioReply *EnginioQmlClient::query(const QJSValue &query, const Operation operation)
 {
-    QNetworkReply *nreply = d_ptr->query<QJSValue>(query, static_cast<EnginioClientPrivate::Operation>(operation));
+    Q_D(EnginioQmlClient);
+
+    d->setEngine(query);
+    ObjectAdaptor<QJSValue> o(query, d);
+    QNetworkReply *nreply = d_ptr->query<QJSValue>(o, static_cast<EnginioClientPrivate::Operation>(operation));
     EnginioReply *ereply = new EnginioReply(d_ptr.data(), nreply);
     nreply->setParent(ereply);
     return ereply;
@@ -173,10 +177,14 @@ EnginioReply *EnginioQmlClient::query(const QJSValue &query, const Operation ope
 
 EnginioReply *EnginioQmlClient::create(const QJSValue &object, const Operation operation)
 {
+    Q_D(EnginioQmlClient);
+
     if (!object.isObject())
         return 0;
 
-    QNetworkReply *nreply = d_ptr->create<QJSValue>(object, operation);
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->create<QJSValue>(o, operation);
     EnginioReply *ereply = new EnginioReply(d_ptr.data(), nreply);
     nreply->setParent(ereply);
 
@@ -185,10 +193,14 @@ EnginioReply *EnginioQmlClient::create(const QJSValue &object, const Operation o
 
 EnginioReply *EnginioQmlClient::update(const QJSValue &object, const Operation operation)
 {
+    Q_D(EnginioQmlClient);
+
     if (!object.isObject())
         return 0;
 
-    QNetworkReply *nreply = d_ptr->update<QJSValue>(object, operation);
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->update<QJSValue>(o, operation);
     EnginioReply *ereply = new EnginioReply(d_ptr.data(), nreply);
     nreply->setParent(ereply);
 
@@ -197,12 +209,33 @@ EnginioReply *EnginioQmlClient::update(const QJSValue &object, const Operation o
 
 EnginioReply *EnginioQmlClient::remove(const QJSValue &object, const Operation operation)
 {
+    Q_D(EnginioQmlClient);
+
     if (!object.isObject())
         return 0;
 
-    QNetworkReply *nreply = d_ptr->remove<QJSValue>(object, operation);
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->remove<QJSValue>(o, operation);
     EnginioReply *ereply = new EnginioReply(d_ptr.data(), nreply);
     nreply->setParent(ereply);
 
     return ereply;
+}
+
+QByteArray EnginioQmlClientPrivate::toJson(const QJSValue &value)
+{
+    if (!_stringify.isCallable())
+        Q_UNIMPLEMENTED(); // TODO maybe _value.toString().toUtf8()?
+    return _stringify.call(QJSValueList() << value).toString().toUtf8();
+}
+
+void EnginioQmlClientPrivate::_setEngine(QJSEngine *engine)
+{
+    Q_ASSERT(!_engine);
+    if (engine) {
+        _engine = engine;
+        _stringify = engine->evaluate("JSON.stringify");
+        Q_ASSERT(_stringify.isCallable());
+    }
 }
