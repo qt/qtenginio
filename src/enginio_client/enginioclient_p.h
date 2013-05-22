@@ -401,7 +401,7 @@ public:
         if (operation == SearchOperation) {
             ValueAdaptor<T> search = object[EnginioString::search];
             ArrayAdaptor<T> objectTypes = object[QStringLiteral("objectTypes")].toArray();
-            if (search.isObject() /*&& !objectTypes.isEmpty()*/) {
+            if (search.isObject()) {
                 for (typename ArrayAdaptor<T>::const_iterator i = objectTypes.constBegin(); i != objectTypes.constEnd(); ++i) {
                     urlQuery.addQueryItem(QStringLiteral("objectTypes[]"), (*i).toString());
                 }
