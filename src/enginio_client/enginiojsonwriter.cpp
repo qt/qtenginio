@@ -97,6 +97,9 @@ void EnginioJsonWriter::arrayToJson(const QJsonArray &a, QByteArray &json)
 void EnginioJsonWriter::valueToJson(const QJsonValue &v, QByteArray &json)
 {
     switch (v.type()) {
+    case QJsonValue::Null:
+        json += "null";
+        break;
     case QJsonValue::Bool:
         json += v.toBool() ? "true" : "false";
         break;
