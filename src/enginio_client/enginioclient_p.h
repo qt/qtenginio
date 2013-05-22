@@ -386,7 +386,7 @@ public:
             urlQuery.addQueryItem(EnginioString::offset, QString::number(offset));
         }
         if (object.contains(EnginioString::count)) { // TODO docs are saying about integer but it is not interpreted.
-            urlQuery.addQueryItem(EnginioString::count, QString::fromLatin1(""));
+            urlQuery.addQueryItem(EnginioString::count, QString(0, Qt::Uninitialized));
         }
         ValueAdaptor<T> include = object[EnginioString::include];
         if (include.isObject()) {
