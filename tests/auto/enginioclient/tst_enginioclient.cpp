@@ -55,6 +55,7 @@ private slots:
     void query_todos();
     void query_todos_filter();
     void query_todos_limit();
+    void query_todos_count();
     void query_users();
     void query_users_filter();
     void search();
@@ -148,6 +149,33 @@ void tst_EnginioClient::query_todos_limit()
     QVERIFY(!response->data().isEmpty());
     QVERIFY(response->data()["results"].isArray());
     QCOMPARE(response->data()["results"].toArray().count(), 1);
+}
+
+void tst_EnginioClient::query_todos_count()
+{
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+
+    QJsonObject obj;
+    obj["objectType"] = QString::fromUtf8("objects.todos");
+    obj["count"] = true;
+    const EnginioReply* reqId = client.query(obj);
+    QVERIFY(reqId);
+
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
+
+    const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QVERIFY(data.contains("count"));
 }
 
 void tst_EnginioClient::query_users()

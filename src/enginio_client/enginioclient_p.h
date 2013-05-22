@@ -91,6 +91,7 @@ struct EnginioString
     static const QString url;
     static const QString access;
     static const QString sort;
+    static const QString count;
 };
 
 class EnginioClientPrivate : public QObject
@@ -383,6 +384,9 @@ public:
         }
         if (int offset = object[EnginioString::offset].toInt()) {
             urlQuery.addQueryItem(EnginioString::offset, QString::number(offset));
+        }
+        if (object.contains(EnginioString::count)) { // TODO docs are saying about integer but it is not interpreted.
+            urlQuery.addQueryItem(EnginioString::count, QString::fromLatin1(""));
         }
         ValueAdaptor<T> include = object[EnginioString::include];
         if (include.isObject()) {

@@ -70,6 +70,8 @@ template <> struct ValueAdaptor<QJSValue>
         return ValueAdaptor<QJSValue>(_value.property(index), _client);
     }
 
+    bool contains(const QString &key) const { return _value.hasProperty(key); }
+
     QByteArray toJson() const
     {
         return _client->toJson(_value);

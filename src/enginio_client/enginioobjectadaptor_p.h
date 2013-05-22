@@ -87,6 +87,7 @@ template <> struct ObjectAdaptor<QJsonObject>
     {}
 
     ValueAdaptor<QJsonObject> operator[](const QString &index) const { return _object[index]; }
+    bool contains(const QString &key) const { return _object.contains(key); }
     QByteArray toJson() const { return QJsonDocument(_object).toJson(QJsonDocument::Compact); }
     void remove(const QString &index) { _object.remove(index); }
 };

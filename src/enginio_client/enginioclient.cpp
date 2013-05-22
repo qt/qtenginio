@@ -94,6 +94,7 @@ const QString EnginioString::object = QStringLiteral("object");
 const QString EnginioString::url = QStringLiteral("url");
 const QString EnginioString::access = QStringLiteral("access");
 const QString EnginioString::sort = QStringLiteral("sort");
+const QString EnginioString::count = QStringLiteral("count");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
