@@ -9,7 +9,8 @@ SUBDIRS += \
     object_operation_tests \
     authentication_tests \
     acl_operation_tests \
-    file_tests
+    file_tests \
+    usergroup_tests
 
 # Make sure destination path exists
 unix {
