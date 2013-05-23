@@ -175,15 +175,18 @@ class EnginioClientPrivate : public QObject
     public:
         ReplyFinishedFunctor(EnginioClientPrivate *enginio)
             : d(enginio)
-        {}
-        void operator ()(QNetworkReply *nreply)
         {
             Q_ASSERT(d);
-            EnginioClient *q = static_cast<EnginioClient*>(d->q_func());
+        }
+
+        void operator ()(QNetworkReply *nreply)
+        {
             EnginioReply *ereply = d->_replyReplyMap.take(nreply);
 
             if (!ereply)
                 return;
+
+            EnginioClient *q = static_cast<EnginioClient*>(d->q_func());
 
             if (nreply->error() != QNetworkReply::NoError) {
                 d->_uploads.remove(nreply);
