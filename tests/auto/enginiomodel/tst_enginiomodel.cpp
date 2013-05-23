@@ -58,6 +58,7 @@ private slots:
     void enginio_property();
     void query_property();
     void operation_property();
+    void roleNames();
 };
 
 void tst_EnginioModel::ctor()
@@ -175,6 +176,37 @@ void tst_EnginioModel::operation_property()
     QTRY_COMPARE(spy.count(), 2);
     QCOMPARE(model.operation(), EnginioClient::UsergroupOperation);
     QCOMPARE(spy[1][0].value<EnginioClient::Operation>(), EnginioClient::UsergroupOperation);
+}
+
+void tst_EnginioModel::roleNames()
+{
+    struct EnginioModelChild: public EnginioModel
+    {
+        using EnginioModel::roleNames;
+    } model;
+    QVERIFY(model.roleNames().isEmpty()); // Initilial value
+
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+    model.setEnginio(&client);
+
+    QVERIFY(model.enginio() == &client);
+
+    model.setOperation(EnginioClient::UserOperation);
+    QJsonObject query = QJsonDocument::fromJson("{\"limit\":5}").object();
+    model.setQuery(query);
+
+    QTRY_COMPARE(model.rowCount(), 5);
+    QHash<int, QByteArray> roles = model.roleNames();
+    QSet<QByteArray> expectedRoles;
+    expectedRoles << "updatedAt" << "objectType" << "id" << "username" << "createdAt" << "_synced";
+    QSet<QByteArray> roleNames = roles.values().toSet();
+    foreach(const QByteArray role, expectedRoles)
+        QVERIFY(roleNames.contains(role));
+
+    QCOMPARE(roles[Qt::DisplayRole], QByteArrayLiteral("id"));
 }
 
 QTEST_MAIN(tst_EnginioModel)
