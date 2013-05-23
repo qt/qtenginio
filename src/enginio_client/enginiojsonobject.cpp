@@ -98,11 +98,7 @@ QByteArray EnginioJsonObject::toEnginioJson(bool isObjectRef) const
 bool EnginioJsonObject::fromEnginioJson(const QJsonObject &json)
 {
     qDebug() << Q_FUNC_INFO << json;
-    QJsonObject::const_iterator i = json.constBegin();
-    while (i != json.constEnd()) {
-        m_object.insert(i.key(), i.value());
-        i++;
-    }
+    m_object = json;
     return true;
 }
 
