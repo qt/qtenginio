@@ -40,6 +40,7 @@
 
 #include <QtTest/QtTest>
 #include <QtCore/qobject.h>
+#include <QtCore/qthread.h>
 
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
@@ -68,6 +69,7 @@ private slots:
     void identity_invalid();
     void acl();
     void file();
+    void sharingNetworkManager();
 };
 
 void tst_EnginioClient::query_todos()
@@ -988,6 +990,35 @@ void tst_EnginioClient::file()
     qDebug() << responseDownload;
     qDebug() << "Download: " << responseDownload;
 
+}
+
+void tst_EnginioClient::sharingNetworkManager()
+{
+    // Check sharing of network acces manager in different enginio clients
+    EnginioClient *e1 = new EnginioClient;
+    EnginioClient *e2 = new EnginioClient;
+    QCOMPARE(e1->networkManager(), e2->networkManager());
+
+    // QNAM can not be shared accross threads
+    struct EnginioInThread : public QThread {
+        QNetworkAccessManager *_qnam;
+        EnginioInThread(QNetworkAccessManager *qnam)
+            : _qnam(qnam)
+        {}
+        void run()
+        {
+            EnginioClient e3;
+            QVERIFY(_qnam != e3.networkManager());
+        }
+    } thread(e1->networkManager());
+    thread.start();
+    QVERIFY(thread.wait(10000));
+
+    // check if deleting qnam creator is not invalidating qnam itself.
+    delete e1;
+    QVERIFY(e2->networkManager());
+    e2->networkManager()->children(); // should not crash
+    delete e2;
 }
 
 QTEST_MAIN(tst_EnginioClient)

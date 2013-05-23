@@ -262,6 +262,7 @@ public:
     QVarLengthArray<QMetaObject::Connection, 2> _identityConnections;
     QUrl m_apiUrl;
     QPointer<QNetworkAccessManager> m_networkManager;
+    QMetaObject::Connection _networkManagerConnection;
     QList<FactoryUnit*> m_factories;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;

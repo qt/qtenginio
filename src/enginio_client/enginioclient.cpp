@@ -43,6 +43,7 @@
 
 #include <QNetworkReply>
 #include <QSslError>
+#include <QtCore/qthreadstorage.h>
 
 /*!
  * \module enginio-client
@@ -115,8 +116,7 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
 
 EnginioClientPrivate::~EnginioClientPrivate()
 {
-    delete m_networkManager;
-
+    QObject::disconnect(_networkManagerConnection);
     while (m_factories.size() > 0) {
         FactoryUnit *unit = m_factories.takeFirst();
         delete unit->factory;
@@ -460,10 +460,18 @@ EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
     return ereply;
 }
 
+Q_GLOBAL_STATIC(QThreadStorage<QNetworkAccessManager*>, NetworkManager)
+
 void EnginioClientPrivate::createNetworkManager()
 {
-    m_networkManager = new QNetworkAccessManager(q_ptr);
-    QObject::connect(m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
+    Q_ASSERT(!m_networkManager);
+    m_networkManager = NetworkManager->localData();
+    if (!m_networkManager) {
+        m_networkManager = new QNetworkAccessManager();
+        NetworkManager->setLocalData(m_networkManager.data());
+    }
+
+    _networkManagerConnection = QObject::connect(m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
 
     // Ignore SSL errors when staging backend is used.
     if (m_apiUrl == QStringLiteral("https://api.staging.engin.io")) {
