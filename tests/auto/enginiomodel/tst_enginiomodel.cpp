@@ -57,6 +57,7 @@ private slots:
     void ctor();
     void enginio_property();
     void query_property();
+    void operation_property();
 };
 
 void tst_EnginioModel::ctor()
@@ -69,6 +70,9 @@ void tst_EnginioModel::enginio_property()
     {
         EnginioClient client;
         EnginioModel model;
+        // No initial value
+        QCOMPARE(model.enginio(), static_cast<EnginioClient*>(0));
+
         QSignalSpy spy(&model, SIGNAL(enginioChanged(EnginioClient*)));
         model.setEnginio(&client);
         QCOMPARE(model.enginio(), &client);
@@ -96,14 +100,50 @@ void tst_EnginioModel::query_property()
     QVERIFY(!query.isEmpty());
     EnginioModel model;
     QSignalSpy spy(&model, SIGNAL(queryChanged(QJsonObject)));
+
+    // initial value is empty
+    QVERIFY(model.query().isEmpty());
+
     model.setQuery(query);
     QCOMPARE(model.query(), query);
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spy[0][0].value<QJsonObject>(), query);
+
+    // try to set the same query again, it should not emit the signal
+    model.setQuery(query);
+    QCOMPARE(model.query(), query);
+    QCOMPARE(spy.count(), 1);
+
     model.setQuery(QJsonObject());
     QTRY_COMPARE(spy.count(), 2);
     QVERIFY(model.query().isEmpty());
     QVERIFY(spy[1][0].value<QJsonObject>().isEmpty());
 }
+
+void tst_EnginioModel::operation_property()
+{
+    EnginioModel model;
+    QSignalSpy spy(&model, SIGNAL(operationChanged(EnginioClient::Operation)));
+
+    // check initial value
+    QCOMPARE(model.operation(), EnginioClient::ObjectOperation);
+
+    model.setOperation(EnginioClient::UserOperation);
+    QCOMPARE(model.operation(), EnginioClient::UserOperation);
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spy[0][0].value<EnginioClient::Operation>(), EnginioClient::UserOperation);
+
+    // try to set the same operation again, it should not emit the signal
+    model.setOperation(EnginioClient::UserOperation);
+    QCOMPARE(model.operation(), EnginioClient::UserOperation);
+    QCOMPARE(spy.count(), 1);
+
+    // try to change it agian.
+    model.setOperation(EnginioClient::UsergroupOperation);
+    QTRY_COMPARE(spy.count(), 2);
+    QCOMPARE(model.operation(), EnginioClient::UsergroupOperation);
+    QCOMPARE(spy[1][0].value<EnginioClient::Operation>(), EnginioClient::UsergroupOperation);
+}
+
 QTEST_MAIN(tst_EnginioModel)
 #include "tst_enginiomodel.moc"
