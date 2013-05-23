@@ -32,6 +32,7 @@ private Q_SLOTS:
     void testCustomObjectWithRefs();
     void testObjectRefsChain();
     void testSelfLinkingObjectRefs();
+    void testDeleteProperty();
 
 private:
     QPointer<EnginioClient> m_client;
@@ -511,6 +512,8 @@ void ObjectOperationTest::testCustomObjectWithRefs()
     delete object1;
     delete object2;
     delete object3;
+
+    m_client->unregisterObjectFactory(factoryId);
 }
 
 /*!
@@ -519,6 +522,9 @@ void ObjectOperationTest::testCustomObjectWithRefs()
 void ObjectOperationTest::testObjectRefsChain()
 {
     QVERIFY2(m_client, "Null client");
+
+    int factoryId = m_client->registerObjectFactory(new TestObjectFactory());
+    QVERIFY2(factoryId > 0, "Invalid factory registration ID");
 
     /* Create object chain: object1 <= object2 <= object3 */
 
@@ -587,6 +593,8 @@ void ObjectOperationTest::testObjectRefsChain()
     delete object1;
     delete object2;
     delete object3;
+
+    m_client->unregisterObjectFactory(factoryId);
 }
 
 /*!
@@ -595,6 +603,9 @@ void ObjectOperationTest::testObjectRefsChain()
 void ObjectOperationTest::testSelfLinkingObjectRefs()
 {
     QVERIFY2(m_client, "Null client");
+
+    int factoryId = m_client->registerObjectFactory(new TestObjectFactory());
+    QVERIFY2(factoryId > 0, "Invalid factory registration ID");
 
     /* Create Object */
     SelfLinkedObject *object = new SelfLinkedObject(
@@ -665,6 +676,86 @@ void ObjectOperationTest::testSelfLinkingObjectRefs()
 
     delete objectRead;
     delete object;
+
+    m_client->unregisterObjectFactory(factoryId);
+}
+
+/*!
+ * Update object in backend by deleting a property
+ */
+void ObjectOperationTest::testDeleteProperty()
+{
+    QVERIFY2(m_client, "Null client");
+    QVERIFY2(m_model, "Null model");
+
+    /* Create new object in backend and add it to model */
+
+    EnginioJsonObject *originalObject = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
+    originalObject->insert("stringValue", EnginioTests::randomString(10));
+    originalObject->insert("intValue", qrand());
+    QVERIFY(EnginioTests::createObject(m_client, originalObject, m_model));
+    QVERIFY(!originalObject->id().isEmpty());
+    QVERIFY(!originalObject->value("stringValue").isUndefined());
+    int modelRowCountBefore = m_model->rowCount();
+
+    /* Delete "stringValue" property from object */
+
+    EnginioJsonObject *updateObject = new EnginioJsonObject(EnginioTests::TEST_OBJECT_TYPE);
+    QVERIFY2(updateObject, "Object creation failed");
+    updateObject->insert("id", originalObject->id());
+    updateObject->insert("stringValue", QJsonValue());
+    QVERIFY(updateObject->value("stringValue").isNull());
+
+    EnginioObjectOperation *op = new EnginioObjectOperation(m_client);
+    op->setModel(m_model);
+    op->update(updateObject);
+
+    QSignalSpy finishedSpy(op, SIGNAL(finished()));
+    QSignalSpy errorSpy(op, SIGNAL(error(EnginioError*)));
+
+    op->execute();
+
+    QVERIFY2(finishedSpy.wait(EnginioTests::NETWORK_TIMEOUT),
+             "Operation was too slow");
+    QCOMPARE(finishedSpy.count(), 1);
+    QCOMPARE(errorSpy.count(), 0);
+    delete op;
+
+    /* Check that object used in update operation was updated correctly */
+
+    QVERIFY(updateObject->value("stringValue").isUndefined());
+    QCOMPARE((int)updateObject->value("intValue").toDouble(),
+             (int)originalObject->value("intValue").toDouble());
+    QVERIFY2(!updateObject->value("createdAt").isUndefined(), "Create time undefined");
+    QVERIFY2(!updateObject->value("updatedAt").isUndefined(), "Update time undefined");
+    QVERIFY(updateObject->value("createdAt").toString() !=
+            updateObject->value("updatedAt").toString());
+    delete updateObject;
+
+    /* Check that object in model was updated correctly */
+
+    QCOMPARE(m_model->rowCount(), modelRowCountBefore);
+    QModelIndex index = m_model->indexFromId(originalObject->id());
+    QVERIFY2(index.isValid(), "Can't find object from model");
+    EnginioJsonObject *modelObject2 = dynamic_cast<EnginioJsonObject*>(
+                m_model->getObject(index));
+    QVERIFY(modelObject2);
+    QVERIFY(modelObject2->value("stringValue").isUndefined());
+    QCOMPARE((int)modelObject2->value("intValue").toDouble(),
+             (int)originalObject->value("intValue").toDouble());
+
+    /* Get updated object from backend */
+
+    EnginioJsonObject *readObject = dynamic_cast<EnginioJsonObject*>(
+                EnginioTests::readObject(m_client,
+                                         originalObject->id(),
+                                         originalObject->objectType()));
+    QVERIFY2(readObject, "Failed to read object");
+    QVERIFY(modelObject2->value("stringValue").isUndefined());
+    QCOMPARE((int)modelObject2->value("intValue").toDouble(),
+             (int)originalObject->value("intValue").toDouble());
+    delete readObject;
+    delete originalObject;
 }
 
 QTEST_MAIN(ObjectOperationTest)

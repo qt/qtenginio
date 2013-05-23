@@ -7,7 +7,6 @@ Client library for accessing Enginio service from Qt and QML code.
   * Mac OS X: OpenSSL library should be preinstalled.
   * Linux: Most distributions have preinstalled OpenSSL library. If yours doesn't, seach for `libssl` in package repository.
   * Windows: Get the installer from http://slproweb.com/products/Win32OpenSSL.html (light version is enough, copy DLLs to windows system directory when asked).
-
 * Perl 5.10 or newer
   * Mac and Linux: Perl should be preinstalled.
   * Windows: http://www.perl.org/get.html
