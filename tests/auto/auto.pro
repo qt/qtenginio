@@ -8,4 +8,5 @@ SUBDIRS += \
     acl_operation \
     file \
     enginioclient \
-    enginiomodel
+    enginiomodel \
+    usergroup

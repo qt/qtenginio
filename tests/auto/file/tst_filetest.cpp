@@ -15,7 +15,7 @@ class FileTest : public QObject
 
 public:
     FileTest();
-
+    
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
@@ -155,10 +155,6 @@ void FileTest::testUploadDownload()
     QCOMPARE(objectFile.value("contentType").toString(), TEST_IMAGE_CONTENT_TYPE);
     QCOMPARE((qint64)objectFile.value("fileSize").toDouble(), file->size());
     QVERIFY(!objectFile.value("url").toString().isEmpty());
-    QCOMPARE(objectFile.value("object").toObject().value("id").toString(),
-             object->id());
-    QCOMPARE(objectFile.value("object").toObject().value("objectType").toString(),
-             object->objectType());
 
     file->close();
     delete fileOp;
@@ -246,10 +242,6 @@ void FileTest::testUploadFromFile()
     QCOMPARE(objectFile.value("fileName").toString(), TEST_IMAGE);
     QCOMPARE(objectFile.value("contentType").toString(), TEST_IMAGE_CONTENT_TYPE);
     QVERIFY(!objectFile.value("url").toString().isEmpty());
-    QCOMPARE(objectFile.value("object").toObject().value("id").toString(),
-             object->id());
-    QCOMPARE(objectFile.value("object").toObject().value("objectType").toString(),
-             object->objectType());
 
     delete fileOp;
     delete object;
@@ -352,10 +344,6 @@ void FileTest::testUploadRefless()
     QCOMPARE(objectFile.value("fileName").toString(), TEST_IMAGE);
     QCOMPARE(objectFile.value("contentType").toString(), TEST_IMAGE_CONTENT_TYPE);
     QVERIFY(!objectFile.value("url").toString().isEmpty());
-    QCOMPARE(objectFile.value("object").toObject().value("id").toString(),
-             object->id());
-    QCOMPARE(objectFile.value("object").toObject().value("objectType").toString(),
-             object->objectType());
 
     delete fileOp;
     delete object;
@@ -435,10 +423,6 @@ void FileTest::testUploadMultipart()
     QCOMPARE(objectFile.value("fileName").toString(), TEST_IMAGE);
     QCOMPARE(objectFile.value("contentType").toString(), TEST_IMAGE_CONTENT_TYPE);
     QVERIFY(!objectFile.value("url").toString().isEmpty());
-    QCOMPARE(objectFile.value("object").toObject().value("id").toString(),
-             object->id());
-    QCOMPARE(objectFile.value("object").toObject().value("objectType").toString(),
-             object->objectType());
 
     delete fileOp;
     delete object;
