@@ -119,9 +119,10 @@ void tst_EnginioClient::query_todos_filter()
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-    QVERIFY(!response->data().isEmpty());
-    QVERIFY(!response->data()["results"].isUndefined());
-    QJsonArray array = response->data()["results"].toArray();
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QVERIFY(!data["results"].isUndefined());
+    QJsonArray array = data["results"].toArray();
     foreach (QJsonValue value, array)
         QVERIFY(value.toObject()["completed"].toBool());
 }
@@ -148,9 +149,10 @@ void tst_EnginioClient::query_todos_limit()
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-    QVERIFY(!response->data().isEmpty());
-    QVERIFY(response->data()["results"].isArray());
-    QCOMPARE(response->data()["results"].toArray().count(), 1);
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QVERIFY(data["results"].isArray());
+    QCOMPARE(data["results"].toArray().count(), 1);
 }
 
 void tst_EnginioClient::query_todos_count()
@@ -200,9 +202,10 @@ void tst_EnginioClient::query_users()
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-    QVERIFY(!response->data().isEmpty());
-    QVERIFY(!response->data()["results"].isUndefined());
-    QVERIFY(response->data()["results"].toArray().count());
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QVERIFY(!data["results"].isUndefined());
+    QVERIFY(data["results"].toArray().count());
 }
 
 void tst_EnginioClient::query_users_filter()
@@ -226,9 +229,10 @@ void tst_EnginioClient::query_users_filter()
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-    QVERIFY(!response->data().isEmpty());
-    QVERIFY(!response->data()["results"].isUndefined());
-    QVERIFY(!response->data()["results"].toArray().count());
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QVERIFY(!data["results"].isUndefined());
+    QVERIFY(!data["results"].toArray().count());
 }
 
 void tst_EnginioClient::search()
@@ -258,9 +262,10 @@ void tst_EnginioClient::search()
 
         QCOMPARE(response, reqId);
         QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-        QVERIFY(!response->data().isEmpty());
-        QVERIFY(!response->data()["results"].isUndefined());
-        resultCount1 = response->data()["results"].toArray().count();
+        QJsonObject data = response->data();
+        QVERIFY(!data.isEmpty());
+        QVERIFY(!data["results"].isUndefined());
+        resultCount1 = data["results"].toArray().count();
         QVERIFY(resultCount1);
         qDebug() << resultCount1 << "results on objects.CustomObject with phrase \"Query\".";
     }
@@ -281,9 +286,10 @@ void tst_EnginioClient::search()
 
         QCOMPARE(response, reqId);
         QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-        QVERIFY(!response->data().isEmpty());
-        QVERIFY(!response->data()["results"].isUndefined());
-        int resultCount2 = response->data()["results"].toArray().count();
+        QJsonObject data = response->data();
+        QVERIFY(!data.isEmpty());
+        QVERIFY(!data["results"].isUndefined());
+        int resultCount2 = data["results"].toArray().count();
         QVERIFY(resultCount2 > resultCount1);
         qDebug() << resultCount2 << " results on objects.CustomObject and objects.SelfLinkedObject with phrase \"object OR test\".";
     }
@@ -312,10 +318,11 @@ void tst_EnginioClient::create_todos()
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-    QVERIFY(!response->data().isEmpty());
-    QCOMPARE(response->data()["completed"], obj["completed"]);
-    QCOMPARE(response->data()["title"], obj["title"]);
-    QCOMPARE(response->data()["objectType"], obj["objectType"]);
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QCOMPARE(data["completed"], obj["completed"]);
+    QCOMPARE(data["title"], obj["title"]);
+    QCOMPARE(data["objectType"], obj["objectType"]);
 }
 
 void tst_EnginioClient::user_crud()
@@ -420,8 +427,9 @@ void tst_EnginioClient::update_todos()
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-    QVERIFY(!response->data().isEmpty());
-    QJsonObject object = response->data()["results"].toArray().first().toObject();
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QJsonObject object = data["results"].toArray().first().toObject();
 
     object["completed"] = !object["completed"].toBool();
     reqId = client.update(object);
@@ -432,10 +440,10 @@ void tst_EnginioClient::update_todos()
     response = spy[1][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-    QCOMPARE(response->data()["title"], object["title"]);
-    QCOMPARE(response->data()["objectType"], object["objectType"]);
-
-    QCOMPARE(response->data()["completed"], object["completed"]);
+    data = response->data();
+    QCOMPARE(data["title"], object["title"]);
+    QCOMPARE(data["objectType"], object["objectType"]);
+    QCOMPARE(data["completed"], object["completed"]);
 }
 
 void tst_EnginioClient::update_invalidId()
@@ -463,8 +471,9 @@ void tst_EnginioClient::update_invalidId()
     QVERIFY(!response->errorString().isEmpty());
     QCOMPARE(reqId, spyError[0][0].value<EnginioReply*>());
     // TODO how ugly is that, improve JSON api
-    QVERIFY(!response->data()["errors"].toArray()[0].toObject()["message"].toString().isEmpty());
-    QVERIFY(!response->data()["errors"].toArray()[0].toObject()["reason"].toString().isEmpty());
+    QJsonObject data = response->data();
+    QVERIFY(!data["errors"].toArray()[0].toObject()["message"].toString().isEmpty());
+    QVERIFY(!data["errors"].toArray()[0].toObject()["reason"].toString().isEmpty());
 }
 
 void tst_EnginioClient::remove_todos()
@@ -961,10 +970,11 @@ void tst_EnginioClient::file()
     const EnginioReply *responseObjectCreation = spy[0][0].value<EnginioReply*>();
     QCOMPARE(responseObjectCreation, req);
     QCOMPARE(responseObjectCreation->errorCode(), QNetworkReply::NoError);
-    QVERIFY(!responseObjectCreation->data().isEmpty());
-    QCOMPARE(responseObjectCreation->data()["title"], obj["title"]);
-    QCOMPARE(responseObjectCreation->data()["objectType"], obj["objectType"]);
-    QString id = responseObjectCreation->data()["id"].toString();
+    QJsonObject data = responseObjectCreation->data();
+    QVERIFY(!data.isEmpty());
+    QCOMPARE(data["title"], obj["title"]);
+    QCOMPARE(data["objectType"], obj["objectType"]);
+    QString id = data["id"].toString();
     QVERIFY(!id.isEmpty());
 
     QJsonObject object;
@@ -999,12 +1009,13 @@ void tst_EnginioClient::file()
     QTRY_COMPARE(spy.count(), 3);
     QCOMPARE(spyError.count(), 0);
     const EnginioReply *responseQuery = spy[2][0].value<EnginioReply*>();
-    QVERIFY(responseQuery->data()["results"].isArray());
-    qDebug() << endl << responseQuery->data()["results"].toArray().first().toObject();
+    data = responseQuery->data();
+    QVERIFY(data["results"].isArray());
+    qDebug() << endl << data["results"].toArray().first().toObject();
 
-    QVERIFY(responseQuery->data()["results"].toArray().first().toObject()["file"].isObject());
-    QVERIFY(!responseQuery->data()["results"].toArray().first().toObject()["file"].toObject()["url"].toString().isEmpty());
-    qDebug() << "Download from here: " << client.apiUrl() << responseQuery->data()["results"].toArray().first().toObject()["file"].toObject()["url"].toString();
+    QVERIFY(data["results"].toArray().first().toObject()["file"].isObject());
+    QVERIFY(!data["results"].toArray().first().toObject()["file"].toObject()["url"].toString().isEmpty());
+    qDebug() << "Download from here: " << client.apiUrl() << data["results"].toArray().first().toObject()["file"].toObject()["url"].toString();
 
     // Download
     const EnginioReply* reqDownload = client.downloadFile(object);
@@ -1015,7 +1026,6 @@ void tst_EnginioClient::file()
     const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
     qDebug() << responseDownload;
     qDebug() << "Download: " << responseDownload;
-
 }
 
 void tst_EnginioClient::sharingNetworkManager()
