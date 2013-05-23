@@ -124,6 +124,12 @@ public:
         , _canFetchMore(false)
     {}
 
+    ~EnginioModelPrivate()
+    {
+        foreach (const QMetaObject::Connection connection, _connections)
+            QObject::disconnect(connection);
+    }
+
     EnginioClient *enginio() const
     {
         return _enginio;
