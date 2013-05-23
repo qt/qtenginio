@@ -35,79 +35,56 @@
 **
 ****************************************************************************/
 
-#include "enginiojsonobject.h"
-#include "enginiojsonwriter_p.h"
-#include <QDebug>
+#ifndef ENGINIOQMLUSERGROUPOPERATION_H
+#define ENGINIOQMLUSERGROUPOPERATION_H
 
-/*!
- * \class EnginioJsonObject
- * \inmodule enginio-client
- * \brief Generic JSON object stored in the Enginio backend.
- *
- * You can use this class if you don't want to define a custom class.
- *
- */
+#include "enginiousergroupoperation.h"
+#include "enginioqmlclient.h"
+#include "enginioqmlobjectmodel.h"
 
-EnginioJsonObject::EnginioJsonObject(const QString &objectType)
+#include <QJsonObject>
+#include <QJSValue>
+
+class EnginioJsonObject;
+
+class EnginioQmlUsergroupOperation : public EnginioUsergroupOperation
 {
-    qDebug() << this << "EnginioJsonObject created. Type:" << objectType;
+    Q_OBJECT
+    Q_DISABLE_COPY(EnginioQmlUsergroupOperation)
+    Q_PROPERTY(EnginioQmlClient* client READ getClient WRITE setClient)
+    Q_PROPERTY(EnginioQmlObjectModel* model READ getModel WRITE setModelQml)
+    Q_PROPERTY(int modelIndex READ modelIndexRow WRITE setModelIndexRow)
+    Q_PROPERTY(QJSValue user READ user)
+    Q_PROPERTY(QJsonObject include READ include WRITE setInclude)
 
-    if (!objectType.isEmpty())
-        m_object.insert(QStringLiteral("objectType"), objectType);
-}
+public:
+    EnginioQmlUsergroupOperation(EnginioQmlClient *client = 0,
+                                 EnginioQmlObjectModel *model = 0,
+                                 QObject *parent = 0);
 
-EnginioJsonObject::~EnginioJsonObject()
-{
-    qDebug() << this << "EnginioJsonObject deleted";
-}
+    EnginioQmlClient * getClient() const;
+    EnginioQmlObjectModel * getModel() const;
+    void setModelQml(EnginioQmlObjectModel *model);
+    QJSValue user();
+    QJsonObject include() const;
+    void setInclude(const QJsonObject &include);
 
-/*!
- * Insert new property with a \a key, and a \a value. If there is
- * already a property with same key, old value will be replaced.
- */
-void EnginioJsonObject::insert(const QString &key, const QJsonValue &value)
-{
-    m_object.insert(key, value);
-}
+    Q_INVOKABLE void addMember(QJSValue user, const QString &usergroupId);
+    Q_INVOKABLE void addMemberById(const QString &userId, const QString &usergroupId);
+    Q_INVOKABLE void removeMember(QJSValue user, const QString &usergroupId);
+    Q_INVOKABLE void removeMemberById(const QString &userId, const QString &usergroupId);
 
-/*!
- * Removes property \a key from object.
- */
-void EnginioJsonObject::remove(const QString &key)
-{
-    m_object.remove(key);
-}
+private slots:
+    void updateUser();
 
-/*!
- * Returns value of the property, \a key. If property does not exist,
- * returned QJsonValue will be \c Undefined.
- */
-QJsonValue EnginioJsonObject::value(const QString &key) const
-{
-    return m_object.value(key);
-}
+private:
+    bool setUser(const QJSValue &user);
+    int modelIndexRow() const;
+    void setModelIndexRow(int row);
 
-QByteArray EnginioJsonObject::toEnginioJson(bool isObjectRef) const
-{
-    QByteArray json;
-    EnginioJsonWriter::objectToJson(m_object, json, isObjectRef);
-    qDebug() << Q_FUNC_INFO << json;
-    return json;
-}
+    QJSValue m_jsObject;
+    EnginioJsonObject *m_user;
+    int m_modelIndexRow;
+};
 
-bool EnginioJsonObject::fromEnginioJson(const QJsonObject &json)
-{
-    qDebug() << Q_FUNC_INFO << json;
-    m_object = json;
-    return true;
-}
-
-QString EnginioJsonObject::id() const
-{
-    return value(QStringLiteral("id")).toString();
-}
-
-QString EnginioJsonObject::objectType() const
-{
-    return value(QStringLiteral("objectType")).toString();
-}
+#endif // ENGINIOQMLUSERGROUPOPERATION_H

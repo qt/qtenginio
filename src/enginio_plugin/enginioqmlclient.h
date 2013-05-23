@@ -49,6 +49,8 @@ class EnginioQmlObjectModel;
 class EnginioQmlObjectOperation;
 class EnginioQmlQueryOperation;
 class EnginioQmlClientPrivate;
+class EnginioQmlUsergroupOperation;
+
 
 class EnginioQmlClient : public EnginioClient
 {
@@ -65,6 +67,7 @@ public:
             EnginioQmlObjectModel *model = 0);
     Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
     Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
+    Q_INVOKABLE EnginioQmlUsergroupOperation * createUsergroupOperation();
 
     Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);

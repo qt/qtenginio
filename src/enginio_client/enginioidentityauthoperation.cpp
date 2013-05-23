@@ -305,8 +305,8 @@ const EnginioAbstractObject * EnginioIdentityAuthOperation::loggedInUser() const
  * to any groups. Note that objects in the list will be deleted when the operation
  * is deleted or executed again.
  */
-QList<EnginioAbstractObject*> EnginioIdentityAuthOperation::loggedInUserGroups()
+QList<EnginioAbstractObject*> EnginioIdentityAuthOperation::loggedInUserGroups() const
 {
-    Q_D(EnginioIdentityAuthOperation);
+    Q_D(const EnginioIdentityAuthOperation);
     return d->m_loggedInUserGroups;
 }

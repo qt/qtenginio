@@ -35,79 +35,51 @@
 **
 ****************************************************************************/
 
-#include "enginiojsonobject.h"
-#include "enginiojsonwriter_p.h"
-#include <QDebug>
+#ifndef ENGINIOUSERGROUPOPERATION_P_H
+#define ENGINIOUSERGROUPOPERATION_P_H
 
-/*!
- * \class EnginioJsonObject
- * \inmodule enginio-client
- * \brief Generic JSON object stored in the Enginio backend.
- *
- * You can use this class if you don't want to define a custom class.
- *
- */
+#include "enginioabstractobject.h"
+#include "enginioobjectmodel.h"
+#include "enginiousergroupoperation.h"
+#include "enginiooperation_p.h"
+#include <QJsonObject>
 
-EnginioJsonObject::EnginioJsonObject(const QString &objectType)
-{
-    qDebug() << this << "EnginioJsonObject created. Type:" << objectType;
+class QBuffer;
 
-    if (!objectType.isEmpty())
-        m_object.insert(QStringLiteral("objectType"), objectType);
+namespace Enginio {
+    enum UsergroupOperationType {
+        NullUsergroupOperation = 0,
+        AddMemberOperation,
+        RemoveMemberOperation
+    };
 }
 
-EnginioJsonObject::~EnginioJsonObject()
+class EnginioUsergroupOperationPrivate : public EnginioOperationPrivate
 {
-    qDebug() << this << "EnginioJsonObject deleted";
-}
+    Q_OBJECT
+    Q_DECLARE_PUBLIC(EnginioUsergroupOperation)
 
-/*!
- * Insert new property with a \a key, and a \a value. If there is
- * already a property with same key, old value will be replaced.
- */
-void EnginioJsonObject::insert(const QString &key, const QJsonValue &value)
-{
-    m_object.insert(key, value);
-}
+public:
+    EnginioUsergroupOperationPrivate(EnginioUsergroupOperation *op = 0);
+    ~EnginioUsergroupOperationPrivate();
 
-/*!
- * Removes property \a key from object.
- */
-void EnginioJsonObject::remove(const QString &key)
-{
-    m_object.remove(key);
-}
+    // From EnginioOperationPrivate
+    virtual QString requestPath() const;
+    virtual QNetworkReply * doRequest(const QUrl &backendUrl);
+    virtual void handleResults();
 
-/*!
- * Returns value of the property, \a key. If property does not exist,
- * returned QJsonValue will be \c Undefined.
- */
-QJsonValue EnginioJsonObject::value(const QString &key) const
-{
-    return m_object.value(key);
-}
+    Enginio::UsergroupOperationType m_type;
+    EnginioAbstractObject *m_user;
+    QString m_userId;
+    QString m_usergroupId;
+    bool m_userOwned;
+    QPointer<EnginioObjectModel> m_model;
+    QModelIndex m_modelIndex;
+    QBuffer *m_requestDataBuffer;
 
-QByteArray EnginioJsonObject::toEnginioJson(bool isObjectRef) const
-{
-    QByteArray json;
-    EnginioJsonWriter::objectToJson(m_object, json, isObjectRef);
-    qDebug() << Q_FUNC_INFO << json;
-    return json;
-}
 
-bool EnginioJsonObject::fromEnginioJson(const QJsonObject &json)
-{
-    qDebug() << Q_FUNC_INFO << json;
-    m_object = json;
-    return true;
-}
+signals:
+    void userUpdated() const;
+};
 
-QString EnginioJsonObject::id() const
-{
-    return value(QStringLiteral("id")).toString();
-}
-
-QString EnginioJsonObject::objectType() const
-{
-    return value(QStringLiteral("objectType")).toString();
-}
+#endif // ENGINIOUSERGROUPOPERATION_P_H
