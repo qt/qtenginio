@@ -152,6 +152,8 @@ void AuthenticationTest::testWrongBackendId()
 
 void AuthenticationTest::testAuthenticationSequence()
 {
+    const QString password("pa$$word");
+
     QVERIFY2(m_client, "Null client");
     QSignalSpy sessionAuthSpy(m_client, SIGNAL(sessionAuthenticated()));
     QSignalSpy sessionTermSpy(m_client, SIGNAL(sessionTerminated()));
@@ -162,7 +164,7 @@ void AuthenticationTest::testAuthenticationSequence()
     user->insert("username", EnginioTests::randomString(15));
     user->insert("firstName", QStringLiteral("firstName_testAuthSequence"));
     user->insert("lastName", QStringLiteral("lastName_testAuthSequence"));
-    user->insert("password", QStringLiteral("password"));
+    user->insert("password", password);
     QVERIFY(EnginioTests::createObject(m_client, user));
     QVERIFY(!user->id().isEmpty());
 
@@ -194,7 +196,7 @@ void AuthenticationTest::testAuthenticationSequence()
     op = new EnginioIdentityAuthOperation(m_client);
     QVERIFY2(op, "Operation creation failed");
     op->loginWithUsernameAndPassword(user->value("username").toString(),
-                                     user->value("password").toString());
+                                     password);
 
     QSignalSpy finishedSpy2(op, SIGNAL(finished()));
     QSignalSpy errorSpy2(op, SIGNAL(error(EnginioError*)));
@@ -269,6 +271,8 @@ void AuthenticationTest::testAuthenticationSequence()
 
 void AuthenticationTest::testAttachToSession()
 {
+    const QString password("pa$$word");
+
     QVERIFY2(m_client, "Null client");
     QSignalSpy sessionAuthSpy1(m_client, SIGNAL(sessionAuthenticated()));
     QSignalSpy sessionTermSpy1(m_client, SIGNAL(sessionTerminated()));
@@ -279,7 +283,7 @@ void AuthenticationTest::testAttachToSession()
     user->insert("username", EnginioTests::randomString(15));
     user->insert("firstName", QStringLiteral("firstName_AttachToSession"));
     user->insert("lastName", QStringLiteral("lastName"));
-    user->insert("password", QStringLiteral("password"));
+    user->insert("password", password);
     QVERIFY(EnginioTests::createObject(m_client, user));
     QVERIFY(!user->id().isEmpty());
 
@@ -288,7 +292,7 @@ void AuthenticationTest::testAttachToSession()
     EnginioIdentityAuthOperation *op = new EnginioIdentityAuthOperation(m_client);
     QVERIFY2(op, "Operation creation failed");
     op->loginWithUsernameAndPassword(user->value("username").toString(),
-                                     user->value("password").toString());
+                                     password);
 
     QSignalSpy finishedSpy1(op, SIGNAL(finished()));
     QSignalSpy errorSpy1(op, SIGNAL(error(EnginioError*)));
@@ -350,6 +354,8 @@ void AuthenticationTest::testAttachToSession()
 
 void AuthenticationTest::testCustomUserProperties()
 {
+    const QString password("pa$$word");
+
     QVERIFY2(m_client, "Null client");
     QSignalSpy sessionAuthSpy(m_client, SIGNAL(sessionAuthenticated()));
     QSignalSpy sessionTermSpy(m_client, SIGNAL(sessionTerminated()));
@@ -360,7 +366,7 @@ void AuthenticationTest::testCustomUserProperties()
     user->insert("username", EnginioTests::randomString(15));
     user->insert("firstName", QStringLiteral("firstName_CustomUser"));
     user->insert("lastName", QStringLiteral("lastName"));
-    user->insert("password", QStringLiteral("password"));
+    user->insert("password", password);
     user->insert("stringValue", QStringLiteral("CustomUserTag"));
     QVERIFY(EnginioTests::createObject(m_client, user));
     QVERIFY(!user->id().isEmpty());
@@ -370,7 +376,7 @@ void AuthenticationTest::testCustomUserProperties()
     EnginioIdentityAuthOperation *op = new EnginioIdentityAuthOperation(m_client);
     QVERIFY2(op, "Operation creation failed");
     op->loginWithUsernameAndPassword(user->value("username").toString(),
-                                     user->value("password").toString());
+                                     password);
 
     QSignalSpy finishedSpy1(op, SIGNAL(finished()));
     QSignalSpy errorSpy1(op, SIGNAL(error(EnginioError*)));

@@ -52,6 +52,8 @@ void AclOperationTest::cleanupTestCase()
 
 void AclOperationTest::testReadObjectPermissions()
 {
+    const QString PASSWORD("pa$$word");
+
     QVERIFY2(m_client, "Null client");
 
     /* Create user object and login */
@@ -60,12 +62,12 @@ void AclOperationTest::testReadObjectPermissions()
     user->insert("username", EnginioTests::randomString(15));
     user->insert("firstName", QStringLiteral("firstName_ReadACL"));
     user->insert("lastName", QStringLiteral("lastName"));
-    user->insert("password", QStringLiteral("password"));
+    user->insert("password", PASSWORD);
     QVERIFY(EnginioTests::createObject(m_client, user));
     QVERIFY(!user->id().isEmpty());
     QVERIFY(EnginioTests::login(m_client,
                                 user->value("username").toString(),
-                                user->value("password").toString()));
+                                PASSWORD));
 
     /* Create new object */
 
@@ -113,6 +115,9 @@ void AclOperationTest::testReadObjectPermissions()
 
 void AclOperationTest::testAddObjectPermissions()
 {
+    const QString USER_1_PASSWORD("pa$$word");
+    const QString USER_2_PASSWORD("s3cret");
+
     QVERIFY2(m_client, "Null client");
 
     /* Create user1 and user2 and login user1 */
@@ -121,7 +126,7 @@ void AclOperationTest::testAddObjectPermissions()
     user1->insert("username", EnginioTests::randomString(15));
     user1->insert("firstName", QStringLiteral("firstName_AddACL1"));
     user1->insert("lastName", QStringLiteral("lastName"));
-    user1->insert("password", QStringLiteral("password"));
+    user1->insert("password", USER_1_PASSWORD);
     QVERIFY(EnginioTests::createObject(m_client, user1));
     QVERIFY(!user1->id().isEmpty());
 
@@ -129,13 +134,13 @@ void AclOperationTest::testAddObjectPermissions()
     user2->insert("username", EnginioTests::randomString(15));
     user2->insert("firstName", QStringLiteral("firstName_AddACL2"));
     user2->insert("lastName", QStringLiteral("lastName"));
-    user2->insert("password", QStringLiteral("password"));
+    user2->insert("password", USER_2_PASSWORD);
     QVERIFY(EnginioTests::createObject(m_client, user2));
     QVERIFY(!user2->id().isEmpty());
 
     QVERIFY(EnginioTests::login(m_client,
                                 user1->value("username").toString(),
-                                user1->value("password").toString()));
+                                USER_1_PASSWORD));
 
     /* Create new object */
 
@@ -167,7 +172,7 @@ void AclOperationTest::testAddObjectPermissions()
     QVERIFY(EnginioTests::logout(m_client));
     QVERIFY(EnginioTests::login(m_client,
                                 user2->value("username").toString(),
-                                user2->value("password").toString()));
+                                USER_2_PASSWORD));
 
     /* Read object permissions as user2 */
 
@@ -201,6 +206,9 @@ void AclOperationTest::testAddObjectPermissions()
 
 void AclOperationTest::testDeleteObjectPermissions()
 {
+    const QString USER_1_PASSWORD("pa$$word");
+    const QString USER_2_PASSWORD("s3cret");
+
     QVERIFY2(m_client, "Null client");
 
     /* Create user1 and user2 and login user1 */
@@ -209,7 +217,7 @@ void AclOperationTest::testDeleteObjectPermissions()
     user1->insert("username", EnginioTests::randomString(15));
     user1->insert("firstName", QStringLiteral("firstName_DeleteACL1"));
     user1->insert("lastName", QStringLiteral("lastName"));
-    user1->insert("password", QStringLiteral("password"));
+    user1->insert("password", USER_1_PASSWORD);
     QVERIFY(EnginioTests::createObject(m_client, user1));
     QVERIFY(!user1->id().isEmpty());
 
@@ -217,13 +225,13 @@ void AclOperationTest::testDeleteObjectPermissions()
     user2->insert("username", EnginioTests::randomString(15));
     user2->insert("firstName", QStringLiteral("firstName_DeleteACL2"));
     user2->insert("lastName", QStringLiteral("lastName"));
-    user2->insert("password", QStringLiteral("password"));
+    user2->insert("password", USER_2_PASSWORD);
     QVERIFY(EnginioTests::createObject(m_client, user2));
     QVERIFY(!user2->id().isEmpty());
 
     QVERIFY(EnginioTests::login(m_client,
                                 user1->value("username").toString(),
-                                user1->value("password").toString()));
+                                USER_1_PASSWORD));
 
     /* Create new object */
 
@@ -256,7 +264,7 @@ void AclOperationTest::testDeleteObjectPermissions()
     QVERIFY(EnginioTests::logout(m_client));
     QVERIFY(EnginioTests::login(m_client,
                                 user2->value("username").toString(),
-                                user2->value("password").toString()));
+                                USER_2_PASSWORD));
 
     /* Try to read object as user2 */
 
@@ -272,6 +280,7 @@ void AclOperationTest::testDeleteObjectPermissions()
 
 void AclOperationTest::testUpdateObjectPermissions()
 {
+    const QString PASSWORD("pa$$word");
     const QString FAKE_USER_ID("111222333444555666777888");
 
     QVERIFY2(m_client, "Null client");
@@ -282,12 +291,12 @@ void AclOperationTest::testUpdateObjectPermissions()
     user->insert("username", EnginioTests::randomString(15));
     user->insert("firstName", QStringLiteral("firstName_UpdateACL"));
     user->insert("lastName", QStringLiteral("lastName"));
-    user->insert("password", QStringLiteral("password"));
+    user->insert("password", PASSWORD);
     QVERIFY(EnginioTests::createObject(m_client, user));
     QVERIFY(!user->id().isEmpty());
     QVERIFY(EnginioTests::login(m_client,
                                 user->value("username").toString(),
-                                user->value("password").toString()));
+                                PASSWORD));
 
     /* Create new object */
 
@@ -355,6 +364,8 @@ void AclOperationTest::testUpdateObjectPermissions()
 
 void AclOperationTest::testReadFullUsers()
 {
+    const QString PASSWORD("pa$$word");
+
     QVERIFY2(m_client, "Null client");
 
     /* Create user object and login */
@@ -363,12 +374,12 @@ void AclOperationTest::testReadFullUsers()
     user->insert("username", EnginioTests::randomString(15));
     user->insert("firstName", QStringLiteral("firstName_ReadACLUsers"));
     user->insert("lastName", QStringLiteral("lastName"));
-    user->insert("password", QStringLiteral("password"));
+    user->insert("password", PASSWORD);
     QVERIFY(EnginioTests::createObject(m_client, user));
     QVERIFY(!user->id().isEmpty());
     QVERIFY(EnginioTests::login(m_client,
                                 user->value("username").toString(),
-                                user->value("password").toString()));
+                                PASSWORD));
 
     /* Create new object */
 
