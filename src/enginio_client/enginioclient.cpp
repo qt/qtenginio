@@ -462,15 +462,11 @@ EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 
 Q_GLOBAL_STATIC(QThreadStorage<QNetworkAccessManager*>, NetworkManager)
 
-void EnginioClientPrivate::createNetworkManager()
+void EnginioClientPrivate::assignNetworkManager()
 {
     Q_ASSERT(!m_networkManager);
-    m_networkManager = NetworkManager->localData();
-    if (!m_networkManager) {
-        m_networkManager = new QNetworkAccessManager();
-        NetworkManager->setLocalData(m_networkManager.data());
-    }
 
+    m_networkManager = prepareNetworkManagerInThread();
     _networkManagerConnection = QObject::connect(m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
 
     // Ignore SSL errors when staging backend is used.
@@ -481,4 +477,15 @@ void EnginioClientPrivate::createNetworkManager()
                 this,
                 SLOT(ignoreSslErrors(QNetworkReply*, const QList<QSslError> &)));
     }
+}
+
+QNetworkAccessManager *EnginioClientPrivate::prepareNetworkManagerInThread()
+{
+    QNetworkAccessManager *qnam;
+    qnam = NetworkManager->localData();
+    if (!qnam) {
+        qnam = new QNetworkAccessManager(); // it will be deleted by QThreadStorage.
+        NetworkManager->setLocalData(qnam);
+    }
+    return qnam;
 }

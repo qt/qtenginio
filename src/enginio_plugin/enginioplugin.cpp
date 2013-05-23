@@ -50,8 +50,11 @@
 #include "enginioreply.h"
 #include "enginioqmlreply.h"
 #include "enginioidentity.h"
+#include <Enginio/private/enginioclient_p.h>
 
 #include <qqml.h>
+#include <QtQml/qqmlnetworkaccessmanagerfactory.h>
+#include <QtQml/qqmlengine.h>
 
 /*!
  * \qmlmodule enginio-plugin
@@ -145,10 +148,29 @@
 
 QQmlEngine *g_qmlEngine = 0;
 
+class EnginioNetworkAccessManagerFactory: public QQmlNetworkAccessManagerFactory
+{
+public:
+    virtual QNetworkAccessManager *create(QObject *parent) Q_DECL_OVERRIDE
+    {
+        Q_UNUSED(parent);
+        return EnginioClientPrivate::prepareNetworkManagerInThread();
+    }
+};
+
 void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
 {
     Q_UNUSED(uri);
     g_qmlEngine = engine;
+
+    if (!engine->networkAccessManagerFactory()) {
+        static EnginioNetworkAccessManagerFactory factory;
+        engine->setNetworkAccessManagerFactory(&factory);
+    } else {
+        qWarning() << "Enginio client failed to install QQmlNetworkAccessManagerFactory"
+                      "on QML engine because a differnt factory is already attached, It"
+                      " is recomanded to use QNetworkAccessManager delivered by Enginio";
+    }
 }
 
 void EnginioPlugin::registerTypes(const char *uri)

@@ -486,12 +486,13 @@ public:
     QNetworkAccessManager *networkManager()
     {
         if (Q_UNLIKELY(m_networkManager.isNull()))
-            createNetworkManager();
+            assignNetworkManager();
 
         return m_networkManager;
     }
 
-    void createNetworkManager();
+    void assignNetworkManager();
+    static QNetworkAccessManager *prepareNetworkManagerInThread();
 
 private:
     /* Create a multi part upload:
