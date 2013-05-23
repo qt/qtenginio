@@ -482,6 +482,16 @@ public:
         return reply;
     }
 
+    QNetworkAccessManager *networkManager()
+    {
+        if (Q_UNLIKELY(m_networkManager.isNull()))
+            createNetworkManager();
+
+        return m_networkManager;
+    }
+
+    void createNetworkManager();
+
 private:
     /* Create a multi part upload:
      * That means the JSON metadata and the actual file get sent in one http-post.

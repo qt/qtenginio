@@ -254,20 +254,7 @@ void EnginioClient::setApiUrl(const QUrl &apiUrl)
 QNetworkAccessManager * EnginioClient::networkManager()
 {
     Q_D(EnginioClient);
-    if (d->m_networkManager.isNull()) {
-        d->m_networkManager = new QNetworkAccessManager(this);
-        QObject::connect(d->m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(d));
-
-        // Ignore SSL errors when staging backend is used.
-        if (apiUrl() == QStringLiteral("https://api.staging.engin.io")) {
-            qWarning() << "SSL errors will be ignored";
-            connect(d->m_networkManager,
-                    SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)),
-                    this,
-                    SLOT(ignoreSslErrors(QNetworkReply*, const QList<QSslError> &)));
-        }
-    }
-    return d->m_networkManager;
+    return d->networkManager();
 }
 
 /*!
@@ -471,4 +458,19 @@ EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
     nreply->setParent(ereply);
 
     return ereply;
+}
+
+void EnginioClientPrivate::createNetworkManager()
+{
+    m_networkManager = new QNetworkAccessManager(q_ptr);
+    QObject::connect(m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
+
+    // Ignore SSL errors when staging backend is used.
+    if (m_apiUrl == QStringLiteral("https://api.staging.engin.io")) {
+        qWarning() << "SSL errors will be ignored";
+        connect(m_networkManager,
+                SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)),
+                this,
+                SLOT(ignoreSslErrors(QNetworkReply*, const QList<QSslError> &)));
+    }
 }
