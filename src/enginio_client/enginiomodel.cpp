@@ -221,6 +221,8 @@ public:
 
     void execute()
     {
+        if (!_enginio)
+            return;
         if (!_query.isEmpty()) {
             const EnginioReply *id = _enginio->query(_query, _operation);
             if (_canFetchMore)

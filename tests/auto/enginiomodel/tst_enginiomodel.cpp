@@ -62,7 +62,39 @@ private slots:
 
 void tst_EnginioModel::ctor()
 {
-    EnginioModel model1, model2(this);
+    {
+        EnginioModel model1, model2(this);
+        Q_UNUSED(model1);
+        Q_UNUSED(model2);
+    }
+
+    QJsonObject query = QJsonDocument::fromJson("{\"foo\":\"invalid\"}").object();
+    QVERIFY(!query.isEmpty());
+    {   // check if destructor of a fully initilized EnginioClient detach fully initilized model
+        EnginioModel model;
+        model.setOperation(EnginioClient::ObjectOperation);
+        model.setQuery(query);
+
+        EnginioClient client;
+        QSignalSpy spyInitilized(&client, SIGNAL(clientInitialized()));
+        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+        model.setEnginio(&client);
+        QTRY_COMPARE(spyInitilized.count(), 1);
+    }
+    {   // check if destructor of a fully initilized EnginioClient detach fully initilized model
+        EnginioClient client;
+        QSignalSpy spyInitilized(&client, SIGNAL(clientInitialized()));
+        EnginioModel model;
+        model.setOperation(EnginioClient::ObjectOperation);
+        model.setQuery(query);
+        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+        model.setEnginio(&client);
+        QTRY_COMPARE(spyInitilized.count(), 1);
+    }
 }
 
 void tst_EnginioModel::enginio_property()
