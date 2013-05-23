@@ -185,9 +185,9 @@ public:
     void setQuery(const QJsonObject &query)
     {
         _query = query;
-        const int pageSize = _query[EnginioString::pageSize].toDouble();
 
-        if (pageSize) {
+        if (_query.contains(EnginioString::pageSize)) {
+            const int pageSize = _query[EnginioString::pageSize].toDouble();
             const QString limitString(EnginioString::limit);
             const QString offsetString(EnginioString::offset);
             const unsigned limit = _query[limitString].toDouble();

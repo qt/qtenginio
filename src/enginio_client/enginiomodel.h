@@ -85,7 +85,7 @@ protected:
 signals:
     void operationChanged(const EnginioClient::Operation operation);
     void queryChanged(const QJsonObject query);
-    void enginioChanged(const EnginioClient *enginio);
+    void enginioChanged(EnginioClient *enginio);
 
 public slots:
     void execute();
