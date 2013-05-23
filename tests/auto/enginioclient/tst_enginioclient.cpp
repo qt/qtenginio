@@ -666,6 +666,32 @@ void tst_EnginioClient::identity()
         QCOMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
     }
+    {
+        // check if EnginoClient is properly detached from identity in destructor.
+        EnginioClient *client = new EnginioClient;
+        client->setApiUrl(EnginioTests::TESTAPP_URL);
+        client->setBackendSecret(EnginioTests::TESTAPP_SECRET);
+
+        EnginioAuthentication identity;
+        client->setIdentity(&identity);
+
+        delete client;
+
+        identity.setPassword("blah");
+        identity.setUser("blah");
+        // we should not crash
+    }
+    {
+        // check if EnginoClient is properly detached from identity destructor.
+        EnginioClient client;
+        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+        {
+            EnginioAuthentication identity;
+            client.setIdentity(&identity);
+        }
+        QVERIFY(!client.identity());
+    }
 }
 
 void tst_EnginioClient::identity_invalid()

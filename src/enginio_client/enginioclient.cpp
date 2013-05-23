@@ -116,6 +116,8 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
 
 EnginioClientPrivate::~EnginioClientPrivate()
 {
+    foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
+        QObject::disconnect(identityConnection);
     QObject::disconnect(_networkManagerConnection);
     while (m_factories.size() > 0) {
         FactoryUnit *unit = m_factories.takeFirst();

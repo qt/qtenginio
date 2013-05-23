@@ -234,6 +234,21 @@ class EnginioClientPrivate : public QObject
             _identity->prepareSessionToken(_enginio);
         }
     };
+
+    class IdentityInstanceDestroyed
+    {
+        EnginioClientPrivate *_enginio;
+
+    public:
+        IdentityInstanceDestroyed(EnginioClientPrivate *enginio)
+            : _enginio(enginio)
+        {}
+        void operator ()()
+        {
+            _enginio->setIdentity(0);
+        }
+    };
+
 public:
     enum Operation {
         // Do not forget to keep in sync with EnginioClient::Operation!
@@ -262,7 +277,7 @@ public:
     QString m_backendId;
     QString m_backendSecret;
     EnginioIdentity *_identity;
-    QVarLengthArray<QMetaObject::Connection, 2> _identityConnections;
+    QVarLengthArray<QMetaObject::Connection, 3> _identityConnections;
     QUrl m_apiUrl;
     QPointer<QNetworkAccessManager> m_networkManager;
     QMetaObject::Connection _networkManagerConnection;
@@ -315,6 +330,7 @@ public:
         } else
             identity->prepareSessionToken(this);
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::dataChanged, callPrepareSessionToken));
+        _identityConnections.append(QObject::connect(identity, &EnginioIdentity::destroyed, IdentityInstanceDestroyed(this)));
         emit q_ptr->identityChanged(identity);
     }
 
