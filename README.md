@@ -12,10 +12,27 @@ Client library for accessing Enginio service from Qt and QML code.
   * Mac and Linux: Perl should be preinstalled.
   * Windows: http://www.perl.org/get.html
 
-# Install
-* `qmake && make install` will build and install Enginio library as Qt5 module.
-* In C++ applications include Enginio headers from <Enginio/...> (for example: `#include <Enginio/enginioclient.h>`) and use Enginio module by adding `QT += enginio` to pro file.
-* In QML applications import Enginio components with `import Enginio 1.0`
+# Build & Install
+* Two build configurations provided: *standalone static library config* and *shared library config* 
+* Both configurations can install the Enginio Library as Qt5 module
+
+1. Standalone static library config 
+    * The default build config for Enginio Library
+    * Produces a static library on Linux and Mac
+    * `qmake && make` - Builds the library to local target under the source folder   
+ * `make install` - Installs the static library as a globally available Qt5 module 
+
+
+2. Shared library config
+	* `qmake CONFIG+=no-package && make install`
+	* Produces shared library and installs it as a globally available Qt5 module
+
+# Usage
+* In C++ applications 
+    * Use Enginio module by adding `QT += enginio` to application `.pro` file
+    * Include Enginio headers with `<Enginio/...>` (for example: `#include <Enginio/enginioclient.h>`) 
+* In QML applications 
+    * Import Enginio components with `import Enginio 1.0`
 
 # Contributing
 * Fork the repository on [GitHub](https://github.com/enginio/enginio-qt)

@@ -42,6 +42,7 @@
 #include "enginioqmlobjectoperation.h"
 #include "enginioqmlqueryoperation.h"
 #include "enginioqmloblejctadaptor_p.h"
+#include "enginioqmlusergroupoperation.h"
 
 #include <QtQml/qjsvalue.h>
 
@@ -249,4 +250,15 @@ void EnginioQmlClientPrivate::_setEngine(QJSEngine *engine)
         _parse = engine->evaluate("JSON.parse");
         Q_ASSERT(_stringify.isCallable());
     }
+}
+
+/*!
+ * \qmlmethod Client::createUsergroupOperation()
+ *
+ * Returns new \l UsergroupOperation which can be used to add and remove members
+ * to/from usergroups. Returned operation can be deleted with \c destroy().
+ */
+EnginioQmlUsergroupOperation * EnginioQmlClient::createUsergroupOperation()
+{
+    return new EnginioQmlUsergroupOperation(this);
 }

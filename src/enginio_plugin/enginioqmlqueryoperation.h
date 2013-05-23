@@ -60,6 +60,7 @@ class EnginioQmlQueryOperation : public EnginioQueryOperation
     Q_PROPERTY(int offset READ offset WRITE setOffset)
     Q_PROPERTY(QJsonArray sort READ sort WRITE setSort)
     Q_PROPERTY(QJsonObject include READ include WRITE setInclude)
+    Q_PROPERTY(QString usergroupId READ usergroupId WRITE setUsergroupId)
 
 public:
     EnginioQmlQueryOperation(EnginioQmlClient *client = 0,

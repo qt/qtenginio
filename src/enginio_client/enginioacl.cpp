@@ -123,7 +123,7 @@ EnginioAcl::EnginioAcl(const QJsonObject &object, QObject *parent) :
     Q_D(EnginioAcl);
     for (int perm = 0; perm < d->m_numPermissions; perm++) {
         if (object.contains(QLatin1String(d->m_permissionNames[perm]))) {
-            d->m_accessLists[perm] = permissionArrayToList(
+            d->m_accessLists[perm] = permissionArrayToObjectList(
                         object[QLatin1String(d->m_permissionNames[perm])].toArray());
         }
     }
@@ -184,14 +184,8 @@ bool EnginioAcl::fromJson(const QByteArray &json)
         QJsonArray listArray = listValue.toArray();
         for (int item = 0; item < listArray.size(); item++) {
             QJsonObject itemObject = listArray.at(item).toObject();
-            QString id = itemObject.value(QStringLiteral("id")).toString();
-            QString type = itemObject.value(QStringLiteral("objectType")).toString();
-
-            if (!id.isEmpty() && !type.isEmpty()) {
-                d->m_accessLists[listItem].append(qMakePair(id, type));
-            } else {
-                error = true;
-            }
+            if (!itemObject.isEmpty())
+                d->m_accessLists[listItem].append(itemObject);
         }
     }
     return !error;
@@ -213,13 +207,17 @@ QByteArray EnginioAcl::toJson() const
 
         json += QByteArray("\"") + d->m_permissionNames[i] + "\":[";
 
-        const QList< QPair<QString, QString> > list = d->m_accessLists.at(i);
-        QList< QPair<QString, QString> >::ConstIterator iter = list.constBegin();
+        const QList<QJsonObject> list = d->m_accessLists.at(i);
+        QList<QJsonObject>::ConstIterator iter = list.constBegin();
         while (iter != list.constEnd()) {
             if (iter != list.constBegin())
                 json += ',';
 
-            json += QByteArray("{\"id\":\"") + iter->first.toUtf8() + "\",\"objectType\":\"" + iter->second.toUtf8() + "\"}";
+            json += "{\"id\":\"";
+            json += iter->value(QStringLiteral("id")).toString().toUtf8();
+            json += "\",\"objectType\":\"";
+            json += iter->value(QStringLiteral("objectType")).toString().toUtf8();
+            json += "\"}";
             iter++;
         }
         json += ']';
@@ -263,7 +261,13 @@ const QList< QPair<QString, QString> >
 EnginioAcl::getSubjectsForPermission(EnginioAcl::Permission permission) const
 {
     Q_D(const EnginioAcl);
-    return d->m_accessLists.at((int)permission);
+    QList< QPair<QString, QString> > resultList;
+    QJsonObject object;
+    foreach (object, d->m_accessLists.at((int)permission)) {
+        resultList.append(qMakePair(object[QStringLiteral("id")].toString(),
+                          object[QStringLiteral("objectType")].toString()));
+    }
+    return resultList;
 }
 
 /*!
@@ -273,8 +277,27 @@ void EnginioAcl::addSubjectForPermission(QPair<QString, QString> subject,
                                          EnginioAcl::Permission permission)
 {
     Q_D(EnginioAcl);
-    if (!d->m_accessLists.at((int)permission).contains(subject))
-        d->m_accessLists[(int)permission].append(subject);
+
+    QList<QJsonObject> list = d->m_accessLists.at((int)permission);
+    QList<QJsonObject>::const_iterator iter = list.constBegin();
+    bool found = false;
+    while (iter != list.constEnd()) {
+        if ((*iter).value(QStringLiteral("id")).toString() == subject.first &&
+            (*iter).value(QStringLiteral("objectType")).toString() == subject.second) {
+
+            found = true;
+            break;
+        }
+        iter++;
+    }
+
+
+    if (!found) {
+        QJsonObject object;
+        object.insert(QStringLiteral("id"), subject.first);
+        object.insert(QStringLiteral("objectType"), subject.second);
+        d->m_accessLists[(int)permission].append(object);
+    }
 }
 
 /*!
@@ -285,10 +308,20 @@ bool EnginioAcl::removeSubjectFromPermission(QPair<QString, QString> subject,
                                              EnginioAcl::Permission permission)
 {
     Q_D(EnginioAcl);
-    int removed = 0;
-    if (d->m_accessLists.at((int)permission).contains(subject))
-        removed = d->m_accessLists[(int)permission].removeAll(subject);
 
+    QList<QJsonObject> &list = d->m_accessLists[((int)permission)];
+    QList<QJsonObject>::iterator iter = list.begin();
+    int removed = 0;
+    while (iter != list.end()) {
+        if ((*iter).value(QStringLiteral("id")).toString() == subject.first &&
+            (*iter).value(QStringLiteral("objectType")).toString() == subject.second) {
+
+            iter = list.erase(iter);
+            removed++;
+        } else {
+            iter++;
+        }
+    }
     return removed > 0;
 }
 
@@ -305,86 +338,90 @@ void EnginioAcl::clear()
 
 /*!
  * Returns subjects in "read" access list. Returned array contains subjects as
- * QJsonObjects with \c id and \c objectType properties.
+ * QJsonObjects.
  */
 QJsonArray EnginioAcl::readJson() const
 {
     Q_D(const EnginioAcl);
-    return permissionListToArray(d->m_accessLists.at(ReadPermission));
+    return permissionObjectListToArray(d->m_accessLists.at(ReadPermission));
 }
 
 /*!
  * Sets subjects in "read" access list to be same as in \a json array. \a json
- * array should contain subjects as QJsonObjects with \c id and \c objectType
- * properties set. Existing subjects in "read" list will be overwritten.
+ * array should contain subjects as QJsonObjects with (at least) \c id and
+ * \c objectType properties set. Existing subjects in "read" list will be
+ * overwritten.
  */
 void EnginioAcl::setReadJson(const QJsonArray &json)
 {
     Q_D(EnginioAcl);
-    d->m_accessLists[ReadPermission] = permissionArrayToList(json);
+    d->m_accessLists[ReadPermission] = permissionArrayToObjectList(json);
 }
 
 /*!
  * Returns subjects in "update" access list. Returned array contains subjects as
- * QJsonObjects with \c id and \c objectType properties.
+ * QJsonObjects.
  */
 QJsonArray EnginioAcl::updateJson() const
 {
     Q_D(const EnginioAcl);
-    return permissionListToArray(d->m_accessLists.at(UpdatePermission));
+    return permissionObjectListToArray(d->m_accessLists.at(UpdatePermission));
 }
 
 /*!
  * Sets subjects in "update" access list to be same as in \a json array. \a json
- * array should contain subjects as QJsonObjects with \c id and \c objectType
- * properties set. Existing subjects in "update" list will be overwritten.
+ * array should contain subjects as QJsonObjects with (at least) \c id and
+ * \c objectType properties set. Existing subjects in "update" list will be
+ * overwritten.
  */
 void EnginioAcl::setUpdateJson(const QJsonArray &json)
 {
     Q_D(EnginioAcl);
-    d->m_accessLists[UpdatePermission] = permissionArrayToList(json);
+    d->m_accessLists[UpdatePermission] = permissionArrayToObjectList(json);
 }
 
 /*!
  * Returns subjects in "delete" access list. Returned array contains subjects as
- * QJsonObjects with \c id and \c objectType properties.
+ * QJsonObjects.
  */
 QJsonArray EnginioAcl::deleteJson() const
 {
     Q_D(const EnginioAcl);
-    return permissionListToArray(d->m_accessLists.at(DeletePermission));
+    return permissionObjectListToArray(d->m_accessLists.at(DeletePermission));
 }
 
 /*!
  * Sets subjects in "delete" access list to be same as in \a json array. \a json
- * array should contain subjects as QJsonObjects with \c id and \c objectType
- * properties set. Existing subjects in "delete" list will be overwritten.
+ * array should contain subjects as QJsonObjects with (at least) \c id and
+ * \c objectType properties set. Existing subjects in "delete" list will be
+ * overwritten.
  */
 void EnginioAcl::setDeleteJson(const QJsonArray &json)
 {
     Q_D(EnginioAcl);
-    d->m_accessLists[DeletePermission] = permissionArrayToList(json);
+    d->m_accessLists[DeletePermission] = permissionArrayToObjectList(json);
 }
 
 /*!
  * Returns subjects in "admin" access list. Returned array contains subjects as
- * QJsonObjects with \c id and \c objectType properties.
+ * QJsonObjects.
  */
 QJsonArray EnginioAcl::adminJson() const
 {
     Q_D(const EnginioAcl);
-    return permissionListToArray(d->m_accessLists.at(AdminPermission));
+    return permissionObjectListToArray(d->m_accessLists.at(AdminPermission));
 }
 
 /*!
  * Sets subjects in "admin" access list to be same as in \a json array. \a json
- * array should contain subjects as QJsonObjects with \c id and \c objectType
- * properties set. Existing subjects in "admin" list will be overwritten.
+ * array should contain subjects as QJsonObjects with (at least) \c id and
+ * \c objectType properties set. Existing subjects in "admin" list will be
+ * overwritten.
  */
 void EnginioAcl::setAdminJson(const QJsonArray &json)
 {
     Q_D(EnginioAcl);
-    d->m_accessLists[AdminPermission] = permissionArrayToList(json);
+    d->m_accessLists[AdminPermission] = permissionArrayToObjectList(json);
 }
 
 /*!
@@ -436,6 +473,37 @@ QList< QPair<QString, QString> > EnginioAcl::permissionArrayToList(QJsonArray ar
     QJsonArray::const_iterator iter = array.constBegin();
     while (iter != array.constEnd()) {
         list.append(objectJsonToPair((*iter).toObject()));
+        iter++;
+    }
+    return list;
+}
+
+/*!
+ * \internal
+ * Converts Enginio object list represented as QList of QJsonObjects to
+ * QJsonArray of QJsonObjects.
+ */
+QJsonArray EnginioAcl::permissionObjectListToArray(QList<QJsonObject> list)
+{
+    QJsonArray array;
+    QJsonObject object;
+    foreach (object, list) {
+        array.append(object);
+    }
+    return array;
+}
+
+/*!
+ * \internal
+ * Converts Enginio object list represented as QJsonArray of QJsonObjects to
+ * QList of QJsonObjects.
+ */
+QList<QJsonObject> EnginioAcl::permissionArrayToObjectList(QJsonArray array)
+{
+    QList<QJsonObject> list;
+    QJsonArray::const_iterator iter = array.constBegin();
+    while (iter != array.constEnd()) {
+        list.append((*iter).toObject());
         iter++;
     }
     return list;

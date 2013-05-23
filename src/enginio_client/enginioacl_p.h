@@ -39,6 +39,7 @@
 #define ENGINIOACL_P_H
 
 #include "enginioacl.h"
+#include <QJsonObject>
 #include <QVector>
 
 class EnginioAclPrivate
@@ -54,7 +55,7 @@ public:
     const static char* m_permissionNames[];
     const static int m_numPermissions;
 
-    QVector<QList< QPair<QString, QString> > > m_accessLists;
+    QVector< QList<QJsonObject> > m_accessLists;
 };
 
 #endif // ENGINIOACL_P_H

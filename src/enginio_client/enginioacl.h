@@ -97,6 +97,8 @@ protected:
     static QPair<QString, QString> objectJsonToPair(QJsonObject json);
     static QJsonArray permissionListToArray(QList< QPair<QString, QString> > list);
     static QList< QPair<QString, QString> > permissionArrayToList(QJsonArray array);
+    static QJsonArray permissionObjectListToArray(QList<QJsonObject> list);
+    static QList<QJsonObject> permissionArrayToObjectList(QJsonArray array);
 
 private:
     Q_DECLARE_PRIVATE(EnginioAcl)

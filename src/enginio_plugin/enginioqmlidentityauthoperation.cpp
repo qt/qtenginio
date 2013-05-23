@@ -22,8 +22,14 @@
  */
 
 /*!
- * \qmlproperty Client IdentityAuthOperation::loggedInUser
+ * \qmlproperty object IdentityAuthOperation::loggedInUser
  * Logged in user or \c undefined if no user has been logged in.
+ */
+
+/*!
+ * \qmlproperty array IdentityAuthOperation::loggedInUserGroups
+ * Array of usergroups where logged in user is a member. Empty array if no user
+ * has been logged in or if user doesn't belong to any usergroups.
  */
 
 /*!
@@ -94,4 +100,16 @@ QJSValue EnginioQmlIdentityAuthOperation::loggedInUserAsJSValue() const
                     QJsonDocument::fromJson(obj->toEnginioJson()).object());
     }
     return QJSValue();
+}
+
+QJSValue EnginioQmlIdentityAuthOperation::loggedInUserGroupsAsArray() const
+{
+    const QList<EnginioAbstractObject*> groupList = loggedInUserGroups();
+    QJSValue array = g_qmlEngine->newArray(groupList.size());
+
+    for (int i = 0; i < groupList.size(); i++) {
+        array.setProperty(i, g_qmlEngine->toScriptValue<QJsonObject>(
+                QJsonDocument::fromJson(groupList[i]->toEnginioJson()).object()));
+    }
+    return array;
 }
