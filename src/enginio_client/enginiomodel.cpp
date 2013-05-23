@@ -126,7 +126,7 @@ public:
 
     ~EnginioModelPrivate()
     {
-        foreach (const QMetaObject::Connection connection, _connections)
+        foreach (const QMetaObject::Connection &connection, _connections)
             QObject::disconnect(connection);
     }
 
