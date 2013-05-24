@@ -357,7 +357,7 @@ public:
         // TODO FIXME we need to remove "id" and "objectType" because of an internal server error.
         // It failes at least for ACL but maybe for others too.
         // Sadly we need to detach here, so it causes at least one allocation. Of course sending
-        // a garbage is also wrong so maybe we should filter out data before sending, the question
+        // garbage is also wrong so maybe we should filter out data before sending, the question
         // is how, and it seems that only enginio server knows...
         ObjectAdaptor<T> o(object);
         o.remove(EnginioString::objectType);
@@ -375,7 +375,20 @@ public:
         QNetworkRequest req(_request);
         req.setUrl(url);
 
+        // TODO FIXME we need to remove "id" and "objectType" because of an internal server error.
+        // It failes at least for ACL but maybe for others too.
+        // Sadly we need to detach here, so it causes at least one allocation. Of course sending
+        // garbage is also wrong so maybe we should filter out data before sending, the question
+        // is how, and it seems that only enginio server knows...
+        ObjectAdaptor<T> o(object);
+        o.remove(EnginioString::objectType);
+        o.remove(EnginioString::id);
+#if QT_VERSION < QT_VERSION_CHECK(5, 2, 0)
         return q_ptr->networkManager()->deleteResource(req);
+#else
+        QByteArray data = o.toJson();
+        return q_ptr->networkManager()->deleteResource(req, data);
+#endif
     }
 
     template<class T>
