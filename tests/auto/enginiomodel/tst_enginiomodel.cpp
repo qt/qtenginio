@@ -42,6 +42,9 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qthread.h>
 
+#include <QtWidgets/qlistview.h>
+#include <QtWidgets/qapplication.h>
+
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
 #include <Enginio/enginiomodel.h>
@@ -59,6 +62,7 @@ private slots:
     void query_property();
     void operation_property();
     void roleNames();
+    void listView();
 };
 
 void tst_EnginioModel::ctor()
@@ -207,6 +211,31 @@ void tst_EnginioModel::roleNames()
         QVERIFY(roleNames.contains(role));
 
     QCOMPARE(roles[Qt::DisplayRole], QByteArrayLiteral("id"));
+}
+
+void tst_EnginioModel::listView()
+{
+    QJsonObject query = QJsonDocument::fromJson("{\"limit\":2}").object();
+    QVERIFY(!query.isEmpty());
+    EnginioModel model;
+    model.setQuery(query);
+    model.setOperation(EnginioClient::UserOperation);
+
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+    model.setEnginio(&client);
+
+    model.execute();
+
+    QListView view;
+    view.setModel(&model);
+    view.show();
+
+    QTRY_COMPARE(model.rowCount(), 2);
+    QVERIFY(view.model() == &model);
+    QVERIFY(view.indexAt(QPoint(1,1)).data().isValid());
 }
 
 QTEST_MAIN(tst_EnginioModel)

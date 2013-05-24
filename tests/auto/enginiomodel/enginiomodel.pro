@@ -1,5 +1,4 @@
-QT       += testlib enginio
-QT       -= gui
+QT       += testlib enginio widgets
 
 DEFINES += TEST_FILE_PATH=\\\"$$_PRO_FILE_PWD_/../file/enginio.png\\\"
 
