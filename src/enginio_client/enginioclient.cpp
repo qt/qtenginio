@@ -96,6 +96,7 @@ const QString EnginioString::url = QStringLiteral("url");
 const QString EnginioString::access = QStringLiteral("access");
 const QString EnginioString::sort = QStringLiteral("sort");
 const QString EnginioString::count = QStringLiteral("count");
+const QString EnginioString::targetFileProperty = QStringLiteral("targetFileProperty");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
@@ -432,15 +433,17 @@ void EnginioClient::setIdentity(EnginioIdentity *identity)
  * When an object which had a file associated gets deleted, the file will
  * automatically be deleted as well.
  */
-EnginioReply* EnginioClient::uploadFile(const QJsonObject &associatedObject, const QUrl &file)
+EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &file)
 {
     Q_D(EnginioClient);
 
+    // FIXME: better error handling
+    QJsonObject associatedObject = object.value(EnginioString::targetFileProperty).toObject();
     if (associatedObject[EnginioString::objectType].toString().isEmpty()
              || associatedObject[EnginioString::id].toString().isEmpty())
         return 0;
 
-    QNetworkReply *nreply = d->uploadFile(associatedObject, file);
+    QNetworkReply *nreply = d->uploadFile<QJsonObject>(object, file);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
 

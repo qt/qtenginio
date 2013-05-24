@@ -92,6 +92,7 @@ struct EnginioString
     static const QString access;
     static const QString sort;
     static const QString count;
+    static const QString targetFileProperty;
 };
 
 class EnginioClientPrivate : public QObject
@@ -189,26 +190,11 @@ class EnginioClientPrivate : public QObject
             EnginioClient *q = static_cast<EnginioClient*>(d->q_func());
 
             if (nreply->error() != QNetworkReply::NoError) {
-                d->_uploads.remove(nreply);
                 d->_downloads.remove(nreply);
                 emit q->error(ereply);
             }
 
-            if (d->_uploads.remove(nreply)) {
-                QJsonObject object;
-                object[EnginioString::id] = ereply->data()[EnginioString::object].toObject()[EnginioString::id].toString();
-                object[EnginioString::objectType] = ereply->data()[EnginioString::object].toObject()[EnginioString::objectType].toString();
-
-                QJsonObject fileRef;
-                fileRef.insert(EnginioString::id, ereply->data()[EnginioString::id].toString());
-                fileRef.insert(EnginioString::objectType, EnginioString::files);
-
-                // FIXME: do not hard-code file here
-                object[QStringLiteral("file")] = fileRef;
-
-                d->_replyReplyMap.insert(d->update<QJsonObject>(object, EnginioClient::ObjectOperation), ereply);
-                return;
-            } else if (d->_downloads.remove(nreply)) {
+            if (d->_downloads.remove(nreply)) {
                 QUrl url = d->m_apiUrl;
                 url.setPath(ereply->data()[EnginioString::results].toArray().first().toObject()[QStringLiteral("file")].toObject()[EnginioString::url].toString());
                 qDebug() << "Download URL: " << url;
@@ -284,7 +270,6 @@ public:
     QList<FactoryUnit*> m_factories;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
-    QSet<QNetworkReply*> _uploads;
     QSet<QNetworkReply*> _downloads;
 
     QByteArray sessionToken() const
@@ -463,7 +448,8 @@ public:
         return reply;
     }
 
-    QNetworkReply *uploadFile(const QJsonObject &associatedObject, const QUrl &fileUrl)
+    template<class T>
+    QNetworkReply *uploadFile(const ObjectAdaptor<T> &object, const QUrl &fileUrl)
     {
         Q_ASSERT_X(fileUrl.isLocalFile(), "", "Upload must be local file.");
         QFile *file = new QFile(fileUrl.toLocalFile());
@@ -476,10 +462,11 @@ public:
         Q_ASSERT(!fileName.isEmpty());
         QMimeDatabase mimeDb;
         QString mimeType = mimeDb.mimeTypeForFile(fileUrl.toLocalFile()).name();
-        return upload(associatedObject, fileName, file, mimeType);
+        return upload(object, fileName, file, mimeType);
     }
 
-    QNetworkReply *upload(const QJsonObject &associatedObject, const QString &fileName, QIODevice *device, const QString &mimeType)
+    template<class T>
+    QNetworkReply *upload(const ObjectAdaptor<T> &object, const QString &fileName, QIODevice *device, const QString &mimeType)
     {
         QUrl apiUrl = m_apiUrl;
         apiUrl.setPath(getPath(QJsonObject(), FileOperation));
@@ -491,14 +478,10 @@ public:
         req.setHeader(QNetworkRequest::ContentTypeHeader, QString());
         req.setUrl(apiUrl);
 
-        QJsonObject obj;
-        obj[EnginioString::object] = associatedObject;
-        QByteArray object = QJsonDocument(obj).toJson();
-        QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object);
+        QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object.toJson());
         QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
         multiPart->setParent(reply);
         device->setParent(multiPart);
-        _uploads.insert(reply);
         return reply;
     }
 

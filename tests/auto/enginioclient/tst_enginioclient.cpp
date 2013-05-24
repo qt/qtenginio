@@ -947,6 +947,9 @@ void tst_EnginioClient::acl()
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
 }
 
+
+// For this test to work, there needs to be a property "fileAttachment"
+// for "objects.files" that is a ref to files.
 void tst_EnginioClient::file()
 {
     EnginioClient client;
@@ -959,7 +962,7 @@ void tst_EnginioClient::file()
 
     // Create a new object
     QJsonObject obj;
-    obj["objectType"] = QString::fromUtf8("objects.todos");
+    obj["objectType"] = QString::fromUtf8("objects.files");
     obj["title"] = QString::fromUtf8("Object With File");
     const EnginioReply* req = client.create(obj);
     QVERIFY(req);
@@ -977,30 +980,35 @@ void tst_EnginioClient::file()
     QString id = data["id"].toString();
     QVERIFY(!id.isEmpty());
 
-    QJsonObject object;
-    object["id"] = id;
-    object["objectType"] = QStringLiteral("objects.todos");
+    const QString filePropertyName = QStringLiteral("fileAttachment");
 
     // Attach file to the object
+    QJsonObject object;
+    object["id"] = id;
+    object["objectType"] = QStringLiteral("objects.files");
+    object["propertyName"] = filePropertyName;
+
+    QJsonObject fileObject;
+    fileObject[QStringLiteral("fileName")] = QStringLiteral("test.png");
+
+    QJsonObject uploadJson;
+    uploadJson[QStringLiteral("targetFileProperty")] = object;
+    uploadJson[QStringLiteral("file")] = fileObject;
 
     // FIXME: make this work for out of source builds
     // FIXME: consider this url mess
     QString path = "file://" + QStringLiteral(TEST_FILE_PATH);
     QVERIFY(QFile::exists(QStringLiteral(TEST_FILE_PATH)));
-    const EnginioReply* req2 = client.uploadFile(object, QUrl(path));
-    QVERIFY(req2);
-
+    const EnginioReply* responseUpload = client.uploadFile(uploadJson, QUrl(path));
+    QVERIFY(responseUpload);
     QTRY_COMPARE(spy.count(), 2);
     QCOMPARE(spyError.count(), 0);
-    const EnginioReply *responseUpload = spy[1][0].value<EnginioReply*>();
-    qDebug() << responseUpload;
-    // FIXME: write test here
 
     // Query including files
     QJsonObject obj2;
     obj2 = QJsonDocument::fromJson(
-                "{\"include\": {\"file\": {}},"
-                 "\"objectType\": \"objects.todos\","
+                "{\"include\": {\"" + filePropertyName.toUtf8() + "\": {}},"
+                 "\"objectType\": \"objects.files\","
                  "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
 
     const EnginioReply *reply = client.query(obj2);
@@ -1011,21 +1019,19 @@ void tst_EnginioClient::file()
     const EnginioReply *responseQuery = spy[2][0].value<EnginioReply*>();
     data = responseQuery->data();
     QVERIFY(data["results"].isArray());
-    qDebug() << endl << data["results"].toArray().first().toObject();
+    QVERIFY(data["results"].toArray().first().toObject()["fileAttachment"].isObject());
+    QVERIFY(!data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString().isEmpty());
+    qDebug() << "Download from here: " << client.apiUrl() << data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString();
 
-    QVERIFY(data["results"].toArray().first().toObject()["file"].isObject());
-    QVERIFY(!data["results"].toArray().first().toObject()["file"].toObject()["url"].toString().isEmpty());
-    qDebug() << "Download from here: " << client.apiUrl() << data["results"].toArray().first().toObject()["file"].toObject()["url"].toString();
+//    // Download
+//    const EnginioReply* reqDownload = client.downloadFile(object);
+//    QVERIFY(reqDownload);
 
-    // Download
-    const EnginioReply* reqDownload = client.downloadFile(object);
-    QVERIFY(reqDownload);
-
-    QTRY_COMPARE(spy.count(), 4);
-    QCOMPARE(spyError.count(), 0);
-    const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
-    qDebug() << responseDownload;
-    qDebug() << "Download: " << responseDownload;
+//    QTRY_COMPARE(spy.count(), 4);
+//    QCOMPARE(spyError.count(), 0);
+//    const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
+//    qDebug() << responseDownload;
+//    qDebug() << "Download: " << responseDownload;
 }
 
 void tst_EnginioClient::sharingNetworkManager()
