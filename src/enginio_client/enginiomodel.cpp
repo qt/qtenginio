@@ -140,6 +140,7 @@ public:
         if (_enginio) {
             foreach(const QMetaObject::Connection &connection, _connections)
                 QObject::disconnect(connection);
+            _connections.clear();
         }
         _enginio = const_cast<EnginioClient*>(enginio);
         if (_enginio) {
@@ -469,11 +470,6 @@ void EnginioModel::setProperty(int row, const QString &role, const QVariant &val
         return;
 
     d->setValue(row, role, value);
-}
-
-void EnginioModel::execute()
-{
-    d->execute();
 }
 
 Qt::ItemFlags EnginioModel::flags(const QModelIndex &index) const
