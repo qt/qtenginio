@@ -87,9 +87,6 @@ signals:
     void queryChanged(const QJsonObject query);
     void enginioChanged(EnginioClient *enginio);
 
-public slots:
-    void execute();
-
 private:
     Q_DISABLE_COPY(EnginioModel)
     QScopedPointer<EnginioModelPrivate> d;

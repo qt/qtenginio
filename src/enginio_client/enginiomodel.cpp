@@ -471,11 +471,6 @@ void EnginioModel::setProperty(int row, const QString &role, const QVariant &val
     d->setValue(row, role, value);
 }
 
-void EnginioModel::execute()
-{
-    d->execute();
-}
-
 Qt::ItemFlags EnginioModel::flags(const QModelIndex &index) const
 {
     return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
