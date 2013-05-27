@@ -934,11 +934,11 @@ void tst_EnginioClient::acl()
         }
     }
     QVERIFY(valid);
-
-    // TODO FIXME!
-    QSKIP("DELETE requires data, but QNAM currently do not support it");
+#if QT_VERSION < QT_VERSION_CHECK(5, 2, 0)
+    QSKIP("DELETE requires data, but QNAM supports it only from Qt 5.2");
+#endif
     // it seems to work fine, let's delete the acl we created
-    reqId = client.remove(obj, EnginioClient::ObjectAclOperation);
+    reqId = client.remove(aclUpdate, EnginioClient::ObjectAclOperation);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 5);
     QCOMPARE(spyError.count(), 0);
