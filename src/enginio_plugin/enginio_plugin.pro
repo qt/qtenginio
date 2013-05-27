@@ -33,7 +33,7 @@ HEADERS += \
     enginioqmlidentityauthoperation.h \
     enginioqmlacloperation.h \
     enginioqmlfileoperation.h \
-    enginioqmloblejctadaptor_p.h \
+    enginioqmlobjectadaptor_p.h \
     enginioqmlclient_p.h \
     enginioqmlreply.h \
     enginioqmlusergroupoperation.h
