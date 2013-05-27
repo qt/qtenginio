@@ -55,6 +55,7 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qmimedatabase.h>
 #include <QtCore/qjsonarray.h>
+#include <QtCore/qbuffer.h>
 
 class FactoryUnit
 {
@@ -369,6 +370,15 @@ public:
         o.remove(EnginioString::objectType);
         o.remove(EnginioString::id);
 #if QT_VERSION < QT_VERSION_CHECK(5, 2, 0)
+        if (operation == EnginioClient::ObjectAclOperation) {
+            QByteArray data = o.toJson();
+            QBuffer *buffer = new QBuffer();
+            buffer->setData(data);
+            buffer->open(QIODevice::ReadOnly);
+            QNetworkReply *reply = q_ptr->networkManager()->sendCustomRequest(req, QByteArrayLiteral("DELETE"), buffer);
+            buffer->setParent(reply);
+            return reply;
+        }
         return q_ptr->networkManager()->deleteResource(req);
 #else
         QByteArray data = o.toJson();
