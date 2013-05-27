@@ -227,8 +227,6 @@ void tst_EnginioModel::listView()
     client.setApiUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
-    model.execute();
-
     QListView view;
     view.setModel(&model);
     view.show();
