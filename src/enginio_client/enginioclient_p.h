@@ -345,6 +345,8 @@ public:
         // Sadly we need to detach here, so it causes at least one allocation. Of course sending
         // garbage is also wrong so maybe we should filter out data before sending, the question
         // is how, and it seems that only enginio server knows...
+        // TODO It would work only for QJSON classes, QJSValue is a reference to real object therefore
+        // copy constructor will not detach, we are altering original object!
         ObjectAdaptor<T> o(object);
         o.remove(EnginioString::objectType);
         o.remove(EnginioString::id);
@@ -366,6 +368,8 @@ public:
         // Sadly we need to detach here, so it causes at least one allocation. Of course sending
         // garbage is also wrong so maybe we should filter out data before sending, the question
         // is how, and it seems that only enginio server knows...
+        // TODO It would work only for QJSON classes, QJSValue is a reference to real object therefore
+        // copy constructor will not detach, we are altering original object!
         ObjectAdaptor<T> o(object);
         o.remove(EnginioString::objectType);
         o.remove(EnginioString::id);
