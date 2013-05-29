@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLOBLEJCTADAPTOR_P_H
-#define ENGINIOQMLOBLEJCTADAPTOR_P_H
+#ifndef ENGINIOQMLOBJECTADAPTOR_P_H
+#define ENGINIOQMLOBJECTADAPTOR_P_H
 
 #include "enginioqmlclient_p.h"
 
@@ -133,4 +133,4 @@ ObjectAdaptor<QJSValue> ValueAdaptor<QJSValue>::toObject() const { return Object
 ArrayAdaptor<QJSValue> ValueAdaptor<QJSValue>::toArray() const { return ArrayAdaptor<QJSValue>(_value, _client); }
 
 
-#endif // ENGINIOQMLOBLEJCTADAPTOR_P_H
+#endif // ENGINIOQMLOBJECTADAPTOR_P_H

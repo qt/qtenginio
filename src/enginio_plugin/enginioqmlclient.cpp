@@ -41,7 +41,7 @@
 #include "enginioqmlidentityauthoperation.h"
 #include "enginioqmlobjectoperation.h"
 #include "enginioqmlqueryoperation.h"
-#include "enginioqmloblejctadaptor_p.h"
+#include "enginioqmlobjectadaptor_p.h"
 #include "enginioqmlusergroupoperation.h"
 
 #include <QtQml/qjsvalue.h>
