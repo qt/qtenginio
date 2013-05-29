@@ -67,7 +67,7 @@ public:
 };
 
 
-struct EnginioString
+struct ENGINIOCLIENT_EXPORT EnginioString
 {
     static const QString pageSize;
     static const QString limit;
@@ -96,7 +96,7 @@ struct EnginioString
     static const QString targetFileProperty;
 };
 
-class EnginioClientPrivate : public QObject
+class ENGINIOCLIENT_EXPORT EnginioClientPrivate : public QObject
 {
     Q_OBJECT
     Q_DECLARE_PUBLIC(EnginioClient)
