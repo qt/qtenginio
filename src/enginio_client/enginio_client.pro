@@ -3,9 +3,7 @@ QT += network
 DEFINES += ENGINIOCLIENT_LIBRARY
 MODULE = enginio
 
-CONFIG += force_independent
-
-!no-package {
+!sharedlib {
     win32: CONFIG -= build_all
     else {
         CONFIG -= debug_and_release

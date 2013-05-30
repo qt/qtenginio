@@ -3,7 +3,10 @@ defineReplace(targetSubDir) {
     else: return(release)
 }
 
-!no-package {
+# Only use force_independent for non-developer build
+!contains(QT_CONFIG, private_tests): CONFIG += force_independent
+
+!sharedlib {
     win32: CONFIG -= build_all
     else: CONFIG -= debug_and_release
 }
@@ -19,7 +22,7 @@ defineReplace(targetSubDir) {
 
 QT += core network enginio
 
-!no-package: win32 {
+!sharedlib: win32 {
     COPY_DLL_CMD = \"$${QT.enginio.libs}/$${QT.enginio.name}$$qtPlatformTargetSuffix().dll\" \"$$OUT_PWD/$$targetSubDir()\"
     COPY_DLL_CMD = $$replace(COPY_DLL_CMD, /, \\)
     QMAKE_POST_LINK += $${QMAKE_COPY} $${COPY_DLL_CMD} &
