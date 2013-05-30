@@ -97,6 +97,7 @@ const QString EnginioString::access = QStringLiteral("access");
 const QString EnginioString::sort = QStringLiteral("sort");
 const QString EnginioString::count = QStringLiteral("count");
 const QString EnginioString::targetFileProperty = QStringLiteral("targetFileProperty");
+const QString EnginioString::members = QStringLiteral("members");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),

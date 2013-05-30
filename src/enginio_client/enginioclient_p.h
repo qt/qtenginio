@@ -94,6 +94,7 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString sort;
     static const QString count;
     static const QString targetFileProperty;
+    static const QString members;
 };
 
 class ENGINIOCLIENT_EXPORT EnginioClientPrivate : public QObject
@@ -154,9 +155,17 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate : public QObject
             result.append(EnginioString::usergroups);
             break;
         case UsergroupMemberOperation:
-            // FIXME usergroups/{id}/members
+        {
+            QString id = object[EnginioString::id].toString();
+            if (id.isEmpty())
+                return QString();
             result.append(EnginioString::usergroups);
-            break;
+            result.append('/');
+            result.append(id);
+            result.append('/');
+            result.append(EnginioString::members);
+            return result;
+        }
         }
 
         if (flags & IncludeIdInPath) {

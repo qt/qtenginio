@@ -62,6 +62,9 @@ private slots:
     void query_usersgroup_limit();
     void query_usersgroup_count();
     void query_usersgroup_sort();
+    void query_usersgroupmembers_limit();
+    void query_usersgroupmembers_count();
+    void query_usersgroupmembers_sort();
     void search();
     void create_todos();
     void user_crud();
@@ -73,6 +76,28 @@ private slots:
     void acl();
     void file();
     void sharingNetworkManager();
+
+private:
+    QString usergroupId(EnginioClient *client)
+    {
+        static QString id;
+        static QString backendId = client->backendId();
+        Q_ASSERT(backendId == client->backendId()); // client can be changed but we want to use the same backend id
+        if (id.isEmpty()) {
+            QJsonObject obj;
+            obj["limit"] = 1;
+            const EnginioReply *reqId = client->query(obj, EnginioClient::UsergroupOperation);
+            Q_ASSERT(reqId);
+            const int __step = 50;
+            const int __timeoutValue = 5000;
+            for (int __i = 0; __i < __timeoutValue && (reqId->data().isEmpty()); __i+=__step) {
+                QTest::qWait(__step);
+            }
+            id = reqId->data()["results"].toArray().first().toObject()["id"].toString();
+            Q_ASSERT(!id.isEmpty());
+        }
+        return id;
+    }
 };
 
 void tst_EnginioClient::query_todos()
@@ -301,6 +326,97 @@ void tst_EnginioClient::query_usersgroup_sort()
     }
 }
 
+void tst_EnginioClient::query_usersgroupmembers_limit()
+{
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    QString id = usergroupId(&client);
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+
+    QJsonObject obj;
+    obj["limit"] = 1;
+    obj["id"] = id;
+    const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupMembersOperation);
+    QVERIFY(reqId);
+
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
+
+    const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QVERIFY(!data["results"].isUndefined());
+    QVERIFY(data["results"].toArray().count() <= 1);
+}
+
+void tst_EnginioClient::query_usersgroupmembers_count()
+{
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    QString id = usergroupId(&client);
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+
+    QJsonObject obj;
+    obj["count"] = 1;
+    obj["id"] = id;
+    const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupMembersOperation);
+    QVERIFY(reqId);
+
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
+
+    const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QVERIFY(data.contains("count"));
+}
+
+void tst_EnginioClient::query_usersgroupmembers_sort()
+{
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    QString id = usergroupId(&client);
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+
+    QJsonObject obj;
+    obj["id"] = id;
+    obj["sort"] = QJsonDocument::fromJson(QByteArrayLiteral("{\"sortBy\": \"createdAt\", \"direction\": \"desc\"}")).object();
+    const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupMembersOperation);
+    QVERIFY(reqId);
+
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
+
+    const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+    QCOMPARE(response, reqId);
+    QCOMPARE(response->errorCode(), QNetworkReply::NoError);
+    QJsonObject data = response->data();
+    QVERIFY(!data.isEmpty());
+    QVERIFY(!data["results"].isUndefined());
+    QJsonArray results = data["results"].toArray();
+    QString previous, current;
+    for (int i = 0; i < results.count(); ++i) {
+        current = results[i].toObject()["createdAt"].toString();
+        QVERIFY(current >= previous);
+        previous = current;
+    }
+}
 void tst_EnginioClient::query_users_filter()
 {
     EnginioClient client;
