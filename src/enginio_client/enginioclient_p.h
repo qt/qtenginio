@@ -194,10 +194,19 @@ class EnginioClientPrivate : public QObject
                 emit q->error(ereply);
             }
 
-            if (d->_downloads.remove(nreply)) {
-                QUrl url = d->m_apiUrl;
-                url.setPath(ereply->data()[EnginioString::results].toArray().first().toObject()[QStringLiteral("file")].toObject()[EnginioString::url].toString());
-                qDebug() << "Download URL: " << url;
+            // resolve the download url
+            if (d->_downloads.contains(nreply)) {
+                QString propertyName = d->_downloads.value(nreply);
+                d->_downloads.remove(nreply);
+                QString id = ereply->data()[EnginioString::results].toArray().first().toObject()[propertyName].toObject()[EnginioString::id].toString();
+                QUrl url(d->m_apiUrl);
+                url.setPath(getPath(QJsonObject(), FileOperation) + QLatin1Char('/') + id + QStringLiteral("/download_url"));
+                //url.setQuery("variant=original");
+                QNetworkRequest req(d->_request);
+                req.setUrl(url);
+                QNetworkReply *reply = d->q_ptr->networkManager()->get(req);
+                ereply->setNetworkReply(reply);
+                return;
             }
 
             q->finished(ereply);
@@ -270,7 +279,7 @@ public:
     QList<FactoryUnit*> m_factories;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
-    QSet<QNetworkReply*> _downloads;
+    QMap<QNetworkReply*, QString> _downloads;
 
     QByteArray sessionToken() const
     {
@@ -444,7 +453,7 @@ public:
                      "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
 
         QNetworkReply *reply = query<QJsonObject>(obj, ObjectOperation);
-        _downloads.insert(reply);
+        _downloads.insert(reply, object[QStringLiteral("propertyName")].toString());
         return reply;
     }
 

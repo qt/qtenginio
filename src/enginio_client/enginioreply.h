@@ -72,7 +72,10 @@ protected:
 
 private:
     Q_DISABLE_COPY(EnginioReply)
+    void setNetworkReply(QNetworkReply *reply);
+
     friend class EnginioClient;
+    friend class EnginioClientPrivate;
 };
 
 Q_DECLARE_TYPEINFO(const EnginioReply*, Q_PRIMITIVE_TYPE);
