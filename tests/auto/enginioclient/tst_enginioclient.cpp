@@ -265,7 +265,6 @@ void tst_EnginioClient::query_usersgroup_limit()
 
 void tst_EnginioClient::query_usersgroup_count()
 {
-    QSKIP("Causes an internal server error"); // FIXME
     EnginioClient client;
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
@@ -280,7 +279,6 @@ void tst_EnginioClient::query_usersgroup_count()
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
-    qDebug() << reqId->data();
     QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
@@ -288,8 +286,7 @@ void tst_EnginioClient::query_usersgroup_count()
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
-    QVERIFY(!data["results"].isUndefined());
-    QVERIFY(data["results"].toArray().count());
+    QVERIFY(data.contains("count"));
 }
 
 void tst_EnginioClient::query_usersgroup_sort()
