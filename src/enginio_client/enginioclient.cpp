@@ -113,6 +113,8 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
     qRegisterMetaType<EnginioAuthentication*>();
+
+    assignNetworkManager();
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
@@ -472,7 +474,7 @@ void EnginioClientPrivate::assignNetworkManager()
     Q_ASSERT(!m_networkManager);
 
     m_networkManager = prepareNetworkManagerInThread();
-    _networkManagerConnection = QObject::connect(m_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
+    _networkManagerConnection = QObject::connect(m_networkManager, &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
 
     // Ignore SSL errors when staging backend is used.
     if (m_apiUrl == QStringLiteral("https://api.staging.engin.io")) {
