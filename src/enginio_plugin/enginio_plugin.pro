@@ -1,7 +1,5 @@
 TARGETPATH = Enginio
 
-CONFIG += force_independent
-
 load(qml_plugin)
 include($$PWD/../../enginio.pri)
 

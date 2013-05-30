@@ -23,7 +23,7 @@ Client library for accessing Enginio service from Qt and QML code.
 
 
 2. Shared library config
-	* `qmake CONFIG+=no-package && make install`
+	* `qmake CONFIG+=sharedlib && make install`
 	* Produces shared library and installs it as a globally available Qt5 module
 
 # Usage
