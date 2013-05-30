@@ -275,7 +275,7 @@ public:
     EnginioIdentity *_identity;
     QVarLengthArray<QMetaObject::Connection, 3> _identityConnections;
     QUrl m_apiUrl;
-    QPointer<QNetworkAccessManager> m_networkManager;
+    QNetworkAccessManager *m_networkManager;
     QMetaObject::Connection _networkManagerConnection;
     QList<FactoryUnit*> m_factories;
     QNetworkRequest _request;
@@ -523,9 +523,6 @@ public:
 
     QNetworkAccessManager *networkManager()
     {
-        if (Q_UNLIKELY(m_networkManager.isNull()))
-            assignNetworkManager();
-
         return m_networkManager;
     }
 
