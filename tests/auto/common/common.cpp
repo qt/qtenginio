@@ -3,6 +3,7 @@
 #include "enginioidentityauthoperation.h"
 #include "enginioobjectmodel.h"
 #include "enginioobjectoperation.h"
+#include "enginioerror.h"
 
 #include <QSignalSpy>
 #include <QDebug>
@@ -27,6 +28,10 @@ bool EnginioTests::createObject(EnginioClient *client,
 
     bool result = finishedSpy.wait(EnginioTests::NETWORK_TIMEOUT);
     result = result && (errorSpy.count() == 0);
+    if (!result) {
+        EnginioError * error = errorSpy[0][0].value<EnginioError*>();
+        qDebug() << error->errorString() << error->error() << error->httpCode();
+    }
     delete op;
     return result;
 }
