@@ -98,6 +98,7 @@ const QString EnginioString::sort = QStringLiteral("sort");
 const QString EnginioString::count = QStringLiteral("count");
 const QString EnginioString::targetFileProperty = QStringLiteral("targetFileProperty");
 const QString EnginioString::members = QStringLiteral("members");
+const QString EnginioString::propertyName = QStringLiteral("propertyName");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
@@ -459,7 +460,7 @@ EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 
     if (object[EnginioString::objectType].toString().isEmpty()
             || object[EnginioString::id].toString().isEmpty()
-            || object[QStringLiteral("propertyName")].toString().isEmpty())
+            || object[EnginioString::propertyName].toString().isEmpty())
         return 0;
 
     QNetworkReply *nreply = d->downloadFile(object);

@@ -95,6 +95,7 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString count;
     static const QString targetFileProperty;
     static const QString members;
+    static const QString propertyName;
 };
 
 class ENGINIOCLIENT_EXPORT EnginioClientPrivate : public QObject
@@ -489,7 +490,7 @@ public:
                      "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
 
         QNetworkReply *reply = query<QJsonObject>(obj, ObjectOperation);
-        _downloads.insert(reply, object[QStringLiteral("propertyName")].toString());
+        _downloads.insert(reply, object[EnginioString::propertyName].toString());
         return reply;
     }
 
