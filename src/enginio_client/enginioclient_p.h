@@ -447,7 +447,7 @@ public:
         ValueAdaptor<T> sort = object[EnginioString::sort];
         if (sort.isComposedType()) {
             urlQuery.addQueryItem(EnginioString::sort,
-                QString::fromUtf8(include.toJson()));
+                QString::fromUtf8(sort.toJson()));
         }
         if (operation == SearchOperation) {
             ValueAdaptor<T> search = object[EnginioString::search];
