@@ -1,5 +1,8 @@
+include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
+
 project = enginio-qt
 description = Client library for accessing Enginio service from Qt and QML code
+url = http://engin.io
 
 sourcedirs += ../src/enginio_client
 sourcedirs += ../src/enginio_plugin
