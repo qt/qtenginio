@@ -69,7 +69,6 @@ public:
     bool setData (const QModelIndex &index,
                   const QVariant &value,
                   int role = Qt::EditRole);
-    Qt::ItemFlags flags(const QModelIndex & index) const;
 
     bool addToModel(QList<EnginioAbstractObject*> objects, int row);
     bool removeFromModel(int row, int count);
