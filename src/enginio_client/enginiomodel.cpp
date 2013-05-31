@@ -44,6 +44,7 @@
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qjsonarray.h>
 
+
 class EnginioModelPrivate {
     QJsonObject _query;
     EnginioClient *_enginio;
@@ -406,6 +407,18 @@ public:
 
 const int EnginioModelPrivate::FullModelReset = -1;
 const int EnginioModelPrivate::IncrementalModelUpdate = -2;
+
+
+/*!
+ * \class EnginioModel
+ * \inmodule enginio-client
+ * \brief EnginioModel
+ */
+
+/*!
+ * \brief EnginioModel::EnginioModel
+ * \param parent
+ */
 
 EnginioModel::EnginioModel(QObject *parent)
     : QAbstractListModel(parent)

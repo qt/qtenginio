@@ -8,12 +8,7 @@ sourcedirs += ../src/enginio_client
 sourcedirs += ../src/enginio_plugin
 headerdirs += ../src/enginio_client
 headerdirs += ../src/enginio_plugin
-sources.fileextensions = "*.cpp"
-headers.fileextensions = "*.h"
 
 outputdir = ./html
 outputformats = HTML
 
-Cpp.ignoretokens = Q_INVOKABLE
-
-#spurious = "Can't link to 'All Modules'"

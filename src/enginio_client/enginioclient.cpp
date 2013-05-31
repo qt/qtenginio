@@ -56,19 +56,36 @@
 /*!
  * \class EnginioClient
  * \inmodule enginio-client
- * \brief Enginio client class
- * Used for handling API keys, sessions and authorization.
+ * \brief EnginioClient handles API keys, sessions and authorization.
+ *
+ * When using Enginio you need to set up your backend using this class.
+ *
+ * The \l backendId and \l backendSecret are required for Engino to work.
+ * Once the client is set up you can use it to make queries to the backend
+ * or use higher level API such as \l EnginioModel.
  */
 
 /*!
  * \fn EnginioClient::sessionAuthenticated() const
- * \brief Emitted when user logs in.
+ * \brief Emitted when a user logs in.
  */
 
 /*!
  * \fn EnginioClient::sessionTerminated() const
- * \brief Emitted when user logs out.
+ * \brief Emitted when a user logs out.
  */
+
+/*!
+    \enum EnginioClient::Operation
+
+    This enum describes which operation a query uses.
+
+    \value ObjectOperation Operate on objects
+    \value ObjectAclOperation Operate on the ACL
+    \value UserOperation Operate on users
+    \value UsergroupOperation Operate on groups
+    \value UsergroupMembersOperation Operate on group members
+*/
 
 int FactoryUnit::nextId = 0;
 
@@ -156,6 +173,8 @@ void EnginioClientPrivate::removeFactory(int factoryId)
  * Create a new client object. \a backendId and \a backendSecret define which
  * Enginio backend will be used with this client. Both can be found from the
  * Enginio dashboard. \a parent is optional.
+ *
+ * \sa backendId, backendSecret
  */
 EnginioClient::EnginioClient(const QString &backendId,
                              const QString &backendSecret,
@@ -167,12 +186,21 @@ EnginioClient::EnginioClient(const QString &backendId,
     setBackendSecret(backendSecret);
 }
 
+/*!
+ * \brief Create a new EnginioClient.
+ * \param parent the QObject parent.
+ *
+ * \sa backendId, backendSecret
+ */
 EnginioClient::EnginioClient(QObject *parent)
     : QObject(parent)
     , d_ptr(new EnginioClientPrivate(this))
 {
 }
 
+/*!
+ * \internal
+ */
 EnginioClient::EnginioClient(QObject *parent, EnginioClientPrivate *d)
     : QObject(parent)
     , d_ptr(d)
@@ -180,13 +208,23 @@ EnginioClient::EnginioClient(QObject *parent, EnginioClientPrivate *d)
 }
 
 /*!
- * Destructor.
+ * Destroys the EnginioClient.
+ *
+ * This ends the Enginio session.
  */
 EnginioClient::~EnginioClient()
 {}
 
 /*!
- * Get the Enginio backend ID.
+ * \property EnginioClient::backendId
+ * \brief The unique ID for the used Enginio backend.
+ *
+ * The backend ID determines which Enginio backend is used
+ * by this instance of EnginioClient. The backend ID and \l backendSecret are
+ * required for Enginio to work.
+ * It is possible to use several Enginio backends simultaneously
+ * by having several instances of EnginioClient.
+ * \sa backendSecret
  */
 QString EnginioClient::backendId() const
 {
@@ -194,9 +232,6 @@ QString EnginioClient::backendId() const
     return d->m_backendId;
 }
 
-/*!
- * Change Enginio backend ID to \a backendId.
- */
 void EnginioClient::setBackendId(const QString &backendId)
 {
     Q_D(EnginioClient);
@@ -210,7 +245,9 @@ void EnginioClient::setBackendId(const QString &backendId)
 }
 
 /*!
- * Get the Enginio backend secret.
+ * \property EnginioClient::backendSecret
+ * \brief The backend secret that corresponds to the \l backendId.
+ * The secret is used to authenticate the Enginio connection.
  */
 QString EnginioClient::backendSecret() const
 {
@@ -218,9 +255,6 @@ QString EnginioClient::backendSecret() const
     return d->m_backendSecret;
 }
 
-/*!
- * Change Enginio backend secret to \a backendSecret.
- */
 void EnginioClient::setBackendSecret(const QString &backendSecret)
 {
     Q_D(EnginioClient);
@@ -234,9 +268,10 @@ void EnginioClient::setBackendSecret(const QString &backendSecret)
 }
 
 /*!
- * \qproperty EnginioClient::apiUrl
+ * \property EnginioClient::apiUrl
  * \brief Enginio backend URL.
  *
+ * The API URL determines the server used by Enginio.
  * Usually it is not needed to change the default URL.
  */
 QUrl EnginioClient::apiUrl() const
@@ -255,8 +290,9 @@ void EnginioClient::setApiUrl(const QUrl &apiUrl)
 }
 
 /*!
- * Get the QNetworkAccessManager used by the Enginio library. Note that it
- * will be deleted with the client object.
+ * \brief Get the QNetworkAccessManager used by the Enginio library.
+ *
+ * Note that it will be deleted with the client object.
  */
 QNetworkAccessManager * EnginioClient::networkManager()
 {
@@ -285,6 +321,14 @@ void EnginioClient::setSessionToken(const QByteArray &sessionToken)
         d->setSessionToken(sessionToken);
     }
 }
+
+/*!
+ * \property EnginioClient::initialized
+ * \brief The initialisation state of the session.
+ *
+ * This property is true when the session is established.
+ * That means \l backendId and \l backendSecret have been set.
+ */
 
 bool EnginioClient::isInitialized() const
 {
@@ -412,6 +456,11 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
     return ereply;
 }
 
+/*!
+ * \property EnginioClient::identity
+ * Represents a user.
+ * \sa EnginioIdentity
+ */
 EnginioIdentity *EnginioClient::identity() const
 {
     Q_D(const EnginioClient);
