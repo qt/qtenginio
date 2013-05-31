@@ -53,4 +53,4 @@ copy2build.output = ../../qml/$${TARGET.module_name}/qmldir
 copy2build.commands = $$QMAKE_COPY ${QMAKE_FILE_IN} ${QMAKE_FILE_OUT}
 copy2build.name = COPY ${QMAKE_FILE_IN}
 copy2build.CONFIG += no_link
-QMAKE_EXTRA_COMPILERS += copy2build
+force_independent: QMAKE_EXTRA_COMPILERS += copy2build
