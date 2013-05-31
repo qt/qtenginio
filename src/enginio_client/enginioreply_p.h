@@ -44,10 +44,9 @@
 #include <QtNetwork/qnetworkreply.h>
 
 class EnginioReplyPrivate {
-protected:
+public:
     QNetworkReply *_nreply;
     mutable QJsonObject _data;
-public:
     EnginioReplyPrivate(QNetworkReply *reply)
         : _nreply(reply)
     {

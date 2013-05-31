@@ -458,7 +458,8 @@ EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
     Q_D(EnginioClient);
 
     if (object[EnginioString::objectType].toString().isEmpty()
-            || object[EnginioString::id].toString().isEmpty())
+            || object[EnginioString::id].toString().isEmpty()
+            || object[QStringLiteral("propertyName")].toString().isEmpty())
         return 0;
 
     QNetworkReply *nreply = d->downloadFile(object);

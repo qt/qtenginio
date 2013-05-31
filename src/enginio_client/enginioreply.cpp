@@ -79,6 +79,17 @@ QJsonObject EnginioReply::data() const
     return d->data();
 }
 
+void EnginioReply::setNetworkReply(QNetworkReply *reply)
+{
+    EnginioClient *client = qobject_cast<EnginioClient*>(parent());
+    Q_ASSERT(client);
+    client->d_ptr->_replyReplyMap.remove(d->_nreply);
+    delete d->_nreply;
+    d->_nreply = reply;
+    d->_data = QJsonObject();
+    client->d_ptr->registerReply(reply, this);
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const EnginioReply *reply)
 {

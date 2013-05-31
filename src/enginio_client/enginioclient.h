@@ -136,6 +136,7 @@ protected:
     Q_DECLARE_PRIVATE(EnginioClient)
 private:
     Q_DISABLE_COPY(EnginioClient)
+    friend class EnginioReply;
 };
 
 Q_DECLARE_TYPEINFO(EnginioClient::Operation, Q_PRIMITIVE_TYPE);

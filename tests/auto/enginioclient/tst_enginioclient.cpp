@@ -1224,17 +1224,18 @@ void tst_EnginioClient::file()
     QVERIFY(data["results"].isArray());
     QVERIFY(data["results"].toArray().first().toObject()["fileAttachment"].isObject());
     QVERIFY(!data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString().isEmpty());
-    qDebug() << "Download from here: " << client.apiUrl() << data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString();
 
-//    // Download
-//    const EnginioReply* reqDownload = client.downloadFile(object);
-//    QVERIFY(reqDownload);
-
-//    QTRY_COMPARE(spy.count(), 4);
-//    QCOMPARE(spyError.count(), 0);
-//    const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
-//    qDebug() << responseDownload;
-//    qDebug() << "Download: " << responseDownload;
+    // Download
+    const EnginioReply* reqDownload = client.downloadFile(object);
+    QVERIFY(reqDownload);
+    QTRY_COMPARE(spy.count(), 4);
+    QCOMPARE(spyError.count(), 0);
+    const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
+    QCOMPARE(spy.count(), 4);
+    QJsonObject downloadData = responseDownload->data();
+    QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
+    QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
+    qDebug() << "Download: " << responseDownload;
 }
 
 void tst_EnginioClient::sharingNetworkManager()
