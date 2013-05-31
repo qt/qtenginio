@@ -64,7 +64,7 @@ template <> struct ValueAdaptor<QJsonObject>
         : _value(value)
     {}
 
-    bool isObject() const { return _value.isObject(); }
+    bool isComposedType() const { return _value.isObject() || _value.isArray(); }
 
     int toInt() const { return _value.toDouble(); }
     QString toString() const { return _value.toString(); }

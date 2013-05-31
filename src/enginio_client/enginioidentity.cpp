@@ -125,7 +125,6 @@ void EnginioAuthentication::setPassword(const QString &password)
 void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
 {
     Q_ASSERT(enginio);
-    Q_ASSERT(enginio->isInitialized());
     Q_ASSERT(enginio->identity());
 
     QJsonObject data;

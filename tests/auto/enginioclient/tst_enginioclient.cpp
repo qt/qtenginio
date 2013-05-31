@@ -300,7 +300,7 @@ void tst_EnginioClient::query_usersgroup_sort()
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject obj;
-    obj["sort"] = QJsonDocument::fromJson(QByteArrayLiteral("{\"sortBy\": \"createdAt\", \"direction\": \"desc\"}")).object();
+    obj["sort"] = QJsonDocument::fromJson(QByteArrayLiteral("[{\"sortBy\": \"createdAt\", \"direction\": \"desc\"}]")).array();
     const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupOperation);
     QVERIFY(reqId);
 
@@ -393,7 +393,7 @@ void tst_EnginioClient::query_usersgroupmembers_sort()
 
     QJsonObject obj;
     obj["id"] = id;
-    obj["sort"] = QJsonDocument::fromJson(QByteArrayLiteral("{\"sortBy\": \"createdAt\", \"direction\": \"desc\"}")).object();
+    obj["sort"] = QJsonDocument::fromJson(QByteArrayLiteral("[{\"sortBy\": \"createdAt\", \"direction\": \"desc\"}]")).array();
     const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupMembersOperation);
     QVERIFY(reqId);
 
@@ -994,7 +994,7 @@ void tst_EnginioClient::acl()
     {
         QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
         QJsonObject userQuery = QJsonDocument::fromJson("{\"query\": {\"username\": {\"$in\": [\"logintest\", \"logintest2\",\"logintest3\"]}},"
-                                 "\"sort\": {\"sortBy\":\"username\", \"direction\": \"asc\"}}", &parseError).object();
+                                                        "\"sort\": [{\"sortBy\":\"username\", \"direction\": \"asc\"}]}", &parseError).object();
         QCOMPARE(parseError.error, QJsonParseError::NoError);
 
         const EnginioReply* reqId = client.query(userQuery, EnginioClient::UserOperation);

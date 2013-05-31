@@ -61,7 +61,7 @@ template <> struct ValueAdaptor<QJSValue>
         , _client(client)
     {}
 
-    bool isObject() const { return _value.isObject(); }
+    bool isComposedType() const { return _value.isObject(); }
 
     int toInt() const { return _value.toInt(); }
     QString toString() const { return _value.toString(); }

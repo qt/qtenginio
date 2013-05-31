@@ -440,19 +440,19 @@ public:
             urlQuery.addQueryItem(EnginioString::count, QString(0, Qt::Uninitialized));
         }
         ValueAdaptor<T> include = object[EnginioString::include];
-        if (include.isObject()) {
+        if (include.isComposedType()) {
             urlQuery.addQueryItem(EnginioString::include,
                 QString::fromUtf8(include.toJson()));
         }
         ValueAdaptor<T> sort = object[EnginioString::sort];
-        if (sort.isObject()) {
+        if (sort.isComposedType()) {
             urlQuery.addQueryItem(EnginioString::sort,
-                QString::fromUtf8(include.toJson()));
+                QString::fromUtf8(sort.toJson()));
         }
         if (operation == SearchOperation) {
             ValueAdaptor<T> search = object[EnginioString::search];
             ArrayAdaptor<T> objectTypes = object[QStringLiteral("objectTypes")].toArray();
-            if (search.isObject()) {
+            if (search.isComposedType()) {
                 for (typename ArrayAdaptor<T>::const_iterator i = objectTypes.constBegin(); i != objectTypes.constEnd(); ++i) {
                     urlQuery.addQueryItem(QStringLiteral("objectTypes[]"), (*i).toString());
                 }
@@ -462,7 +462,7 @@ public:
                 // FIXME: Think about proper error handling for wrong user input.
             } else qWarning("!! Fulltext Search: parameter(s) missing !!");
         } else
-        if (object[EnginioString::query].isObject()) { // TODO docs are inconsistent on that
+        if (object[EnginioString::query].isComposedType()) { // TODO docs are inconsistent on that
             urlQuery.addQueryItem(QStringLiteral("q"),
                 QString::fromUtf8(object[EnginioString::query].toJson()));
         }

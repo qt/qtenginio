@@ -164,7 +164,7 @@ EnginioQmlAclOperation * EnginioQmlClient::createAclOperation()
 
 bool EnginioQmlClient::isAuthenticated() const
 {
-    return sessionToken().isEmpty();
+    return !sessionToken().isEmpty();
 }
 
 EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation operation)
