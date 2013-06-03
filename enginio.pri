@@ -16,7 +16,6 @@ defineReplace(targetSubDir) {
     module_pri = mkspecs/modules/qt_lib_enginio.pri
     exists($$PWD/$$module_pri): include($$PWD/$$module_pri) # in-source build
     else: exists($$OUT_PWD/../enginio-qt/$$module_pri): include($$OUT_PWD/../enginio-qt/$$module_pri) # shadow build
-    else: exists($$[QT_INSTALL_PREFIX]/$$module_pri): include($$[QT_INSTALL_PREFIX]/$$module_pri) # should be a developer build
     else: error("Enginio client library module pri not found.")
 }
 
