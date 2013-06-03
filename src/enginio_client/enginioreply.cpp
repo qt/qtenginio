@@ -46,6 +46,19 @@
 #include "enginioclient_p.h"
 #include "enginioobjectadaptor_p.h"
 
+/*!
+  \class EnginioReply
+  \brief The EnginioReply class contains the data from a request to the Enginio database.
+  \inmodule enginio-client
+
+  The finished signal is emitted when the query is done.
+
+  \sa EnginioClient
+*/
+
+/*!
+  \internal
+*/
 EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
     : QObject(p->q_ptr)
     , d(new EnginioReplyPrivate(reply))
@@ -53,6 +66,9 @@ EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
     p->registerReply(reply, this);
 }
 
+/*!
+  \internal
+*/
 EnginioReply::EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv)
     : QObject(parent->q_ptr)
     , d(priv)
@@ -60,6 +76,12 @@ EnginioReply::EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, E
     parent->registerReply(reply, this);
 }
 
+
+/*!
+  \brief Destroys the EnginioReply.
+
+  The reply needs to be deleted after the finished signal is emitted.
+*/
 EnginioReply::~EnginioReply()
 {
 }

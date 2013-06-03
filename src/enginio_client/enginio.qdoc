@@ -47,8 +47,6 @@ Enginio works from both, C++ and Qt Quick.
 \brief Introduction to using Enginio using Qt Quick
 
 You use the QML version of \l EnginioClient and things like \l EnginioModel.
-
-
 */
 
 
@@ -57,7 +55,60 @@ You use the QML version of \l EnginioClient and things like \l EnginioModel.
 \title Getting Started with Enginio using C++
 \brief Introduction to using Enginio using C++
 
-The most important class is \l EnginioClient.
+\section1 Setup Qt application project
 
+You need to link to Enginio. For QMake based projects simply add
+\code
+QT += enginio
+\endcode
+to your \c .pro file.
+
+\section1 Initialize Enginio Client
+
+To use Enginio Qt library in your code, you have to include relevant library headers.
+\code
+ #include <Enginio/Enginio>
+\endcode
+Before making any calls to the Enginio API, the \l EnginioClient needs to be instantiated.
+The constructor requires the \l{EnginioClient::backendId}{Backend ID} and \l{EnginioClient::backendSecret}{Backend Secret}.
+They can be copied from the Dashboard.
+Go to the \l{https://dashboard.engin.io/}{Enginio Dashboard} and select a backend.
+Copy the Backend Id and Backend Secret values.
+
+\code
+QString backendId("YOUR_OWN_BACKEND_ID");
+QString backendSecret("YOUR_OWN_BACKEND_SECRET");
+EnginioClient *client = new EnginioClient(backendId, backendSecret);
+\endcode
+For testing purposes it is easiest to hardcode the backend ID and backend secret directly into application code. But this might not be always the best choice and sometimes it might be beneficial to put backend configuration in separate configuration file.
+\section1 Store your first Object
+
+Create an object in JSON format and fill in the data:
+\code
+    QJsonObject city;
+    city.insert("objectType", QString("objects.city")); // an object type is required for all objects in Enginio
+    city.insert("name", QString("Oslo")); // other properties can be chosen freely
+    city.insert("population", 624000);
+\endcode
+
+Create the object in the Enginio database by calling \l{EnginioClient::create}:
+\code
+    client->create(city);
+    connect(client, SIGNAL(finished(EnginioReply*)), this, SLOT(uploadFinished(EnginioReply*)));
+\endcode
+Note that execute() method performs the actual asynchronous network communication.
+You need to wait for its completion by connecting to the \l{EnginioClient::finished}{finished} and \l{EnginioClient::error}{error} signals.
+
+\section1 Checking stored objects in the Dashboard
+
+When you have successfully stored objects with Qt C++ or QML code, go to your \l{https://dashboard.engin.io/}{Enginio Dashboard}
+and check the status there.
+
+\list
+\li Select the ’Objects’ view from top navigation bar.
+\li Make sure that objects.city is selected in the type drop-down.
+\li The list should now show a row for the object which was just uploaded.
+\endlist
+\image object_browser_first_city_object.png
 */
 

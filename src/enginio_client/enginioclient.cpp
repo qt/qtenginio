@@ -365,6 +365,7 @@ void EnginioClient::unregisterObjectFactory(int factoryId)
 }
 
 /*!
+  \internal
  * Create new object of specified \a type and optionally with \a id.
  * Note that types of user-defined objects have "objects." prefix.
  */
@@ -394,6 +395,12 @@ void EnginioClient::ignoreSslErrors(QNetworkReply* reply,
     reply->ignoreSslErrors(errors);
 }
 
+/*!
+ * \brief Search.
+ *
+ * \return EnginioReply containing the status and the result once it is finished.
+ * \sa EnginioReply, create(), query(), update(), remove()
+ */
 EnginioReply *EnginioClient::search(const QJsonObject &query)
 {
     Q_D(EnginioClient);
@@ -404,6 +411,12 @@ EnginioReply *EnginioClient::search(const QJsonObject &query)
     return ereply;
 }
 
+/*!
+ * \brief Query the database.
+ *
+ * \return EnginioReply containing the status and the result once it is finished.
+ * \sa EnginioReply, create(), update(), remove()
+ */
 EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation operation)
 {
     Q_D(EnginioClient);
@@ -414,6 +427,14 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
     return ereply;
 }
 
+/*!
+ * \brief Insert a new \a object into the database.
+ *
+ * The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
+ * to create new objects by default.
+ * \return EnginioReply containing the status of the query and the data once it is finished.
+ * \sa EnginioReply, query(), update(), remove()
+ */
 EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
@@ -428,6 +449,14 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation o
     return ereply;
 }
 
+/*!
+ * \brief Update an existing \a object in the database.
+ *
+ * The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
+ * to create new objects by default.
+ * \return EnginioReply containing the status of the query and the data once it is finished.
+ * \sa EnginioReply, create(), query(), remove()
+ */
 EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
@@ -442,6 +471,14 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
     return ereply;
 }
 
+/*!
+ * \brief Remove an existing \a object from the database.
+ *
+ * The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
+ * to create new objects by default.
+ * \return EnginioReply containing the status of the query and the data once it is finished.
+ * \sa EnginioReply, create(), query(), update()
+ */
 EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
@@ -477,7 +514,7 @@ void EnginioClient::setIdentity(EnginioIdentity *identity)
 
 /*!
  * \brief EnginioClient::uploadFile uploads a file
- * \param associatedObject an existing object on the server
+ * \param object an existing object on the server
  * \param file the file to upload
  * \return
  *

@@ -9,6 +9,8 @@ sourcedirs += ../src/enginio_plugin
 headerdirs += ../src/enginio_client
 headerdirs += ../src/enginio_plugin
 
+imagedirs += images
+
 outputdir = ./html
 outputformats = HTML
 
