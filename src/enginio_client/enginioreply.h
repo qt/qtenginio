@@ -68,6 +68,7 @@ signals:
 
 protected:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
+    virtual void emitFinished();
     QScopedPointer<EnginioReplyPrivate> d;
 
 private:

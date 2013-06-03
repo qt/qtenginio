@@ -217,8 +217,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
                 return;
             }
 
+            ereply->emitFinished();
             q->finished(ereply);
-            ereply->finished();
         }
     };
 
@@ -535,6 +535,11 @@ public:
 
     void assignNetworkManager();
     static QNetworkAccessManager *prepareNetworkManagerInThread();
+
+    bool isSignalConnected(const QMetaMethod &signal) const
+    {
+        return q_ptr->isSignalConnected(signal);
+    }
 
 private:
     /* Create a multi part upload:
