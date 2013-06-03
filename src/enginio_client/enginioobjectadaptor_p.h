@@ -72,6 +72,8 @@ template <> struct ValueAdaptor<QJsonObject>
     {
         if (_value.isObject())
             return QJsonDocument(_value.toObject()).toJson(QJsonDocument::Compact);
+        if (_value.isArray())
+            return QJsonDocument(_value.toArray()).toJson(QJsonDocument::Compact);
         Q_UNIMPLEMENTED();
         return QByteArray();
     }
@@ -102,7 +104,15 @@ template <> struct ArrayAdaptor<QJsonObject>
     bool isEmpty() const { return _array.isEmpty(); }
     QByteArray toJson() const { return QJsonDocument(_array).toJson(QJsonDocument::Compact); }
 
-    typedef QJsonArray::const_iterator const_iterator;
+    struct const_iterator: public QJsonArray::const_iterator {
+        ValueAdaptor<QJsonObject> operator *() const
+        {
+            return QJsonArray::const_iterator::operator *();
+        }
+        const_iterator(const QJsonArray::const_iterator &other)
+            : QJsonArray::const_iterator(other)
+        {}
+    };
 
     const_iterator constBegin() const { return _array.constBegin(); }
     const_iterator constEnd() const { return _array.constEnd(); }
