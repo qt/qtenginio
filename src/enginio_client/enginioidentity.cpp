@@ -51,9 +51,8 @@
 */
 
 /*!
- * \brief EnginioIdentity::EnginioIdentity
- * \param parent
- */
+    Constructs a new EnginioIdentity with \a parent as QObject parent.
+*/
 EnginioIdentity::EnginioIdentity(QObject *parent) :
     QObject(parent)
 {

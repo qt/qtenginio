@@ -41,6 +41,7 @@
 #include "enginiooperation_p.h"
 #include "enginioidentityauthoperation.h"
 
+#ifndef qdoc
 namespace Enginio {
     enum AuthOperationType {
         NullAuthOperation = 0,
@@ -49,6 +50,7 @@ namespace Enginio {
         LogoutAuthOperation
     };
 }
+#endif
 
 class EnginioIdentityAuthOperationPrivate : public EnginioOperationPrivate
 {

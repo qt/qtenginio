@@ -49,43 +49,49 @@
 #include <QDebug>
 
 /*!
- * \qmltype Client
+ * \qmltype Enginio
  * \instantiates EnginioQmlClient
  * \inqmlmodule enginio-plugin
  * \brief Enginio client inteface to access the service.
  *
- * Client is used in all communication with the Enginio backend. The backend
- * application is identified with backend ID and secret.
+ * Enginio is used for all communication with the Enginio backend.
+ * The backend is identified by \l{backendId}{backend ID} and \l{backendSecret}{secret}.
  *
  * It also provides methods for creating operation objects dynamically.
  */
 
 /*!
- * \qmlproperty string Client::backendId
+ * \qmlproperty string Enginio::backendId
  * Enginio backend ID. This can be obtained from the Enginio dashboard.
  */
 
 /*!
- * \qmlproperty string Client::backendSecret
+ * \qmlproperty string Enginio::backendSecret
  * Enginio backend secret. This can be obtained from the Enginio dashboard.
  */
 
 /*!
- * \qmlproperty string Client::sessionToken
- * Token of currently authenticated session. This is empty string if there's no
+ * \qmlproperty string Enginio::apiUrl
+ * Enginio backend URL.
+ *
+ * Usually there is no need to change the default URL.
+ */
+
+/*!
+ * \qmlproperty string Enginio::sessionToken
+ * Token of currently authenticated session.
+ *
+ * The session token is an empty string if there is no
  * authenticated session.
  */
 
 /*!
- * \qmlsignal Client::sessionAuthenticated()
- * This signal is emitted when the user logs in.
+ * \qmlproperty bool Enginio::isAuthenticated()
+ * This property holds the state of the authentication.
+ *
+ * It is false until a user session has been establieshed.
+ * \sa sessionToken
  */
-
-/*!
- * \qmlsignal Client::sessionTerminated()
- * This signal is emitted when the user logs out.
- */
-
 
 class IsAuthenticatedFunctor
 {
@@ -114,7 +120,8 @@ EnginioQmlClient::EnginioQmlClient(QObject *parent)
 }
 
 /*!
- * \qmlmethod Client::createObjectOperation(ObjectModel model = 0)
+  \internal
+ * \qmlmethod Enginio::createObjectOperation(ObjectModel model = 0)
  * Returns new \l ObjectOperation which can be used to create new objects on
  * backend or read, update or delete existing objects. If \a model is specified,
  * when operation finishes corresponding object in \a model will be updated.
@@ -127,7 +134,8 @@ EnginioQmlObjectOperation * EnginioQmlClient::createObjectOperation(
 }
 
 /*!
- * \qmlmethod Client::createQueryOperation(ObjectModel model = 0)
+  \internal
+ * \qmlmethod Enginio::createQueryOperation(ObjectModel model = 0)
  *
  * Returns new \l QueryOperation which can be used to query objects from
  * backend. If \a model is specified, when operation finishes any objects
@@ -141,7 +149,8 @@ EnginioQmlQueryOperation * EnginioQmlClient::createQueryOperation(
 }
 
 /*!
- * \qmlmethod Client::createIdentityAuthOperation()
+  \internal
+ * \qmlmethod Enginio::createIdentityAuthOperation()
  *
  * Returns new \l IdentityAuthOperation which can be used to authenticate user
  * with Enginio backend. Returned operation can be deleted with \c destroy().
@@ -152,7 +161,8 @@ EnginioQmlIdentityAuthOperation * EnginioQmlClient::createIdentityAuthOperation(
 }
 
 /*!
- * \qmlmethod Client::createAclOperation()
+  \internal
+ * \qmlmethod Enginio::createAclOperation()
  *
  * Returns new \l AclOperation which can be used to read and modify permissions
  * of Enginio objects. Returned operation can be deleted with \c destroy().
@@ -253,7 +263,8 @@ void EnginioQmlClientPrivate::_setEngine(QJSEngine *engine)
 }
 
 /*!
- * \qmlmethod Client::createUsergroupOperation()
+  \internal
+ * \qmlmethod Enginio::createUsergroupOperation()
  *
  * Returns new \l UsergroupOperation which can be used to add and remove members
  * to/from usergroups. Returned operation can be deleted with \c destroy().

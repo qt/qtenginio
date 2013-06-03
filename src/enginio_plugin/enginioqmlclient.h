@@ -59,6 +59,8 @@ class EnginioQmlClient : public EnginioClient
 
 public:
     EnginioQmlClient(QObject *parent = 0);
+
+    // FIXME rename to authenticated or sessionAuthenticated or userAuthenticated?
     Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged);
 
     Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(

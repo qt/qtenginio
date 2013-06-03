@@ -416,15 +416,17 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
  */
 
 /*!
- * \brief EnginioModel::EnginioModel
- * \param parent
- */
+    Constructs a new model with \a parent as QObject parent.
+*/
 
 EnginioModel::EnginioModel(QObject *parent)
     : QAbstractListModel(parent)
     , d(new EnginioModelPrivate(this))
 {}
 
+/*!
+    Destroys the model.
+*/
 EnginioModel::~EnginioModel()
 {}
 

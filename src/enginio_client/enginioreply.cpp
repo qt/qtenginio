@@ -86,16 +86,25 @@ EnginioReply::~EnginioReply()
 {
 }
 
+/*!
+ * \brief EnginioReply::errorCode gives the network error for the request.
+ */
 QNetworkReply::NetworkError EnginioReply::errorCode() const
 {
     return d->errorCode();
 }
 
+/*!
+ * \brief EnginioReply::errorCode gives the network error for the request as human readable string.
+ */
 QString EnginioReply::errorString() const
 {
     return d->errorString();
 }
 
+/*!
+ * \brief EnginioReply::data returns the data of any request to the Enginio backend.
+ */
 QJsonObject EnginioReply::data() const
 {
     return d->data();

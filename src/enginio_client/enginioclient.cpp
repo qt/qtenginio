@@ -513,16 +513,13 @@ void EnginioClient::setIdentity(EnginioIdentity *identity)
 }
 
 /*!
- * \brief EnginioClient::uploadFile uploads a file
- * \param object an existing object on the server
- * \param file the file to upload
- * \return
- *
- * Each uploaded file needs to be associated with an object in the database.
- * If there is no association, the file will eventually get deleted.
- * When an object which had a file associated gets deleted, the file will
- * automatically be deleted as well.
- */
+  Stores a \a file attached to an \a object in Enginio.
+
+  Each uploaded file needs to be associated with an object in the database.
+  If there is no association, the file will eventually get deleted.
+  When an object which had a file associated gets deleted, the file will
+  automatically be deleted as well.
+*/
 EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &file)
 {
     Q_D(EnginioClient);
