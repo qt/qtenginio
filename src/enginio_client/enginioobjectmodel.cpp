@@ -43,6 +43,7 @@
 
 /*!
  * \class EnginioObjectModel
+ * \internal
  * \inmodule enginio-client
  * \brief List model for objects derived from EnginioAbstractObject
  */

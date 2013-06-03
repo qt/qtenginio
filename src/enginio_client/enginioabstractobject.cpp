@@ -39,6 +39,7 @@
 
 /*!
  * \class EnginioAbstractObject
+ * \internal
  * \inmodule enginio-client
  * \brief Abstract interface for objects stored in the Enginio backend
  *
@@ -47,7 +48,7 @@
  * EnginioAbstractObjectFactory that can create instances of your custom class
  * and register the factory instance with EnginioClient::registerObjectFactory().
  *
- * /sa EnginioClient
+ * \sa EnginioClient
  */
 
 /*!

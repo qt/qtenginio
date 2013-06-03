@@ -42,6 +42,8 @@
 
 /*!
  * \class EnginioAclOperation
+ * \internal
+ *
  * \inmodule enginio-client
  * \brief Operation for fetching and modifying Enginio permissions.
  *

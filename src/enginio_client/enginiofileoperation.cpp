@@ -45,6 +45,8 @@
 
 /*!
  * \class EnginioFileOperation
+ * \internal
+ *
  * \inmodule enginio-client
  * \brief Operation for uploading binary files to Enginio backend.
  */

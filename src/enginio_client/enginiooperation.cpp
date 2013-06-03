@@ -44,6 +44,7 @@
 
 /*!
  * \class EnginioOperation
+ * \internal
  * \inmodule enginio-client
  * \brief Base class for the Enginio operations
  * \sa EnginioObjectOperation, EnginioQueryOperation
