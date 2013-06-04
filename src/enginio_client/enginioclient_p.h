@@ -193,6 +193,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
             if (nreply->error() != QNetworkReply::NoError) {
                 d->_downloads.remove(nreply);
                 emit q->error(ereply);
+                emit ereply->errorCodeChanged();
+                emit ereply->errorStringChanged();
             }
 
             // resolve the download url
@@ -210,6 +212,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
                 return;
             }
 
+            ereply->dataChanged();
             ereply->emitFinished();
             q->finished(ereply);
         }

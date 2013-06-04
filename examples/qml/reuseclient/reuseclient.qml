@@ -29,11 +29,11 @@ Rectangle {
                     }).finished.connect(function() { tmessage.text = "I can connect directly to query object too" } )
         }
 
-        onError:  console.log("Error: " + JSON.stringify(reply.data()) )
+        onError:  console.log("Error: " + JSON.stringify(reply.data) )
 
         onFinished: {
             console.log(reply)
-            var data = reply.data().results[0];
+            var data = reply.data.results[0];
             switch (reply) {
                 case requests.newest: tnewest.text = data.title + " (" + data.createdAt +")" ; break
                 case requests.oldest: toldest.text = data.title + " (" + data.createdAt +")" ; break

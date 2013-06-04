@@ -55,16 +55,23 @@ class EnginioClientPrivate;
 class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
+    Q_PROPERTY(QNetworkReply::NetworkError errorCode READ errorCode NOTIFY errorCodeChanged)
+    Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
+
 public:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
     ~EnginioReply();
 
-    Q_INVOKABLE QNetworkReply::NetworkError errorCode() const;
-    Q_INVOKABLE QString errorString() const;
-    Q_INVOKABLE QJsonObject data() const;
+    QJsonObject data() const;
+    QNetworkReply::NetworkError errorCode() const;
+    QString errorString() const;
 
 signals:
     void finished();
+    void dataChanged();
+    void errorCodeChanged();
+    void errorStringChanged();
 
 protected:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);

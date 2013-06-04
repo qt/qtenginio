@@ -29,7 +29,7 @@ Rectangle {
         backendId: AppConfig.backendData.id
         backendSecret: AppConfig.backendData.secret
         apiUrl: AppConfig.backendData.apiUrl
-        onError: console.log("Enginio error " + reply.errorCode() + ": " + reply.errorString())
+        onError: console.log("Enginio error " + reply.errorCode + ": " + reply.errorString)
     }
     //! [client]
 
@@ -88,7 +88,7 @@ Rectangle {
                         "propertyName": "file" }
                     var reply = client.downloadFile(data)
                     reply.finished.connect(function() {
-                        image.source = reply.data().expiringUrl
+                        image.source = reply.data.expiringUrl
                     })
                 }
             }
@@ -193,11 +193,11 @@ Rectangle {
                     file: { fileName: fileName },
                     targetFileProperty: {
                         objectType: "objects.image",
-                        id: reply.data().id,
+                        id: reply.data.id,
                         propertyName: "file"
                     },
                 };
-                console.log("data: " + reply.data() + " id: " + reply.data().id)
+                console.log("data: " + reply.data + " id: " + reply.data.id)
                 var uploadReply = client.uploadFile(uploadData, fileUrl)
                 uploadReply.finished.connect(function() { var tmp = enginioModel.query; enginioModel.query = {}; enginioModel.query = tmp; })
             })
