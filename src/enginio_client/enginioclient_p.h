@@ -497,7 +497,8 @@ public:
     template<class T>
     QNetworkReply *uploadFile(const ObjectAdaptor<T> &object, const QUrl &fileUrl)
     {
-        Q_ASSERT_X(fileUrl.scheme().isEmpty() || fileUrl.isLocalFile(), "", "Upload must be local file.");
+        if (!fileUrl.scheme().isEmpty() && !fileUrl.isLocalFile())
+            qWarning() << "Enginio: Upload must be local file.";
         QString path = fileUrl.isLocalFile() ? fileUrl.toLocalFile() : fileUrl.path();
 
         QFile *file = new QFile(path);
