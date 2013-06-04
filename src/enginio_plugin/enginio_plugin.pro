@@ -1,3 +1,4 @@
+requires(qtHaveModule(quick))
 TARGETPATH = Enginio
 
 load(qml_plugin)
