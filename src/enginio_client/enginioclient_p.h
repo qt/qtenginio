@@ -110,6 +110,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         result.reserve(96);
         result.append(QStringLiteral("/v1/"));
 
+        // FIXME warn about invalid paths
+
         switch (operation) {
         case ObjectOperation: {
             QString objectType = object[EnginioString::objectType].toString();
@@ -495,11 +497,11 @@ public:
     template<class T>
     QNetworkReply *uploadFile(const ObjectAdaptor<T> &object, const QUrl &fileUrl)
     {
-        Q_ASSERT_X(fileUrl.isLocalFile(), "", "Upload must be local file.");
-        QFile *file = new QFile(fileUrl.toLocalFile());
-        if (!file->open(QFile::ReadOnly))
-            // FIXME: this is not allowed
-            return 0;
+        Q_ASSERT_X(fileUrl.scheme().isEmpty() || fileUrl.isLocalFile(), "", "Upload must be local file.");
+        QString path = fileUrl.isLocalFile() ? fileUrl.toLocalFile() : fileUrl.path();
+
+        QFile *file = new QFile(path);
+        file->open(QFile::ReadOnly);
         Q_ASSERT(file->isOpen());
 
         QString fileName = file->fileName();
