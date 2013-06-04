@@ -116,13 +116,16 @@ const QString EnginioString::count = QStringLiteral("count");
 const QString EnginioString::targetFileProperty = QStringLiteral("targetFileProperty");
 const QString EnginioString::members = QStringLiteral("members");
 const QString EnginioString::propertyName = QStringLiteral("propertyName");
+const QString EnginioString::apiEnginIo = QStringLiteral("https://api.engin.io");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
     _identity(),
-    m_apiUrl(QStringLiteral("https://api.engin.io")),
+    m_apiUrl(EnginioString::apiEnginIo),
     m_networkManager()
 {
+    assignNetworkManager();
+
     addFactory(new EnginioJsonObjectFactory());
 
     _request.setHeader(QNetworkRequest::ContentTypeHeader,
@@ -132,8 +135,6 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
     qRegisterMetaType<EnginioAuthentication*>();
-
-    assignNetworkManager();
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
@@ -578,6 +579,9 @@ QNetworkAccessManager *EnginioClientPrivate::prepareNetworkManagerInThread()
     qnam = NetworkManager->localData();
     if (!qnam) {
         qnam = new QNetworkAccessManager(); // it will be deleted by QThreadStorage.
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+        qnam->connectToHostEncrypted(EnginioString::apiEnginIo);
+#endif
         NetworkManager->setLocalData(qnam);
     }
     return qnam;

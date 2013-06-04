@@ -96,6 +96,7 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString targetFileProperty;
     static const QString members;
     static const QString propertyName;
+    static const QString apiEnginIo;
 };
 
 class ENGINIOCLIENT_EXPORT EnginioClientPrivate
