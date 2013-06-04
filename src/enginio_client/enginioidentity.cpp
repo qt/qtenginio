@@ -44,6 +44,15 @@
 #include <QtCore/qstring.h>
 #include <QtNetwork/qnetworkreply.h>
 
+/*!
+  \class EnginioIdentity
+  \inmodule enginio-client
+  \brief Represents a user
+*/
+
+/*!
+    Constructs a new EnginioIdentity with \a parent as QObject parent.
+*/
 EnginioIdentity::EnginioIdentity(QObject *parent) :
     QObject(parent)
 {

@@ -46,6 +46,7 @@
 
 /*!
  * \class EnginioObjectOperation
+ * \internal
  * \inmodule enginio-client
  * \brief Operation acting on a single object
  *

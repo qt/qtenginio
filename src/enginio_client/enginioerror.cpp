@@ -93,6 +93,7 @@ EnginioError::EnginioError(ErrorType error,
 
 /*!
  * Constructor used in inheriting classes.
+ * \internal
  */
 EnginioError::EnginioError(ErrorType error,
                            QString errorString,

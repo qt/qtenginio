@@ -1,16 +1,16 @@
+include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
+
 project = enginio-qt
 description = Client library for accessing Enginio service from Qt and QML code
+url = http://engin.io
 
 sourcedirs += ../src/enginio_client
 sourcedirs += ../src/enginio_plugin
 headerdirs += ../src/enginio_client
 headerdirs += ../src/enginio_plugin
-sources.fileextensions = "*.cpp"
-headers.fileextensions = "*.h"
+
+imagedirs += images
 
 outputdir = ./html
 outputformats = HTML
 
-Cpp.ignoretokens = Q_INVOKABLE
-
-#spurious = "Can't link to 'All Modules'"

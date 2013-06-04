@@ -47,6 +47,7 @@
 
 /*!
  * \class EnginioUsergroupOperation
+ * \internal
  * \inmodule enginio-client
  * \brief Operation for adding and removing usergroup members.
  *

@@ -46,6 +46,7 @@
 
 class QBuffer;
 
+#ifndef qdoc
 namespace Enginio {
     enum UsergroupOperationType {
         NullUsergroupOperation = 0,
@@ -53,6 +54,7 @@ namespace Enginio {
         RemoveMemberOperation
     };
 }
+#endif
 
 class EnginioUsergroupOperationPrivate : public EnginioOperationPrivate
 {

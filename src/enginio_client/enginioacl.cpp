@@ -44,6 +44,8 @@
 
 /*!
  * \class EnginioAcl
+ * \internal
+ *
  * \inmodule enginio-client
  * \brief EnginioAcl defines access control list for Enginio objects.
  *

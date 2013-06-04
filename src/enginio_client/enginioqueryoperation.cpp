@@ -45,6 +45,7 @@
 
 /*!
  * \class EnginioQueryOperation
+ * \internal
  * \inmodule enginio-client
  * \brief Operation for fetching multiple Enginio objects from backend.
  *

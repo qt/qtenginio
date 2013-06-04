@@ -44,12 +44,14 @@
 class EnginioAbstractObject;
 class EnginioObjectModelPrivate;
 
+#ifndef qdoc
 namespace Enginio {
     enum ObjectModelRole {
         DataRole = Qt::UserRole + 1,
         JsonRole
     };
 }
+#endif
 
 class ENGINIOCLIENT_EXPORT EnginioObjectModel : public QAbstractListModel
 {

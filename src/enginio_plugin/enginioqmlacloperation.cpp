@@ -5,35 +5,36 @@
 #include <QSharedPointer>
 
 /*!
- * \qmltype AclOperation
- * \instantiates EnginioQmlAclOperation
- * \inqmlmodule enginio-plugin
- * \brief Operation for fetching and modifying permissions of Enginio objects.
- *
- * Usage:
- * \list
- *     \li Define AclOperation object or create one dynamically using
- *         \l Client::createAclOperation() method.
- *     \li Define which object's permissions should be read/updated by setting
- *         the \l object property.
- *     \li To read object permissions: call execute().
- *     \li To grant new permissions to object: define \l permissionsToGrant
- *         property and call execute().
- *     \li To withdraw permissions from object: define \l permissionsToWithdraw
- *         property and call execute().
- *     \li To set all object permissions: define \l permissionsToSet property
- *         and call execute(). Please note that this will overwrite
- *         all existing permissions on object.
- *     \li After operation's \l finished signal is emitted, object's
- *         read/modified permissions from \l results property.
- * \endlist
- *
- * In order to read or modify object's properties user must be authenticated to
- * Enginio service and have "admin" permission on object.
- *
- * Please note that one operation can be used to grant OR withdraw OR set
- * permissions. You should not define more than one of the properties
- * \l permissionsToGrant, \l permissionsToWithdraw and \l permissionsToSet.
+  \qmltype AclOperation
+  \internal
+  \instantiates EnginioQmlAclOperation
+  \inqmlmodule enginio-plugin
+  \brief Operation for fetching and modifying permissions of Enginio objects.
+
+  Usage:
+  \list
+      \li Define AclOperation object or create one dynamically using
+          \l Client::createAclOperation() method.
+      \li Define which object's permissions should be read/updated by setting
+          the \l object property.
+      \li To read object permissions: call execute().
+      \li To grant new permissions to object: define \l permissionsToGrant
+          property and call execute().
+      \li To withdraw permissions from object: define \l permissionsToWithdraw
+          property and call execute().
+      \li To set all object permissions: define \l permissionsToSet property
+          and call execute(). Please note that this will overwrite
+          all existing permissions on object.
+      \li After operation's \l finished signal is emitted, object's
+          read/modified permissions from \l results property.
+  \endlist
+
+  In order to read or modify object's properties user must be authenticated to
+  Enginio service and have "admin" permission on object.
+
+  Please note that one operation can be used to grant OR withdraw OR set
+  permissions. You should not define more than one of the properties
+  \l permissionsToGrant, \l permissionsToWithdraw and \l permissionsToSet.
  */
 
 /*!

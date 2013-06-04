@@ -44,6 +44,7 @@
 #include "enginiooperation_p.h"
 #include <QJsonObject>
 
+#ifndef qdoc
 namespace Enginio {
     enum ObjectOperationType {
         NullObjectOperation = 0,
@@ -53,6 +54,7 @@ namespace Enginio {
         RemoveObjectOperation
     };
 }
+#endif
 
 class EnginioObjectOperationPrivate : public EnginioOperationPrivate
 {

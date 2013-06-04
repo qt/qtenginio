@@ -41,6 +41,7 @@
 
 /*!
  * \class EnginioJsonObject
+   \internal
  * \inmodule enginio-client
  * \brief Generic JSON object stored in the Enginio backend.
  *

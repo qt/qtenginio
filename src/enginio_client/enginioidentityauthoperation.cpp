@@ -45,6 +45,7 @@
 
 /*!
  * \class EnginioIdentityAuthOperation
+ * \internal
  * \inmodule enginio-client
  * \brief Authentication operation based on username and password.
  *
