@@ -8,4 +8,4 @@ SOURCES += ../main.cpp
 mac: CONFIG -= app_bundle
 
 OTHER_FILES += ../config.js logwriter.qml
-RESOURCES += ../qml.qrc
+RESOURCES += ../qml.qrc logwriter.qrc

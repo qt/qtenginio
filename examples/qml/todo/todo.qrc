@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>config.js</file>
+        <file>todo.qml</file>
     </qresource>
 </RCC>

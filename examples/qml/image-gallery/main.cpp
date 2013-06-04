@@ -1,11 +1,11 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlEngine>
 #include <QQuickView>
 #include <QDir>
 
 int main(int argc, char* argv[])
 {
-    QGuiApplication app(argc,argv);
+    QApplication app(argc,argv);
     QQuickView view;
     const QString appPath = QCoreApplication::applicationDirPath();
 
