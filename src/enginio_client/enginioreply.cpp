@@ -142,5 +142,9 @@ QDebug operator<<(QDebug d, const EnginioReply *reply)
     return d.space();
 }
 
+void EnginioReply::emitFinished()
+{
+    emit finished();
+}
 
 #endif

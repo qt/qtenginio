@@ -98,11 +98,8 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString propertyName;
 };
 
-class ENGINIOCLIENT_EXPORT EnginioClientPrivate : public QObject
+class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 {
-    Q_OBJECT
-    Q_DECLARE_PUBLIC(EnginioClient)
-
     enum PathOptions { Default, IncludeIdInPath = 1};
 
     template<class T>
@@ -198,7 +195,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate : public QObject
             if (!ereply)
                 return;
 
-            EnginioClient *q = static_cast<EnginioClient*>(d->q_func());
+            EnginioClient *q = static_cast<EnginioClient*>(d->q_ptr);
 
             if (nreply->error() != QNetworkReply::NoError) {
                 d->_downloads.remove(nreply);
@@ -220,8 +217,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate : public QObject
                 return;
             }
 
+            ereply->emitFinished();
             q->finished(ereply);
-            ereply->finished();
         }
     };
 
@@ -538,6 +535,11 @@ public:
 
     void assignNetworkManager();
     static QNetworkAccessManager *prepareNetworkManagerInThread();
+
+    bool isSignalConnected(const QMetaMethod &signal) const
+    {
+        return q_ptr->isSignalConnected(signal);
+    }
 
 private:
     /* Create a multi part upload:

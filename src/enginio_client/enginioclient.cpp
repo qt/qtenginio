@@ -565,9 +565,9 @@ void EnginioClientPrivate::assignNetworkManager()
     // Ignore SSL errors when staging backend is used.
     if (m_apiUrl == QStringLiteral("https://api.staging.engin.io")) {
         qWarning() << "SSL errors will be ignored";
-        connect(m_networkManager,
+        QObject::connect(m_networkManager,
                 SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)),
-                this,
+                q_ptr,
                 SLOT(ignoreSslErrors(QNetworkReply*, const QList<QSslError> &)));
     }
 }
