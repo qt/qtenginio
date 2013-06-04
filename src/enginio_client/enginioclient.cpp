@@ -567,7 +567,7 @@ void EnginioClientPrivate::assignNetworkManager()
         qWarning() << "SSL errors will be ignored";
         connect(m_networkManager,
                 SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)),
-                this,
+                q_ptr,
                 SLOT(ignoreSslErrors(QNetworkReply*, const QList<QSslError> &)));
     }
 }
