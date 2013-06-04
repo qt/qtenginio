@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
+    qmltests \
     client_offline \
     query_operation \
     object_operation \
