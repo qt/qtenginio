@@ -1,4 +1,3 @@
-requires(qtHaveModule(quick))
 requires(qtHaveModule(network))
 
 TEMPLATE = subdirs
