@@ -1,5 +1,16 @@
 # Enginio Qt Library Changelog
 
+## 0.4.0 (May 31st 2013)
+New:
+* UsergroupOperation added
+* Usergroup members can now be fetched with query operation
+* Get usergroups of logged in user from QML
+
+Fixes:
+* Handle removed and null properties correctly in EnginioJsonObject
+* Use default flags with ObjectModel
+* Internal ACL fixes
+
 ## 0.3.0 (May 7th 2013)
 New:
 * Usage simplified by building Enginio library as a proper Qt5 module. Now only configuration required is `QT += enginio`.
