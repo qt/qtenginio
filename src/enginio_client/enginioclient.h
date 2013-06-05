@@ -80,7 +80,6 @@ public:
     Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
     Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
     Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
-    Q_PROPERTY(QByteArray sessionToken READ sessionToken WRITE setSessionToken NOTIFY sessionTokenChanged) // TODO deprecated, replaced by identityToken
     Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged)
     Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged)
 
@@ -95,8 +94,6 @@ public:
     QUrl apiUrl() const;
     void setApiUrl(const QUrl &apiUrl);
     QNetworkAccessManager *networkManager();
-    QByteArray sessionToken() const;
-    void setSessionToken(const QByteArray &sessionToken);
 
     bool isInitialized() const;
 
@@ -117,7 +114,6 @@ signals:
     void backendIdChanged(const QString &backendId);
     void backendSecretChanged(const QString &backendSecret);
     void apiUrlChanged(const QUrl& url);
-    void sessionTokenChanged(const QByteArray &sessionToken); // TODO deprecated, replaced by identityTokenChanged
     void identityTokenChanged(const QJsonObject &token);
     void identityChanged(const EnginioIdentity *identity);
     void finished(EnginioReply *reply);

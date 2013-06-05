@@ -73,19 +73,20 @@
  */
 
 /*!
- * \qmlproperty string Enginio::sessionToken
- * Token of currently authenticated session.
- *
- * The session token is an empty string if there is no
- * authenticated session.
- */
+  * \qmlproperty object Enginio::identityToken
+  * Token of currently authenticated session. It contains information about
+  * logged in user.
+  *
+  * The token is an empty object if there is no
+  * authenticated session.
+  */
 
 /*!
  * \qmlproperty bool Enginio::isAuthenticated()
  * This property holds the state of the authentication.
  *
  * It is false until a user session has been establieshed.
- * \sa sessionToken
+ * \sa identityToken
  */
 
 class IsAuthenticatedFunctor
@@ -116,7 +117,7 @@ EnginioQmlClient::EnginioQmlClient(QObject *parent)
 
 bool EnginioQmlClient::isAuthenticated() const
 {
-    return !sessionToken().isEmpty();
+    return !identityToken().isEmpty();
 }
 
 EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation operation)

@@ -293,7 +293,11 @@ public:
             _identityToken = QJsonDocument::fromJson(data).object();
             sessionToken = _identityToken[EnginioString::sessionToken].toString().toLatin1();
         }
-        setSessionToken(sessionToken);
+        _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
+        if (sessionToken.isEmpty())
+            emit q_ptr->sessionTerminated();
+        else
+            emit q_ptr->sessionAuthenticated();
         emit q_ptr->identityTokenChanged(_identityToken);
     }
 
@@ -302,18 +306,6 @@ public:
         return _identityToken[EnginioString::sessionToken].toString().toLatin1();
     }
 
-    void setSessionToken(const QByteArray &sessionToken)
-    {
-        // TODO this function should be replaced by setIdentityToken, but it is kept for
-        // now as the old api needs it.
-        _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
-
-        emit q_ptr->sessionTokenChanged(sessionToken);
-        if (sessionToken.isEmpty())
-            emit q_ptr->sessionTerminated();
-        else
-            emit q_ptr->sessionAuthenticated();
-    }
 
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
     {
