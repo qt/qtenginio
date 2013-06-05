@@ -39,8 +39,15 @@
 #include <QFile>
 #include <QTextStream>
 
+#include "../common/common.h"
+
 int main(int argc, char** argv)
 {
+    if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty()) {
+        qFatal("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET and ENGINIO_API_URL are not set!");
+        return EXIT_FAILURE;
+    }
+
     QString qmlFilePath(QUICK_TEST_SOURCE_DIR);
     QFile qmltestConfig(qmlFilePath + QDir::separator() + "config.js");
 
@@ -52,9 +59,9 @@ int main(int argc, char** argv)
 
         QTextStream out(&qmltestConfig);
         out << "var backendData = {\n" \
-            << "    id: \"" << qgetenv("ENGINIO_BACKEND_ID") << "\",\n" \
-            << "    secret: \"" << qgetenv("ENGINIO_BACKEND_SECRET") << "\",\n" \
-            << "    apiUrl: \"" << qgetenv("ENGINIO_API_URL") << "\"\n" \
+            << "    id: \"" << EnginioTests::TESTAPP_ID << "\",\n" \
+            << "    secret: \"" << EnginioTests::TESTAPP_SECRET << "\",\n" \
+            << "    apiUrl: \"" << EnginioTests::TESTAPP_URL << "\"\n" \
             << "}\n";
 
         out.flush();

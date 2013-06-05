@@ -53,6 +53,7 @@ class tst_EnginioClient: public QObject
     Q_OBJECT
 
 private slots:
+    void init();
     void query_todos();
     void query_todos_filter();
     void query_todos_limit();
@@ -101,6 +102,12 @@ private:
         return id;
     }
 };
+
+void tst_EnginioClient::init()
+{
+    if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
+        QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
+}
 
 void tst_EnginioClient::query_todos()
 {
