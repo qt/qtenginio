@@ -891,7 +891,7 @@ void tst_EnginioClient::identity()
         // login / logout
         EnginioClient client;
         EnginioAuthentication identity;
-        QSignalSpy spy(&client, SIGNAL(identityTokenChanged(const QByteArray&)));
+        QSignalSpy spy(&client, SIGNAL(identityTokenChanged(const QJsonObject &)));
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
@@ -921,7 +921,7 @@ void tst_EnginioClient::identity()
         // change backend id
         EnginioClient client;
         EnginioAuthentication identity;
-        QSignalSpy spy(&client, SIGNAL(identityTokenChanged(const QByteArray&)));
+        QSignalSpy spy(&client, SIGNAL(identityTokenChanged(const QJsonObject &)));
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
@@ -949,7 +949,7 @@ void tst_EnginioClient::identity()
         client.setApiUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
-        QSignalSpy spy(&client, SIGNAL(identityTokenChanged(const QByteArray&)));
+        QSignalSpy spy(&client, SIGNAL(identityTokenChanged(const QJsonObject &)));
         QSignalSpy spyInit(&client, SIGNAL(clientInitialized()));
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
