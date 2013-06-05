@@ -525,12 +525,6 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
 {
     Q_D(EnginioClient);
 
-    // FIXME: better error handling
-    QJsonObject associatedObject = object.value(EnginioString::targetFileProperty).toObject();
-    if (associatedObject[EnginioString::objectType].toString().isEmpty()
-             || associatedObject[EnginioString::id].toString().isEmpty())
-        return 0;
-
     QNetworkReply *nreply = d->uploadFile<QJsonObject>(object, file);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
@@ -541,11 +535,6 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
 EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 {
     Q_D(EnginioClient);
-
-    if (object[EnginioString::objectType].toString().isEmpty()
-            || object[EnginioString::id].toString().isEmpty()
-            || object[EnginioString::propertyName].toString().isEmpty())
-        return 0;
 
     QNetworkReply *nreply = d->downloadFile(object);
     EnginioReply *ereply = new EnginioReply(d, nreply);
