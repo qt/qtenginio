@@ -44,16 +44,18 @@
 #include <QDebug>
 
 /*!
- * \qmltype Enginio
- * \instantiates EnginioQmlClient
- * \inqmlmodule enginio-plugin
- * \brief Enginio client inteface to access the service.
- *
- * Enginio is used for all communication with the Enginio backend.
- * The backend is identified by \l{backendId}{backend ID} and \l{backendSecret}{secret}.
- *
- * It also provides methods for creating operation objects dynamically.
- */
+  \qmltype Enginio
+  \instantiates EnginioQmlClient
+  \inqmlmodule enginio-plugin
+  \ingroup engino-qml
+
+  \brief Enginio client inteface to access the service
+
+  Enginio is used for all communication with the Enginio backend.
+  The backend is identified by \l{backendId}{backend ID} and \l{backendSecret}{secret}.
+
+  It also provides methods for creating operation objects dynamically.
+*/
 
 /*!
  * \qmlproperty string Enginio::backendId

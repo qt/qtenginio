@@ -45,34 +45,36 @@
 #include <QtCore/qthreadstorage.h>
 
 /*!
- * \module enginio-client
- * \title Enginio Client Interface
- * 
- * This interface provides access to the Enginio service through a set of C++ classes
- * based on Qt.
- */
+  \module enginio-client
+  \title Enginio Client Interface
+
+  This interface provides access to the Enginio service through a set of C++ classes
+  based on Qt.
+*/
 
 /*!
- * \class EnginioClient
- * \inmodule enginio-client
- * \brief EnginioClient handles API keys, sessions and authorization.
- *
- * When using Enginio you need to set up your backend using this class.
- *
- * The \l backendId and \l backendSecret are required for Engino to work.
- * Once the client is set up you can use it to make queries to the backend
- * or use higher level API such as \l EnginioModel.
- */
+  \class EnginioClient
+  \inmodule enginio-qt
+  \ingroup enginio-client
+  \brief EnginioClient handles API keys, sessions and authorization.
+  \mainclass
+
+  When using Enginio you need to set up your backend using this class.
+
+  The \l backendId and \l backendSecret are required for Engino to work.
+  Once the client is set up you can use it to make queries to the backend
+  or use higher level API such as \l EnginioModel.
+*/
 
 /*!
- * \fn EnginioClient::sessionAuthenticated() const
- * \brief Emitted when a user logs in.
- */
+  \fn EnginioClient::sessionAuthenticated() const
+  \brief Emitted when a user logs in.
+*/
 
 /*!
- * \fn EnginioClient::sessionTerminated() const
- * \brief Emitted when a user logs out.
- */
+  \fn EnginioClient::sessionTerminated() const
+  \brief Emitted when a user logs out.
+*/
 
 /*!
     \enum EnginioClient::Operation

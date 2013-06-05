@@ -49,7 +49,8 @@
 /*!
   \class EnginioReply
   \brief The EnginioReply class contains the data from a request to the Enginio database.
-  \inmodule enginio-client
+  \inmodule enginio-qt
+  \ingroup enginio-client
 
   The finished signal is emitted when the query is done.
 
