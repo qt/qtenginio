@@ -162,12 +162,6 @@ bool EnginioObjectModel::setData (const QModelIndex &index,
     return true;
 }
 
-Qt::ItemFlags EnginioObjectModel::flags(const QModelIndex & index) const
-{
-    Q_UNUSED(index);
-    return Qt::ItemIsSelectable & Qt::ItemIsEditable;
-}
-
 /*!
  * Add objects in \a objects to the model starting on row \a row. If any objects
  * are added to model successfully \c rowsInserted signal is emitted. Please
