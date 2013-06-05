@@ -18,6 +18,18 @@ Item {
         }
     }
 
+    EnginioAuthentication {
+        id: validIdentity
+        user: "logintest"
+        password: "logintest"
+    }
+
+    EnginioAuthentication {
+        id: invalidIdentity
+        user: "INVALID"
+        password: "INVALID"
+    }
+
     SignalSpy {
            id: finishedSpy
            target: enginio
@@ -29,6 +41,50 @@ Item {
            target: enginio
            signalName: "error"
     }
+
+    SignalSpy {
+        id: sessionAuthenticatedSpy
+        target: enginio
+        signalName: "sessionAuthenticated"
+    }
+
+    SignalSpy {
+        id: sessionAuthenticationErrorSpy
+        target: enginio
+        signalName: "sessionAuthenticationError"
+    }
+
+    TestCase {
+        name: "EnginioClient: Assign an identity"
+
+        function init() {
+            enginio.identity = null
+            sessionAuthenticatedSpy.clear()
+            sessionAuthenticationErrorSpy.clear()
+        }
+
+        function test_assignValidIdentity() {
+            verify(!enginio.isAuthenticated)
+            enginio.identity = validIdentity
+            sessionAuthenticatedSpy.wait()
+            verify(enginio.isAuthenticated)
+
+            // reassign the same
+            enginio.identity = null
+            tryCompare(enginio.isAuthenticated, false)
+            enginio.identity = validIdentity
+            sessionAuthenticatedSpy.wait()
+            verify(enginio.isAuthenticated)
+        }
+
+        function test_assignInvalidIdentity() {
+            verify(!enginio.isAuthenticated)
+            enginio.identity = invalidIdentity
+            sessionAuthenticationErrorSpy.wait()
+            verify(!enginio.isAuthenticated)
+        }
+    }
+
 
     TestCase {
         name: "EnginioClient_ObjectOperation"
