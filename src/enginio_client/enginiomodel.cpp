@@ -410,10 +410,12 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
 
 
 /*!
- * \class EnginioModel
- * \inmodule enginio-client
- * \brief EnginioModel
- */
+  \class EnginioModel
+  \inmodule enginio-qt
+  \ingroup enginio-client
+  \brief EnginioModel represents data from Enginio as a \l QAbstractListModel.
+  \mainclass
+*/
 
 /*!
     Constructs a new model with \a parent as QObject parent.

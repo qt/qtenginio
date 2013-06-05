@@ -14,3 +14,5 @@ imagedirs += images
 outputdir = ./html
 outputformats = HTML
 
+exampledirs += ../examples/qml
+

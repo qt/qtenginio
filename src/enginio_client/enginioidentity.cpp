@@ -46,7 +46,8 @@
 
 /*!
   \class EnginioIdentity
-  \inmodule enginio-client
+  \inmodule enginio-qt
+  \ingroup enginio-client
   \brief Represents a user
 */
 
