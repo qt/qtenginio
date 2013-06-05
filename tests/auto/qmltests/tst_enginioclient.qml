@@ -71,7 +71,7 @@ Item {
 
             // reassign the same
             enginio.identity = null
-            tryCompare(enginio.isAuthenticated, false)
+            tryCompare(enginio, "isAuthenticated", false)
             enginio.identity = validIdentity
             sessionAuthenticatedSpy.wait()
             verify(enginio.isAuthenticated)
