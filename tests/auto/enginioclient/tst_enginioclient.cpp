@@ -860,6 +860,12 @@ void tst_EnginioClient::identity()
         QCOMPARE(spyError.count(), 0);
         QCOMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
+        QVERIFY(!client.identityToken().isEmpty());
+
+        QJsonObject token = client.identityToken();
+        QVERIFY(token.contains("sessionToken"));
+        QVERIFY(token.contains("user"));
+        QVERIFY(token.contains("usergroups"));
     }
     {
         // Different initialization order
@@ -881,6 +887,7 @@ void tst_EnginioClient::identity()
         QCOMPARE(spyError.count(), 0);
         QCOMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
+        QVERIFY(!client.identityToken().isEmpty());
     }
     {
         // login / logout
@@ -900,16 +907,19 @@ void tst_EnginioClient::identity()
         QTRY_COMPARE(spy.count(), 1);
         QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
+        QVERIFY(!client.identityToken().isEmpty());
 
         client.setIdentity(0);
         QTRY_COMPARE(spy.count(), 2);
         QCOMPARE(spyError.count(), 0);
         QVERIFY(client.sessionToken().isEmpty());
+        QVERIFY(client.identityToken().isEmpty());
 
         client.setIdentity(&identity);
         QTRY_COMPARE(spy.count(), 3);
         QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
+        QVERIFY(!client.identityToken().isEmpty());
         QCOMPARE(spyAuthError.count(), 0);
     }
     {
@@ -930,6 +940,7 @@ void tst_EnginioClient::identity()
         QTRY_COMPARE(spy.count(), 1);
         QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
+        QVERIFY(!client.identityToken().isEmpty());
 
         client.setBackendId(QString());
         client.setBackendId(EnginioTests::TESTAPP_ID);
@@ -937,6 +948,7 @@ void tst_EnginioClient::identity()
         QCOMPARE(spyError.count(), 0);
         QCOMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
+        QVERIFY(!client.identityToken().isEmpty());
     }
     {
         // fast identity change before initialization
@@ -963,6 +975,7 @@ void tst_EnginioClient::identity()
         QCOMPARE(spy.count(), 0);
         QCOMPARE(spyError.count(), 0);
         QVERIFY(client.sessionToken().isEmpty());
+        QVERIFY(client.identityToken().isEmpty());
 
         for (uint i = 0; i < 4; ++i) {
             client.setIdentity(&identity1);
@@ -974,6 +987,7 @@ void tst_EnginioClient::identity()
         QCOMPARE(spy.count(), 0);
         QCOMPARE(spyError.count(), 0);
         QVERIFY(client.sessionToken().isEmpty());
+        QVERIFY(client.identityToken().isEmpty());
 
         client.setBackendId(EnginioTests::TESTAPP_ID); // trigger clientInitialized signal
 
@@ -987,6 +1001,7 @@ void tst_EnginioClient::identity()
         QCOMPARE(spyError.count(), 0);
         QCOMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
+        QVERIFY(!client.identityToken().isEmpty());
     }
     {
         // check if EnginoClient is properly detached from identity in destructor.
@@ -1037,6 +1052,7 @@ void tst_EnginioClient::identity_invalid()
         QTRY_COMPARE(spy.count(), 0);
         QCOMPARE(spyError.count(), 0);
         QVERIFY(client.sessionToken().isEmpty());
+        QVERIFY(client.identityToken().isEmpty());
     }
     {   // check if an old session is _not_ invalidated on an invalid re-loggin
         EnginioClient client;
@@ -1057,16 +1073,20 @@ void tst_EnginioClient::identity_invalid()
         QCOMPARE(spyError.count(), 0);
         QTRY_COMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.sessionToken().isEmpty());
+        QVERIFY(!client.identityToken().isEmpty());
 
         const QByteArray sessionToken = client.sessionToken();
+        const QJsonObject identityToken = client.identityToken();
 
         // we are logged-in
         identity.setUser("invalidLogin");
         QTRY_COMPARE(spyAuthError.count(), 1);
         QCOMPARE(client.sessionToken(), sessionToken);
+        QCOMPARE(client.identityToken(), identityToken);
         identity.setPassword("invalidPass");
         QTRY_COMPARE(spyAuthError.count(), 2);
         QCOMPARE(client.sessionToken(), sessionToken);
+        QCOMPARE(client.identityToken(), identityToken);
 
         // get back to logged-in state
         identity.setUser("logintest2");
@@ -1078,6 +1098,8 @@ void tst_EnginioClient::identity_invalid()
 
         QVERIFY(client.sessionToken() != sessionToken);
         QVERIFY(!client.sessionToken().isEmpty());
+        QVERIFY(client.identityToken() != identityToken);
+        QVERIFY(!client.identityToken().isEmpty());
     }
 }
 
@@ -1120,6 +1142,7 @@ void tst_EnginioClient::acl()
 
     // wait for authentication, acl requires that
     QTRY_VERIFY(!client.sessionToken().isEmpty());
+    QVERIFY(!client.identityToken().isEmpty());
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
 

@@ -321,6 +321,8 @@ void EnginioClient::setSessionToken(const QByteArray &sessionToken)
     if (d->sessionToken() != sessionToken) {
         d->setSessionToken(sessionToken);
     }
+
+    Q_UNIMPLEMENTED();
 }
 
 /*!
@@ -574,4 +576,10 @@ QNetworkAccessManager *EnginioClientPrivate::prepareNetworkManagerInThread()
         NetworkManager->setLocalData(qnam);
     }
     return qnam;
+}
+
+QJsonObject EnginioClient::identityToken() const
+{
+    Q_D(const EnginioClient);
+    return d->identityToken();
 }
