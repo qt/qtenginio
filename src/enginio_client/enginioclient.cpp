@@ -36,7 +36,6 @@
 ****************************************************************************/
 
 #include "enginioclient_p.h"
-#include "enginiojsonobjectfactory.h"
 #include "enginioreply.h"
 #include "enginiomodel.h"
 #include "enginioidentity.h"
@@ -87,8 +86,6 @@
     \value UsergroupMembersOperation Operate on group members
 */
 
-int FactoryUnit::nextId = 0;
-
 const QString EnginioString::pageSize = QStringLiteral("pageSize");
 const QString EnginioString::limit = QStringLiteral("limit");
 const QString EnginioString::offset = QStringLiteral("offset");
@@ -126,8 +123,6 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
 {
     assignNetworkManager();
 
-    addFactory(new EnginioJsonObjectFactory());
-
     _request.setHeader(QNetworkRequest::ContentTypeHeader,
                           QStringLiteral("application/json"));
     qRegisterMetaType<EnginioClient*>();
@@ -142,32 +137,6 @@ EnginioClientPrivate::~EnginioClientPrivate()
     foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
         QObject::disconnect(identityConnection);
     QObject::disconnect(_networkManagerConnection);
-    while (m_factories.size() > 0) {
-        FactoryUnit *unit = m_factories.takeFirst();
-        delete unit->factory;
-        delete unit;
-    }
-}
-
-int EnginioClientPrivate::addFactory(EnginioAbstractObjectFactory *factory)
-{
-    FactoryUnit *unit = new FactoryUnit;
-    unit->factory = factory;
-    unit->id = FactoryUnit::nextId++;
-    m_factories.prepend(unit);
-    return unit->id;
-}
-
-void EnginioClientPrivate::removeFactory(int factoryId)
-{
-    for (int i = 0; i < m_factories.size(); ++i) {
-        if (m_factories.at(i)->id == factoryId) {
-            FactoryUnit *unit = m_factories.takeAt(i);
-            delete unit->factory;
-            delete unit;
-            return;
-        }
-    }
 }
 
 /*!
@@ -337,54 +306,6 @@ bool EnginioClient::isInitialized() const
 {
     Q_D(const EnginioClient);
     return d->isInitialized();
-}
-
-/*!
- * Register object factory, \a factory, for custom object classes. Only used when
- * you implement object class(es) as subclass of EnginioAbstractObject. If
- * there are no factories that can create objects of type 'x', internal
- * EnginioJsonObjectFactory is used to create EnginioJsonObject instances where,
- * \c objectType property is set to 'x'.
- *
- * Calling this function will take the ownership of the factory object.
- *
- * Returns unique ID for registered factory which can be used to unregister the
- * factory.
- */
-int EnginioClient::registerObjectFactory(EnginioAbstractObjectFactory *factory)
-{
-    Q_D(EnginioClient);
-    return d->addFactory(factory);
-}
-
-/*!
- * Unregister custom object factory. \a factoryId is the ID received from
- * EnginioClient::registerObjectFactory()
- */
-void EnginioClient::unregisterObjectFactory(int factoryId)
-{
-    Q_D(EnginioClient);
-    d->removeFactory(factoryId);
-}
-
-/*!
-  \internal
- * Create new object of specified \a type and optionally with \a id.
- * Note that types of user-defined objects have "objects." prefix.
- */
-EnginioAbstractObject * EnginioClient::createObject(const QString &type,
-                                                    const QString &id) const
-{
-    Q_D(const EnginioClient);
-    EnginioAbstractObject *obj = 0;
-
-    for (int i = 0; i < d->m_factories.size(); ++i) {
-        obj = d->m_factories.at(i)->factory->createObjectForType(type, id);
-        if (obj)
-            break;
-    }
-
-    return obj;
 }
 
 void EnginioClient::ignoreSslErrors(QNetworkReply* reply,

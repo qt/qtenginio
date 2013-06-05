@@ -13,29 +13,15 @@ SOURCES += \
     enginioqmlclient.cpp \
     enginioqmlmodel.cpp \
     enginioplugin.cpp \
-    enginioqmlobjectmodel.cpp \
-    enginioqmlqueryoperation.cpp \
-    enginioqmlobjectoperation.cpp \
-    enginioqmlidentityauthoperation.cpp \
-    enginioqmlacloperation.cpp \
-    enginioqmlfileoperation.cpp \
     enginioqmlreply.cpp \
-    enginioqmlusergroupoperation.cpp
 
 HEADERS += \
     enginioqmlclient.h \
     enginioqmlmodel.h \
     enginioplugin.h \
-    enginioqmlobjectmodel.h \
-    enginioqmlqueryoperation.h \
-    enginioqmlobjectoperation.h \
-    enginioqmlidentityauthoperation.h \
-    enginioqmlacloperation.h \
-    enginioqmlfileoperation.h \
     enginioqmlobjectadaptor_p.h \
     enginioqmlclient_p.h \
     enginioqmlreply.h \
-    enginioqmlusergroupoperation.h
 
 QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 
