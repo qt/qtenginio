@@ -5,7 +5,34 @@ import "config.js" as AppConfig
 
 Item {
     id: root
-    property string __testObjectName
+    property string __testObjectName: "QML_TEST_" + (new Date()).getTime()
+
+    function cleanupDatabase() {
+        finishedSpy.clear()
+
+        var reply = enginio.query({ "objectType": "objects." + __testObjectName
+                              }, Enginio.ObjectOperation);
+
+        finishedSpy.wait()
+        if (typeof reply.data().results == 'undefined') {
+            return
+        }
+
+        for (var i = 0; i < reply.data().results.length; ++i)
+        {
+            enginio.remove({ "objectType": "objects." + __testObjectName,
+                             "id" : reply.data().results[i]["id"]
+                           }, Enginio.ObjectOperation);
+        }
+
+        while (finishedSpy.count < reply.data().results.length)
+        {
+            finishedSpy.wait()
+        }
+
+        finishedSpy.clear()
+        errorSpy.clear()
+    }
 
     Enginio {
         id: enginio
@@ -14,7 +41,7 @@ Item {
         apiUrl: AppConfig.backendData.apiUrl
 
         onError: {
-            console.log(reply.errorString)
+            console.log("\n\n### ERROR: " + reply.errorString + " ###\n")
         }
     }
 
@@ -87,11 +114,10 @@ Item {
 
 
     TestCase {
-        name: "EnginioClient_ObjectOperation"
+        name: "EnginioClient: EnginioClient: ObjectOperation CRUD"
 
         function initTestCase() {
-            __testObjectName = "QML_TEST_" + (new Date()).getTime()
-            console.log("The test suffix will be " + __testObjectName)
+            cleanupDatabase()
         }
 
         function init() {
