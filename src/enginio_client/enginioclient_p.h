@@ -291,14 +291,35 @@ public:
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
     QMap<QNetworkReply*, QString> _downloads;
+    QJsonObject _identityToken;
+
+    QJsonObject identityToken() const
+    {
+        return _identityToken;
+    }
+
+    void setIdentityToken(const QByteArray &data)
+    {
+        QByteArray sessionToken;
+        if (data.isEmpty()) {
+            _identityToken = QJsonObject();
+        } else {
+            _identityToken = QJsonDocument::fromJson(data).object();
+            sessionToken = _identityToken[EnginioString::sessionToken].toString().toLatin1();
+        }
+        setSessionToken(sessionToken);
+        emit q_ptr->identityTokenChanged(_identityToken);
+    }
 
     QByteArray sessionToken() const
     {
-        return _request.rawHeader(QByteArrayLiteral("Enginio-Backend-Session"));
+        return _identityToken[EnginioString::sessionToken].toString().toLatin1();
     }
 
     void setSessionToken(const QByteArray &sessionToken)
     {
+        // TODO this function should be replaced by setIdentityToken, but it is kept for
+        // now as the old api needs it.
         _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
 
         emit q_ptr->sessionTokenChanged(sessionToken);
@@ -325,8 +346,8 @@ public:
         _identityConnections.clear();
 
         if (!(_identity = identity)) {
-            // invalidate old token
-            q_ptr->setSessionToken(QByteArray());
+            // invalidate old identity token
+            setIdentityToken(QByteArray());
             return;
         }
         CallPrepareSessionToken callPrepareSessionToken(this, identity);
