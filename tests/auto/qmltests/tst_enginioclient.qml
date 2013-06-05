@@ -120,6 +120,10 @@ Item {
             cleanupDatabase()
         }
 
+        function cleanupTestCase() {
+            cleanupDatabase()
+        }
+
         function init() {
             finishedSpy.clear()
             errorSpy.clear()
