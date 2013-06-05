@@ -18,7 +18,7 @@ Rectangle {
         backendSecret: AppConfig.backendData.secret
 
         onFinished: {
-            var data = reply.data().results
+            var data = reply.data.results
             root.total = data.length
             var idle = 0
             var busy = 0
