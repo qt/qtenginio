@@ -51,45 +51,55 @@
 
   \brief Enginio client inteface to access the service
 
-  Enginio is used for all communication with the Enginio backend.
-  The backend is identified by \l{backendId}{backend ID} and \l{backendSecret}{secret}.
+  Enginio is the heart of the QML API for Enginio.
+  It is used for all communication with the Enginio backend.
+  \l EnginioModel compliments it to make handling of multiple objects simple.
 
-  It also provides methods for creating operation objects dynamically.
+  The backend is identified by \l{backendId}{backend ID} and \l{backendSecret}{secret}.
+  \snippet simple.qml client
+
+  Once the backend is configured, it is possible to run queries by calling query on
+  Enginio.
+  For example to get all objects stored with the type "objects.image" run this query:
+  \snippet simple.qml client-query
+
+  Enginio gives you a convenient way to handle the responses to your queryies as well:
+  \snippet simple.qml client-signals
 */
 
 /*!
- * \qmlproperty string Enginio::backendId
- * Enginio backend ID. This can be obtained from the Enginio dashboard.
- */
+  \qmlproperty string Enginio::backendId
+  Enginio backend ID. This can be obtained from the Enginio dashboard.
+*/
 
 /*!
- * \qmlproperty string Enginio::backendSecret
- * Enginio backend secret. This can be obtained from the Enginio dashboard.
- */
+  \qmlproperty string Enginio::backendSecret
+  Enginio backend secret. This can be obtained from the Enginio dashboard.
+*/
 
 /*!
- * \qmlproperty string Enginio::apiUrl
- * Enginio backend URL.
- *
- * Usually there is no need to change the default URL.
- */
+  \qmlproperty string Enginio::apiUrl
+  Enginio backend URL.
+
+  Usually there is no need to change the default URL.
+*/
 
 /*!
-  * \qmlproperty object Enginio::identityToken
-  * Token of currently authenticated session. It contains information about
-  * logged in user.
-  *
-  * The token is an empty object if there is no
-  * authenticated session.
-  */
+  \qmlproperty object Enginio::identityToken
+  Token of currently authenticated session. It contains information about
+  logged in user.
+
+  The token is an empty object if there is no
+  authenticated session.
+*/
 
 /*!
- * \qmlproperty bool Enginio::isAuthenticated()
- * This property holds the state of the authentication.
- *
- * It is false until a user session has been establieshed.
- * \sa identityToken
- */
+  \qmlproperty bool Enginio::isAuthenticated()
+  This property holds the state of the authentication.
+
+  It is false until a user session has been establieshed.
+  \sa identityToken
+*/
 
 class IsAuthenticatedFunctor
 {

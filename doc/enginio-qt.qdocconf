@@ -14,5 +14,7 @@ imagedirs += images
 outputdir = ./html
 outputformats = HTML
 
-exampledirs += ../examples/qml
+exampledirs += \
+               ../examples/qml \
+               snippets
 
