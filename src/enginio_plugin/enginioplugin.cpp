@@ -35,18 +35,9 @@
 **
 ****************************************************************************/
 
-#include "enginioacl.h"
 #include "enginioplugin.h"
-#include "enginioqmlacloperation.h"
 #include "enginioqmlclient.h"
 #include "enginioqmlmodel.h"
-#include "enginioqmlfileoperation.h"
-#include "enginioqmlidentityauthoperation.h"
-#include "enginioqmlobjectmodel.h"
-#include "enginioqmlobjectoperation.h"
-#include "enginioqmlqueryoperation.h"
-#include "enginioqmlusergroupoperation.h"
-#include "enginioerror.h"
 #include "enginiomodel.h"
 #include "enginioreply.h"
 #include "enginioqmlreply.h"
@@ -183,15 +174,6 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterType<EnginioQmlModel>(uri, 1, 0, "EnginioModel");
     qmlRegisterUncreatableType<EnginioReply>(uri, 1, 0, "__EnginioReply", "__EnginioReply cannot be instantiated.");
     qmlRegisterUncreatableType<EnginioQmlReply>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
-    qmlRegisterType<EnginioQmlObjectModel>(uri, 1, 0, "ObjectModel");
-    qmlRegisterType<EnginioQmlObjectOperation>(uri, 1, 0, "ObjectOperation");
-    qmlRegisterType<EnginioQmlQueryOperation>(uri, 1, 0, "QueryOperation");
-    qmlRegisterType<EnginioQmlIdentityAuthOperation>(uri, 1, 0, "IdentityAuthOperation");
-    qmlRegisterType<EnginioQmlAclOperation>(uri, 1, 0, "AclOperation");
-    qmlRegisterType<EnginioQmlFileOperation>(uri, 1, 0, "FileOperation");
-    qmlRegisterType<EnginioQmlUsergroupOperation>(uri, 1, 0, "UsergroupOperation");
-    qmlRegisterType<EnginioError>(uri, 1, 0, "Error");
-    qmlRegisterType<EnginioAcl>(uri, 1, 0, "Acl");
     qmlRegisterUncreatableType<EnginioIdentity>(uri, 1, 0, "EnginioIdentity", "EnginioIdentity can not be instantiated directly");
     qmlRegisterType<EnginioAuthentication>(uri, 1, 0, "EnginioAuthentication");
 }

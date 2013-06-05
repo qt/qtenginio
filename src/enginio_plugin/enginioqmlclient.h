@@ -63,14 +63,6 @@ public:
     // FIXME rename to authenticated or sessionAuthenticated or userAuthenticated?
     Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged);
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
-    Q_INVOKABLE EnginioQmlUsergroupOperation * createUsergroupOperation();
-
     using EnginioClient::query;
     using EnginioClient::create;
     using EnginioClient::update;

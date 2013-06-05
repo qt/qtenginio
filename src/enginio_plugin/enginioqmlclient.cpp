@@ -35,14 +35,9 @@
 **
 ****************************************************************************/
 
-#include "enginioqmlacloperation.h"
 #include "enginioqmlclient.h"
 #include "Enginio/private/enginioclient_p.h"
-#include "enginioqmlidentityauthoperation.h"
-#include "enginioqmlobjectoperation.h"
-#include "enginioqmlqueryoperation.h"
 #include "enginioqmlobjectadaptor_p.h"
-#include "enginioqmlusergroupoperation.h"
 
 #include <QtQml/qjsvalue.h>
 
@@ -78,19 +73,20 @@
  */
 
 /*!
- * \qmlproperty string Enginio::sessionToken
- * Token of currently authenticated session.
- *
- * The session token is an empty string if there is no
- * authenticated session.
- */
+  * \qmlproperty object Enginio::identityToken
+  * Token of currently authenticated session. It contains information about
+  * logged in user.
+  *
+  * The token is an empty object if there is no
+  * authenticated session.
+  */
 
 /*!
  * \qmlproperty bool Enginio::isAuthenticated()
  * This property holds the state of the authentication.
  *
  * It is false until a user session has been establieshed.
- * \sa sessionToken
+ * \sa identityToken
  */
 
 class IsAuthenticatedFunctor
@@ -119,62 +115,9 @@ EnginioQmlClient::EnginioQmlClient(QObject *parent)
     QObject::connect(this, &EnginioClient::sessionTerminated, IsAuthenticatedFunctor(this, false));
 }
 
-/*!
-  \internal
- * \qmlmethod Enginio::createObjectOperation(ObjectModel model = 0)
- * Returns new \l ObjectOperation which can be used to create new objects on
- * backend or read, update or delete existing objects. If \a model is specified,
- * when operation finishes corresponding object in \a model will be updated.
- * Returned operation can be deleted with \c destroy().
- */
-EnginioQmlObjectOperation * EnginioQmlClient::createObjectOperation(
-        EnginioQmlObjectModel *model)
-{
-    return new EnginioQmlObjectOperation(this, model);
-}
-
-/*!
-  \internal
- * \qmlmethod Enginio::createQueryOperation(ObjectModel model = 0)
- *
- * Returns new \l QueryOperation which can be used to query objects from
- * backend. If \a model is specified, when operation finishes any objects
- * fetched from backend will be added to \a model. Returned operation can be
- * deleted with \c destroy().
- */
-EnginioQmlQueryOperation * EnginioQmlClient::createQueryOperation(
-        EnginioQmlObjectModel *model)
-{
-    return new EnginioQmlQueryOperation(this, model);
-}
-
-/*!
-  \internal
- * \qmlmethod Enginio::createIdentityAuthOperation()
- *
- * Returns new \l IdentityAuthOperation which can be used to authenticate user
- * with Enginio backend. Returned operation can be deleted with \c destroy().
- */
-EnginioQmlIdentityAuthOperation * EnginioQmlClient::createIdentityAuthOperation()
-{
-    return new EnginioQmlIdentityAuthOperation(this);
-}
-
-/*!
-  \internal
- * \qmlmethod Enginio::createAclOperation()
- *
- * Returns new \l AclOperation which can be used to read and modify permissions
- * of Enginio objects. Returned operation can be deleted with \c destroy().
- */
-EnginioQmlAclOperation * EnginioQmlClient::createAclOperation()
-{
-    return new EnginioQmlAclOperation(this);
-}
-
 bool EnginioQmlClient::isAuthenticated() const
 {
-    return !sessionToken().isEmpty();
+    return !identityToken().isEmpty();
 }
 
 EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation operation)
@@ -262,14 +205,3 @@ void EnginioQmlClientPrivate::_setEngine(QJSEngine *engine)
     }
 }
 
-/*!
-  \internal
- * \qmlmethod Enginio::createUsergroupOperation()
- *
- * Returns new \l UsergroupOperation which can be used to add and remove members
- * to/from usergroups. Returned operation can be deleted with \c destroy().
- */
-EnginioQmlUsergroupOperation * EnginioQmlClient::createUsergroupOperation()
-{
-    return new EnginioQmlUsergroupOperation(this);
-}

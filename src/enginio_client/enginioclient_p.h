@@ -38,7 +38,6 @@
 #ifndef ENGINIOCLIENT_P_H
 #define ENGINIOCLIENT_P_H
 
-#include "enginioabstractobjectfactory.h"
 #include "enginioclient.h"
 #include "enginioreply.h"
 #include "enginioidentity.h"
@@ -56,15 +55,6 @@
 #include <QtCore/qmimedatabase.h>
 #include <QtCore/qjsonarray.h>
 #include <QtCore/qbuffer.h>
-
-class FactoryUnit
-{
-public:
-    EnginioAbstractObjectFactory *factory;
-    int id;
-
-    static int nextId;
-};
 
 
 struct ENGINIOCLIENT_EXPORT EnginioString
@@ -276,9 +266,6 @@ public:
     EnginioClientPrivate(EnginioClient *client = 0);
     virtual ~EnginioClientPrivate();
 
-    int addFactory(EnginioAbstractObjectFactory *factory);
-    void removeFactory(int factoryId);
-
     EnginioClient *q_ptr;
     QString m_backendId;
     QString m_backendSecret;
@@ -287,7 +274,6 @@ public:
     QUrl m_apiUrl;
     QNetworkAccessManager *m_networkManager;
     QMetaObject::Connection _networkManagerConnection;
-    QList<FactoryUnit*> m_factories;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
     QMap<QNetworkReply*, QString> _downloads;
@@ -307,7 +293,11 @@ public:
             _identityToken = QJsonDocument::fromJson(data).object();
             sessionToken = _identityToken[EnginioString::sessionToken].toString().toLatin1();
         }
-        setSessionToken(sessionToken);
+        _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
+        if (sessionToken.isEmpty())
+            emit q_ptr->sessionTerminated();
+        else
+            emit q_ptr->sessionAuthenticated();
         emit q_ptr->identityTokenChanged(_identityToken);
     }
 
@@ -316,18 +306,6 @@ public:
         return _identityToken[EnginioString::sessionToken].toString().toLatin1();
     }
 
-    void setSessionToken(const QByteArray &sessionToken)
-    {
-        // TODO this function should be replaced by setIdentityToken, but it is kept for
-        // now as the old api needs it.
-        _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
-
-        emit q_ptr->sessionTokenChanged(sessionToken);
-        if (sessionToken.isEmpty())
-            emit q_ptr->sessionTerminated();
-        else
-            emit q_ptr->sessionAuthenticated();
-    }
 
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
     {
