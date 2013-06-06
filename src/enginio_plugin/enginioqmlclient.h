@@ -61,21 +61,21 @@ public:
     EnginioQmlClient(QObject *parent = 0);
 
     // FIXME rename to authenticated or sessionAuthenticated or userAuthenticated?
-    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged);
+    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged FINAL REVISION 1)
 
     using EnginioClient::query;
     using EnginioClient::create;
     using EnginioClient::update;
     using EnginioClient::remove;
 
-    Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
+    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
 
     bool isAuthenticated() const;
 signals:
-    void isAuthenticatedChanged(bool isAuthenticated);
+    Q_REVISION(1) void isAuthenticatedChanged(bool isAuthenticated);
 
 private:
     Q_DECLARE_PRIVATE(EnginioQmlClient);

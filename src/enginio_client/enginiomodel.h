@@ -53,9 +53,9 @@ public:
     explicit EnginioModel(QObject *parent = 0);
     ~EnginioModel();
 
-    Q_PROPERTY(EnginioClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
-    Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged)
-    Q_PROPERTY(int operation READ operation WRITE setOperation NOTIFY operationChanged)
+    Q_PROPERTY(EnginioClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged REVISION 1)
+    Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged REVISION 1)
+    Q_PROPERTY(int operation READ operation WRITE setOperation NOTIFY operationChanged REVISION 1)
 
     // TODO: that is a pretty silly name
     EnginioClient *enginio() const;
@@ -75,17 +75,17 @@ public:
     virtual void fetchMore(const QModelIndex &parent) Q_DECL_OVERRIDE;
     virtual bool canFetchMore(const QModelIndex &parent) const Q_DECL_OVERRIDE;
 
-    Q_INVOKABLE void append(const QJsonObject &value);
-    Q_INVOKABLE void remove(int row);
-    Q_INVOKABLE void setProperty(int row, const QString &role, const QVariant &value);
+    Q_INVOKABLE Q_REVISION(1) void append(const QJsonObject &value);
+    Q_INVOKABLE Q_REVISION(1) void remove(int row);
+    Q_INVOKABLE Q_REVISION(1) void setProperty(int row, const QString &role, const QVariant &value);
 
 protected:
     virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
 signals:
-    void operationChanged(const EnginioClient::Operation operation);
-    void queryChanged(const QJsonObject query);
-    void enginioChanged(EnginioClient *enginio);
+    Q_REVISION(1) void operationChanged(const EnginioClient::Operation operation);
+    Q_REVISION(1) void queryChanged(const QJsonObject query);
+    Q_REVISION(1) void enginioChanged(EnginioClient *enginio);
 
 private:
     Q_DISABLE_COPY(EnginioModel)
