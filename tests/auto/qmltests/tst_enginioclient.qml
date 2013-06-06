@@ -142,10 +142,10 @@ Item {
             compare(finishedSpy.count, ++finished)
             compare(errorSpy.count, 0)
 
-            var objectId = reply.data["id"]
+            var objectId = reply.data.id
 
-            compare(reply.data["testName"], "CREATE")
-            compare(reply.data["count"], 1337)
+            compare(reply.data.testName, "CREATE")
+            compare(reply.data.count, 1337)
 
             reply = enginio.query({ "objectType": "objects." + __testObjectName,
                                     "id" : objectId
@@ -154,11 +154,12 @@ Item {
             finishedSpy.wait()
             compare(finishedSpy.count, ++finished)
             compare(errorSpy.count, 0)
+            verify(reply.data.results !== undefined)
             compare(reply.data.results.length, 1)
-            compare(reply.data.results[0]["id"], objectId)
-            compare(reply.data.results[0]["testCase"], "EnginioClient_ObjectOperation")
-            compare(reply.data.results[0]["testName"], "CREATE")
-            compare(reply.data.results[0]["count"], 1337)
+            compare(reply.data.results[0].id, objectId)
+            compare(reply.data.results[0].testCase, "EnginioClient_ObjectOperation")
+            compare(reply.data.results[0].testName, "CREATE")
+            compare(reply.data.results[0].count, 1337)
 
             reply = enginio.update({ "objectType": "objects." + __testObjectName,
                                      "id" : objectId,
@@ -169,10 +170,10 @@ Item {
             finishedSpy.wait()
             compare(finishedSpy.count, ++finished)
             compare(errorSpy.count, 0)
-            compare(reply.data["id"], objectId)
-            compare(reply.data["testCase"], "EnginioClient_ObjectOperation_Update")
-            compare(reply.data["testName"], "UPDATE")
-            compare(reply.data["count"], 1337)
+            compare(reply.data.id, objectId)
+            compare(reply.data.testCase, "EnginioClient_ObjectOperation_Update")
+            compare(reply.data.testName, "UPDATE")
+            compare(reply.data.count, 1337)
 
             reply = enginio.remove({ "objectType": "objects." + __testObjectName,
                                        "id" : objectId
