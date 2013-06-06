@@ -14,20 +14,24 @@ Item {
                               }, Enginio.ObjectOperation);
 
         finishedSpy.wait()
-        if (typeof reply.data().results == 'undefined') {
+
+        var results = reply.data.results
+
+        if (results === undefined) {
+            console.log("No data to clean up.")
             return
         }
 
-        for (var i = 0; i < reply.data().results.length; ++i)
+        for (var i = 0; i < results.length; ++i)
         {
             enginio.remove({ "objectType": "objects." + __testObjectName,
-                             "id" : reply.data().results[i]["id"]
+                             "id" : results[i].id
                            }, Enginio.ObjectOperation);
         }
 
-        while (finishedSpy.count < reply.data().results.length)
+        while (finishedSpy.count < results.length)
         {
-            finishedSpy.wait()
+            finishedSpy.wait() // Throws an exception if it times out
         }
 
         finishedSpy.clear()
@@ -114,7 +118,7 @@ Item {
 
 
     TestCase {
-        name: "EnginioClient: EnginioClient: ObjectOperation CRUD"
+        name: "EnginioClient: ObjectOperation CRUD"
 
         function initTestCase() {
             cleanupDatabase()
