@@ -103,6 +103,43 @@
   \sa identityToken
 */
 
+/*!
+  \qmlmethod EnginioReply Enginio::uploadFile(QJsonObject object, QUrl file)
+  \brief Stores a \a file attached to an \a object in Enginio
+
+  Each uploaded file needs to be associated with an object in the database.
+  \note The upload will only work with the propper server setup: in the dashboard create a property
+  of the type that you will use. Set this property to be a reference to files.
+
+  In order to upload a file, first create an object:
+  \snippet qmltests/tst_files.qml upload-create-object
+
+  Then do the actual upload:
+  \snippet qmltests/tst_files.qml upload
+
+  Note: There is no need to directly delete files.
+  Instead when the object that contains the link to the file gets deleted,
+  the file will automatically be deleted as well.
+
+  \sa downloadFile()
+*/
+
+/*!
+  \qmlmethod EnginioReply Enginio::downloadFile(QJsonObject object)
+  \brief Get the download URL for a file
+
+  \snippet qmltests/tst_files.qml download
+
+  The response contains the download URL and the duration how long the URL will be valid.
+  \code
+    downloadReply.data.expiringUrl
+    downloadReply.data.expiresAt
+  \endcode
+
+  \sa uploadFile()
+*/
+
+
 class IsAuthenticatedFunctor
 {
     EnginioQmlClient *_qmlEnginio;

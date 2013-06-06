@@ -415,16 +415,25 @@ void EnginioClient::setIdentity(EnginioIdentity *identity)
 }
 
 /*!
-  Stores a \a file attached to an \a object in Enginio.
+  \brief Stores a \a file attached to an \a object in Enginio
+
+  Each uploaded file needs to be associated with an object in the database.
+  \note The upload will only work with the propper server setup: in the dashboard create a property
+  of the type that you will use. Set this property to be a reference to files.
 
   Each uploaded file needs to be associated with an object in the database.
 
-  \snippet files.qml upload
+  In order to upload a file, first create an object:
+  \snippet enginioclient/tst_enginioclient.cpp upload-create-object
+
+  Then do the actual upload:
+  \snippet enginioclient/tst_enginioclient.cpp upload
 
   Note: There is no need to directly delete files.
   Instead when the object that contains the link to the file gets deleted,
   the file will automatically be deleted as well.
 
+  \sa downloadFile()
 */
 EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &file)
 {
@@ -440,7 +449,9 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
 /*!
   \brief Download a file stored in Enginio
 
-  \snippet files.qml download
+  \snippet enginioclient/tst_enginioclient.cpp download
+  The propertyName can be anything, but it must be the same as the one used to upload the file with.
+  This way one object can have several files attached to itself (one per propertyName).
 */
 EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 {
