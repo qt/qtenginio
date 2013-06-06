@@ -505,13 +505,14 @@ public:
         QString path = fileUrl.isLocalFile() ? fileUrl.toLocalFile() : fileUrl.path();
 
         QFile *file = new QFile(path);
+        Q_ASSERT(file->exists());
         file->open(QFile::ReadOnly);
         Q_ASSERT(file->isOpen());
 
         QString fileName = file->fileName();
         Q_ASSERT(!fileName.isEmpty());
         QMimeDatabase mimeDb;
-        QString mimeType = mimeDb.mimeTypeForFile(fileUrl.toLocalFile()).name();
+        QString mimeType = mimeDb.mimeTypeForFile(path).name();
         return upload(object, fileName, file, mimeType);
     }
 
