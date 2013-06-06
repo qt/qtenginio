@@ -47,12 +47,15 @@ class EnginioQmlReplyPrivate;
 class ENGINIOCLIENT_EXPORT EnginioQmlReply : public EnginioReply
 {
     Q_OBJECT
+    Q_PROPERTY(QJSValue data READ data NOTIFY dataChanged)
 public:
     explicit EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply);
     virtual void emitFinished();
-    Q_INVOKABLE QJSValue data() const;
+    QJSValue data() const;
 private:
     friend class EnginioQmlReplyPrivate;
+
+    Q_SIGNAL void dataChanged();
 };
 
 
