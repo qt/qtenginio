@@ -57,6 +57,7 @@ class tst_EnginioModel: public QObject
     Q_OBJECT
 
 private slots:
+    void init();
     void ctor();
     void enginio_property();
     void query_property();
@@ -64,6 +65,12 @@ private slots:
     void roleNames();
     void listView();
 };
+
+void tst_EnginioModel::init()
+{
+    if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
+        QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
+}
 
 void tst_EnginioModel::ctor()
 {

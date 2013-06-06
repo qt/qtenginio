@@ -5,7 +5,38 @@ import "config.js" as AppConfig
 
 Item {
     id: root
-    property string __testObjectName
+    property string __testObjectName: "QML_TEST_" + (new Date()).getTime()
+
+    function cleanupDatabase() {
+        finishedSpy.clear()
+
+        var reply = enginio.query({ "objectType": "objects." + __testObjectName
+                              }, Enginio.ObjectOperation);
+
+        finishedSpy.wait()
+
+        var results = reply.data.results
+
+        if (results === undefined) {
+            console.log("No data to clean up.")
+            return
+        }
+
+        for (var i = 0; i < results.length; ++i)
+        {
+            enginio.remove({ "objectType": "objects." + __testObjectName,
+                             "id" : results[i].id
+                           }, Enginio.ObjectOperation);
+        }
+
+        while (finishedSpy.count < results.length)
+        {
+            finishedSpy.wait() // Throws an exception if it times out
+        }
+
+        finishedSpy.clear()
+        errorSpy.clear()
+    }
 
     Enginio {
         id: enginio
@@ -14,7 +45,7 @@ Item {
         apiUrl: AppConfig.backendData.apiUrl
 
         onError: {
-            console.log(reply.errorString)
+            console.log("\n\n### ERROR: " + reply.errorString + " ###\n")
         }
     }
 
@@ -87,11 +118,14 @@ Item {
 
 
     TestCase {
-        name: "EnginioClient_ObjectOperation"
+        name: "EnginioClient: ObjectOperation CRUD"
 
         function initTestCase() {
-            __testObjectName = "QML_TEST_" + (new Date()).getTime()
-            console.log("The test suffix will be " + __testObjectName)
+            cleanupDatabase()
+        }
+
+        function cleanupTestCase() {
+            cleanupDatabase()
         }
 
         function init() {
@@ -112,10 +146,10 @@ Item {
             compare(finishedSpy.count, ++finished)
             compare(errorSpy.count, 0)
 
-            var objectId = reply.data["id"]
+            var objectId = reply.data.id
 
-            compare(reply.data["testName"], "CREATE")
-            compare(reply.data["count"], 1337)
+            compare(reply.data.testName, "CREATE")
+            compare(reply.data.count, 1337)
 
             reply = enginio.query({ "objectType": "objects." + __testObjectName,
                                     "id" : objectId
@@ -124,11 +158,12 @@ Item {
             finishedSpy.wait()
             compare(finishedSpy.count, ++finished)
             compare(errorSpy.count, 0)
+            verify(reply.data.results !== undefined)
             compare(reply.data.results.length, 1)
-            compare(reply.data.results[0]["id"], objectId)
-            compare(reply.data.results[0]["testCase"], "EnginioClient_ObjectOperation")
-            compare(reply.data.results[0]["testName"], "CREATE")
-            compare(reply.data.results[0]["count"], 1337)
+            compare(reply.data.results[0].id, objectId)
+            compare(reply.data.results[0].testCase, "EnginioClient_ObjectOperation")
+            compare(reply.data.results[0].testName, "CREATE")
+            compare(reply.data.results[0].count, 1337)
 
             reply = enginio.update({ "objectType": "objects." + __testObjectName,
                                      "id" : objectId,
@@ -139,10 +174,10 @@ Item {
             finishedSpy.wait()
             compare(finishedSpy.count, ++finished)
             compare(errorSpy.count, 0)
-            compare(reply.data["id"], objectId)
-            compare(reply.data["testCase"], "EnginioClient_ObjectOperation_Update")
-            compare(reply.data["testName"], "UPDATE")
-            compare(reply.data["count"], 1337)
+            compare(reply.data.id, objectId)
+            compare(reply.data.testCase, "EnginioClient_ObjectOperation_Update")
+            compare(reply.data.testName, "UPDATE")
+            compare(reply.data.count, 1337)
 
             reply = enginio.remove({ "objectType": "objects." + __testObjectName,
                                        "id" : objectId
@@ -158,6 +193,77 @@ Item {
             finishedSpy.wait()
             compare(finishedSpy.count, ++finished)
             compare(errorSpy.count, 0)
+            compare(reply.data.results.length, 0)
+        }
+    }
+
+    TestCase {
+        name: "EnginioClient: ObjectOperation Query"
+
+        function initTestCase() {
+            cleanupDatabase()
+        }
+
+        function cleanupTestCase() {
+            cleanupDatabase()
+        }
+
+        function init() {
+            finishedSpy.clear()
+            errorSpy.clear()
+        }
+
+        function test_query() {
+            verify(enginio.initialized)
+            var iterations = 50
+            var reply
+
+            for (var i = 0; i < iterations; ++i)
+            {
+                enginio.create({ "objectType": "objects." + __testObjectName,
+                                   "testCase" : "EnginioClient_ObjectOperation",
+                                   "testName" : "test_Query_" + i,
+                                   "iteration" : i,
+                               }, Enginio.ObjectOperation);
+            }
+
+            tryCompare(finishedSpy, "count", iterations, 10000)
+            compare(errorSpy.count, 0)
+
+            var finished = 0
+            var request = [0, 5, 25, 20, 50]
+            var expected = [25, 20, 5, 0]
+
+            finishedSpy.clear()
+
+            reply = enginio.query({ "objectType": "objects." + __testObjectName,
+                                    "query": { "iteration" : {  "$in": request } },
+                                    "sort": [{"sortBy": "iteration", "direction": "desc"}]
+                                  }, Enginio.ObjectOperation);
+
+            finishedSpy.wait()
+            compare(finishedSpy.count, ++finished)
+            compare(errorSpy.count, 0)
+            verify(reply.data.results !== undefined)
+
+            var actualCount = reply.data.results.length
+            compare(actualCount, expected.length)
+
+            for (var i = 0; i < actualCount; ++i)
+            {
+                compare(reply.data.results[i].iteration, expected[i])
+            }
+
+            cleanupDatabase()
+            finishedSpy.clear()
+
+            reply = enginio.query({ "objectType": "objects." + __testObjectName
+                                  }, Enginio.ObjectOperation);
+
+            finishedSpy.wait()
+            compare(finishedSpy.count, 1)
+            compare(errorSpy.count, 0)
+            verify(reply.data.results !== undefined)
             compare(reply.data.results.length, 0)
         }
     }
