@@ -194,6 +194,38 @@ EnginioQmlReply *EnginioQmlClient::remove(const QJSValue &object, const Operatio
     return ereply;
 }
 
+EnginioQmlReply *EnginioQmlClient::downloadFile(const QJSValue &object)
+{
+    Q_D(EnginioQmlClient);
+
+    if (!object.isObject())
+        return 0;
+
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->downloadFile<QJSValue>(o);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+EnginioQmlReply *EnginioQmlClient::uploadFile(const QJSValue &object, const QUrl &url)
+{
+    Q_D(EnginioQmlClient);
+
+    if (!object.isObject())
+        return 0;
+
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->uploadFile<QJSValue>(o, url);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
 QByteArray EnginioQmlClientPrivate::toJson(const QJSValue &value)
 {
     if (!_stringify.isCallable())

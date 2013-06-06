@@ -481,7 +481,8 @@ public:
         return !m_backendId.isEmpty() && !m_backendSecret.isEmpty();
     }
 
-    QNetworkReply *downloadFile(const QJsonObject &object)
+    template<class T>
+    QNetworkReply *downloadFile(const ObjectAdaptor<T> &object)
     {
         QString id = object[EnginioString::id].toString();
         QString objectType = object[EnginioString::objectType].toString();
