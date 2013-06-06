@@ -63,7 +63,7 @@
 
   The \l backendId and \l backendSecret are required for Engino to work.
   Once the client is set up you can use it to make queries to the backend
-  or use higher level API such as \l EnginioModel.
+  or use higher level API such as \l {EnginioModelCpp}{EnginioModel}.
 */
 
 /*!
@@ -418,9 +418,13 @@ void EnginioClient::setIdentity(EnginioIdentity *identity)
   Stores a \a file attached to an \a object in Enginio.
 
   Each uploaded file needs to be associated with an object in the database.
-  If there is no association, the file will eventually get deleted.
-  When an object which had a file associated gets deleted, the file will
-  automatically be deleted as well.
+
+  \snippet files.qml upload
+
+  Note: There is no need to directly delete files.
+  Instead when the object that contains the link to the file gets deleted,
+  the file will automatically be deleted as well.
+
 */
 EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &file)
 {
@@ -433,6 +437,11 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
     return ereply;
 }
 
+/*!
+  \brief Download a file stored in Enginio
+
+  \snippet files.qml download
+*/
 EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 {
     Q_D(EnginioClient);

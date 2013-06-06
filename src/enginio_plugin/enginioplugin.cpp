@@ -57,15 +57,8 @@
  */
 
 
-/*!
- * \qmltype Error
- * \instantiates EnginioError
- * \inqmlmodule enginio-plugin
- * \brief Used to describe errors that occur during Enginio operations
- */
-
-/*!
- * \qmlproperty enumeration Error::error
+/* FIXME if needed
+ * \qmlproperty enumeration EnginioReply::errorCode
  * \list
  * \li Error.NoError - No errors.
  * \li Error.UnknownError - Something went wrong but we don't know what.
@@ -75,7 +68,7 @@
  * \endlist
  */
 
-/*!
+/*
  * \qmltype Acl
  * \instantiates EnginioAcl
  * \inqmlmodule enginio-plugin
@@ -107,7 +100,7 @@
  * value is \c {{ "id": "*", "objectType": "aclSubject" }}.
  */
 
-/*!
+/*
  * \qmlproperty enumeration Acl::Permission
  * \list
  * \li Acl.ReadPermission - Permission to read object data
@@ -116,26 +109,6 @@
  * \li Acl.AdminPermission - Permission to read, update and delete object and to
  *     read and change object permissions
  * \endlist
- */
-
-/*!
- * \qmlproperty object Acl::readPermissions
- * List of subjects that have "read" permission.
- */
-
-/*!
- * \qmlproperty object Acl::updatePermissions
- * List of subjects that have "update" permission.
- */
-
-/*!
- * \qmlproperty object Acl::deletePermissions
- * List of subjects that have "delete" permission.
- */
-
-/*!
- * \qmlproperty object Acl::adminPermissions
- * List of subjects that have "admin" permission.
  */
 
 QQmlEngine *g_qmlEngine = 0;

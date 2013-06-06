@@ -37,6 +37,35 @@
 
 #include "enginioqmlmodel.h"
 
+/*!
+  \qmltype EnginioModel
+  \instantiates EnginioQmlModel
+  \inqmlmodule enginio-plugin
+  \ingroup engino-qml
+  \target EnginioModelQml
+
+  \brief Makes accessing collections of objects easy
+
+  The query property of the model takes a JSON object.
+
+  To get a model of each object of type "objects.city" use:
+  \snippet models.qml model
+
+  It is then possible to use a regular Qt Quick ListView
+  to display the list of cities that the backend contains.
+  \snippet models.qml view
+  Note that the properties of the objects can be directly accessed.
+  In this example, we have the type "objects.city" in the backend
+  with two properties: "name" and "population".
+
+  The model supports several function to modify the data, for example it is
+  easy to add another city to the backend by appending it:
+  \snippet models.qml append
+
+  The QML version of EnginioModel supports the same functionality as the C++ version.
+  \l {EnginioModelCpp}{EnginioModel C++}
+*/
+
 EnginioQmlModel::EnginioQmlModel(QObject *parent)
     : EnginioModel(parent)
 {

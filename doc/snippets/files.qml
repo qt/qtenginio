@@ -36,29 +36,45 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-//! [import]
 import Enginio 1.0
-//! [import]
+import "../../examples/qml/config.js" as Config
 
 Rectangle {
-    //! [client]
+    width: 400
+    height: 400
+
     Enginio {
         id: client
-        backendId: "YOUR_BACKEND_ID" // from Enginio Dashboard
-        backendSecret: "YOUR_BACKEND_SECRET" // from Enginio Dashboard
-    }
-    //! [client]
-
-    //! [client-signals]
-    Enginio {
+        backendId: Config.backendData.id
+        backendSecret: Config.backendData.secret
         onFinished: console.log("Engino request finished." + reply.data)
         onError: console.log("Enginio error " + reply.errorCode + ": " + reply.errorString)
     }
-    //! [client-signals]
 
-    //! [client-query]
-    Enginio {
-        Component.onCompleted: query({objectType: "objects.image",})
+    //! [upload]
+    function upload() {
+        var fileObject = {
+            objectType: "objects.example",
+            name: "Example object with file attachment",
+        }
+        var reply = client.create(fileObject);
+        reply.finished.connect(function() {
+            console.log("Upload finished: " + reply.data().id)
+            var objectId = reply.data().id
+            var fileName = "files.qml"
+            var uploadData = {
+                file: { "fileName": fileName },
+                "targetFileProperty": {
+                    "objectType": "objects.example",
+                    "id": objectId,
+                    "propertyName": "qml_attachment"
+                },
+            };
+            var uploadReply = client.uploadFile(uploadData, fileName)
+            uploadReply.finished.connect(function() { console.log("File uploaded.") })
+        })
     }
-    //! [client-query]
+    //! [upload]
+
+    Component.onCompleted: upload()
 }

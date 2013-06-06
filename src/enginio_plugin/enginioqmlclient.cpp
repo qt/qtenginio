@@ -49,7 +49,9 @@
   \inqmlmodule enginio-plugin
   \ingroup engino-qml
 
-  \brief Enginio client inteface to access the service
+  \brief client interface to access Enginio
+
+  \snippet simple.qml import
 
   Enginio is the heart of the QML API for Enginio.
   It is used for all communication with the Enginio backend.
