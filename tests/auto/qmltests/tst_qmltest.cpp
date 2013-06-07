@@ -35,6 +35,7 @@
 **
 ****************************************************************************/
 #include <QtQuickTest/quicktest.h>
+#include <QGuiApplication>
 #include <QDir>
 #include <QFile>
 #include <QTextStream>
@@ -47,6 +48,14 @@ int main(int argc, char** argv)
         qFatal("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET and ENGINIO_API_URL are not set!");
         return EXIT_FAILURE;
     }
+
+    QGuiApplication app(argc, argv);
+    const QString appPath = QGuiApplication::applicationDirPath();
+    // This allows starting the test without previously defining QML2_IMPORT_PATH.
+    QDir qmlImportDir(appPath);
+    qmlImportDir.cd("../../../qml");
+    QByteArray canonicalImportPath = qmlImportDir.canonicalPath().toUtf8();
+    qputenv("QML2_IMPORT_PATH", canonicalImportPath);
 
     QString qmlFilePath(QUICK_TEST_SOURCE_DIR);
     QFile qmltestConfig(qmlFilePath + QDir::separator() + "config.js");
