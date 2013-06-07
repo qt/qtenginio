@@ -49,7 +49,9 @@
   \inqmlmodule enginio-plugin
   \ingroup engino-qml
 
-  \brief Enginio client inteface to access the service
+  \brief client interface to access Enginio
+
+  \snippet simple.qml import
 
   Enginio is the heart of the QML API for Enginio.
   It is used for all communication with the Enginio backend.
@@ -100,6 +102,43 @@
   It is false until a user session has been establieshed.
   \sa identityToken
 */
+
+/*!
+  \qmlmethod EnginioReply Enginio::uploadFile(QJsonObject object, QUrl file)
+  \brief Stores a \a file attached to an \a object in Enginio
+
+  Each uploaded file needs to be associated with an object in the database.
+  \note The upload will only work with the propper server setup: in the dashboard create a property
+  of the type that you will use. Set this property to be a reference to files.
+
+  In order to upload a file, first create an object:
+  \snippet qmltests/tst_files.qml upload-create-object
+
+  Then do the actual upload:
+  \snippet qmltests/tst_files.qml upload
+
+  Note: There is no need to directly delete files.
+  Instead when the object that contains the link to the file gets deleted,
+  the file will automatically be deleted as well.
+
+  \sa downloadFile()
+*/
+
+/*!
+  \qmlmethod EnginioReply Enginio::downloadFile(QJsonObject object)
+  \brief Get the download URL for a file
+
+  \snippet qmltests/tst_files.qml download
+
+  The response contains the download URL and the duration how long the URL will be valid.
+  \code
+    downloadReply.data.expiringUrl
+    downloadReply.data.expiresAt
+  \endcode
+
+  \sa uploadFile()
+*/
+
 
 class IsAuthenticatedFunctor
 {
@@ -186,6 +225,38 @@ EnginioQmlReply *EnginioQmlClient::remove(const QJSValue &object, const Operatio
     d->setEngine(object);
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->remove<QJSValue>(o, operation);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+EnginioQmlReply *EnginioQmlClient::downloadFile(const QJSValue &object)
+{
+    Q_D(EnginioQmlClient);
+
+    if (!object.isObject())
+        return 0;
+
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->downloadFile<QJSValue>(o);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+EnginioQmlReply *EnginioQmlClient::uploadFile(const QJSValue &object, const QUrl &url)
+{
+    Q_D(EnginioQmlClient);
+
+    if (!object.isObject())
+        return 0;
+
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->uploadFile<QJSValue>(o, url);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
     nreply->setParent(ereply);
 

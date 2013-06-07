@@ -413,8 +413,10 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
   \class EnginioModel
   \inmodule enginio-qt
   \ingroup enginio-client
+  \target EnginioModelCpp
   \brief EnginioModel represents data from Enginio as a \l QAbstractListModel.
-  \mainclass
+
+  For the QML version of this class see \l {EnginioModelQml}{EnginioModel (QML)}
 */
 
 /*!

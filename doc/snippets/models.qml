@@ -36,29 +36,63 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-//! [import]
 import Enginio 1.0
-//! [import]
+import "../../examples/qml/config.js" as Config
 
 Rectangle {
-    //! [client]
+    width: 400
+    height: 400
+
     Enginio {
         id: client
-        backendId: "YOUR_BACKEND_ID" // from Enginio Dashboard
-        backendSecret: "YOUR_BACKEND_SECRET" // from Enginio Dashboard
-    }
-    //! [client]
-
-    //! [client-signals]
-    Enginio {
+        backendId: Config.id
+        backendSecret: Config.secret
         onFinished: console.log("Engino request finished." + reply.data)
         onError: console.log("Enginio error " + reply.errorCode + ": " + reply.errorString)
     }
-    //! [client-signals]
 
-    //! [client-query]
-    Enginio {
-        Component.onCompleted: query({objectType: "objects.image",})
+    //! [model]
+    EnginioModel {
+        id: enginioModel
+        enginio: client
+        query: { "objectType": "objects.city" }
     }
-    //! [client-query]
+    //! [model]
+
+    //! [view]
+    ListView {
+        anchors.fill: parent
+        model: enginioModel
+        delegate: Text {
+            text: model.name + ": " + model.population
+        }
+    }
+    //! [view]
+
+    Rectangle {
+        color: "lightsteelblue"
+        width: parent.width
+        height: 30
+        anchors.bottom: parent.bottom
+        Text {
+            anchors.centerIn: parent
+            text: "Add Berlin"
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: addCity()
+        }
+    }
+
+    //! [append]
+    function addCity() {
+        var berlin = {
+            "objectType": "objects.city",
+            "name": "Berlin",
+            "population": 3300000
+        }
+        enginioModel.append(berlin)
+    }
+    //! [append]
+
 }

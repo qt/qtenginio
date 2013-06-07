@@ -12,4 +12,6 @@ QT += qmltest
 DEFINES += QUICK_TEST_SOURCE_DIR=\\\"$$_PRO_FILE_PWD_\\\"
 
 OTHER_FILES += \
-    tst_enginioclient.qml
+    tst_enginioclient.qml \
+    tst_files.qml
+

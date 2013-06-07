@@ -63,7 +63,7 @@
 
   The \l backendId and \l backendSecret are required for Engino to work.
   Once the client is set up you can use it to make queries to the backend
-  or use higher level API such as \l EnginioModel.
+  or use higher level API such as \l {EnginioModelCpp}{EnginioModel}.
 */
 
 /*!
@@ -415,12 +415,25 @@ void EnginioClient::setIdentity(EnginioIdentity *identity)
 }
 
 /*!
-  Stores a \a file attached to an \a object in Enginio.
+  \brief Stores a \a file attached to an \a object in Enginio
 
   Each uploaded file needs to be associated with an object in the database.
-  If there is no association, the file will eventually get deleted.
-  When an object which had a file associated gets deleted, the file will
-  automatically be deleted as well.
+  \note The upload will only work with the propper server setup: in the dashboard create a property
+  of the type that you will use. Set this property to be a reference to files.
+
+  Each uploaded file needs to be associated with an object in the database.
+
+  In order to upload a file, first create an object:
+  \snippet enginioclient/tst_enginioclient.cpp upload-create-object
+
+  Then do the actual upload:
+  \snippet enginioclient/tst_enginioclient.cpp upload
+
+  Note: There is no need to directly delete files.
+  Instead when the object that contains the link to the file gets deleted,
+  the file will automatically be deleted as well.
+
+  \sa downloadFile()
 */
 EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &file)
 {
@@ -433,11 +446,18 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
     return ereply;
 }
 
+/*!
+  \brief Download a file stored in Enginio
+
+  \snippet enginioclient/tst_enginioclient.cpp download
+  The propertyName can be anything, but it must be the same as the one used to upload the file with.
+  This way one object can have several files attached to itself (one per propertyName).
+*/
 EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->downloadFile(object);
+    QNetworkReply *nreply = d->downloadFile<QJsonObject>(object);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
 

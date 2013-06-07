@@ -1282,18 +1282,19 @@ void tst_EnginioClient::file()
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
-    // Create a new object
+    //![upload-create-object]
     QJsonObject obj;
     obj["objectType"] = QString::fromUtf8("objects.files");
     obj["title"] = QString::fromUtf8("Object With File");
-    const EnginioReply* req = client.create(obj);
-    QVERIFY(req);
+    const EnginioReply* createReply = client.create(obj);
+    //![upload-create-object]
+    QVERIFY(createReply);
 
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *responseObjectCreation = spy[0][0].value<EnginioReply*>();
-    QCOMPARE(responseObjectCreation, req);
+    QCOMPARE(responseObjectCreation, createReply);
     QCOMPARE(responseObjectCreation->errorCode(), QNetworkReply::NoError);
     QJsonObject data = responseObjectCreation->data();
     QVERIFY(!data.isEmpty());
@@ -1302,13 +1303,19 @@ void tst_EnginioClient::file()
     QString id = data["id"].toString();
     QVERIFY(!id.isEmpty());
 
-    const QString filePropertyName = QStringLiteral("fileAttachment");
-
     // Attach file to the object
+
+    {
+    // FIXME: make this work for out of source builds
+    // FIXME: consider this url mess
+    QString path = QStringLiteral(TEST_FILE_PATH);
+    QVERIFY(QFile::exists(QStringLiteral(TEST_FILE_PATH)));
+
+    //![upload]
     QJsonObject object;
     object["id"] = id;
     object["objectType"] = QStringLiteral("objects.files");
-    object["propertyName"] = filePropertyName;
+    object["propertyName"] = QStringLiteral("fileAttachment");;
 
     QJsonObject fileObject;
     fileObject[QStringLiteral("fileName")] = QStringLiteral("test.png");
@@ -1316,20 +1323,19 @@ void tst_EnginioClient::file()
     QJsonObject uploadJson;
     uploadJson[QStringLiteral("targetFileProperty")] = object;
     uploadJson[QStringLiteral("file")] = fileObject;
-
-    // FIXME: make this work for out of source builds
-    // FIXME: consider this url mess
-    QString path = "file://" + QStringLiteral(TEST_FILE_PATH);
-    QVERIFY(QFile::exists(QStringLiteral(TEST_FILE_PATH)));
     const EnginioReply* responseUpload = client.uploadFile(uploadJson, QUrl(path));
+    //![upload]
+
     QVERIFY(responseUpload);
     QTRY_COMPARE(spy.count(), 2);
     QCOMPARE(spyError.count(), 0);
+    }
 
     // Query including files
+    {
     QJsonObject obj2;
     obj2 = QJsonDocument::fromJson(
-                "{\"include\": {\"" + filePropertyName.toUtf8() + "\": {}},"
+                "{\"include\": {\"fileAttachment\": {}},"
                  "\"objectType\": \"objects.files\","
                  "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
 
@@ -1343,10 +1349,19 @@ void tst_EnginioClient::file()
     QVERIFY(data["results"].isArray());
     QVERIFY(data["results"].toArray().first().toObject()["fileAttachment"].isObject());
     QVERIFY(!data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString().isEmpty());
+    }
 
     // Download
-    const EnginioReply* reqDownload = client.downloadFile(object);
-    QVERIFY(reqDownload);
+    {
+    //![download]
+    QJsonObject object;
+    object["id"] = id; // ID of an existing object with attached file
+    object["objectType"] = QStringLiteral("objects.files");
+    object["propertyName"] = QStringLiteral("fileAttachment");;
+    const EnginioReply* replyDownload = client.downloadFile(object);
+    //![download]
+
+    QVERIFY(replyDownload);
     QTRY_COMPARE(spy.count(), 4);
     QCOMPARE(spyError.count(), 0);
     const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
@@ -1354,7 +1369,7 @@ void tst_EnginioClient::file()
     QJsonObject downloadData = responseDownload->data();
     QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
     QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
-    qDebug() << "Download: " << responseDownload;
+    }
 }
 
 void tst_EnginioClient::sharingNetworkManager()

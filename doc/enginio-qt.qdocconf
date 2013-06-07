@@ -16,5 +16,8 @@ outputformats = HTML
 
 exampledirs += \
                ../examples/qml \
-               snippets
+               snippets \
+               ../tests/auto \
+
+depends += qtcore qtgui qtwidgets qtdoc qtdeclarative
 
