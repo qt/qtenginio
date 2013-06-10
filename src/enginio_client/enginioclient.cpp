@@ -257,6 +257,7 @@ void EnginioClient::setApiUrl(const QUrl &apiUrl)
     Q_D(EnginioClient);
     if (d->m_apiUrl != apiUrl) {
         d->m_apiUrl = apiUrl;
+        d->ignoreSslErrorsIfNeeded();
         emit apiUrlChanged(apiUrl);
     }
 }
@@ -472,15 +473,6 @@ void EnginioClientPrivate::assignNetworkManager()
 
     m_networkManager = prepareNetworkManagerInThread();
     _networkManagerConnection = QObject::connect(m_networkManager, &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
-
-    // Ignore SSL errors when staging backend is used.
-    if (m_apiUrl == QStringLiteral("https://api.staging.engin.io")) {
-        qWarning() << "SSL errors will be ignored";
-        QObject::connect(m_networkManager,
-                SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)),
-                q_ptr,
-                SLOT(ignoreSslErrors(QNetworkReply*, const QList<QSslError> &)));
-    }
 }
 
 QNetworkAccessManager *EnginioClientPrivate::prepareNetworkManagerInThread()
