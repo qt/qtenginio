@@ -21,6 +21,7 @@ SOURCES += \
     enginioidentity.cpp \
 
 HEADERS += \
+    chunkdevice_p.h \
     enginioclient.h\
     enginioclient_global.h \
     enginioclient_p.h \

@@ -38,6 +38,7 @@
 #ifndef ENGINIOCLIENT_P_H
 #define ENGINIOCLIENT_P_H
 
+#include "chunkdevice_p.h"
 #include "enginioclient.h"
 #include "enginioreply.h"
 #include "enginioidentity.h"
@@ -647,11 +648,13 @@ private:
 
         // qDebug() << "Uploading chunk from " << startPos << " to " << endPos << " of " << size;
 
-        // FIXME use a custom QIODevice that reads chunkSize bytes from device
-        // instead of duplicating into a QByteArray
-        QByteArray data = device->read(_uploadChunkSize);
+        Q_ASSERT(device->isOpen());
 
-        QNetworkReply *reply = q_ptr->networkManager()->put(req, data);
+        ChunkDevice *chunkDevice = new ChunkDevice(device, startPos, _uploadChunkSize);
+        chunkDevice->open(QIODevice::ReadOnly);
+
+        QNetworkReply *reply = q_ptr->networkManager()->put(req, chunkDevice);
+        chunkDevice->setParent(reply);
         _chunkedUploads.insert(reply, device);
         ereply->setNetworkReply(reply);
         reply->setParent(ereply);
