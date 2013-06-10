@@ -71,7 +71,8 @@ int main(int argc, char** argv)
             << "    id: \"" << EnginioTests::TESTAPP_ID << "\",\n" \
             << "    secret: \"" << EnginioTests::TESTAPP_SECRET << "\",\n" \
             << "    apiUrl: \"" << EnginioTests::TESTAPP_URL << "\"\n" \
-            << "}\n";
+            << "}\n"
+            << "var testSourcePath = \"" QUICK_TEST_SOURCE_DIR "\"\n";
 
         out.flush();
         qmltestConfig.close();

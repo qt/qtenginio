@@ -99,7 +99,7 @@ Item {
             compare(errorSpy.count, 0)
             verify(reply.data.id.length > 0)
 
-            var fileName = "../common/enginio.png";
+            var fileName = AppConfig.testSourcePath + "/../common/enginio.png";
 
             //! [upload]
             var objectId = reply.data.id
