@@ -61,7 +61,7 @@ public:
     EnginioQmlClient(QObject *parent = 0);
 
     // FIXME rename to authenticated or sessionAuthenticated or userAuthenticated?
-    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged FINAL REVISION 1)
+    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged FINAL)
 
     using EnginioClient::query;
     using EnginioClient::create;
@@ -70,16 +70,16 @@ public:
     using EnginioClient::downloadFile;
     using EnginioClient::uploadFile;
 
-    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
-    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *downloadFile(const QJSValue &object);
-    Q_INVOKABLE Q_REVISION(1) EnginioQmlReply *uploadFile(const QJSValue &object, const QUrl &url);
+    Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *downloadFile(const QJSValue &object);
+    Q_INVOKABLE EnginioQmlReply *uploadFile(const QJSValue &object, const QUrl &url);
 
     bool isAuthenticated() const;
 signals:
-    Q_REVISION(1) void isAuthenticatedChanged(bool isAuthenticated);
+    void isAuthenticatedChanged(bool isAuthenticated);
 
 private:
     Q_DECLARE_PRIVATE(EnginioQmlClient);

@@ -76,12 +76,12 @@ public:
     explicit EnginioClient(QObject *parent = 0);
     ~EnginioClient();
 
-    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged REVISION 1)
-    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged REVISION 1)
-    Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged REVISION 1)
-    Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized REVISION 1)
-    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged REVISION 1)
-    Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged REVISION 1)
+    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged)
+    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
+    Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
+    Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
+    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged)
+    Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged)
 
     QString backendId() const;
     void setBackendId(const QString &backendId);
@@ -97,27 +97,27 @@ public:
 
     bool isInitialized() const;
 
-    Q_INVOKABLE Q_REVISION(1) EnginioReply *search(const QJsonObject &query);
-    Q_INVOKABLE Q_REVISION(1) EnginioReply *query(const QJsonObject &query, const Operation operation = ObjectOperation);
-    Q_INVOKABLE Q_REVISION(1) EnginioReply *create(const QJsonObject &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE Q_REVISION(1) EnginioReply *update(const QJsonObject &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE Q_REVISION(1) EnginioReply *remove(const QJsonObject &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *search(const QJsonObject &query);
+    Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *update(const QJsonObject &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *remove(const QJsonObject &object, const Operation operation = ObjectOperation);
 
-    Q_INVOKABLE Q_REVISION(1) EnginioReply *uploadFile(const QJsonObject &associatedObject, const QUrl &file);
-    Q_INVOKABLE Q_REVISION(1) EnginioReply *downloadFile(const QJsonObject &object);
+    Q_INVOKABLE EnginioReply *uploadFile(const QJsonObject &associatedObject, const QUrl &file);
+    Q_INVOKABLE EnginioReply *downloadFile(const QJsonObject &object);
 
 signals:
-    Q_REVISION(1) void sessionAuthenticated() const;
-    Q_REVISION(1) void sessionAuthenticationError(EnginioReply *reply) const;
-    Q_REVISION(1) void sessionTerminated() const;
-    Q_REVISION(1) void clientInitialized() const;
-    Q_REVISION(1) void backendIdChanged(const QString &backendId);
-    Q_REVISION(1) void backendSecretChanged(const QString &backendSecret);
-    Q_REVISION(1) void apiUrlChanged(const QUrl& url);
-    Q_REVISION(1) void identityTokenChanged(const QJsonObject &token);
-    Q_REVISION(1) void identityChanged(const EnginioIdentity *identity);
-    Q_REVISION(1) void finished(EnginioReply *reply);
-    Q_REVISION(1) void error(EnginioReply *reply);
+    void sessionAuthenticated() const;
+    void sessionAuthenticationError(EnginioReply *reply) const;
+    void sessionTerminated() const;
+    void clientInitialized() const;
+    void backendIdChanged(const QString &backendId);
+    void backendSecretChanged(const QString &backendSecret);
+    void apiUrlChanged(const QUrl& url);
+    void identityTokenChanged(const QJsonObject &token);
+    void identityChanged(const EnginioIdentity *identity);
+    void finished(EnginioReply *reply);
+    void error(EnginioReply *reply);
 
 private slots:
     void ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &errors);

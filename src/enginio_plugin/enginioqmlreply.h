@@ -47,7 +47,7 @@ class EnginioQmlReplyPrivate;
 class ENGINIOCLIENT_EXPORT EnginioQmlReply : public EnginioReply
 {
     Q_OBJECT
-    Q_PROPERTY(QJSValue data READ data NOTIFY dataChanged FINAL REVISION 1)
+    Q_PROPERTY(QJSValue data READ data NOTIFY dataChanged FINAL)
 public:
     explicit EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply);
     virtual void emitFinished();
@@ -55,7 +55,7 @@ public:
 private:
     friend class EnginioQmlReplyPrivate;
 
-    Q_SIGNAL Q_REVISION(1) void dataChanged();
+    Q_SIGNAL void dataChanged();
 };
 
 
