@@ -116,12 +116,17 @@ const QString EnginioString::targetFileProperty = QStringLiteral("targetFileProp
 const QString EnginioString::members = QStringLiteral("members");
 const QString EnginioString::propertyName = QStringLiteral("propertyName");
 const QString EnginioString::apiEnginIo = QStringLiteral("https://api.engin.io");
+const QString EnginioString::status = QStringLiteral("status");
+const QString EnginioString::empty = QStringLiteral("empty");
+const QString EnginioString::complete = QStringLiteral("complete");
+const QString EnginioString::incomplete = QStringLiteral("incomplete");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
     _identity(),
     m_apiUrl(EnginioString::apiEnginIo),
-    m_networkManager()
+    m_networkManager(),
+    _uploadChunkSize(512 * 1024)
 {
     assignNetworkManager();
 
