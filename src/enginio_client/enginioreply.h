@@ -55,9 +55,9 @@ class EnginioClientPrivate;
 class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged REVISION 1)
-    Q_PROPERTY(QNetworkReply::NetworkError errorCode READ errorCode NOTIFY errorCodeChanged REVISION 1)
-    Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged REVISION 1)
+    Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
+    Q_PROPERTY(QNetworkReply::NetworkError errorCode READ errorCode NOTIFY errorCodeChanged)
+    Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
 
 public:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
@@ -68,10 +68,10 @@ public:
     QString errorString() const;
 
 signals:
-    Q_REVISION(1) void finished();
-    Q_REVISION(1) void dataChanged();
-    Q_REVISION(1) void errorCodeChanged();
-    Q_REVISION(1) void errorStringChanged();
+    void finished();
+    void dataChanged();
+    void errorCodeChanged();
+    void errorStringChanged();
 
 protected:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);

@@ -141,12 +141,12 @@ void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
 void EnginioPlugin::registerTypes(const char *uri)
 {
     // @uri Enginio
-    qmlRegisterType<EnginioQmlClient, 1>(uri, 1, 0, "Client");
-    qmlRegisterType<EnginioQmlClient, 1>(uri, 1, 0, "Enginio");
-    qmlRegisterType<EnginioClient, 1>(uri, 1, 0, "__Enginio");
-    qmlRegisterType<EnginioQmlModel, 1>(uri, 1, 0, "EnginioModel");
-    qmlRegisterUncreatableType<EnginioReply, 1>(uri, 1, 0, "__EnginioReply", "__EnginioReply cannot be instantiated.");
-    qmlRegisterUncreatableType<EnginioQmlReply, 1>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
-    qmlRegisterUncreatableType<EnginioIdentity, 1>(uri, 1, 0, "EnginioIdentity", "EnginioIdentity can not be instantiated directly");
-    qmlRegisterType<EnginioAuthentication, 1>(uri, 1, 0, "EnginioAuthentication");
+    qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Client");
+    qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Enginio");
+    qmlRegisterType<EnginioClient>(uri, 1, 0, "__Enginio");
+    qmlRegisterType<EnginioQmlModel>(uri, 1, 0, "EnginioModel");
+    qmlRegisterUncreatableType<EnginioReply>(uri, 1, 0, "__EnginioReply", "__EnginioReply cannot be instantiated.");
+    qmlRegisterUncreatableType<EnginioQmlReply>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
+    qmlRegisterUncreatableType<EnginioIdentity>(uri, 1, 0, "EnginioIdentity", "EnginioIdentity can not be instantiated directly");
+    qmlRegisterType<EnginioAuthentication>(uri, 1, 0, "EnginioAuthentication");
 }
