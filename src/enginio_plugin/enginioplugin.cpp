@@ -141,7 +141,6 @@ void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
 void EnginioPlugin::registerTypes(const char *uri)
 {
     // @uri Enginio
-    qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Client");
     qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Enginio");
     qmlRegisterType<EnginioClient>(uri, 1, 0, "__Enginio");
     qmlRegisterType<EnginioQmlModel>(uri, 1, 0, "EnginioModel");
