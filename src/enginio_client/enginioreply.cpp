@@ -111,6 +111,11 @@ QJsonObject EnginioReply::data() const
     return d->data();
 }
 
+void EnginioReply::emitFinished()
+{
+    emit finished();
+}
+
 void EnginioReply::setNetworkReply(QNetworkReply *reply)
 {
     EnginioClient *client = qobject_cast<EnginioClient*>(parent());
@@ -142,10 +147,4 @@ QDebug operator<<(QDebug d, const EnginioReply *reply)
     d << ")";
     return d.space();
 }
-
-void EnginioReply::emitFinished()
-{
-    emit finished();
-}
-
-#endif
+#endif // QT_NO_DEBUG_STREAM
