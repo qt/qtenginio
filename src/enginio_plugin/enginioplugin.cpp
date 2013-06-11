@@ -142,7 +142,7 @@ void EnginioPlugin::registerTypes(const char *uri)
 {
     // @uri Enginio
     qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "Enginio");
-    qmlRegisterType<EnginioClient>(uri, 1, 0, "__Enginio");
+    qmlRegisterUncreatableType<EnginioClient>(uri, 1, 0, "__Enginio", "__Enginio should not be instantiated from QML directly.");
     qmlRegisterType<EnginioQmlModel>(uri, 1, 0, "EnginioModel");
     qmlRegisterUncreatableType<EnginioReply>(uri, 1, 0, "__EnginioReply", "__EnginioReply cannot be instantiated.");
     qmlRegisterUncreatableType<EnginioQmlReply>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
