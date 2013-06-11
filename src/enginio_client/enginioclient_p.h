@@ -199,8 +199,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
             // resolve the download url
             if (d->_downloads.contains(nreply)) {
-                QString propertyName = d->_downloads.value(nreply);
-                d->_downloads.remove(nreply);
+                QString propertyName = d->_downloads.take(nreply);
                 QString id = ereply->data()[EnginioString::results].toArray().first().toObject()[propertyName].toObject()[EnginioString::id].toString();
                 QUrl url(d->m_apiUrl);
                 url.setPath(getPath(QJsonObject(), FileOperation) + QLatin1Char('/') + id + QStringLiteral("/download_url"));
