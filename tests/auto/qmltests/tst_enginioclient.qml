@@ -45,7 +45,10 @@ Item {
         apiUrl: AppConfig.backendData.apiUrl
 
         onError: {
-            console.log("\n\n### ERROR: " + reply.errorString + " ###\n")
+            console.log("\n\n###");
+            console.log(reply.errorString);
+            console.log(JSON.stringify(reply.data));
+            console.log("\n###\n");
         }
     }
 
@@ -92,6 +95,10 @@ Item {
             enginio.identity = null
             sessionAuthenticatedSpy.clear()
             sessionAuthenticationErrorSpy.clear()
+        }
+
+        function cleanupTestCase() {
+            init()
         }
 
         function test_assignValidIdentity() {

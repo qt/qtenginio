@@ -56,6 +56,11 @@ class tst_Files: public QObject
 {
     Q_OBJECT
 
+public slots:
+    void error(EnginioReply *reply) {
+        qDebug() << "\n###\n" << reply << "\n###\n";
+    }
+
 private slots:
     void init();
     void fileUploadDownload_data();
@@ -82,6 +87,7 @@ void tst_Files::fileUploadDownload()
     QFETCH(int, chunkSize);
 
     EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);

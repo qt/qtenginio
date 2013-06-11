@@ -56,6 +56,11 @@ class tst_EnginioModel: public QObject
 {
     Q_OBJECT
 
+public slots:
+    void error(EnginioReply *reply) {
+        qDebug() << "\n###\n" << reply << "\n###\n";
+    }
+
 private slots:
     void init();
     void ctor();
@@ -88,6 +93,7 @@ void tst_EnginioModel::ctor()
         model.setQuery(query);
 
         EnginioClient client;
+        QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         client.setBackendId(EnginioTests::TESTAPP_ID);
         client.setApiUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
@@ -95,6 +101,7 @@ void tst_EnginioModel::ctor()
     }
     {   // check if destructor of a fully initilized EnginioClient detach fully initilized model
         EnginioClient client;
+        QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         EnginioModel model;
         model.setOperation(EnginioClient::ObjectOperation);
         model.setQuery(query);
@@ -109,6 +116,7 @@ void tst_EnginioModel::enginio_property()
 {
     {
         EnginioClient client;
+        QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         EnginioModel model;
         // No initial value
         QCOMPARE(model.enginio(), static_cast<EnginioClient*>(0));
@@ -123,6 +131,7 @@ void tst_EnginioModel::enginio_property()
         QSignalSpy spy(&model, SIGNAL(enginioChanged(EnginioClient*)));
         {
             EnginioClient client;
+            QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
             model.setEnginio(&client);
             QCOMPARE(model.enginio(), &client);
             QTRY_COMPARE(spy.count(), 1);
@@ -194,6 +203,7 @@ void tst_EnginioModel::roleNames()
     QVERIFY(model.roleNames().isEmpty()); // Initilial value
 
     EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);
@@ -225,6 +235,7 @@ void tst_EnginioModel::listView()
     model.setOperation(EnginioClient::UserOperation);
 
     EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);
