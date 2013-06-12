@@ -142,23 +142,6 @@ EnginioClientPrivate::~EnginioClientPrivate()
 }
 
 /*!
- * Create a new client object. \a backendId and \a backendSecret define which
- * Enginio backend will be used with this client. Both can be found from the
- * Enginio dashboard. \a parent is optional.
- *
- * \sa backendId, backendSecret
- */
-EnginioClient::EnginioClient(const QString &backendId,
-                             const QString &backendSecret,
-                             QObject *parent)
-    : QObject(parent)
-    , d_ptr(new EnginioClientPrivate(this))
-{
-    setBackendId(backendId);
-    setBackendSecret(backendSecret);
-}
-
-/*!
  * \brief Create a new EnginioClient.
  * \param parent the QObject parent.
  *
@@ -198,21 +181,19 @@ EnginioClient::~EnginioClient()
  * by having several instances of EnginioClient.
  * \sa backendSecret
  */
-QString EnginioClient::backendId() const
+QByteArray EnginioClient::backendId() const
 {
     Q_D(const EnginioClient);
     return d->m_backendId;
 }
 
-void EnginioClient::setBackendId(const QString &backendId)
+void EnginioClient::setBackendId(const QByteArray &backendId)
 {
     Q_D(EnginioClient);
     if (d->m_backendId != backendId) {
         d->m_backendId = backendId;
-        d->_request.setRawHeader("Enginio-Backend-Id", d->m_backendId.toLatin1());
+        d->_request.setRawHeader("Enginio-Backend-Id", d->m_backendId);
         emit backendIdChanged(backendId);
-        if (isInitialized())
-            emit clientInitialized();
     }
 }
 
@@ -221,21 +202,19 @@ void EnginioClient::setBackendId(const QString &backendId)
  * \brief The backend secret that corresponds to the \l backendId.
  * The secret is used to authenticate the Enginio connection.
  */
-QString EnginioClient::backendSecret() const
+QByteArray EnginioClient::backendSecret() const
 {
     Q_D(const EnginioClient);
     return d->m_backendSecret;
 }
 
-void EnginioClient::setBackendSecret(const QString &backendSecret)
+void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
 {
     Q_D(EnginioClient);
     if (d->m_backendSecret != backendSecret) {
         d->m_backendSecret = backendSecret;
-        d->_request.setRawHeader("Enginio-Backend-Secret", d->m_backendSecret.toLatin1());
+        d->_request.setRawHeader("Enginio-Backend-Secret", d->m_backendSecret);
         emit backendSecretChanged(backendSecret);
-        if (isInitialized())
-            emit clientInitialized();
     }
 }
 
@@ -271,20 +250,6 @@ QNetworkAccessManager * EnginioClient::networkManager()
 {
     Q_D(EnginioClient);
     return d->networkManager();
-}
-
-/*!
- * \property EnginioClient::initialized
- * \brief The initialisation state of the session.
- *
- * This property is true when the session is established.
- * That means \l backendId and \l backendSecret have been set.
- */
-
-bool EnginioClient::isInitialized() const
-{
-    Q_D(const EnginioClient);
-    return d->isInitialized();
 }
 
 void EnginioClient::ignoreSslErrors(QNetworkReply* reply,

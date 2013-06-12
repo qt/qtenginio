@@ -70,23 +70,19 @@ public:
     };
     Q_ENUMS(Operation)
 
-    explicit EnginioClient(const QString &backendId,
-                           const QString &backendSecret,
-                           QObject *parent = 0);
     explicit EnginioClient(QObject *parent = 0);
     ~EnginioClient();
 
-    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged)
-    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
-    Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
-    Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
-    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged)
-    Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged)
+    Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
+    Q_PROPERTY(QByteArray backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged FINAL)
+    Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged FINAL)
+    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
+    Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged FINAL)
 
-    QString backendId() const;
-    void setBackendId(const QString &backendId);
-    QString backendSecret() const;
-    void setBackendSecret(const QString &backendSecret);
+    QByteArray backendId() const;
+    void setBackendId(const QByteArray &backendId);
+    QByteArray backendSecret() const;
+    void setBackendSecret(const QByteArray &backendSecret);
     EnginioIdentity *identity() const;
     void setIdentity(EnginioIdentity *identity);
     QJsonObject identityToken() const;
@@ -94,8 +90,6 @@ public:
     QUrl apiUrl() const;
     void setApiUrl(const QUrl &apiUrl);
     QNetworkAccessManager *networkManager();
-
-    bool isInitialized() const;
 
     Q_INVOKABLE EnginioReply *search(const QJsonObject &query);
     Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Operation operation = ObjectOperation);
@@ -110,9 +104,8 @@ signals:
     void sessionAuthenticated() const;
     void sessionAuthenticationError(EnginioReply *reply) const;
     void sessionTerminated() const;
-    void clientInitialized() const;
-    void backendIdChanged(const QString &backendId);
-    void backendSecretChanged(const QString &backendSecret);
+    void backendIdChanged(const QByteArray &backendId);
+    void backendSecretChanged(const QByteArray &backendSecret);
     void apiUrlChanged(const QUrl& url);
     void identityTokenChanged(const QJsonObject &token);
     void identityChanged(const EnginioIdentity *identity);

@@ -146,9 +146,8 @@ public:
         _enginio = const_cast<EnginioClient*>(enginio);
         if (_enginio) {
             _connections.append(QObject::connect(_enginio, &EnginioClient::finished, FinishedRequest(this)));
-            _connections.append(QObject::connect(_enginio, &EnginioClient::clientInitialized, QueryChanged(this)));
             _connections.append(QObject::connect(_enginio, &QObject::destroyed, EnginioDestroyed(this)));
-            if (_enginio->isInitialized())
+            if (!_enginio->backendId().isEmpty() && !_enginio->backendSecret().isEmpty())
                 execute();
         }
         emit q->enginioChanged(_enginio);

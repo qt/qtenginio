@@ -230,7 +230,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {}
         void operator ()()
         {
-            _identity->prepareSessionToken(_enginio);
+            if (!_enginio->m_backendId.isEmpty() && !_enginio->m_backendSecret.isEmpty()) {
+                // TODO should we disconnect backendId and backendSecret change singals?
+                _identity->prepareSessionToken(_enginio);
+            }
         }
     };
 
@@ -270,10 +273,10 @@ public:
     virtual ~EnginioClientPrivate();
 
     EnginioClient *q_ptr;
-    QString m_backendId;
-    QString m_backendSecret;
+    QByteArray m_backendId;
+    QByteArray m_backendSecret;
     EnginioIdentity *_identity;
-    QVarLengthArray<QMetaObject::Connection, 3> _identityConnections;
+    QVarLengthArray<QMetaObject::Connection, 4> _identityConnections;
     QUrl m_apiUrl;
     QNetworkAccessManager *m_networkManager;
     QMetaObject::Connection _networkManagerConnection;
@@ -346,8 +349,11 @@ public:
             return;
         }
         CallPrepareSessionToken callPrepareSessionToken(this, identity);
-        if (!isInitialized()) {
-            _identityConnections.append(QObject::connect(q_ptr, &EnginioClient::clientInitialized, callPrepareSessionToken));
+        if (m_backendId.isEmpty() || m_backendSecret.isEmpty()) {
+            if (m_backendId.isEmpty())
+                _identityConnections.append(QObject::connect(q_ptr, &EnginioClient::backendIdChanged, callPrepareSessionToken));
+            if (m_backendSecret.isEmpty())
+                _identityConnections.append(QObject::connect(q_ptr, &EnginioClient::backendSecretChanged, callPrepareSessionToken));
         } else
             identity->prepareSessionToken(this);
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::dataChanged, callPrepareSessionToken));
@@ -488,11 +494,6 @@ public:
         req.setUrl(url);
 
         return q_ptr->networkManager()->get(req);
-    }
-
-    bool isInitialized() const
-    {
-        return !m_backendId.isEmpty() && !m_backendSecret.isEmpty();
     }
 
     template<class T>
