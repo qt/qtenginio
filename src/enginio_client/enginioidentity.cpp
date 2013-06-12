@@ -49,6 +49,7 @@
   \inmodule enginio-qt
   \ingroup enginio-client
   \brief Represents a user
+  \internal
 */
 
 /*!
