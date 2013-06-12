@@ -54,6 +54,8 @@ public:
         , _engine(0)
     {}
 
+    void init();
+
     inline void setEngine(const QJSValue &object)
     {
         if (Q_UNLIKELY(!_engine))

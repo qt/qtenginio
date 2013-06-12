@@ -282,6 +282,30 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         }
     };
 
+    class AuthenticationStateTrackerFunctor
+    {
+        EnginioClientPrivate * _enginio;
+        EnginioClient::AuthenticationState _state;
+    public:
+        AuthenticationStateTrackerFunctor(EnginioClientPrivate *enginio, EnginioClient::AuthenticationState state = EnginioClient::NotAuthenticated)
+            : _enginio(enginio)
+            , _state(state)
+        {}
+
+        void operator()() const
+        {
+            _enginio->setAuthenticationState(_state);
+        }
+
+        void operator()(const EnginioIdentity *identity) const
+        {
+            if (identity)
+                _enginio->setAuthenticationState(EnginioClient::Authenticating);
+            // else we could call _enginio->setAuthenticationState(EnginioClient::NotAuthenticated);
+            // but sessionTerminated signal should do the trick anyway
+        }
+    };
+
 public:
     enum Operation {
         // Do not forget to keep in sync with EnginioClient::Operation!
@@ -324,6 +348,22 @@ public:
     QMap<QNetworkReply*, QPair<QIODevice*, qint64> > _chunkedUploads;
     qint64 _uploadChunkSize;
     QJsonObject _identityToken;
+    EnginioClient::AuthenticationState _authenticationState;
+
+    void init();
+
+    void setAuthenticationState(const EnginioClient::AuthenticationState state)
+    {
+        if (_authenticationState == state)
+            return;
+        _authenticationState = state;
+        emit q_ptr->authenticationStateChanged(state);
+    }
+
+    EnginioClient::AuthenticationState authenticationState() const
+    {
+        return _authenticationState;
+    }
 
     void ignoreSslErrorsIfNeeded() {
         // Ignore SSL errors when staging backend is used.
@@ -358,7 +398,6 @@ public:
             emit q_ptr->sessionTerminated();
         else
             emit q_ptr->sessionAuthenticated();
-        emit q_ptr->identityTokenChanged(_identityToken);
     }
 
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)

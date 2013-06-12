@@ -60,9 +60,6 @@ class EnginioQmlClient : public EnginioClient
 public:
     EnginioQmlClient(QObject *parent = 0);
 
-    // FIXME rename to authenticated or sessionAuthenticated or userAuthenticated?
-    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY isAuthenticatedChanged FINAL)
-
     using EnginioClient::query;
     using EnginioClient::create;
     using EnginioClient::update;
@@ -76,10 +73,6 @@ public:
     Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *downloadFile(const QJSValue &object);
     Q_INVOKABLE EnginioQmlReply *uploadFile(const QJSValue &object, const QUrl &url);
-
-    bool isAuthenticated() const;
-signals:
-    void isAuthenticatedChanged(bool isAuthenticated);
 
 private:
     Q_DECLARE_PRIVATE(EnginioQmlClient);

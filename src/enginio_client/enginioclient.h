@@ -60,6 +60,14 @@ class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
     Q_OBJECT
 public:
+    enum AuthenticationState {
+        NotAuthenticated,
+        Authenticating,
+        Authenticated,
+        AuthenticationFailure
+    };
+    Q_ENUMS(AuthenticationState)
+
     enum Operation {
         // Do not forget to keep in sync with EnginioClientPrivate::Operation!
         ObjectOperation,
@@ -77,7 +85,7 @@ public:
     Q_PROPERTY(QByteArray backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged FINAL)
     Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged FINAL)
     Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
-    Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged FINAL)
+    Q_PROPERTY(AuthenticationState authenticationState READ authenticationState NOTIFY authenticationStateChanged FINAL)
 
     QByteArray backendId() const;
     void setBackendId(const QByteArray &backendId);
@@ -85,7 +93,7 @@ public:
     void setBackendSecret(const QByteArray &backendSecret);
     EnginioIdentity *identity() const;
     void setIdentity(EnginioIdentity *identity);
-    QJsonObject identityToken() const;
+    AuthenticationState authenticationState() const;
 
     QUrl apiUrl() const;
     void setApiUrl(const QUrl &apiUrl);
@@ -107,7 +115,7 @@ signals:
     void backendIdChanged(const QByteArray &backendId);
     void backendSecretChanged(const QByteArray &backendSecret);
     void apiUrlChanged(const QUrl& url);
-    void identityTokenChanged(const QJsonObject &token);
+    void authenticationStateChanged(const AuthenticationState &state);
     void identityChanged(const EnginioIdentity *identity);
     void finished(EnginioReply *reply);
     void error(EnginioReply *reply);
@@ -126,5 +134,7 @@ private:
 
 Q_DECLARE_TYPEINFO(EnginioClient::Operation, Q_PRIMITIVE_TYPE);
 Q_DECLARE_METATYPE(EnginioClient::Operation);
+Q_DECLARE_TYPEINFO(EnginioClient::AuthenticationState, Q_PRIMITIVE_TYPE);
+Q_DECLARE_METATYPE(EnginioClient::AuthenticationState);
 
 #endif // ENGINIOCLIENT_H

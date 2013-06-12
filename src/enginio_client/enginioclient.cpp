@@ -128,17 +128,27 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     _identity(),
     m_apiUrl(EnginioString::apiEnginIo),
     m_networkManager(),
+    _authenticationState(EnginioClient::NotAuthenticated),
     _uploadChunkSize(512 * 1024)
 {
     assignNetworkManager();
 
     _request.setHeader(QNetworkRequest::ContentTypeHeader,
                           QStringLiteral("application/json"));
+}
+
+void EnginioClientPrivate::init()
+{
     qRegisterMetaType<EnginioClient*>();
     qRegisterMetaType<EnginioModel*>();
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
     qRegisterMetaType<EnginioAuthentication*>();
+
+    QObject::connect(q_ptr, &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
+    QObject::connect(q_ptr, &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClient::Authenticated));
+    QObject::connect(q_ptr, &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClient::AuthenticationFailure));
+    QObject::connect(q_ptr, &EnginioClient::identityChanged, AuthenticationStateTrackerFunctor(this));
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
@@ -158,6 +168,8 @@ EnginioClient::EnginioClient(QObject *parent)
     : QObject(parent)
     , d_ptr(new EnginioClientPrivate(this))
 {
+    Q_D(EnginioClient);
+    d->init();
 }
 
 /*!
@@ -461,8 +473,8 @@ QNetworkAccessManager *EnginioClientPrivate::prepareNetworkManagerInThread()
     return qnam;
 }
 
-QJsonObject EnginioClient::identityToken() const
+EnginioClient::AuthenticationState EnginioClient::authenticationState() const
 {
     Q_D(const EnginioClient);
-    return d->identityToken();
+    return d->authenticationState();
 }
