@@ -142,23 +142,6 @@ EnginioClientPrivate::~EnginioClientPrivate()
 }
 
 /*!
- * Create a new client object. \a backendId and \a backendSecret define which
- * Enginio backend will be used with this client. Both can be found from the
- * Enginio dashboard. \a parent is optional.
- *
- * \sa backendId, backendSecret
- */
-EnginioClient::EnginioClient(const QString &backendId,
-                             const QString &backendSecret,
-                             QObject *parent)
-    : QObject(parent)
-    , d_ptr(new EnginioClientPrivate(this))
-{
-    setBackendId(backendId);
-    setBackendSecret(backendSecret);
-}
-
-/*!
  * \brief Create a new EnginioClient.
  * \param parent the QObject parent.
  *

@@ -70,9 +70,6 @@ public:
     };
     Q_ENUMS(Operation)
 
-    explicit EnginioClient(const QString &backendId,
-                           const QString &backendSecret,
-                           QObject *parent = 0);
     explicit EnginioClient(QObject *parent = 0);
     ~EnginioClient();
 
