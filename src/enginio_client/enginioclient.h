@@ -76,12 +76,12 @@ public:
     explicit EnginioClient(QObject *parent = 0);
     ~EnginioClient();
 
-    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged)
-    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged)
-    Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged)
-    Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized)
-    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged)
-    Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged)
+    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
+    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged FINAL)
+    Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged FINAL)
+    Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized FINAL)
+    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
+    Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged FINAL)
 
     QString backendId() const;
     void setBackendId(const QString &backendId);
