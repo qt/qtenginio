@@ -77,7 +77,6 @@ private slots:
     void identity();
     void identity_invalid();
     void acl();
-    void file();
     void sharingNetworkManager();
 
 private:
@@ -1267,109 +1266,6 @@ void tst_EnginioClient::acl()
     response = spy[4][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     QCOMPARE(response->errorCode(), QNetworkReply::NoError);
-}
-
-
-// For this test to work, there needs to be a property "fileAttachment"
-// for "objects.files" that is a ref to files.
-void tst_EnginioClient::file()
-{
-    EnginioClient client;
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setApiUrl(EnginioTests::TESTAPP_URL);
-
-    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
-    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
-
-    //![upload-create-object]
-    QJsonObject obj;
-    obj["objectType"] = QString::fromUtf8("objects.files");
-    obj["title"] = QString::fromUtf8("Object With File");
-    const EnginioReply* createReply = client.create(obj);
-    //![upload-create-object]
-    QVERIFY(createReply);
-
-    QTRY_COMPARE(spy.count(), 1);
-    QCOMPARE(spyError.count(), 0);
-
-    const EnginioReply *responseObjectCreation = spy[0][0].value<EnginioReply*>();
-    QCOMPARE(responseObjectCreation, createReply);
-    QCOMPARE(responseObjectCreation->errorCode(), QNetworkReply::NoError);
-    QJsonObject data = responseObjectCreation->data();
-    QVERIFY(!data.isEmpty());
-    QCOMPARE(data["title"], obj["title"]);
-    QCOMPARE(data["objectType"], obj["objectType"]);
-    QString id = data["id"].toString();
-    QVERIFY(!id.isEmpty());
-
-    // Attach file to the object
-
-    {
-    // FIXME: make this work for out of source builds
-    // FIXME: consider this url mess
-    QString path = QStringLiteral(TEST_FILE_PATH);
-    QVERIFY(QFile::exists(QStringLiteral(TEST_FILE_PATH)));
-
-    //![upload]
-    QJsonObject object;
-    object["id"] = id;
-    object["objectType"] = QStringLiteral("objects.files");
-    object["propertyName"] = QStringLiteral("fileAttachment");;
-
-    QJsonObject fileObject;
-    fileObject[QStringLiteral("fileName")] = QStringLiteral("test.png");
-
-    QJsonObject uploadJson;
-    uploadJson[QStringLiteral("targetFileProperty")] = object;
-    uploadJson[QStringLiteral("file")] = fileObject;
-    const EnginioReply* responseUpload = client.uploadFile(uploadJson, QUrl(path));
-    //![upload]
-
-    QVERIFY(responseUpload);
-    QTRY_COMPARE(spy.count(), 2);
-    QCOMPARE(spyError.count(), 0);
-    }
-
-    // Query including files
-    {
-    QJsonObject obj2;
-    obj2 = QJsonDocument::fromJson(
-                "{\"include\": {\"fileAttachment\": {}},"
-                 "\"objectType\": \"objects.files\","
-                 "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
-
-    const EnginioReply *reply = client.query(obj2);
-    QVERIFY(reply);
-
-    QTRY_COMPARE(spy.count(), 3);
-    QCOMPARE(spyError.count(), 0);
-    const EnginioReply *responseQuery = spy[2][0].value<EnginioReply*>();
-    data = responseQuery->data();
-    QVERIFY(data["results"].isArray());
-    QVERIFY(data["results"].toArray().first().toObject()["fileAttachment"].isObject());
-    QVERIFY(!data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString().isEmpty());
-    }
-
-    // Download
-    {
-    //![download]
-    QJsonObject object;
-    object["id"] = id; // ID of an existing object with attached file
-    object["objectType"] = QStringLiteral("objects.files");
-    object["propertyName"] = QStringLiteral("fileAttachment");;
-    const EnginioReply* replyDownload = client.downloadFile(object);
-    //![download]
-
-    QVERIFY(replyDownload);
-    QTRY_COMPARE(spy.count(), 4);
-    QCOMPARE(spyError.count(), 0);
-    const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
-    QCOMPARE(spy.count(), 4);
-    QJsonObject downloadData = responseDownload->data();
-    QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
-    QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
-    }
 }
 
 void tst_EnginioClient::sharingNetworkManager()
