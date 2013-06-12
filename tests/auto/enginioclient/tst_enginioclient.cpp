@@ -85,6 +85,7 @@ private slots:
     void remove_todos();
     void identity();
     void identity_invalid();
+    void identity_afterLogout();
     void acl();
     void sharingNetworkManager();
 
@@ -1223,6 +1224,50 @@ void tst_EnginioClient::identity_invalid()
         QVERIFY(spy[1][0].value<EnginioReply*>()->data() != identityReplyData);
         QCOMPARE(client.authenticationState(), EnginioClient::Authenticated);
     }
+}
+
+void tst_EnginioClient::identity_afterLogout()
+{
+    qRegisterMetaType<QNetworkReply*>();
+    EnginioClient client;
+
+    EnginioAuthentication identity;
+    identity.setUser("logintest");
+    identity.setPassword("logintest");
+
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+    client.setIdentity(&identity);
+
+    QVERIFY(client.networkManager());
+    QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
+
+    // This may be fragile, we need real network reply to catch the header.
+    QSignalSpy spy(client.networkManager(), SIGNAL(finished(QNetworkReply*)));
+    QByteArray headerName = QByteArrayLiteral("Enginio-Backend-Session");
+
+    // make a connection with a new session token
+    QJsonObject obj;
+    obj["objectType"] = QString::fromUtf8("objects.todos");
+    const EnginioReply* reqId = client.query(obj);
+    QVERIFY(reqId);
+    QTRY_VERIFY(!reqId->data().isEmpty());
+    QCOMPARE(reqId->errorCode(), QNetworkReply::NoError);
+    QCOMPARE(spy.count(), 1);
+
+    QVERIFY(spy[0][0].value<QNetworkReply*>()->request().hasRawHeader(headerName));
+
+    client.setIdentity(0);
+    QTRY_COMPARE(client.authenticationState(), EnginioClient::NotAuthenticated);
+
+    // unsecured data should be still accessible
+    reqId = client.query(obj);
+    QVERIFY(reqId);
+    QTRY_VERIFY(!reqId->data().isEmpty());
+    QCOMPARE(reqId->errorCode(), QNetworkReply::NoError);
+    QCOMPARE(spy.count(), 2);
+    QVERIFY(!spy[1][0].value<QNetworkReply*>()->request().hasRawHeader(headerName));
 }
 
 void tst_EnginioClient::acl()
