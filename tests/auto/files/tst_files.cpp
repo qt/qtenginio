@@ -43,10 +43,14 @@
 #include <QtCore/qthread.h>
 
 #include <Enginio/enginioclient.h>
+#include <Enginio/private/enginioclient_p.h>
 #include <Enginio/enginioreply.h>
 #include <Enginio/enginioidentity.h>
 
 #include "../common/common.h"
+
+// For this test to work, there needs to be a property "fileAttachment"
+// for "objects.files" that is a ref to files.
 
 class tst_Files: public QObject
 {
@@ -54,7 +58,8 @@ class tst_Files: public QObject
 
 private slots:
     void init();
-    void file();
+    void fileUploadDownload_data();
+    void fileUploadDownload();
 };
 
 void tst_Files::init()
@@ -63,15 +68,28 @@ void tst_Files::init()
         QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
 }
 
-
-// For this test to work, there needs to be a property "fileAttachment"
-// for "objects.files" that is a ref to files.
-void tst_Files::file()
+void tst_Files::fileUploadDownload_data()
 {
+    QTest::addColumn<int>("chunkSize");
+
+    QTest::newRow("Multi Part") << -1;
+    // With such a small chunk size the image will be uploaded in chunks
+    QTest::newRow("Chunked") << 1024;
+}
+
+void tst_Files::fileUploadDownload()
+{
+    QFETCH(int, chunkSize);
+
     EnginioClient client;
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    if (chunkSize > 0) {
+        EnginioClientPrivate *clientPrivate = EnginioClientPrivate::get(&client);
+        clientPrivate->_uploadChunkSize = 1024;
+    }
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
