@@ -384,20 +384,19 @@ public:
         return _identityToken;
     }
 
-    void setIdentityToken(const QByteArray &data)
+    void setIdentityToken(EnginioReply *reply)
     {
         QByteArray sessionToken;
-        if (data.isEmpty()) {
-            _identityToken = QJsonObject();
-        } else {
-            _identityToken = QJsonDocument::fromJson(data).object();
+        if (reply) {
+            _identityToken = reply->data();
             sessionToken = _identityToken[EnginioString::sessionToken].toString().toLatin1();
         }
+
         _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
         if (sessionToken.isEmpty())
             emit q_ptr->sessionTerminated();
         else
-            emit q_ptr->sessionAuthenticated();
+            emit q_ptr->sessionAuthenticated(reply);
     }
 
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
@@ -418,7 +417,7 @@ public:
 
         if (!(_identity = identity)) {
             // invalidate old identity token
-            setIdentityToken(QByteArray());
+            setIdentityToken(0);
             return;
         }
         CallPrepareSessionToken callPrepareSessionToken(this, identity);

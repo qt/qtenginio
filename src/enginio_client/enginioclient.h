@@ -109,7 +109,7 @@ public:
     Q_INVOKABLE EnginioReply *downloadFile(const QJsonObject &object);
 
 signals:
-    void sessionAuthenticated() const;
+    void sessionAuthenticated(EnginioReply *reply) const;
     void sessionAuthenticationError(EnginioReply *reply) const;
     void sessionTerminated() const;
     void backendIdChanged(const QByteArray &backendId);

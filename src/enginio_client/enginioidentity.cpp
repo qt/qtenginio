@@ -74,13 +74,12 @@ public:
         {}
         void operator ()()
         {
+            EnginioReply *ereply = new EnginioReply(_enginio, _reply);
             if (_reply->error() != QNetworkReply::NoError) {
-                EnginioReply *ereply = new EnginioReply(_enginio, _reply);
                 emit _enginio->q_ptr->sessionAuthenticationError(ereply);
                 // TODO does ereply leak? Yes potentially. We need to think about the ownership
             } else {
-                QByteArray data(_reply->readAll());
-                _enginio->setIdentityToken(data);
+                _enginio->setIdentityToken(ereply);
                 _reply->deleteLater();
             }
         }

@@ -67,7 +67,7 @@
 */
 
 /*!
-  \fn EnginioClient::sessionAuthenticated() const
+  \fn EnginioClient::sessionAuthenticated(EnginioReply *reply) const
   \brief Emitted when a user logs in.
 */
 
