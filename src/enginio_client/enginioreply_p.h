@@ -38,17 +38,22 @@
 #ifndef ENGINIOREPLY_P_H
 #define ENGINIOREPLY_P_H
 
+#include <QtCore/qhash.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qjsondocument.h>
 #include <QtNetwork/qnetworkreply.h>
 
+#include "enginioclient_p.h"
+
 class EnginioReplyPrivate {
 public:
+    EnginioClientPrivate *_client;
     QNetworkReply *_nreply;
     mutable QJsonObject _data;
-    EnginioReplyPrivate(QNetworkReply *reply)
-        : _nreply(reply)
+    EnginioReplyPrivate(EnginioClientPrivate *p, QNetworkReply *reply)
+        : _client(p)
+        , _nreply(reply)
     {
         Q_ASSERT(reply);
     }
@@ -68,6 +73,27 @@ public:
         if (_data.isEmpty())
             _data = QJsonDocument::fromJson(_nreply->readAll()).object();
         return _data;
+    }
+
+    void dumpDebugInfo() const
+    {
+        static QHash<QNetworkAccessManager::Operation, QByteArray> operationNames;
+        operationNames[QNetworkAccessManager::GetOperation] = "GET";
+        operationNames[QNetworkAccessManager::PutOperation] = "PUT";
+        operationNames[QNetworkAccessManager::PostOperation] = "POST";
+        operationNames[QNetworkAccessManager::DeleteOperation] = "DELETE";
+        operationNames[QNetworkAccessManager::CustomOperation] = "CUSTOM";
+
+        QNetworkRequest request = _nreply->request();
+        qDebug() << "Request URL:" << request.url().toString(/*FormattingOptions*/ QUrl::None);
+        qDebug() << "Operation:" << operationNames[_nreply->operation()];
+
+        QByteArray json = _client->_requestData.value(_nreply);
+        if (!json.isEmpty())
+            qDebug() << "Request Data:" << json;
+
+        if (!_data.isEmpty())
+            qDebug() << "Reply Data:" << _data;
     }
 };
 

@@ -8,15 +8,13 @@
 
 class EnginioQmlReplyPrivate : public EnginioReplyPrivate
 {
-    EnginioQmlClientPrivate *_client;
     EnginioQmlReply *q;
     QMetaObject::Connection _orphanConnection;
     mutable QJSValue _value;
 
 public:
     EnginioQmlReplyPrivate(EnginioQmlClientPrivate *client, QNetworkReply *reply, EnginioQmlReply *q_ptr)
-        : EnginioReplyPrivate(reply)
-        , _client(client)
+        : EnginioReplyPrivate(client, reply)
         , q(q_ptr)
     {
         Q_ASSERT(client);
@@ -52,7 +50,7 @@ public:
     QJSValue data() const
     {
         if (!_value.isObject())
-            _value = _client->fromJson(_nreply->readAll());
+            _value = static_cast<EnginioQmlClientPrivate*>(_client)->fromJson(_nreply->readAll());
         return _value;
     }
 };

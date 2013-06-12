@@ -62,7 +62,7 @@
 */
 EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
     : QObject(p->q_ptr)
-    , d(new EnginioReplyPrivate(reply))
+    , d(new EnginioReplyPrivate(p, reply))
 {
     p->registerReply(reply, this);
 }
@@ -118,13 +118,20 @@ void EnginioReply::emitFinished()
 
 void EnginioReply::setNetworkReply(QNetworkReply *reply)
 {
-    EnginioClient *client = qobject_cast<EnginioClient*>(parent());
-    Q_ASSERT(client);
-    client->d_ptr->_replyReplyMap.remove(d->_nreply);
+    d->_client->_replyReplyMap.remove(d->_nreply);
+
+    if (gEnableEnginioDebugInfo)
+        d->_client->_requestData.remove(d->_nreply);
+
     delete d->_nreply;
     d->_nreply = reply;
     d->_data = QJsonObject();
-    client->d_ptr->registerReply(reply, this);
+    d->_client->registerReply(reply, this);
+}
+
+void EnginioReply::dumpDebugInfo() const
+{
+    d->dumpDebugInfo();
 }
 
 #ifndef QT_NO_DEBUG_STREAM

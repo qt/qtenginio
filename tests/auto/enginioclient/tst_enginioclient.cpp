@@ -54,7 +54,10 @@ class tst_EnginioClient: public QObject
 
 public slots:
     void error(EnginioReply *reply) {
-        qDebug() << "\n###\n" << reply << "\n###\n";
+        qDebug() << "\n\n### ERROR";
+        qDebug() << reply->errorString();
+        reply->dumpDebugInfo();
+        qDebug() << "\n###\n";
     }
 
 private slots:

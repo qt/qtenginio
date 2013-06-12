@@ -61,11 +61,13 @@ class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
 
 public:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
-    ~EnginioReply();
+    virtual ~EnginioReply();
 
     QJsonObject data() const;
     QNetworkReply::NetworkError errorCode() const;
     QString errorString() const;
+
+    Q_SLOT void dumpDebugInfo() const;
 
 signals:
     void finished();

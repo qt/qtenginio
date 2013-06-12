@@ -239,6 +239,9 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
             ereply->dataChanged();
             ereply->emitFinished();
             q->finished(ereply);
+
+            if (gEnableEnginioDebugInfo)
+                d->_requestData.remove(nreply);
         }
     };
 
@@ -311,6 +314,7 @@ public:
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
     QMap<QNetworkReply*, QString> _downloads;
+    QMap<QNetworkReply*, QByteArray> _requestData;
 
     // device and last position
     QMap<QNetworkReply*, QPair<QIODevice*, qint64> > _chunkedUploads;
@@ -401,7 +405,12 @@ public:
         QNetworkRequest req(_request);
         req.setUrl(url);
         QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
-        return q_ptr->networkManager()->post(req, data);
+        QNetworkReply *reply = q_ptr->networkManager()->post(req, data);
+
+        if (gEnableEnginioDebugInfo)
+            _requestData.insert(reply, data);
+
+        return reply;
     }
 
     template<class T>
@@ -424,7 +433,13 @@ public:
         o.remove(EnginioString::objectType);
         o.remove(EnginioString::id);
         QByteArray data = o.toJson();
-        return q_ptr->networkManager()->put(req, data);
+
+        QNetworkReply *reply = q_ptr->networkManager()->put(req, data);
+
+        if (gEnableEnginioDebugInfo)
+            _requestData.insert(reply, data);
+
+        return reply;
     }
 
     template<class T>
@@ -454,12 +469,21 @@ public:
             buffer->open(QIODevice::ReadOnly);
             QNetworkReply *reply = q_ptr->networkManager()->sendCustomRequest(req, QByteArrayLiteral("DELETE"), buffer);
             buffer->setParent(reply);
+
+            if (gEnableEnginioDebugInfo)
+                _requestData.insert(reply, data);
+
             return reply;
         }
         return q_ptr->networkManager()->deleteResource(req);
 #else
         QByteArray data = o.toJson();
-        return q_ptr->networkManager()->deleteResource(req, data);
+        QNetworkReply *reply = q_ptr->networkManager()->deleteResource(req, data);
+
+        if (gEnableEnginioDebugInfo)
+            _requestData.insert(reply, data);
+
+        return reply;
 #endif
     }
 
@@ -473,7 +497,13 @@ public:
         req.setUrl(url);
 
         QByteArray data = object.toJson();
-        return q_ptr->networkManager()->post(req, data);
+
+        QNetworkReply *reply = q_ptr->networkManager()->post(req, data);
+
+        if (gEnableEnginioDebugInfo)
+            _requestData.insert(reply, data);
+
+        return reply;
     }
 
     template<class T>
@@ -566,10 +596,17 @@ public:
     template<class T>
     QNetworkReply *upload(const ObjectAdaptor<T> &object, const QString &fileName, QIODevice *device, const QString &mimeType)
     {
+        QByteArray data = object.toJson();
+        QNetworkReply *reply = 0;
         if (!device->isSequential() && device->size() < _uploadChunkSize)
-            return uploadAsHttpMultiPart(object.toJson(), fileName, device, mimeType);
+            reply = uploadAsHttpMultiPart(data, fileName, device, mimeType);
+        else
+            reply = uploadChunked(data, device);
 
-        return uploadChunked(object.toJson(), device);
+        if (gEnableEnginioDebugInfo)
+            _requestData.insert(reply, data);
+
+        return reply;
     }
 
     QNetworkAccessManager *networkManager()

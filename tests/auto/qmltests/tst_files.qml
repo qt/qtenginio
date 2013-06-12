@@ -50,7 +50,10 @@ Item {
         apiUrl: AppConfig.backendData.apiUrl
 
         onError: {
-            console.log("\n\n### ERROR: " + reply.errorString + " ###\n")
+            console.log("\n\n### ERROR")
+            console.log(reply.errorString)
+            reply.dumpDebugInfo()
+            console.log("\n###\n")
         }
     }
 
