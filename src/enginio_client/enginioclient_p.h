@@ -361,12 +361,6 @@ public:
         emit q_ptr->identityTokenChanged(_identityToken);
     }
 
-    QByteArray sessionToken() const
-    {
-        return _identityToken[EnginioString::sessionToken].toString().toLatin1();
-    }
-
-
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
     {
         _replyReplyMap[nreply] = ereply;
