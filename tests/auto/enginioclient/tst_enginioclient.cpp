@@ -58,12 +58,14 @@ public slots:
     }
 
 private slots:
+    void initTestCase();
     void init();
     void query_todos();
     void query_todos_filter();
     void query_todos_limit();
     void query_todos_count();
     void query_todos_sort();
+    void users_crud();
     void query_users();
     void query_users_filter();
     void query_users_sort();
@@ -75,7 +77,6 @@ private slots:
     void query_usersgroupmembers_sort();
     void search();
     void create_todos();
-    void user_crud();
     void update_todos();
     void update_invalidId();
     void remove_todos();
@@ -168,6 +169,59 @@ private:
         }
     }
 };
+
+void tst_EnginioClient::initTestCase()
+{
+    // Create some users to be used in later tests
+    EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+
+    QJsonObject obj;
+    int spyCount = spy.count();
+
+    for (int i = 0; i < 5; ++i) {
+        QJsonObject query;
+        query["username"] = QStringLiteral("logintest") + (i ? QString::number(i) : "");
+        obj["query"] = query;
+        client.query(obj, EnginioClient::UserOperation);
+        ++spyCount;
+    }
+
+    QTRY_COMPARE(spy.count(), spyCount);
+    QCOMPARE(spyError.count(), 0);
+
+    for (int i = 0; i < 5; ++i) {
+        EnginioReply *reply = spy[i][0].value<EnginioReply*>();
+        QVERIFY(reply);
+        QVERIFY(!reply->data().isEmpty());
+        QVERIFY(!reply->data()["query"].isUndefined());
+        obj = reply->data()["query"].toObject();
+        QVERIFY(!obj.isEmpty());
+        obj = obj["query"].toObject();
+        QVERIFY(!obj.isEmpty());
+        QString identity = obj["username"].toString();
+        QVERIFY(!identity.isEmpty());
+        QVERIFY(!reply->data()["results"].isUndefined());
+        QJsonArray data = reply->data()["results"].toArray();
+        if (!data.count()) {
+            QJsonObject query;
+            query["username"] = identity;
+            query["password"] = identity;
+            client.create(query, EnginioClient::UserOperation);
+            ++spyCount;
+            qDebug() << "Creating " << query;
+        }
+    }
+
+    QTRY_COMPARE(spy.count(), spyCount);
+    QCOMPARE(spyError.count(), 0);
+}
 
 void tst_EnginioClient::init()
 {
@@ -713,9 +767,10 @@ void tst_EnginioClient::create_todos()
     QCOMPARE(data["objectType"], obj["objectType"]);
 }
 
-void tst_EnginioClient::user_crud()
+void tst_EnginioClient::users_crud()
 {
     EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
     client.setApiUrl(EnginioTests::TESTAPP_URL);
