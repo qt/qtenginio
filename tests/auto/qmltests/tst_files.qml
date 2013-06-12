@@ -83,7 +83,6 @@ Item {
         }
 
         function test_upload() {
-            verify(enginio.initialized)
             var finished = 0
 
             //! [upload-create-object]

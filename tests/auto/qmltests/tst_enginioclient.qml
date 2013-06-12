@@ -134,7 +134,6 @@ Item {
         }
 
         function test_CRUD() {
-            verify(enginio.initialized)
             var finished = 0;
             var reply = enginio.create({ "objectType": "objects." + __testObjectName,
                                          "testCase" : "EnginioClient_ObjectOperation",
@@ -214,7 +213,6 @@ Item {
         }
 
         function test_query() {
-            verify(enginio.initialized)
             var iterations = 50
             var reply
 

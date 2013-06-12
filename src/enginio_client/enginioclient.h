@@ -76,7 +76,6 @@ public:
     Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
     Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged FINAL)
     Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged FINAL)
-    Q_PROPERTY(bool initialized READ isInitialized NOTIFY clientInitialized FINAL)
     Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
     Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged FINAL)
 
@@ -92,8 +91,6 @@ public:
     void setApiUrl(const QUrl &apiUrl);
     QNetworkAccessManager *networkManager();
 
-    bool isInitialized() const;
-
     Q_INVOKABLE EnginioReply *search(const QJsonObject &query);
     Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Operation operation = ObjectOperation);
@@ -107,7 +104,6 @@ signals:
     void sessionAuthenticated() const;
     void sessionAuthenticationError(EnginioReply *reply) const;
     void sessionTerminated() const;
-    void clientInitialized() const;
     void backendIdChanged(const QString &backendId);
     void backendSecretChanged(const QString &backendSecret);
     void apiUrlChanged(const QUrl& url);

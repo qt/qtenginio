@@ -1013,7 +1013,7 @@ void tst_EnginioClient::identity()
 
         client.setBackendId(QString());
         client.setBackendId(EnginioTests::TESTAPP_ID);
-        QTRY_COMPARE(spy.count(), 2); // we got another EnginioClient::clientInitialized signal TODO is it ok?
+        QTRY_COMPARE(spy.count(), 2);
         QCOMPARE(spyError.count(), 0);
         QCOMPARE(spyAuthError.count(), 0);
         QVERIFY(!client.identityToken().isEmpty());
@@ -1025,7 +1025,6 @@ void tst_EnginioClient::identity()
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
         QSignalSpy spy(&client, SIGNAL(identityTokenChanged(const QJsonObject &)));
-        QSignalSpy spyInit(&client, SIGNAL(clientInitialized()));
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
@@ -1050,14 +1049,12 @@ void tst_EnginioClient::identity()
             client.setIdentity(&identity3);
         }
 
-        QCOMPARE(spyInit.count(), 0);
         QCOMPARE(spy.count(), 0);
         QCOMPARE(spyError.count(), 0);
         QVERIFY(client.identityToken().isEmpty());
 
-        client.setBackendId(EnginioTests::TESTAPP_ID); // trigger clientInitialized signal
+        client.setBackendId(EnginioTests::TESTAPP_ID); // trigger authentication process
 
-        QTRY_COMPARE(spyInit.count(), 1);
         QTRY_COMPARE(spy.count(), 1);
 
         for (uint i = 0; spy.count() == 1 && i < 5; ++i)

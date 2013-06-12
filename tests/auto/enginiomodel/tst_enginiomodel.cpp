@@ -88,16 +88,13 @@ void tst_EnginioModel::ctor()
         model.setQuery(query);
 
         EnginioClient client;
-        QSignalSpy spyInitilized(&client, SIGNAL(clientInitialized()));
         client.setBackendId(EnginioTests::TESTAPP_ID);
         client.setApiUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
         model.setEnginio(&client);
-        QTRY_COMPARE(spyInitilized.count(), 1);
     }
     {   // check if destructor of a fully initilized EnginioClient detach fully initilized model
         EnginioClient client;
-        QSignalSpy spyInitilized(&client, SIGNAL(clientInitialized()));
         EnginioModel model;
         model.setOperation(EnginioClient::ObjectOperation);
         model.setQuery(query);
@@ -105,7 +102,6 @@ void tst_EnginioModel::ctor()
         client.setApiUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
         model.setEnginio(&client);
-        QTRY_COMPARE(spyInitilized.count(), 1);
     }
 }
 

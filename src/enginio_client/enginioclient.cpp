@@ -194,8 +194,6 @@ void EnginioClient::setBackendId(const QString &backendId)
         d->m_backendId = backendId;
         d->_request.setRawHeader("Enginio-Backend-Id", d->m_backendId.toLatin1());
         emit backendIdChanged(backendId);
-        if (isInitialized())
-            emit clientInitialized();
     }
 }
 
@@ -217,8 +215,6 @@ void EnginioClient::setBackendSecret(const QString &backendSecret)
         d->m_backendSecret = backendSecret;
         d->_request.setRawHeader("Enginio-Backend-Secret", d->m_backendSecret.toLatin1());
         emit backendSecretChanged(backendSecret);
-        if (isInitialized())
-            emit clientInitialized();
     }
 }
 
@@ -254,20 +250,6 @@ QNetworkAccessManager * EnginioClient::networkManager()
 {
     Q_D(EnginioClient);
     return d->networkManager();
-}
-
-/*!
- * \property EnginioClient::initialized
- * \brief The initialisation state of the session.
- *
- * This property is true when the session is established.
- * That means \l backendId and \l backendSecret have been set.
- */
-
-bool EnginioClient::isInitialized() const
-{
-    Q_D(const EnginioClient);
-    return d->isInitialized();
 }
 
 void EnginioClient::ignoreSslErrors(QNetworkReply* reply,
