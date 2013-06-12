@@ -1011,7 +1011,7 @@ void tst_EnginioClient::identity()
         QCOMPARE(spyError.count(), 0);
         QVERIFY(!client.identityToken().isEmpty());
 
-        client.setBackendId(QString());
+        client.setBackendId(QByteArray());
         client.setBackendId(EnginioTests::TESTAPP_ID);
         QTRY_COMPARE(spy.count(), 2);
         QCOMPARE(spyError.count(), 0);

@@ -73,16 +73,16 @@ public:
     explicit EnginioClient(QObject *parent = 0);
     ~EnginioClient();
 
-    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
-    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged FINAL)
+    Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
+    Q_PROPERTY(QByteArray backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged FINAL)
     Q_PROPERTY(QUrl apiUrl READ apiUrl WRITE setApiUrl NOTIFY apiUrlChanged FINAL)
     Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
     Q_PROPERTY(QJsonObject identityToken READ identityToken NOTIFY identityTokenChanged FINAL)
 
-    QString backendId() const;
-    void setBackendId(const QString &backendId);
-    QString backendSecret() const;
-    void setBackendSecret(const QString &backendSecret);
+    QByteArray backendId() const;
+    void setBackendId(const QByteArray &backendId);
+    QByteArray backendSecret() const;
+    void setBackendSecret(const QByteArray &backendSecret);
     EnginioIdentity *identity() const;
     void setIdentity(EnginioIdentity *identity);
     QJsonObject identityToken() const;
@@ -104,8 +104,8 @@ signals:
     void sessionAuthenticated() const;
     void sessionAuthenticationError(EnginioReply *reply) const;
     void sessionTerminated() const;
-    void backendIdChanged(const QString &backendId);
-    void backendSecretChanged(const QString &backendSecret);
+    void backendIdChanged(const QByteArray &backendId);
+    void backendSecretChanged(const QByteArray &backendSecret);
     void apiUrlChanged(const QUrl& url);
     void identityTokenChanged(const QJsonObject &token);
     void identityChanged(const EnginioIdentity *identity);

@@ -273,8 +273,8 @@ public:
     virtual ~EnginioClientPrivate();
 
     EnginioClient *q_ptr;
-    QString m_backendId;
-    QString m_backendSecret;
+    QByteArray m_backendId;
+    QByteArray m_backendSecret;
     EnginioIdentity *_identity;
     QVarLengthArray<QMetaObject::Connection, 4> _identityConnections;
     QUrl m_apiUrl;

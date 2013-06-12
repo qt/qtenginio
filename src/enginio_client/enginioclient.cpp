@@ -181,18 +181,18 @@ EnginioClient::~EnginioClient()
  * by having several instances of EnginioClient.
  * \sa backendSecret
  */
-QString EnginioClient::backendId() const
+QByteArray EnginioClient::backendId() const
 {
     Q_D(const EnginioClient);
     return d->m_backendId;
 }
 
-void EnginioClient::setBackendId(const QString &backendId)
+void EnginioClient::setBackendId(const QByteArray &backendId)
 {
     Q_D(EnginioClient);
     if (d->m_backendId != backendId) {
         d->m_backendId = backendId;
-        d->_request.setRawHeader("Enginio-Backend-Id", d->m_backendId.toLatin1());
+        d->_request.setRawHeader("Enginio-Backend-Id", d->m_backendId);
         emit backendIdChanged(backendId);
     }
 }
@@ -202,18 +202,18 @@ void EnginioClient::setBackendId(const QString &backendId)
  * \brief The backend secret that corresponds to the \l backendId.
  * The secret is used to authenticate the Enginio connection.
  */
-QString EnginioClient::backendSecret() const
+QByteArray EnginioClient::backendSecret() const
 {
     Q_D(const EnginioClient);
     return d->m_backendSecret;
 }
 
-void EnginioClient::setBackendSecret(const QString &backendSecret)
+void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
 {
     Q_D(EnginioClient);
     if (d->m_backendSecret != backendSecret) {
         d->m_backendSecret = backendSecret;
-        d->_request.setRawHeader("Enginio-Backend-Secret", d->m_backendSecret.toLatin1());
+        d->_request.setRawHeader("Enginio-Backend-Secret", d->m_backendSecret);
         emit backendSecretChanged(backendSecret);
     }
 }
