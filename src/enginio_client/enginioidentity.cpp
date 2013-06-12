@@ -131,6 +131,20 @@ void EnginioAuthentication::setPassword(const QString &password)
     emit userChanged(password);
 }
 
+struct DisconnectConnection
+{
+    QMetaObject::Connection _connection;
+
+    DisconnectConnection(const QMetaObject::Connection& connection)
+        : _connection(connection)
+    {}
+
+    void operator ()() const
+    {
+        QObject::disconnect(_connection);
+    }
+};
+
 void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
 {
     Q_ASSERT(enginio);
@@ -140,6 +154,7 @@ void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
     data[EnginioString::username] = d_ptr->_user;
     data[EnginioString::password] = d_ptr->_pass;
     QNetworkReply *reply = enginio->identify(data);
-    QObject::connect(reply, &QNetworkReply::finished, EnginioAuthenticationPrivate::SessionSetterFunctor(enginio, reply));
+    QMetaObject::Connection requestFinished = QObject::connect(reply, &QNetworkReply::finished, EnginioAuthenticationPrivate::SessionSetterFunctor(enginio, reply));
+    QObject::connect(enginio->q_ptr, &EnginioClient::destroyed, DisconnectConnection(requestFinished));
 }
 
