@@ -115,7 +115,7 @@ Q_SIGNALS:
     void backendIdChanged(const QByteArray &backendId);
     void backendSecretChanged(const QByteArray &backendSecret);
     void apiUrlChanged(const QUrl& url);
-    void authenticationStateChanged(const AuthenticationState &state);
+    void authenticationStateChanged(const AuthenticationState state);
     void identityChanged(const EnginioIdentity *identity);
     void finished(EnginioReply *reply);
     void error(EnginioReply *reply);
