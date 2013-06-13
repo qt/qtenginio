@@ -9,11 +9,14 @@ Item {
 
     function cleanupDatabase() {
         finishedSpy.clear()
+        errorSpy.clear()
 
         var reply = enginio.query({ "objectType": "objects." + __testObjectName
                               }, Enginio.ObjectOperation);
 
-        finishedSpy.wait()
+        cleanupTest.tryCompare(finishedSpy, "count", 1)
+        cleanupTest.verify(!errorSpy.count)
+        finishedSpy.clear()
 
         var results = reply.data.results
 
@@ -29,10 +32,8 @@ Item {
                            }, Enginio.ObjectOperation);
         }
 
-        while (finishedSpy.count < results.length)
-        {
-            finishedSpy.wait() // Throws an exception if it times out
-        }
+        cleanupTest.tryCompare(finishedSpy, "count", results.length)
+        cleanupTest.verify(!errorSpy.count)
 
         finishedSpy.clear()
         errorSpy.clear()
@@ -89,6 +90,11 @@ Item {
     }
 
     TestCase {
+        id: cleanupTest
+        name: "Database clean-up Dummy Test"
+    }
+
+    TestCase {
         name: "EnginioClient: Assign an identity"
 
         function init() {
@@ -123,17 +129,8 @@ Item {
         }
     }
 
-
     TestCase {
         name: "EnginioClient: ObjectOperation CRUD"
-
-        function initTestCase() {
-            cleanupDatabase()
-        }
-
-        function cleanupTestCase() {
-            cleanupDatabase()
-        }
 
         function init() {
             finishedSpy.clear()
@@ -158,7 +155,7 @@ Item {
             compare(reply.data.count, 1337)
 
             reply = enginio.query({ "objectType": "objects." + __testObjectName,
-                                    "id" : objectId
+                                    "query" : { "id" : objectId }
                                   }, Enginio.ObjectOperation);
 
             finishedSpy.wait()
