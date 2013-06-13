@@ -128,8 +128,8 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     _identity(),
     m_apiUrl(EnginioString::apiEnginIo),
     m_networkManager(),
-    _authenticationState(EnginioClient::NotAuthenticated),
-    _uploadChunkSize(512 * 1024)
+    _uploadChunkSize(512 * 1024),
+    _authenticationState(EnginioClient::NotAuthenticated)
 {
     assignNetworkManager();
 
