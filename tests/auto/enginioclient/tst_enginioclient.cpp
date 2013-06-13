@@ -72,6 +72,7 @@ private slots:
     void query_users();
     void query_users_filter();
     void query_users_sort();
+    void query_usersgroup_crud();
     void query_usersgroup_limit();
     void query_usersgroup_count();
     void query_usersgroup_sort();
@@ -217,6 +218,47 @@ void tst_EnginioClient::initTestCase()
             query["username"] = identity;
             query["password"] = identity;
             client.create(query, EnginioClient::UserOperation);
+            ++spyCount;
+            qDebug() << "Creating " << query;
+        }
+    }
+
+    QTRY_COMPARE(spy.count(), spyCount);
+    QCOMPARE(spyError.count(), 0);
+
+
+    // Create user groups for later tests if the backend does not have them yet.
+    spy.clear();
+    spyCount = 0;
+
+    for (int i = 0; i < 5; ++i) {
+        QJsonObject query;
+        query["name"] = "usergroup" + (i ? QString::number(i) : "");
+        obj["query"] = query;
+        client.query(obj, EnginioClient::UsergroupOperation);
+        ++spyCount;
+    }
+
+    QTRY_COMPARE(spy.count(), spyCount);
+    QCOMPARE(spyError.count(), 0);
+
+    for (int i = 0; i < 5; ++i) {
+        EnginioReply *reply = spy[i][0].value<EnginioReply*>();
+        QVERIFY(reply);
+        QVERIFY(!reply->data().isEmpty());
+        QVERIFY(!reply->data()["query"].isUndefined());
+        obj = reply->data()["query"].toObject();
+        QVERIFY(!obj.isEmpty());
+        obj = obj["query"].toObject();
+        QVERIFY(!obj.isEmpty());
+        QString groupName = obj["name"].toString();
+        QVERIFY(!groupName.isEmpty());
+        QVERIFY(!reply->data()["results"].isUndefined());
+        QJsonArray data = reply->data()["results"].toArray();
+        if (!data.count()) {
+            QJsonObject query;
+            query["name"] = groupName;
+            client.create(query, EnginioClient::UsergroupOperation);
             ++spyCount;
             qDebug() << "Creating " << query;
         }
@@ -478,6 +520,71 @@ void tst_EnginioClient::query_users_sort()
             previous = current;
         }
     }
+}
+
+void tst_EnginioClient::query_usersgroup_crud()
+{
+    EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setApiUrl(EnginioTests::TESTAPP_URL);
+
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+
+    QString groupName = QStringLiteral("users");
+    QString tmpGroupName = QString::number(QDateTime::currentMSecsSinceEpoch());
+    QString description = QStringLiteral("Temporary Usergroup");
+    QJsonObject data;
+    data["name"] = tmpGroupName;
+
+    qDebug() << data;
+
+    EnginioReply *reply = client.create(data, EnginioClient::UsergroupOperation);
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
+    QVERIFY(reply);
+    QVERIFY(!reply->data().isEmpty());
+    QCOMPARE(reply->data()["name"].toString(), tmpGroupName);
+
+    QVERIFY(!reply->data()["id"].isUndefined());
+    spy.clear();
+
+    QString id = reply->data()["id"].toString();
+    QJsonObject query;
+    query["query"] = data;
+
+    reply = client.query(query, EnginioClient::UsergroupOperation);
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
+    QVERIFY(reply);
+    QVERIFY(!reply->data().isEmpty());
+    QVERIFY(!reply->data()["results"].isUndefined());
+    QJsonArray results = reply->data()["results"].toArray();
+    QCOMPARE(results.count(), 1);
+    QCOMPARE(results[0].toObject()["id"].toString(), id);
+    spy.clear();
+
+
+    data["id"] = id;
+    data["description"] = description;
+    reply = client.update(data, EnginioClient::UsergroupOperation);
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
+    QVERIFY(reply);
+    QVERIFY(!reply->data().isEmpty());
+    QVERIFY(!reply->data()["name"].isUndefined());
+    QCOMPARE(reply->data()["name"].toString(), tmpGroupName);
+    QCOMPARE(reply->data()["description"].toString(), description);
+    spy.clear();
+
+    data = QJsonObject();
+    data["id"] = id;
+    reply = client.remove(data, EnginioClient::UsergroupOperation);
+    QTRY_COMPARE(spy.count(), 1);
+    QCOMPARE(spyError.count(), 0);
+    QVERIFY(reply);
 }
 
 void tst_EnginioClient::query_usersgroup_limit()
