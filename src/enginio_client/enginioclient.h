@@ -74,7 +74,8 @@ public:
         ObjectAclOperation,
         UserOperation,
         UsergroupOperation,
-        UsergroupMembersOperation
+        UsergroupMembersOperation,
+        FileOperation
     };
     Q_ENUMS(Operation)
 

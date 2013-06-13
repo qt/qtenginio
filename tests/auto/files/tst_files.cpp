@@ -88,6 +88,9 @@ void tst_Files::fileUploadDownload_data()
 void tst_Files::fileUploadDownload()
 {
     QFETCH(int, chunkSize);
+    qDebug() << chunkSize;
+
+    int replyCount = 0;
 
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
@@ -110,8 +113,8 @@ void tst_Files::fileUploadDownload()
     const EnginioReply* createReply = client.create(obj);
     //![upload-create-object]
     QVERIFY(createReply);
-
-    QTRY_COMPARE(spy.count(), 1);
+    ++replyCount;
+    QTRY_COMPARE(spy.count(), replyCount);
     QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *responseObjectCreation = spy[0][0].value<EnginioReply*>();
@@ -124,17 +127,13 @@ void tst_Files::fileUploadDownload()
     QString id = data["id"].toString();
     QVERIFY(!id.isEmpty());
 
-
-
     QString fileName = QStringLiteral("test.png");
-    QString path = QStringLiteral(TEST_FILE_PATH);
-    QVERIFY(QFile::exists(path));
+    QString filePath = QStringLiteral(TEST_FILE_PATH);
+    QVERIFY(QFile::exists(filePath));
+    QString fileId;
 
     // Attach file to the object
     {
-    // FIXME: make this work for out of source builds
-    // FIXME: consider this url mess
-
     //![upload]
     QJsonObject object;
     object["id"] = id;
@@ -147,12 +146,14 @@ void tst_Files::fileUploadDownload()
     QJsonObject uploadJson;
     uploadJson[QStringLiteral("targetFileProperty")] = object;
     uploadJson[QStringLiteral("file")] = fileObject;
-    const EnginioReply* responseUpload = client.uploadFile(uploadJson, QUrl(path));
+    const EnginioReply* responseUpload = client.uploadFile(uploadJson, QUrl(filePath));
     //![upload]
 
     QVERIFY(responseUpload);
-    QTRY_COMPARE(spy.count(), 2);
+    ++replyCount;
+    QTRY_COMPARE(spy.count(), replyCount);
     QCOMPARE(spyError.count(), 0);
+    fileId = responseUpload->data().value(QStringLiteral("id")).toString();
     }
 
     // Query including files
@@ -166,7 +167,8 @@ void tst_Files::fileUploadDownload()
     const EnginioReply *reply = client.query(obj2);
     QVERIFY(reply);
 
-    QTRY_COMPARE(spy.count(), 3);
+    ++replyCount;
+    QTRY_COMPARE(spy.count(), replyCount);
     QCOMPARE(spyError.count(), 0);
     const EnginioReply *responseQuery = spy[2][0].value<EnginioReply*>();
     data = responseQuery->data();
@@ -175,9 +177,10 @@ void tst_Files::fileUploadDownload()
     QVERIFY(!data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString().isEmpty());
     QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileName"].toString(), fileName);
 
-    QFile file(path);
+    QFile file(filePath);
     double fileSize = (double) file.size();
     QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileSize"].toDouble(), fileSize);
+    QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["id"].toString(), fileId);
     }
 
     // Download
@@ -186,18 +189,33 @@ void tst_Files::fileUploadDownload()
     QJsonObject object;
     object["id"] = id; // ID of an existing object with attached file
     object["objectType"] = QStringLiteral("objects.files");
-    object["propertyName"] = QStringLiteral("fileAttachment");;
+    object["propertyName"] = QStringLiteral("fileAttachment");
+
     const EnginioReply* replyDownload = client.downloadFile(object);
     //![download]
 
     QVERIFY(replyDownload);
-    QTRY_COMPARE(spy.count(), 4);
+    ++replyCount;
+    QTRY_COMPARE(spy.count(), replyCount);
     QCOMPARE(spyError.count(), 0);
     const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
-    QCOMPARE(spy.count(), 4);
     QJsonObject downloadData = responseDownload->data();
     QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
     QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
+    }
+
+    // View/Query the file details
+    {
+    QJsonObject fileObject;
+    fileObject.insert("id", fileId);
+    EnginioReply *fileInfo = client.query(fileObject, EnginioClient::FileOperation);
+    QVERIFY(fileInfo);
+    ++replyCount;
+    QTRY_COMPARE(spy.count(), replyCount);
+    QCOMPARE(spyError.count(), 0);
+    QCOMPARE(fileInfo->data()["fileName"].toString(), fileName);
+    QFile file(filePath);
+    QCOMPARE(fileInfo->data()["fileSize"].toDouble(), (double)file.size());
     }
 }
 

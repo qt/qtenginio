@@ -137,9 +137,20 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         case AuthenticationOperation:
             result.append(EnginioString::authIdentity);
             break;
-        case FileOperation:
+        case FileOperation: {
             result.append(EnginioString::files);
+            // if we have a fileID, it becomes "view", otherwise it is up/download
+            QString fileId = object[EnginioString::id].toString();
+            if (!fileId.isEmpty())
+                result.append(QLatin1Char('/') + fileId);
             break;
+        }
+        case FileGetDownloadUrlOperation: {
+            result.append(EnginioString::files);
+            QString fileId = object[EnginioString::id].toString();
+            result.append(QLatin1Char('/') + fileId + QStringLiteral("/download_url"));
+            break;
+        }
         case FileChunkUploadOperation: {
             const QString fileId = object[EnginioString::id].toString();
             Q_ASSERT(!fileId.isEmpty());
@@ -217,7 +228,9 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
                 QString propertyName = d->_downloads.take(nreply);
                 QString id = ereply->data()[EnginioString::results].toArray().first().toObject()[propertyName].toObject()[EnginioString::id].toString();
                 QUrl url(d->m_serviceUrl);
-                url.setPath(getPath(QJsonObject(), FileOperation) + QLatin1Char('/') + id + QStringLiteral("/download_url"));
+                QJsonObject object;
+                object.insert(EnginioString::id, id);
+                url.setPath(getPath(object, FileGetDownloadUrlOperation));
                 //url.setQuery("variant=original");
                 QNetworkRequest req(d->_request);
                 req.setUrl(url);
@@ -313,14 +326,15 @@ public:
         ObjectAclOperation = EnginioClient::ObjectAclOperation,
         UserOperation = EnginioClient::UserOperation,
         UsergroupOperation = EnginioClient::UsergroupOperation,
+        FileOperation = EnginioClient::FileOperation,
 
         // private
         UsergroupMemberOperation,
         AuthenticationOperation,
         SessionOperation,
         SearchOperation,
-        FileOperation,
-        FileChunkUploadOperation
+        FileChunkUploadOperation,
+        FileGetDownloadUrlOperation
     };
 
     Q_ENUMS(Operation)
