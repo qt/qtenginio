@@ -113,7 +113,7 @@ QJsonObject EnginioReply::data() const
 
 void EnginioReply::emitFinished()
 {
-    emit finished();
+    emit finished(this);
 }
 
 void EnginioReply::setNetworkReply(QNetworkReply *reply)

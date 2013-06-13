@@ -70,7 +70,7 @@ public:
     Q_SLOT void dumpDebugInfo() const;
 
 Q_SIGNALS:
-    void finished();
+    void finished(EnginioReply *reply);
     void dataChanged();
     void errorCodeChanged();
     void errorStringChanged();
