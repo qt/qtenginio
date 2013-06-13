@@ -75,6 +75,8 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString sessionToken;
     static const QString authIdentity;
     static const QString files;
+    static const QString file;
+    static const QString fileName;
     static const QString search;
     static const QString session;
     static const QString users;
@@ -203,6 +205,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
             if (nreply->error() != QNetworkReply::NoError) {
                 d->_downloads.remove(nreply);
+                QPair<QIODevice *, qint64> deviceState = d->_chunkedUploads.take(nreply);
+                delete deviceState.first;
                 emit q->error(ereply);
                 emit ereply->errorCodeChanged();
                 emit ereply->errorStringChanged();
@@ -231,8 +235,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
                     d->uploadChunk(ereply, deviceState.first, deviceState.second);
                     return;
                 }
-                if (status != EnginioString::complete)
-                    qWarning() << "Upload failed: " << ereply;
+                // should never get here unless upload was successful
+                Q_ASSERT(status == EnginioString::complete);
                 delete deviceState.first;
             }
 
@@ -585,26 +589,24 @@ public:
         Q_ASSERT(file->exists());
         file->open(QFile::ReadOnly);
         Q_ASSERT(file->isOpen());
-
-        QString fileName = file->fileName();
-        Q_ASSERT(!fileName.isEmpty());
         QMimeDatabase mimeDb;
         QString mimeType = mimeDb.mimeTypeForFile(path).name();
-        return upload(object, fileName, file, mimeType);
+        return upload(object, file, mimeType);
     }
 
     template<class T>
-    QNetworkReply *upload(const ObjectAdaptor<T> &object, const QString &fileName, QIODevice *device, const QString &mimeType)
+    QNetworkReply *upload(const ObjectAdaptor<T> &object, QIODevice *device, const QString &mimeType)
     {
-        QByteArray data = object.toJson();
         QNetworkReply *reply = 0;
         if (!device->isSequential() && device->size() < _uploadChunkSize)
-            reply = uploadAsHttpMultiPart(data, fileName, device, mimeType);
+            reply = uploadAsHttpMultiPart(object, device, mimeType);
         else
-            reply = uploadChunked(data, device);
+            reply = uploadChunked(object, device);
 
-        if (gEnableEnginioDebugInfo)
+        if (gEnableEnginioDebugInfo) {
+            QByteArray data = object.toJson();
             _requestData.insert(reply, data);
+        }
 
         return reply;
     }
@@ -624,7 +626,8 @@ public:
 
 private:
 
-    QNetworkReply *uploadAsHttpMultiPart(const QByteArray &object, const QString &fileName, QIODevice *device, const QString &mimeType)
+    template<class T>
+    QNetworkReply *uploadAsHttpMultiPart(const ObjectAdaptor<T> &object, QIODevice *device, const QString &mimeType)
     {
         QUrl apiUrl = m_apiUrl;
         apiUrl.setPath(getPath(QJsonObject(), FileOperation));
@@ -633,7 +636,7 @@ private:
         req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray());
         req.setUrl(apiUrl);
 
-        QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object);
+        QHttpMultiPart *multiPart = createHttpMultiPart(object, device, mimeType);
         QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
         multiPart->setParent(reply);
         device->setParent(multiPart);
@@ -646,10 +649,9 @@ private:
      * The associatedObject has to be a valid object type on the server.
      * If it does not contain an id, it needs to be manually associated later or will get garbage collected eventually.
      */
-    QHttpMultiPart *createHttpMultiPart(const QString &fileName, QIODevice *data, const QString &mimeType, const QByteArray &associatedObject)
+    template<class T>
+    QHttpMultiPart *createHttpMultiPart(const ObjectAdaptor<T> &object, QIODevice *data, const QString &mimeType)
     {
-        Q_ASSERT(!fileName.isEmpty());
-
         // check file/chunk size
         QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
         data->setParent(multiPart);
@@ -658,19 +660,20 @@ private:
         objectPart.setHeader(QNetworkRequest::ContentDispositionHeader,
                              QStringLiteral("form-data; name=\"object\""));
 
-        objectPart.setBody(associatedObject);
+        objectPart.setBody(object.toJson());
         multiPart->append(objectPart);
 
         QHttpPart filePart;
         filePart.setHeader(QNetworkRequest::ContentTypeHeader, mimeType);
         filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                           QStringLiteral("form-data; name=\"file\"; filename=\"%1\"").arg(fileName));
+                           QStringLiteral("form-data; name=\"file\"; filename=\"%1\"").arg(object[EnginioString::file].toObject()[EnginioString::fileName].toString()));
         filePart.setBodyDevice(data);
         multiPart->append(filePart);
         return multiPart;
     }
 
-    QNetworkReply *uploadChunked(const QByteArray &object, QIODevice *device)
+    template<class T>
+    QNetworkReply *uploadChunked(const ObjectAdaptor<T> &object, QIODevice *device)
     {
         QUrl apiUrl = m_apiUrl;
         apiUrl.setPath(getPath(QJsonObject(), FileOperation));
@@ -678,7 +681,7 @@ private:
         QNetworkRequest req(_request);
         req.setUrl(apiUrl);
 
-        QNetworkReply *reply = q_ptr->networkManager()->post(req, object);
+        QNetworkReply *reply = q_ptr->networkManager()->post(req, object.toJson());
         _chunkedUploads.insert(reply, qMakePair(device, static_cast<qint64>(0)));
         return reply;
     }
