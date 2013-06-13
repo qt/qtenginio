@@ -187,9 +187,7 @@ void tst_Files::fileUploadDownload()
     {
     //![download]
     QJsonObject object;
-    object["id"] = id; // ID of an existing object with attached file
-    object["objectType"] = QStringLiteral("objects.files");
-    object["propertyName"] = QStringLiteral("fileAttachment");
+    object["id"] = fileId; // ID of an existing object with attached file
 
     const EnginioReply* replyDownload = client.downloadFile(object);
     //![download]
@@ -200,6 +198,7 @@ void tst_Files::fileUploadDownload()
     QCOMPARE(spyError.count(), 0);
     const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
     QJsonObject downloadData = responseDownload->data();
+
     QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
     QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
     }
