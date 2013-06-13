@@ -120,9 +120,6 @@ Q_SIGNALS:
     void finished(EnginioReply *reply);
     void error(EnginioReply *reply);
 
-private slots:
-    void ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
-
 protected:
     QScopedPointer<EnginioClientPrivate> d_ptr;
 

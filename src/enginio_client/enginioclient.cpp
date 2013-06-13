@@ -255,7 +255,6 @@ void EnginioClient::setApiUrl(const QUrl &apiUrl)
     Q_D(EnginioClient);
     if (d->m_apiUrl != apiUrl) {
         d->m_apiUrl = apiUrl;
-        d->ignoreSslErrorsIfNeeded();
         emit apiUrlChanged(apiUrl);
     }
 }
@@ -269,17 +268,6 @@ QNetworkAccessManager * EnginioClient::networkManager() const
 {
     Q_D(const EnginioClient);
     return d->networkManager();
-}
-
-void EnginioClient::ignoreSslErrors(QNetworkReply* reply,
-                                    const QList<QSslError> &errors)
-{
-    QList<QSslError>::ConstIterator i = errors.constBegin();
-    while (i != errors.constEnd()) {
-        qWarning() << "Ignoring SSL error:" << i->errorString();
-        i++;
-    }
-    reply->ignoreSslErrors(errors);
 }
 
 /*!

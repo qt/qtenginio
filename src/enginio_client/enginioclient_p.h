@@ -365,20 +365,6 @@ public:
         return _authenticationState;
     }
 
-    void ignoreSslErrorsIfNeeded() {
-        // Ignore SSL errors when staging backend is used.
-        // FIXME: Remove this as soon as the certificates are fixed.
-        if (m_apiUrl == QStringLiteral("https://api.staging.engin.io")) {
-            qWarning() << "SSL errors will be ignored";
-            QObject::connect(m_networkManager,
-                    SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)),
-                    q_ptr,
-                    SLOT(ignoreSslErrors(QNetworkReply*, const QList<QSslError> &)));
-        } else {
-            m_networkManager->disconnect(SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)));
-        }
-    }
-
     QJsonObject identityToken() const
     {
         return _identityToken;
