@@ -124,13 +124,16 @@ void tst_Files::fileUploadDownload()
     QString id = data["id"].toString();
     QVERIFY(!id.isEmpty());
 
-    // Attach file to the object
 
+
+    QString fileName = QStringLiteral("test.png");
+    QString path = QStringLiteral(TEST_FILE_PATH);
+    QVERIFY(QFile::exists(path));
+
+    // Attach file to the object
     {
     // FIXME: make this work for out of source builds
     // FIXME: consider this url mess
-    QString path = QStringLiteral(TEST_FILE_PATH);
-    QVERIFY(QFile::exists(QStringLiteral(TEST_FILE_PATH)));
 
     //![upload]
     QJsonObject object;
@@ -139,7 +142,7 @@ void tst_Files::fileUploadDownload()
     object["propertyName"] = QStringLiteral("fileAttachment");;
 
     QJsonObject fileObject;
-    fileObject[QStringLiteral("fileName")] = QStringLiteral("test.png");
+    fileObject[QStringLiteral("fileName")] = fileName;
 
     QJsonObject uploadJson;
     uploadJson[QStringLiteral("targetFileProperty")] = object;
@@ -170,6 +173,11 @@ void tst_Files::fileUploadDownload()
     QVERIFY(data["results"].isArray());
     QVERIFY(data["results"].toArray().first().toObject()["fileAttachment"].isObject());
     QVERIFY(!data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString().isEmpty());
+    QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileName"].toString(), fileName);
+
+    QFile file(path);
+    double fileSize = (double) file.size();
+    QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileSize"].toDouble(), fileSize);
     }
 
     // Download
