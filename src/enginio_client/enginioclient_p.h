@@ -203,6 +203,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
             if (nreply->error() != QNetworkReply::NoError) {
                 d->_downloads.remove(nreply);
+                QPair<QIODevice *, qint64> deviceState = d->_chunkedUploads.take(nreply);
+                delete deviceState.first;
                 emit q->error(ereply);
                 emit ereply->errorCodeChanged();
                 emit ereply->errorStringChanged();
@@ -231,8 +233,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
                     d->uploadChunk(ereply, deviceState.first, deviceState.second);
                     return;
                 }
-                if (status != EnginioString::complete)
-                    qWarning() << "Upload failed: " << ereply;
+                // should never get here unless upload was successful
+                Q_ASSERT(status == EnginioString::complete);
                 delete deviceState.first;
             }
 
