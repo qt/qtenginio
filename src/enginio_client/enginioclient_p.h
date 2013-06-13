@@ -643,7 +643,7 @@ public:
         return reply;
     }
 
-    QNetworkAccessManager *networkManager()
+    QNetworkAccessManager *networkManager() const
     {
         return m_networkManager;
     }

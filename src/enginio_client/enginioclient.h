@@ -97,7 +97,7 @@ public:
 
     QUrl apiUrl() const;
     void setApiUrl(const QUrl &apiUrl);
-    QNetworkAccessManager *networkManager();
+    QNetworkAccessManager *networkManager() const;
 
     Q_INVOKABLE EnginioReply *search(const QJsonObject &query);
     Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Operation operation = ObjectOperation);

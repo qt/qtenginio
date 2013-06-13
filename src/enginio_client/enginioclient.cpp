@@ -265,9 +265,9 @@ void EnginioClient::setApiUrl(const QUrl &apiUrl)
  *
  * Note that it will be deleted with the client object.
  */
-QNetworkAccessManager * EnginioClient::networkManager()
+QNetworkAccessManager * EnginioClient::networkManager() const
 {
-    Q_D(EnginioClient);
+    Q_D(const EnginioClient);
     return d->networkManager();
 }
 
