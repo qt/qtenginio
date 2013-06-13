@@ -116,12 +116,17 @@ const QString EnginioString::targetFileProperty = QStringLiteral("targetFileProp
 const QString EnginioString::members = QStringLiteral("members");
 const QString EnginioString::propertyName = QStringLiteral("propertyName");
 const QString EnginioString::apiEnginIo = QStringLiteral("https://api.engin.io");
+const QString EnginioString::status = QStringLiteral("status");
+const QString EnginioString::empty = QStringLiteral("empty");
+const QString EnginioString::complete = QStringLiteral("complete");
+const QString EnginioString::incomplete = QStringLiteral("incomplete");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
     _identity(),
     m_apiUrl(EnginioString::apiEnginIo),
-    m_networkManager()
+    m_networkManager(),
+    _uploadChunkSize(512 * 1024)
 {
     assignNetworkManager();
 
@@ -390,10 +395,10 @@ void EnginioClient::setIdentity(EnginioIdentity *identity)
   Each uploaded file needs to be associated with an object in the database.
 
   In order to upload a file, first create an object:
-  \snippet enginioclient/tst_enginioclient.cpp upload-create-object
+  \snippet files/tst_files.cpp upload-create-object
 
   Then do the actual upload:
-  \snippet enginioclient/tst_enginioclient.cpp upload
+  \snippet files/tst_files.cpp upload
 
   Note: There is no need to directly delete files.
   Instead when the object that contains the link to the file gets deleted,
@@ -415,7 +420,7 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
 /*!
   \brief Download a file stored in Enginio
 
-  \snippet enginioclient/tst_enginioclient.cpp download
+  \snippet files/tst_files.cpp download
   The propertyName can be anything, but it must be the same as the one used to upload the file with.
   This way one object can have several files attached to itself (one per propertyName).
 */

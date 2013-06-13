@@ -4,3 +4,4 @@ SUBDIRS += \
     qmltests \
     enginioclient \
     enginiomodel \
+    files \

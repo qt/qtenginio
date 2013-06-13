@@ -38,6 +38,7 @@
 #ifndef ENGINIOCLIENT_P_H
 #define ENGINIOCLIENT_P_H
 
+#include "chunkdevice_p.h"
 #include "enginioclient.h"
 #include "enginioreply.h"
 #include "enginioidentity.h"
@@ -87,6 +88,10 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString members;
     static const QString propertyName;
     static const QString apiEnginIo;
+    static const QString status;
+    static const QString empty;
+    static const QString complete;
+    static const QString incomplete;
 };
 
 class ENGINIOCLIENT_EXPORT EnginioClientPrivate
@@ -133,6 +138,12 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         case FileOperation:
             result.append(EnginioString::files);
             break;
+        case FileChunkUploadOperation: {
+            const QString fileId = object[EnginioString::id].toString();
+            Q_ASSERT(!fileId.isEmpty());
+            result.append(EnginioString::files + QLatin1Char('/') + fileId + QStringLiteral("/chunk"));
+            break;
+        }
         case SearchOperation:
             result.append(EnginioString::search);
             break;
@@ -199,8 +210,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
             // resolve the download url
             if (d->_downloads.contains(nreply)) {
-                QString propertyName = d->_downloads.value(nreply);
-                d->_downloads.remove(nreply);
+                QString propertyName = d->_downloads.take(nreply);
                 QString id = ereply->data()[EnginioString::results].toArray().first().toObject()[propertyName].toObject()[EnginioString::id].toString();
                 QUrl url(d->m_apiUrl);
                 url.setPath(getPath(QJsonObject(), FileOperation) + QLatin1Char('/') + id + QStringLiteral("/download_url"));
@@ -210,6 +220,20 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
                 QNetworkReply *reply = d->q_ptr->networkManager()->get(req);
                 ereply->setNetworkReply(reply);
                 return;
+            }
+
+            // continue chunked upload
+            else if (d->_chunkedUploads.contains(nreply)) {
+                QPair<QIODevice *, qint64> deviceState = d->_chunkedUploads.take(nreply);
+                QString status = ereply->data().value(EnginioString::status).toString();
+                if (status == EnginioString::empty || status == EnginioString::incomplete) {
+                    Q_ASSERT(ereply->data().value(EnginioString::objectType).toString() == EnginioString::files);
+                    d->uploadChunk(ereply, deviceState.first, deviceState.second);
+                    return;
+                }
+                if (status != EnginioString::complete)
+                    qWarning() << "Upload failed: " << ereply;
+                delete deviceState.first;
             }
 
             ereply->dataChanged();
@@ -264,13 +288,17 @@ public:
         AuthenticationOperation,
         SessionOperation,
         SearchOperation,
-        FileOperation
+        FileOperation,
+        FileChunkUploadOperation
     };
 
     Q_ENUMS(Operation)
 
     EnginioClientPrivate(EnginioClient *client = 0);
     virtual ~EnginioClientPrivate();
+    static EnginioClientPrivate* get(EnginioClient *client) { return client->d_func(); }
+    static const EnginioClientPrivate* get(const EnginioClient *client) { return client->d_func(); }
+
 
     EnginioClient *q_ptr;
     QByteArray m_backendId;
@@ -283,6 +311,10 @@ public:
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
     QMap<QNetworkReply*, QString> _downloads;
+
+    // device and last position
+    QMap<QNetworkReply*, QPair<QIODevice*, qint64> > _chunkedUploads;
+    qint64 _uploadChunkSize;
     QJsonObject _identityToken;
 
     void ignoreSslErrorsIfNeeded() {
@@ -534,21 +566,10 @@ public:
     template<class T>
     QNetworkReply *upload(const ObjectAdaptor<T> &object, const QString &fileName, QIODevice *device, const QString &mimeType)
     {
-        QUrl apiUrl = m_apiUrl;
-        apiUrl.setPath(getPath(QJsonObject(), FileOperation));
+        if (!device->isSequential() && device->size() < _uploadChunkSize)
+            return uploadAsHttpMultiPart(object.toJson(), fileName, device, mimeType);
 
-        QNetworkRequest req(_request);
-        // FIXME: must NOT have the json type as content type,
-        // otherwise enginio thinks we want to download
-        // unsetting it here is ugly
-        req.setHeader(QNetworkRequest::ContentTypeHeader, QString());
-        req.setUrl(apiUrl);
-
-        QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object.toJson());
-        QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
-        multiPart->setParent(reply);
-        device->setParent(multiPart);
-        return reply;
+        return uploadChunked(object.toJson(), device);
     }
 
     QNetworkAccessManager *networkManager()
@@ -565,6 +586,24 @@ public:
     }
 
 private:
+
+    QNetworkReply *uploadAsHttpMultiPart(const QByteArray &object, const QString &fileName, QIODevice *device, const QString &mimeType)
+    {
+        QUrl apiUrl = m_apiUrl;
+        apiUrl.setPath(getPath(QJsonObject(), FileOperation));
+
+        QNetworkRequest req(_request);
+        req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray());
+        req.setUrl(apiUrl);
+
+        QHttpMultiPart *multiPart = createHttpMultiPart(fileName, device, mimeType, object);
+        QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
+        multiPart->setParent(reply);
+        device->setParent(multiPart);
+        return reply;
+    }
+
+
     /* Create a multi part upload:
      * That means the JSON metadata and the actual file get sent in one http-post.
      * The associatedObject has to be a valid object type on the server.
@@ -592,6 +631,52 @@ private:
         filePart.setBodyDevice(data);
         multiPart->append(filePart);
         return multiPart;
+    }
+
+    QNetworkReply *uploadChunked(const QByteArray &object, QIODevice *device)
+    {
+        QUrl apiUrl = m_apiUrl;
+        apiUrl.setPath(getPath(QJsonObject(), FileOperation));
+
+        QNetworkRequest req(_request);
+        req.setUrl(apiUrl);
+
+        QNetworkReply *reply = q_ptr->networkManager()->post(req, object);
+        _chunkedUploads.insert(reply, qMakePair(device, static_cast<qint64>(0)));
+        return reply;
+    }
+
+    void uploadChunk(EnginioReply *ereply, QIODevice *device, qint64 startPos)
+    {
+        QUrl apiUrl = m_apiUrl;
+        QString path = getPath(ereply->data(), FileChunkUploadOperation);
+        apiUrl.setPath(path);
+
+        QNetworkRequest req(_request);
+        req.setUrl(apiUrl);
+        req.setHeader(QNetworkRequest::ContentTypeHeader,
+                      QByteArrayLiteral("application/octet-stream"));
+
+        // Content-Range: bytes {chunkStart}-{chunkEnd}/{totalFileSize}
+        qint64 size = device->size();
+        qint64 endPos = qMin(startPos + _uploadChunkSize, size);
+        req.setRawHeader(QByteArrayLiteral("Content-Range"),
+                         QByteArray::number(startPos) + QByteArrayLiteral("-")
+                         + QByteArray::number(endPos) + QByteArrayLiteral("/")
+                         + QByteArray::number(size));
+
+        // qDebug() << "Uploading chunk from " << startPos << " to " << endPos << " of " << size;
+
+        Q_ASSERT(device->isOpen());
+
+        ChunkDevice *chunkDevice = new ChunkDevice(device, startPos, _uploadChunkSize);
+        chunkDevice->open(QIODevice::ReadOnly);
+
+        QNetworkReply *reply = q_ptr->networkManager()->put(req, chunkDevice);
+        chunkDevice->setParent(reply);
+        _chunkedUploads.insert(reply, qMakePair(device, endPos));
+        ereply->setNetworkReply(reply);
+        reply->setParent(ereply);
     }
 };
 
