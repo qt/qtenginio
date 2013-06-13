@@ -52,7 +52,7 @@ class ENGINIOCLIENT_EXPORT EnginioIdentity : public QObject
 public:
     explicit EnginioIdentity(QObject *parent = 0);
 
-signals:
+Q_SIGNALS:
     void dataChanged();
 private:
     virtual void prepareSessionToken(EnginioClientPrivate *enginio) = 0;
@@ -77,7 +77,7 @@ public:
     QString password() const;
     void setPassword(const QString &password);
 
-signals:
+Q_SIGNALS:
     void userChanged(const QString &user);
     void passwordChanged(const QString &password);
 

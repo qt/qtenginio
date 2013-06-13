@@ -108,7 +108,7 @@ public:
     Q_INVOKABLE EnginioReply *uploadFile(const QJsonObject &associatedObject, const QUrl &file);
     Q_INVOKABLE EnginioReply *downloadFile(const QJsonObject &object);
 
-signals:
+Q_SIGNALS:
     void sessionAuthenticated(EnginioReply *reply) const;
     void sessionAuthenticationError(EnginioReply *reply) const;
     void sessionTerminated() const;

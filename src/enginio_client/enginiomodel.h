@@ -82,7 +82,7 @@ public:
 protected:
     virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
-signals:
+Q_SIGNALS:
     void operationChanged(const EnginioClient::Operation operation);
     void queryChanged(const QJsonObject query);
     void enginioChanged(EnginioClient *enginio);

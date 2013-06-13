@@ -69,7 +69,7 @@ public:
 
     Q_SLOT void dumpDebugInfo() const;
 
-signals:
+Q_SIGNALS:
     void finished();
     void dataChanged();
     void errorCodeChanged();
