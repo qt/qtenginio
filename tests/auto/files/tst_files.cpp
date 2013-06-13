@@ -97,7 +97,7 @@ void tst_Files::fileUploadDownload()
 
     if (chunkSize > 0) {
         EnginioClientPrivate *clientPrivate = EnginioClientPrivate::get(&client);
-        clientPrivate->_uploadChunkSize = 1024;
+        clientPrivate->_uploadChunkSize = chunkSize;
     }
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
