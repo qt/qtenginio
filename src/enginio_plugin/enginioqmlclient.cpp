@@ -87,23 +87,6 @@
 */
 
 /*!
-  \qmlproperty object Enginio::identityToken
-  Token of currently authenticated session. It contains information about
-  logged in user.
-
-  The token is an empty object if there is no
-  authenticated session.
-*/
-
-/*!
-  \qmlproperty bool Enginio::isAuthenticated()
-  This property holds the state of the authentication.
-
-  It is false until a user session has been establieshed.
-  \sa identityToken
-*/
-
-/*!
   \qmlmethod EnginioReply Enginio::uploadFile(QJsonObject object, QUrl file)
   \brief Stores a \a file attached to an \a object in Enginio
 
@@ -139,36 +122,18 @@
   \sa uploadFile()
 */
 
-
-class IsAuthenticatedFunctor
-{
-    EnginioQmlClient *_qmlEnginio;
-    bool _status;
-
-public:
-    IsAuthenticatedFunctor(EnginioQmlClient *qmlEnginio, bool status)
-        : _qmlEnginio(qmlEnginio)
-        , _status(status)
-    {}
-    void operator ()()
-    {
-        _qmlEnginio->isAuthenticatedChanged(_status);
-    }
-};
-
 EnginioQmlClient::EnginioQmlClient(QObject *parent)
     : EnginioClient(parent, new EnginioQmlClientPrivate(this))
 {
-    qRegisterMetaType<EnginioQmlClient*>();
-    qRegisterMetaType<EnginioQmlReply*>();
-
-    QObject::connect(this, &EnginioClient::sessionAuthenticated, IsAuthenticatedFunctor(this, true));
-    QObject::connect(this, &EnginioClient::sessionTerminated, IsAuthenticatedFunctor(this, false));
+    Q_D(EnginioQmlClient);
+    d->init();
 }
 
-bool EnginioQmlClient::isAuthenticated() const
+void EnginioQmlClientPrivate::init()
 {
-    return !identityToken().isEmpty();
+    EnginioClientPrivate::init();
+    qRegisterMetaType<EnginioQmlClient*>();
+    qRegisterMetaType<EnginioQmlReply*>();
 }
 
 EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation operation)

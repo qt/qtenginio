@@ -69,8 +69,8 @@ public:
 
     Q_SLOT void dumpDebugInfo() const;
 
-signals:
-    void finished();
+Q_SIGNALS:
+    void finished(EnginioReply *reply);
     void dataChanged();
     void errorCodeChanged();
     void errorStringChanged();

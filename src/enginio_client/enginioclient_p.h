@@ -282,6 +282,30 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         }
     };
 
+    class AuthenticationStateTrackerFunctor
+    {
+        EnginioClientPrivate * _enginio;
+        EnginioClient::AuthenticationState _state;
+    public:
+        AuthenticationStateTrackerFunctor(EnginioClientPrivate *enginio, EnginioClient::AuthenticationState state = EnginioClient::NotAuthenticated)
+            : _enginio(enginio)
+            , _state(state)
+        {}
+
+        void operator()() const
+        {
+            _enginio->setAuthenticationState(_state);
+        }
+
+        void operator()(const EnginioIdentity *identity) const
+        {
+            if (identity)
+                _enginio->setAuthenticationState(EnginioClient::Authenticating);
+            // else we could call _enginio->setAuthenticationState(EnginioClient::NotAuthenticated);
+            // but sessionTerminated signal should do the trick anyway
+        }
+    };
+
 public:
     enum Operation {
         // Do not forget to keep in sync with EnginioClient::Operation!
@@ -324,19 +348,21 @@ public:
     QMap<QNetworkReply*, QPair<QIODevice*, qint64> > _chunkedUploads;
     qint64 _uploadChunkSize;
     QJsonObject _identityToken;
+    EnginioClient::AuthenticationState _authenticationState;
 
-    void ignoreSslErrorsIfNeeded() {
-        // Ignore SSL errors when staging backend is used.
-        // FIXME: Remove this as soon as the certificates are fixed.
-        if (m_apiUrl == QStringLiteral("https://api.staging.engin.io")) {
-            qWarning() << "SSL errors will be ignored";
-            QObject::connect(m_networkManager,
-                    SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)),
-                    q_ptr,
-                    SLOT(ignoreSslErrors(QNetworkReply*, const QList<QSslError> &)));
-        } else {
-            m_networkManager->disconnect(SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)));
-        }
+    void init();
+
+    void setAuthenticationState(const EnginioClient::AuthenticationState state)
+    {
+        if (_authenticationState == state)
+            return;
+        _authenticationState = state;
+        emit q_ptr->authenticationStateChanged(state);
+    }
+
+    EnginioClient::AuthenticationState authenticationState() const
+    {
+        return _authenticationState;
     }
 
     QJsonObject identityToken() const
@@ -344,28 +370,20 @@ public:
         return _identityToken;
     }
 
-    void setIdentityToken(const QByteArray &data)
+    void setIdentityToken(EnginioReply *reply)
     {
         QByteArray sessionToken;
-        if (data.isEmpty()) {
-            _identityToken = QJsonObject();
-        } else {
-            _identityToken = QJsonDocument::fromJson(data).object();
+        if (reply) {
+            _identityToken = reply->data();
             sessionToken = _identityToken[EnginioString::sessionToken].toString().toLatin1();
         }
+
         _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
         if (sessionToken.isEmpty())
             emit q_ptr->sessionTerminated();
         else
-            emit q_ptr->sessionAuthenticated();
-        emit q_ptr->identityTokenChanged(_identityToken);
+            emit q_ptr->sessionAuthenticated(reply);
     }
-
-    QByteArray sessionToken() const
-    {
-        return _identityToken[EnginioString::sessionToken].toString().toLatin1();
-    }
-
 
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
     {
@@ -385,7 +403,7 @@ public:
 
         if (!(_identity = identity)) {
             // invalidate old identity token
-            setIdentityToken(QByteArray());
+            setIdentityToken(0);
             return;
         }
         CallPrepareSessionToken callPrepareSessionToken(this, identity);
@@ -611,7 +629,7 @@ public:
         return reply;
     }
 
-    QNetworkAccessManager *networkManager()
+    QNetworkAccessManager *networkManager() const
     {
         return m_networkManager;
     }

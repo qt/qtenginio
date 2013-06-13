@@ -74,13 +74,12 @@ public:
         {}
         void operator ()()
         {
+            EnginioReply *ereply = new EnginioReply(_enginio, _reply);
             if (_reply->error() != QNetworkReply::NoError) {
-                EnginioReply *ereply = new EnginioReply(_enginio, _reply);
                 emit _enginio->q_ptr->sessionAuthenticationError(ereply);
                 // TODO does ereply leak? Yes potentially. We need to think about the ownership
             } else {
-                QByteArray data(_reply->readAll());
-                _enginio->setIdentityToken(data);
+                _enginio->setIdentityToken(ereply);
                 _reply->deleteLater();
             }
         }
@@ -131,6 +130,20 @@ void EnginioAuthentication::setPassword(const QString &password)
     emit userChanged(password);
 }
 
+struct DisconnectConnection
+{
+    QMetaObject::Connection _connection;
+
+    DisconnectConnection(const QMetaObject::Connection& connection)
+        : _connection(connection)
+    {}
+
+    void operator ()() const
+    {
+        QObject::disconnect(_connection);
+    }
+};
+
 void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
 {
     Q_ASSERT(enginio);
@@ -140,6 +153,7 @@ void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
     data[EnginioString::username] = d_ptr->_user;
     data[EnginioString::password] = d_ptr->_pass;
     QNetworkReply *reply = enginio->identify(data);
-    QObject::connect(reply, &QNetworkReply::finished, EnginioAuthenticationPrivate::SessionSetterFunctor(enginio, reply));
+    QMetaObject::Connection requestFinished = QObject::connect(reply, &QNetworkReply::finished, EnginioAuthenticationPrivate::SessionSetterFunctor(enginio, reply));
+    QObject::connect(enginio->q_ptr, &EnginioClient::destroyed, DisconnectConnection(requestFinished));
 }
 

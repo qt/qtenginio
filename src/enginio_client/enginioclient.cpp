@@ -67,7 +67,7 @@
 */
 
 /*!
-  \fn EnginioClient::sessionAuthenticated() const
+  \fn EnginioClient::sessionAuthenticated(EnginioReply *reply) const
   \brief Emitted when a user logs in.
 */
 
@@ -128,17 +128,27 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     _identity(),
     m_apiUrl(EnginioString::apiEnginIo),
     m_networkManager(),
-    _uploadChunkSize(512 * 1024)
+    _uploadChunkSize(512 * 1024),
+    _authenticationState(EnginioClient::NotAuthenticated)
 {
     assignNetworkManager();
 
     _request.setHeader(QNetworkRequest::ContentTypeHeader,
                           QStringLiteral("application/json"));
+}
+
+void EnginioClientPrivate::init()
+{
     qRegisterMetaType<EnginioClient*>();
     qRegisterMetaType<EnginioModel*>();
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
     qRegisterMetaType<EnginioAuthentication*>();
+
+    QObject::connect(q_ptr, &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
+    QObject::connect(q_ptr, &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClient::Authenticated));
+    QObject::connect(q_ptr, &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClient::AuthenticationFailure));
+    QObject::connect(q_ptr, &EnginioClient::identityChanged, AuthenticationStateTrackerFunctor(this));
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
@@ -158,6 +168,8 @@ EnginioClient::EnginioClient(QObject *parent)
     : QObject(parent)
     , d_ptr(new EnginioClientPrivate(this))
 {
+    Q_D(EnginioClient);
+    d->init();
 }
 
 /*!
@@ -243,7 +255,6 @@ void EnginioClient::setApiUrl(const QUrl &apiUrl)
     Q_D(EnginioClient);
     if (d->m_apiUrl != apiUrl) {
         d->m_apiUrl = apiUrl;
-        d->ignoreSslErrorsIfNeeded();
         emit apiUrlChanged(apiUrl);
     }
 }
@@ -253,21 +264,10 @@ void EnginioClient::setApiUrl(const QUrl &apiUrl)
  *
  * Note that it will be deleted with the client object.
  */
-QNetworkAccessManager * EnginioClient::networkManager()
+QNetworkAccessManager * EnginioClient::networkManager() const
 {
-    Q_D(EnginioClient);
+    Q_D(const EnginioClient);
     return d->networkManager();
-}
-
-void EnginioClient::ignoreSslErrors(QNetworkReply* reply,
-                                    const QList<QSslError> &errors)
-{
-    QList<QSslError>::ConstIterator i = errors.constBegin();
-    while (i != errors.constEnd()) {
-        qWarning() << "Ignoring SSL error:" << i->errorString();
-        i++;
-    }
-    reply->ignoreSslErrors(errors);
 }
 
 /*!
@@ -461,8 +461,8 @@ QNetworkAccessManager *EnginioClientPrivate::prepareNetworkManagerInThread()
     return qnam;
 }
 
-QJsonObject EnginioClient::identityToken() const
+EnginioClient::AuthenticationState EnginioClient::authenticationState() const
 {
     Q_D(const EnginioClient);
-    return d->identityToken();
+    return d->authenticationState();
 }

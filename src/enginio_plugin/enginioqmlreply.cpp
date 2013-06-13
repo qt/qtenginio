@@ -32,19 +32,22 @@ public:
 
         static QMetaMethod clientFinishedSignal = QMetaMethod::fromSignal(&EnginioClient::finished);
         static QMetaMethod clientErrorSignal = QMetaMethod::fromSignal(&EnginioClient::error);
+        static QMetaMethod replyFinishedSignal = QMetaMethod::fromSignal(&EnginioReply::finished);
 
-        if (Q_LIKELY(_client->isSignalConnected(clientFinishedSignal)
-                || _client->isSignalConnected(clientErrorSignal))) {
+        bool isReplyFinishedConnected = q->isSignalConnected(replyFinishedSignal);
+        bool isClientFinishedConnected = _client->isSignalConnected(clientFinishedSignal);
+        bool isClientErrorConnected = _client->isSignalConnected(clientErrorSignal);
+
+        if (Q_LIKELY(isClientFinishedConnected
+                  || isReplyFinishedConnected
+                  || isClientErrorConnected)) {
             // something is connected and we can transfer the owership.
             q->setParent(0);
             QQmlEngine::setObjectOwnership(q, QQmlEngine::JavaScriptOwnership);
-            emit q->finished();
-        } else {
-            emit q->finished();
-            // TODO can we deleteNow or even better, return it to a pool, how often
-            // it happens?
+            if (isReplyFinishedConnected)
+                emit q->finished(q);
+        } else
             q->deleteLater();
-        }
     }
 
     QJSValue data() const
@@ -59,6 +62,12 @@ public:
 EnginioQmlReply::EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply)
     : EnginioReply(parent, reply, new EnginioQmlReplyPrivate(parent, reply, this))
 {}
+
+EnginioQmlReply::~EnginioQmlReply()
+{
+    EnginioQmlReplyPrivate *priv = static_cast<EnginioQmlReplyPrivate *>(d.take());
+    delete priv;
+}
 
 QJSValue EnginioQmlReply::data() const
 {

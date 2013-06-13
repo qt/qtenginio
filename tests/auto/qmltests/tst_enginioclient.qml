@@ -102,24 +102,24 @@ Item {
         }
 
         function test_assignValidIdentity() {
-            verify(!enginio.isAuthenticated)
+            verify(enginio.authenticationState !== Enginio.Authenticated)
             enginio.identity = validIdentity
             sessionAuthenticatedSpy.wait()
-            verify(enginio.isAuthenticated)
+            verify(enginio.authenticationState === Enginio.Authenticated)
 
             // reassign the same
             enginio.identity = null
             tryCompare(enginio, "isAuthenticated", false)
             enginio.identity = validIdentity
             sessionAuthenticatedSpy.wait()
-            verify(enginio.isAuthenticated)
+            verify(enginio.authenticationState === Enginio.Authenticated)
         }
 
         function test_assignInvalidIdentity() {
-            verify(!enginio.isAuthenticated)
+            verify(enginio.authenticationState !== Enginio.Authenticated)
             enginio.identity = invalidIdentity
             sessionAuthenticationErrorSpy.wait()
-            verify(!enginio.isAuthenticated)
+            verify(enginio.authenticationState !== Enginio.Authenticated)
         }
     }
 
