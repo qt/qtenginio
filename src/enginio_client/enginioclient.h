@@ -38,7 +38,7 @@
 #ifndef ENGINIOCLIENT_H
 #define ENGINIOCLIENT_H
 
-#include "enginioclient_global.h"
+#include "Enginio/enginioclient_global.h"
 #include <QObject>
 #include <QtCore/qscopedpointer.h>
 #include <QtCore/qtypeinfo.h>

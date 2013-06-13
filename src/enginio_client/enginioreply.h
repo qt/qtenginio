@@ -46,7 +46,7 @@
 #include <QtCore/qmetatype.h>
 #include <QtNetwork/qnetworkreply.h>
 
-#include "enginioclient_global.h"
+#include "Enginio/enginioclient_global.h"
 
 class EnginioClient;
 class EnginioReplyPrivate;
