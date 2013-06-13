@@ -85,6 +85,10 @@ EnginioReply::EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, E
 */
 EnginioReply::~EnginioReply()
 {
+    // At this point d pointer may be null, because it may be deleted by
+    // EnginioQmlReply. If you need to add code here, then consider to
+    // make EnginioReply destructor virtual. For now there is no point
+    // in adding vtable to the private class.
 }
 
 /*!

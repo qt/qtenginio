@@ -63,6 +63,12 @@ EnginioQmlReply::EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply 
     : EnginioReply(parent, reply, new EnginioQmlReplyPrivate(parent, reply, this))
 {}
 
+EnginioQmlReply::~EnginioQmlReply()
+{
+    EnginioQmlReplyPrivate *priv = static_cast<EnginioQmlReplyPrivate *>(d.take());
+    delete priv;
+}
+
 QJSValue EnginioQmlReply::data() const
 {
     return static_cast<const EnginioQmlReplyPrivate*>(d.data())->data();

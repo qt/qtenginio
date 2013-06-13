@@ -50,6 +50,8 @@ class ENGINIOCLIENT_EXPORT EnginioQmlReply : public EnginioReply
     Q_PROPERTY(QJSValue data READ data NOTIFY dataChanged FINAL)
 public:
     explicit EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply);
+    ~EnginioQmlReply();
+
     virtual void emitFinished();
     QJSValue data() const;
 private:
