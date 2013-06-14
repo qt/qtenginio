@@ -80,7 +80,8 @@
 */
 
 /*!
-  \qmlproperty string Enginio::serviceUrl
+  \qmlproperty url Enginio::serviceUrl
+  \internal
   Enginio backend URL.
 
   Usually there is no need to change the default URL.

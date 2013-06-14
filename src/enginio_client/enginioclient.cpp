@@ -240,6 +240,7 @@ void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
 /*!
  * \property EnginioClient::serviceUrl
  * \brief Enginio backend URL.
+ * \internal
  *
  * The API URL determines the server used by Enginio.
  * Usually it is not needed to change the default URL.
