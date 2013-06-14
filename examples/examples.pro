@@ -1,2 +1,5 @@
 TEMPLATE = subdirs
-qtHaveModule(enginio): SUBDIRS += qml
+
+qtHaveModule(quick) {
+    SUBDIRS += qml
+}

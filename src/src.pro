@@ -7,6 +7,8 @@ load(qt_docs)
 
 CONFIG += ordered
 
-SUBDIRS += \
-    enginio_client \
-    enginio_plugin
+SUBDIRS += enginio_client
+
+qtHaveModule(quick) {
+    SUBDIRS += enginio_plugin
+}
