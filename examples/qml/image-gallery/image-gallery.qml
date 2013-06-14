@@ -29,7 +29,7 @@ Rectangle {
         backendId: AppConfig.backendData.id
         backendSecret: AppConfig.backendData.secret
         serviceUrl: AppConfig.backendData.serviceUrl
-        onError: console.log("Enginio error " + reply.errorCode + ": " + reply.errorString)
+        onError: console.log("Enginio error: " + reply.errorCode + ": " + reply.errorString)
     }
     //! [client]
 
@@ -83,9 +83,8 @@ Rectangle {
                     visible: image.status != Image.Ready
                 }
                 Component.onCompleted: {
-                    var data = { "id": model.id,
-                        "objectType": "objects.image",
-                        "propertyName": "file" }
+                    var data = { "id": model.file.id }
+                    console.log("file id" + model.file.id)
                     var reply = client.downloadFile(data)
                     reply.finished.connect(function() {
                         image.source = reply.data.expiringUrl
@@ -185,7 +184,7 @@ Rectangle {
             var fileObject = {
                 objectType: "objects.image",
                 name: fileName,
-                localPath: fileUrl
+                localPath: fileUrl.toString()
             }
             var reply = client.create(fileObject);
             reply.finished.connect(function() {
