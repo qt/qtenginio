@@ -47,7 +47,7 @@ Item {
         id: enginio
         backendId: AppConfig.backendData.id
         backendSecret: AppConfig.backendData.secret
-        apiUrl: AppConfig.backendData.apiUrl
+        serviceUrl: AppConfig.backendData.serviceUrl
 
         onError: {
             console.log("\n\n### ERROR")

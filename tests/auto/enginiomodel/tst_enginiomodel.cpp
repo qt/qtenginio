@@ -98,7 +98,7 @@ void tst_EnginioModel::ctor()
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         client.setBackendId(EnginioTests::TESTAPP_ID);
-        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setserviceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
         model.setEnginio(&client);
     }
@@ -109,7 +109,7 @@ void tst_EnginioModel::ctor()
         model.setOperation(EnginioClient::ObjectOperation);
         model.setQuery(query);
         client.setBackendId(EnginioTests::TESTAPP_ID);
-        client.setApiUrl(EnginioTests::TESTAPP_URL);
+        client.setserviceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
         model.setEnginio(&client);
     }
@@ -209,7 +209,7 @@ void tst_EnginioModel::roleNames()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setApiUrl(EnginioTests::TESTAPP_URL);
+    client.setserviceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
     QVERIFY(model.enginio() == &client);
@@ -241,7 +241,7 @@ void tst_EnginioModel::listView()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setApiUrl(EnginioTests::TESTAPP_URL);
+    client.setserviceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
     QListView view;

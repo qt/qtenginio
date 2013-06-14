@@ -216,7 +216,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
             if (d->_downloads.contains(nreply)) {
                 QString propertyName = d->_downloads.take(nreply);
                 QString id = ereply->data()[EnginioString::results].toArray().first().toObject()[propertyName].toObject()[EnginioString::id].toString();
-                QUrl url(d->m_apiUrl);
+                QUrl url(d->m_serviceUrl);
                 url.setPath(getPath(QJsonObject(), FileOperation) + QLatin1Char('/') + id + QStringLiteral("/download_url"));
                 //url.setQuery("variant=original");
                 QNetworkRequest req(d->_request);
@@ -336,7 +336,7 @@ public:
     QByteArray m_backendSecret;
     EnginioIdentity *_identity;
     QVarLengthArray<QMetaObject::Connection, 4> _identityConnections;
-    QUrl m_apiUrl;
+    QUrl m_serviceUrl;
     QNetworkAccessManager *m_networkManager;
     QMetaObject::Connection _networkManagerConnection;
     QNetworkRequest _request;
@@ -421,7 +421,7 @@ public:
 
     QNetworkReply *identify(const QJsonObject &object)
     {
-        QUrl url(m_apiUrl);
+        QUrl url(m_serviceUrl);
         url.setPath(getPath(object, AuthenticationOperation));
 
         QNetworkRequest req(_request);
@@ -438,7 +438,7 @@ public:
     template<class T>
     QNetworkReply *update(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
-        QUrl url(m_apiUrl);
+        QUrl url(m_serviceUrl);
         url.setPath(getPath(object, operation, IncludeIdInPath));
 
         QNetworkRequest req(_request);
@@ -467,7 +467,7 @@ public:
     template<class T>
     QNetworkReply *remove(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
-        QUrl url(m_apiUrl);
+        QUrl url(m_serviceUrl);
         url.setPath(getPath(object, operation, IncludeIdInPath));
 
         QNetworkRequest req(_request);
@@ -512,7 +512,7 @@ public:
     template<class T>
     QNetworkReply *create(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
-        QUrl url(m_apiUrl);
+        QUrl url(m_serviceUrl);
         url.setPath(getPath(object, operation));
 
         QNetworkRequest req(_request);
@@ -531,7 +531,7 @@ public:
     template<class T>
     QNetworkReply *query(const ObjectAdaptor<T> &object, const Operation operation)
     {
-        QUrl url(m_apiUrl);
+        QUrl url(m_serviceUrl);
         url.setPath(getPath(object, operation));
 
         // TODO add all params here
@@ -647,12 +647,12 @@ private:
     template<class T>
     QNetworkReply *uploadAsHttpMultiPart(const ObjectAdaptor<T> &object, QIODevice *device, const QString &mimeType)
     {
-        QUrl apiUrl = m_apiUrl;
-        apiUrl.setPath(getPath(QJsonObject(), FileOperation));
+        QUrl serviceUrl = m_serviceUrl;
+        serviceUrl.setPath(getPath(QJsonObject(), FileOperation));
 
         QNetworkRequest req(_request);
         req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray());
-        req.setUrl(apiUrl);
+        req.setUrl(serviceUrl);
 
         QHttpMultiPart *multiPart = createHttpMultiPart(object, device, mimeType);
         QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
@@ -693,11 +693,11 @@ private:
     template<class T>
     QNetworkReply *uploadChunked(const ObjectAdaptor<T> &object, QIODevice *device)
     {
-        QUrl apiUrl = m_apiUrl;
-        apiUrl.setPath(getPath(QJsonObject(), FileOperation));
+        QUrl serviceUrl = m_serviceUrl;
+        serviceUrl.setPath(getPath(QJsonObject(), FileOperation));
 
         QNetworkRequest req(_request);
-        req.setUrl(apiUrl);
+        req.setUrl(serviceUrl);
 
         QNetworkReply *reply = q_ptr->networkManager()->post(req, object.toJson());
         _chunkedUploads.insert(reply, qMakePair(device, static_cast<qint64>(0)));
@@ -706,12 +706,12 @@ private:
 
     void uploadChunk(EnginioReply *ereply, QIODevice *device, qint64 startPos)
     {
-        QUrl apiUrl = m_apiUrl;
+        QUrl serviceUrl = m_serviceUrl;
         QString path = getPath(ereply->data(), FileChunkUploadOperation);
-        apiUrl.setPath(path);
+        serviceUrl.setPath(path);
 
         QNetworkRequest req(_request);
-        req.setUrl(apiUrl);
+        req.setUrl(serviceUrl);
         req.setHeader(QNetworkRequest::ContentTypeHeader,
                       QByteArrayLiteral("application/octet-stream"));
 

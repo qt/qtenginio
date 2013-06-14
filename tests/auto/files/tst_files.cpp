@@ -93,7 +93,7 @@ void tst_Files::fileUploadDownload()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setApiUrl(EnginioTests::TESTAPP_URL);
+    client.setserviceUrl(EnginioTests::TESTAPP_URL);
 
     if (chunkSize > 0) {
         EnginioClientPrivate *clientPrivate = EnginioClientPrivate::get(&client);

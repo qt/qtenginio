@@ -126,7 +126,7 @@ const QString EnginioString::incomplete = QStringLiteral("incomplete");
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
     _identity(),
-    m_apiUrl(EnginioString::apiEnginIo),
+    m_serviceUrl(EnginioString::apiEnginIo),
     m_networkManager(),
     _uploadChunkSize(512 * 1024),
     _authenticationState(EnginioClient::NotAuthenticated)
@@ -238,24 +238,24 @@ void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
 }
 
 /*!
- * \property EnginioClient::apiUrl
+ * \property EnginioClient::serviceUrl
  * \brief Enginio backend URL.
  *
  * The API URL determines the server used by Enginio.
  * Usually it is not needed to change the default URL.
  */
-QUrl EnginioClient::apiUrl() const
+QUrl EnginioClient::serviceUrl() const
 {
     Q_D(const EnginioClient);
-    return d->m_apiUrl;
+    return d->m_serviceUrl;
 }
 
-void EnginioClient::setApiUrl(const QUrl &apiUrl)
+void EnginioClient::setserviceUrl(const QUrl &serviceUrl)
 {
     Q_D(EnginioClient);
-    if (d->m_apiUrl != apiUrl) {
-        d->m_apiUrl = apiUrl;
-        emit apiUrlChanged(apiUrl);
+    if (d->m_serviceUrl != serviceUrl) {
+        d->m_serviceUrl = serviceUrl;
+        emit serviceUrlChanged(serviceUrl);
     }
 }
 
