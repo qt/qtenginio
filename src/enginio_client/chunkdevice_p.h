@@ -59,38 +59,38 @@ public:
         source->seek(startPos);
     }
 
-    bool isSequential()
+    bool isSequential() const Q_DECL_OVERRIDE
     {
         return _source->isSequential();
     }
 
-    qint64 readData(char *data, qint64 maxlen)
+    qint64 readData(char *data, qint64 maxlen) Q_DECL_OVERRIDE
     {
         return _source->read(data, maxlen);
     }
 
-    qint64 writeData(const char*, qint64)
+    qint64 writeData(const char*, qint64) Q_DECL_OVERRIDE
     {
         return -1;
     }
 
-    qint64 size() const
+    qint64 size() const Q_DECL_OVERRIDE
     {
         return qMin(_source->size() - _startPos, _chunkSize);
     }
 
-    qint64 pos() const
+    qint64 pos() const Q_DECL_OVERRIDE
     {
         return _source->pos() - _startPos;
     }
 
-    bool seek(qint64 pos)
+    bool seek(qint64 pos) Q_DECL_OVERRIDE
     {
         QIODevice::seek(pos);
         return _source->seek(pos + _startPos);
     }
 
-    qint64 bytesAvailable() const
+    qint64 bytesAvailable() const Q_DECL_OVERRIDE
     {
         return qMin(_source->bytesAvailable(), _chunkSize + (_startPos - _source->pos()));
     }
