@@ -124,6 +124,8 @@ const QString EnginioString::status = QStringLiteral("status");
 const QString EnginioString::empty = QStringLiteral("empty");
 const QString EnginioString::complete = QStringLiteral("complete");
 const QString EnginioString::incomplete = QStringLiteral("incomplete");
+const QString EnginioString::headers = QStringLiteral("headers");
+const QString EnginioString::payload = QStringLiteral("payload");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
@@ -271,6 +273,32 @@ QNetworkAccessManager * EnginioClient::networkManager() const
 {
     Q_D(const EnginioClient);
     return d->networkManager();
+}
+
+/*!
+ * \brief Create custom request to the enginio REST API
+ *
+ * \param url The url to be used for the request. Note that only the path and the query are used from the url.
+ * \param httpOperation Verb to the server that is valid according to the HTTP specification (eg. "GET", "POST", "PUT", etc.).
+ * \param data optional JSON object possibly containing custom headers and the payload data for the request.
+ *
+ *   {
+ *       "headers" : { "Accept" : "application/json" }
+ *       "payload" : { "email": "me@engin.io", "password": "password" }
+ *   }
+ *
+ * \return EnginioReply containing the status and the result once it is finished.
+ * \sa EnginioReply, create(), query(), update(), remove()
+ * \internal
+ */
+
+EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)
+{
+    Q_D(EnginioClient);
+    QNetworkReply *nreply = d->customRequest(url, httpOperation, data);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+    return ereply;
 }
 
 /*!

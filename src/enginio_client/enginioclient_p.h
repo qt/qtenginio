@@ -94,6 +94,8 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString empty;
     static const QString complete;
     static const QString incomplete;
+    static const QString headers;
+    static const QString payload;
 };
 
 class ENGINIOCLIENT_EXPORT EnginioClientPrivate
@@ -436,6 +438,51 @@ public:
 
         if (gEnableEnginioDebugInfo)
             _requestData.insert(reply, data);
+
+        return reply;
+    }
+
+    QNetworkReply *customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)
+    {
+        Q_ASSERT(!url.isEmpty());
+        Q_ASSERT(!httpOperation.isEmpty());
+
+        QUrl reqUrl(_serviceUrl);
+        reqUrl.setPath(url.path());
+        reqUrl.setQuery(url.query());
+
+        QNetworkRequest req(_request);
+        req.setUrl(reqUrl);
+
+        if (data[EnginioString::headers].isObject()) {
+            QJsonObject headers = data[EnginioString::headers].toObject();
+
+            QJsonObject::const_iterator end = headers.constEnd();
+            for (QJsonObject::const_iterator i = headers.constBegin(); i != end; i++) {
+                QByteArray headerName = i.key().toUtf8();
+                QByteArray headerValue = i.value().toString().toUtf8();
+                req.setRawHeader(headerName, headerValue);
+            }
+        }
+
+        QBuffer *buffer = 0;
+        QByteArray payload;
+
+        if (data[EnginioString::payload].isObject()) {
+            ObjectAdaptor<QJsonObject> o(data[EnginioString::payload].toObject());
+            payload = o.toJson();
+            buffer = new QBuffer();
+            buffer->setData(payload);
+            buffer->open(QIODevice::ReadOnly);
+        }
+
+        QNetworkReply *reply = networkManager()->sendCustomRequest(req, httpOperation, buffer);
+
+        if (gEnableEnginioDebugInfo && !payload.isEmpty())
+            _requestData.insert(reply, payload);
+
+        if (buffer)
+            buffer->setParent(reply);
 
         return reply;
     }
