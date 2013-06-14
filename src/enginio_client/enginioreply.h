@@ -55,11 +55,11 @@ class EnginioClientPrivate;
 class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
 {
     Q_OBJECT
+public:
     Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
     Q_PROPERTY(QNetworkReply::NetworkError errorCode READ errorCode NOTIFY errorCodeChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
 
-public:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
     virtual ~EnginioReply();
 
