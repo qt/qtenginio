@@ -57,6 +57,8 @@ int main(int argc, char** argv)
     QByteArray canonicalImportPath = qmlImportDir.canonicalPath().toUtf8();
     qputenv("QML2_IMPORT_PATH", canonicalImportPath);
 
+    qDebug("QML2_IMPORT_PATH=%s",canonicalImportPath.data());
+
     QString qmlFilePath(QUICK_TEST_SOURCE_DIR);
     QFile qmltestConfig(qmlFilePath + QDir::separator() + "config.js");
 

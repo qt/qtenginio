@@ -6,6 +6,7 @@ TARGET = tst_qmltests
 
 QT += enginio
 CONFIG += testcase
+CONFIG   -= app_bundle
 
 QT += qmltest
 
