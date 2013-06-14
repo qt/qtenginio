@@ -28,7 +28,7 @@ Rectangle {
         id: client
         backendId: AppConfig.backendData.id
         backendSecret: AppConfig.backendData.secret
-        apiUrl: AppConfig.backendData.apiUrl
+        serviceUrl: AppConfig.backendData.serviceUrl
         onError: console.log("Enginio error " + reply.errorCode + ": " + reply.errorString)
     }
     //! [client]
@@ -130,7 +130,7 @@ Rectangle {
                 hoverEnabled: true
                 onClicked: {
                     imageDialog.title = model.name ? model.name : "";
-                    imageDialog.source = AppConfig.backendData.apiUrl + model.file.url;
+                    imageDialog.source = AppConfig.backendData.serviceUrl + model.file.url;
                     imageDialog.visible = true;
                 }
                 onContainsMouseChanged: deleteIcon.opacity = containsMouse ? 1.0 : 0.0

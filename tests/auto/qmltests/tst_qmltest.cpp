@@ -70,7 +70,7 @@ int main(int argc, char** argv)
         out << "var backendData = {\n" \
             << "    id: \"" << EnginioTests::TESTAPP_ID << "\",\n" \
             << "    secret: \"" << EnginioTests::TESTAPP_SECRET << "\",\n" \
-            << "    apiUrl: \"" << EnginioTests::TESTAPP_URL << "\"\n" \
+            << "    serviceUrl: \"" << EnginioTests::TESTAPP_URL << "\"\n" \
             << "}\n"
             << "var testSourcePath = \"" QUICK_TEST_SOURCE_DIR "\"\n";
 
