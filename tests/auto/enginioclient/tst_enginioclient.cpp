@@ -822,7 +822,11 @@ void tst_EnginioClient::search()
         const EnginioReply* reqId = client.search(searchQuery);
         QVERIFY(reqId);
 
-        QTRY_COMPARE(spy.count(), 1);
+
+        if (!spy.wait())
+            reqId->dumpDebugInfo();
+
+        QCOMPARE(spy.count(), 1);
         QCOMPARE(spyError.count(), 0);
 
         const EnginioReply *response = spy[0][0].value<EnginioReply*>();
