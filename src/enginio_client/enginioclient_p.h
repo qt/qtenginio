@@ -137,9 +137,20 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         case AuthenticationOperation:
             result.append(EnginioString::authIdentity);
             break;
-        case FileOperation:
+        case FileOperation: {
             result.append(EnginioString::files);
+            // if we have a fileID, it becomes "view", otherwise it is up/download
+            QString fileId = object[EnginioString::id].toString();
+            if (!fileId.isEmpty())
+                result.append(QLatin1Char('/') + fileId);
             break;
+        }
+        case FileGetDownloadUrlOperation: {
+            result.append(EnginioString::files);
+            QString fileId = object[EnginioString::id].toString();
+            result.append(QLatin1Char('/') + fileId + QStringLiteral("/download_url"));
+            break;
+        }
         case FileChunkUploadOperation: {
             const QString fileId = object[EnginioString::id].toString();
             Q_ASSERT(!fileId.isEmpty());
@@ -204,26 +215,11 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
             EnginioClient *q = static_cast<EnginioClient*>(d->q_ptr);
 
             if (nreply->error() != QNetworkReply::NoError) {
-                d->_downloads.remove(nreply);
                 QPair<QIODevice *, qint64> deviceState = d->_chunkedUploads.take(nreply);
                 delete deviceState.first;
                 emit q->error(ereply);
                 emit ereply->errorCodeChanged();
                 emit ereply->errorStringChanged();
-            }
-
-            // resolve the download url
-            if (d->_downloads.contains(nreply)) {
-                QString propertyName = d->_downloads.take(nreply);
-                QString id = ereply->data()[EnginioString::results].toArray().first().toObject()[propertyName].toObject()[EnginioString::id].toString();
-                QUrl url(d->m_serviceUrl);
-                url.setPath(getPath(QJsonObject(), FileOperation) + QLatin1Char('/') + id + QStringLiteral("/download_url"));
-                //url.setQuery("variant=original");
-                QNetworkRequest req(d->_request);
-                req.setUrl(url);
-                QNetworkReply *reply = d->q_ptr->networkManager()->get(req);
-                ereply->setNetworkReply(reply);
-                return;
             }
 
             // continue chunked upload
@@ -313,14 +309,15 @@ public:
         ObjectAclOperation = EnginioClient::ObjectAclOperation,
         UserOperation = EnginioClient::UserOperation,
         UsergroupOperation = EnginioClient::UsergroupOperation,
+        FileOperation = EnginioClient::FileOperation,
 
         // private
         UsergroupMemberOperation,
         AuthenticationOperation,
         SessionOperation,
         SearchOperation,
-        FileOperation,
-        FileChunkUploadOperation
+        FileChunkUploadOperation,
+        FileGetDownloadUrlOperation
     };
 
     Q_ENUMS(Operation)
@@ -341,7 +338,6 @@ public:
     QMetaObject::Connection _networkManagerConnection;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
-    QMap<QNetworkReply*, QString> _downloads;
     QMap<QNetworkReply*, QByteArray> _requestData;
 
     // device and last position
@@ -534,6 +530,7 @@ public:
         QUrl url(m_serviceUrl);
         url.setPath(getPath(object, operation));
 
+
         // TODO add all params here
         QUrlQuery urlQuery;
         if (int limit = object[EnginioString::limit].toInt()) {
@@ -583,16 +580,12 @@ public:
     template<class T>
     QNetworkReply *downloadFile(const ObjectAdaptor<T> &object)
     {
-        QString id = object[EnginioString::id].toString();
-        QString objectType = object[EnginioString::objectType].toString();
-        QJsonObject obj;
-        obj = QJsonDocument::fromJson(QByteArrayLiteral(
-                    "{\"include\": {\"file\": {}},"
-                     "\"objectType\": \"") + objectType.toUtf8() + "\","
-                     "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
+        QUrl url(m_serviceUrl);
+        url.setPath(getPath(object, FileGetDownloadUrlOperation));
+        QNetworkRequest req(_request);
+        req.setUrl(url);
 
-        QNetworkReply *reply = query<QJsonObject>(obj, ObjectOperation);
-        _downloads.insert(reply, object[EnginioString::propertyName].toString());
+        QNetworkReply *reply = q_ptr->networkManager()->get(req);
         return reply;
     }
 
