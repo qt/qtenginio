@@ -257,7 +257,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {}
         void operator ()()
         {
-            if (!_enginio->m_backendId.isEmpty() && !_enginio->m_backendSecret.isEmpty()) {
+            if (!_enginio->_backendId.isEmpty() && !_enginio->_backendSecret.isEmpty()) {
                 // TODO should we disconnect backendId and backendSecret change singals?
                 _identity->prepareSessionToken(_enginio);
             }
@@ -329,12 +329,12 @@ public:
 
 
     EnginioClient *q_ptr;
-    QByteArray m_backendId;
-    QByteArray m_backendSecret;
+    QByteArray _backendId;
+    QByteArray _backendSecret;
     EnginioIdentity *_identity;
     QVarLengthArray<QMetaObject::Connection, 4> _identityConnections;
-    QUrl m_serviceUrl;
-    QNetworkAccessManager *m_networkManager;
+    QUrl _serviceUrl;
+    QNetworkAccessManager *_networkManager;
     QMetaObject::Connection _networkManagerConnection;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
@@ -403,10 +403,10 @@ public:
             return;
         }
         CallPrepareSessionToken callPrepareSessionToken(this, identity);
-        if (m_backendId.isEmpty() || m_backendSecret.isEmpty()) {
-            if (m_backendId.isEmpty())
+        if (_backendId.isEmpty() || _backendSecret.isEmpty()) {
+            if (_backendId.isEmpty())
                 _identityConnections.append(QObject::connect(q_ptr, &EnginioClient::backendIdChanged, callPrepareSessionToken));
-            if (m_backendSecret.isEmpty())
+            if (_backendSecret.isEmpty())
                 _identityConnections.append(QObject::connect(q_ptr, &EnginioClient::backendSecretChanged, callPrepareSessionToken));
         } else
             identity->prepareSessionToken(this);
@@ -417,7 +417,7 @@ public:
 
     QNetworkReply *identify(const QJsonObject &object)
     {
-        QUrl url(m_serviceUrl);
+        QUrl url(_serviceUrl);
         url.setPath(getPath(object, AuthenticationOperation));
 
         QNetworkRequest req(_request);
@@ -434,7 +434,7 @@ public:
     template<class T>
     QNetworkReply *update(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
-        QUrl url(m_serviceUrl);
+        QUrl url(_serviceUrl);
         url.setPath(getPath(object, operation, IncludeIdInPath));
 
         QNetworkRequest req(_request);
@@ -463,7 +463,7 @@ public:
     template<class T>
     QNetworkReply *remove(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
-        QUrl url(m_serviceUrl);
+        QUrl url(_serviceUrl);
         url.setPath(getPath(object, operation, IncludeIdInPath));
 
         QNetworkRequest req(_request);
@@ -508,7 +508,7 @@ public:
     template<class T>
     QNetworkReply *create(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
-        QUrl url(m_serviceUrl);
+        QUrl url(_serviceUrl);
         url.setPath(getPath(object, operation));
 
         QNetworkRequest req(_request);
@@ -527,7 +527,7 @@ public:
     template<class T>
     QNetworkReply *query(const ObjectAdaptor<T> &object, const Operation operation)
     {
-        QUrl url(m_serviceUrl);
+        QUrl url(_serviceUrl);
         url.setPath(getPath(object, operation));
 
 
@@ -580,7 +580,7 @@ public:
     template<class T>
     QNetworkReply *downloadFile(const ObjectAdaptor<T> &object)
     {
-        QUrl url(m_serviceUrl);
+        QUrl url(_serviceUrl);
         url.setPath(getPath(object, FileGetDownloadUrlOperation));
         QNetworkRequest req(_request);
         req.setUrl(url);
@@ -624,7 +624,7 @@ public:
 
     QNetworkAccessManager *networkManager() const
     {
-        return m_networkManager;
+        return _networkManager;
     }
 
     void assignNetworkManager();
@@ -640,7 +640,7 @@ private:
     template<class T>
     QNetworkReply *uploadAsHttpMultiPart(const ObjectAdaptor<T> &object, QIODevice *device, const QString &mimeType)
     {
-        QUrl serviceUrl = m_serviceUrl;
+        QUrl serviceUrl = _serviceUrl;
         serviceUrl.setPath(getPath(QJsonObject(), FileOperation));
 
         QNetworkRequest req(_request);
@@ -686,7 +686,7 @@ private:
     template<class T>
     QNetworkReply *uploadChunked(const ObjectAdaptor<T> &object, QIODevice *device)
     {
-        QUrl serviceUrl = m_serviceUrl;
+        QUrl serviceUrl = _serviceUrl;
         serviceUrl.setPath(getPath(QJsonObject(), FileOperation));
 
         QNetworkRequest req(_request);
@@ -699,7 +699,7 @@ private:
 
     void uploadChunk(EnginioReply *ereply, QIODevice *device, qint64 startPos)
     {
-        QUrl serviceUrl = m_serviceUrl;
+        QUrl serviceUrl = _serviceUrl;
         QString path = getPath(ereply->data(), FileChunkUploadOperation);
         serviceUrl.setPath(path);
 

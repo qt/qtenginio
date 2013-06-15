@@ -126,8 +126,8 @@ const QString EnginioString::incomplete = QStringLiteral("incomplete");
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
     _identity(),
-    m_serviceUrl(EnginioString::apiEnginIo),
-    m_networkManager(),
+    _serviceUrl(EnginioString::apiEnginIo),
+    _networkManager(),
     _uploadChunkSize(512 * 1024),
     _authenticationState(EnginioClient::NotAuthenticated)
 {
@@ -203,15 +203,15 @@ EnginioClient::~EnginioClient()
 QByteArray EnginioClient::backendId() const
 {
     Q_D(const EnginioClient);
-    return d->m_backendId;
+    return d->_backendId;
 }
 
 void EnginioClient::setBackendId(const QByteArray &backendId)
 {
     Q_D(EnginioClient);
-    if (d->m_backendId != backendId) {
-        d->m_backendId = backendId;
-        d->_request.setRawHeader("Enginio-Backend-Id", d->m_backendId);
+    if (d->_backendId != backendId) {
+        d->_backendId = backendId;
+        d->_request.setRawHeader("Enginio-Backend-Id", d->_backendId);
         emit backendIdChanged(backendId);
     }
 }
@@ -224,15 +224,15 @@ void EnginioClient::setBackendId(const QByteArray &backendId)
 QByteArray EnginioClient::backendSecret() const
 {
     Q_D(const EnginioClient);
-    return d->m_backendSecret;
+    return d->_backendSecret;
 }
 
 void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
 {
     Q_D(EnginioClient);
-    if (d->m_backendSecret != backendSecret) {
-        d->m_backendSecret = backendSecret;
-        d->_request.setRawHeader("Enginio-Backend-Secret", d->m_backendSecret);
+    if (d->_backendSecret != backendSecret) {
+        d->_backendSecret = backendSecret;
+        d->_request.setRawHeader("Enginio-Backend-Secret", d->_backendSecret);
         emit backendSecretChanged(backendSecret);
     }
 }
@@ -248,14 +248,14 @@ void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
 QUrl EnginioClient::serviceUrl() const
 {
     Q_D(const EnginioClient);
-    return d->m_serviceUrl;
+    return d->_serviceUrl;
 }
 
 void EnginioClient::setserviceUrl(const QUrl &serviceUrl)
 {
     Q_D(EnginioClient);
-    if (d->m_serviceUrl != serviceUrl) {
-        d->m_serviceUrl = serviceUrl;
+    if (d->_serviceUrl != serviceUrl) {
+        d->_serviceUrl = serviceUrl;
         emit serviceUrlChanged(serviceUrl);
     }
 }
@@ -442,10 +442,10 @@ Q_GLOBAL_STATIC(QThreadStorage<QNetworkAccessManager*>, NetworkManager)
 
 void EnginioClientPrivate::assignNetworkManager()
 {
-    Q_ASSERT(!m_networkManager);
+    Q_ASSERT(!_networkManager);
 
-    m_networkManager = prepareNetworkManagerInThread();
-    _networkManagerConnection = QObject::connect(m_networkManager, &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
+    _networkManager = prepareNetworkManagerInThread();
+    _networkManagerConnection = QObject::connect(_networkManager, &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
 }
 
 QNetworkAccessManager *EnginioClientPrivate::prepareNetworkManagerInThread()

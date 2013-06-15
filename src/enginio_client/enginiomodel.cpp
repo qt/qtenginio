@@ -417,13 +417,25 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
   \target EnginioModelCpp
   \brief EnginioModel represents data from Enginio as a \l QAbstractListModel.
 
+  Example of setting a query.
+
+  The query has to result in a list.
+
+  Inside the delegate you have the magic properties model and index.
+  Exposes the data as "model".
+  index
+
+  Sorting is done server side, as soon as data is changed locally it will be invalid.
+
+
+  \note that the EnginioClient does not emit the finished and error signals for the model.
+
   For the QML version of this class see \l {EnginioModelQml}{EnginioModel (QML)}
 */
 
 /*!
     Constructs a new model with \a parent as QObject parent.
 */
-
 EnginioModel::EnginioModel(QObject *parent)
     : QAbstractListModel(parent)
     , d(new EnginioModelPrivate(this))
@@ -435,6 +447,13 @@ EnginioModel::EnginioModel(QObject *parent)
 EnginioModel::~EnginioModel()
 {}
 
+
+/*!
+  \property EnginioModel::enginio
+  \brief The EnginioClient used by the model.
+
+  \sa EnginioClient
+*/
 EnginioClient *EnginioModel::enginio() const
 {
     return d->enginio();
@@ -447,6 +466,16 @@ void EnginioModel::setEnginio(const EnginioClient *enginio)
     d->setEnginio(enginio);
 }
 
+/*!
+  \property EnginioModel::query
+  \brief The query which returns the data for the model.
+
+  FIXME example
+
+  Sorting preserved until insertion/deletion
+
+  \sa EnginioClient::query()
+*/
 QJsonObject EnginioModel::query()
 {
     return d->query();
