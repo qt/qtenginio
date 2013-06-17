@@ -289,7 +289,7 @@ public:
             QJsonObject oldValue = requestInfo.second;
             QJsonObject newValue(response->data());
 
-            if (response->errorCode() != QNetworkReply::NoError) {
+            if (response->networkError() != QNetworkReply::NoError) {
                 _data.replace(row, oldValue); // FIXME do we have to do more here?
                 return;
             }

@@ -55,25 +55,35 @@ class EnginioClientPrivate;
 class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
-    Q_PROPERTY(QNetworkReply::NetworkError errorCode READ errorCode NOTIFY errorCodeChanged)
-    Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
-
 public:
+    enum ErrorTypes {
+        NoError,
+        NetworkError,
+        BackendError
+    };
+    Q_ENUMS(ErrorTypes)
+
+    Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
+    Q_PROPERTY(ErrorTypes errorType READ errorType NOTIFY errorChanged)
+    Q_PROPERTY(QNetworkReply::NetworkError networkError READ networkError NOTIFY errorChanged)
+    Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
+    Q_PROPERTY(int backendStatus READ backendStatus NOTIFY errorChanged)
+
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
     virtual ~EnginioReply();
 
     QJsonObject data() const;
-    QNetworkReply::NetworkError errorCode() const;
+    ErrorTypes errorType() const;
+    QNetworkReply::NetworkError networkError() const;
     QString errorString() const;
+    int backendStatus() const;
 
     Q_SLOT void dumpDebugInfo() const;
 
 Q_SIGNALS:
     void finished(EnginioReply *reply);
     void dataChanged();
-    void errorCodeChanged();
-    void errorStringChanged();
+    void errorChanged();
 
 protected:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
@@ -90,6 +100,8 @@ private:
 
 Q_DECLARE_TYPEINFO(const EnginioReply*, Q_PRIMITIVE_TYPE);
 Q_DECLARE_METATYPE(const EnginioReply*);
+Q_DECLARE_TYPEINFO(EnginioReply::ErrorTypes, Q_PRIMITIVE_TYPE);
+Q_DECLARE_METATYPE(EnginioReply::ErrorTypes)
 
 #ifndef QT_NO_DEBUG_STREAM
 ENGINIOCLIENT_EXPORT QDebug operator<<(QDebug d, const EnginioReply *reply);

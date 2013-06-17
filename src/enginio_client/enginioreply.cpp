@@ -94,7 +94,7 @@ EnginioReply::~EnginioReply()
 /*!
  * \brief EnginioReply::errorCode gives the network error for the request.
  */
-QNetworkReply::NetworkError EnginioReply::errorCode() const
+QNetworkReply::NetworkError EnginioReply::networkError() const
 {
     return d->errorCode();
 }
@@ -138,6 +138,16 @@ void EnginioReply::dumpDebugInfo() const
     d->dumpDebugInfo();
 }
 
+int EnginioReply::backendStatus() const
+{
+    return d->backendStatus();
+}
+
+EnginioReply::ErrorTypes EnginioReply::errorType() const
+{
+    return d->errorType();
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const EnginioReply *reply)
 {
@@ -148,10 +158,10 @@ QDebug operator<<(QDebug d, const EnginioReply *reply)
     d.nospace();
     d << "EnginioReply(" << hex << (void *) reply << dec;
 
-    if (reply->errorCode() == 0) {
+    if (reply->networkError() == 0) {
         d << " success data=" << reply->data();
     } else {
-        d << " errorCode=" << reply->errorCode() << " ";
+        d << " errorCode=" << reply->networkError() << " ";
         d << " errorString=" << reply->errorString() << " ";
         d << " errorData=" << reply->data() << " ";
     }
