@@ -48,6 +48,11 @@
 
 #include "../common/common.h"
 
+#define CHECK_NO_ERROR(response) \
+    QCOMPARE(response->errorType(), EnginioReply::NoError);\
+    QCOMPARE(response->networkError(), QNetworkReply::NoError);\
+    QVERIFY(response->backendStatus() >= 200 && response->backendStatus() < 300);
+
 class tst_EnginioClient: public QObject
 {
     Q_OBJECT
@@ -295,7 +300,7 @@ void tst_EnginioClient::query_todos()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QVERIFY(!response->data().isEmpty());
     QVERIFY(!response->data()["results"].isUndefined());
 }
@@ -322,7 +327,7 @@ void tst_EnginioClient::query_todos_filter()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(!data["results"].isUndefined());
@@ -353,7 +358,7 @@ void tst_EnginioClient::query_todos_limit()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(data["results"].isArray());
@@ -382,7 +387,7 @@ void tst_EnginioClient::query_todos_count()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(data.contains("count"));
@@ -414,7 +419,7 @@ void tst_EnginioClient::query_todos_sort()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QJsonArray results = data["results"].toArray();
@@ -451,7 +456,7 @@ void tst_EnginioClient::query_users()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(!data["results"].isUndefined());
@@ -479,7 +484,7 @@ void tst_EnginioClient::query_users_sort()
 
         const EnginioReply *response = spy[0][0].value<EnginioReply*>();
         QCOMPARE(response, reqId);
-        QCOMPARE(response->networkError(), QNetworkReply::NoError);
+        CHECK_NO_ERROR(response);
         QJsonObject data = response->data();
         QVERIFY(!data.isEmpty());
         QVERIFY(!data["results"].isUndefined());
@@ -507,7 +512,7 @@ void tst_EnginioClient::query_users_sort()
 
         const EnginioReply *response = spy[0][0].value<EnginioReply*>();
         QCOMPARE(response, reqId);
-        QCOMPARE(response->networkError(), QNetworkReply::NoError);
+        CHECK_NO_ERROR(response);
         QJsonObject data = response->data();
         QVERIFY(!data.isEmpty());
         QVERIFY(!data["results"].isUndefined());
@@ -608,7 +613,7 @@ void tst_EnginioClient::query_usersgroup_limit()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(!data["results"].isUndefined());
@@ -636,7 +641,7 @@ void tst_EnginioClient::query_usersgroup_count()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(data.contains("count"));
@@ -663,7 +668,7 @@ void tst_EnginioClient::query_usersgroup_sort()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(!data["results"].isUndefined());
@@ -700,7 +705,7 @@ void tst_EnginioClient::query_usersgroupmembers_limit()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(!data["results"].isUndefined());
@@ -730,7 +735,7 @@ void tst_EnginioClient::query_usersgroupmembers_count()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(data.contains("count"));
@@ -759,7 +764,7 @@ void tst_EnginioClient::query_usersgroupmembers_sort()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(!data["results"].isUndefined());
@@ -792,7 +797,7 @@ void tst_EnginioClient::query_users_filter()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QVERIFY(!data["results"].isUndefined());
@@ -832,7 +837,7 @@ void tst_EnginioClient::search()
         const EnginioReply *response = spy[0][0].value<EnginioReply*>();
 
         QCOMPARE(response, reqId);
-        QCOMPARE(response->networkError(), QNetworkReply::NoError);
+        CHECK_NO_ERROR(response);
         QJsonObject data = response->data();
         QVERIFY(!data.isEmpty());
         QVERIFY(!data["results"].isUndefined());
@@ -856,7 +861,7 @@ void tst_EnginioClient::search()
         const EnginioReply *response = spy[0][0].value<EnginioReply*>();
 
         QCOMPARE(response, reqId);
-        QCOMPARE(response->networkError(), QNetworkReply::NoError);
+        CHECK_NO_ERROR(response);
         QJsonObject data = response->data();
         QVERIFY(!data.isEmpty());
         QVERIFY(!data["results"].isUndefined());
@@ -889,7 +894,7 @@ void tst_EnginioClient::create_todos()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QCOMPARE(data["completed"], obj["completed"]);
@@ -927,7 +932,7 @@ void tst_EnginioClient::users_crud()
         const EnginioReply *response = spy[0][0].value<EnginioReply*>();
         QJsonObject data = response->data();
         QCOMPARE(response, reqId);
-        QCOMPARE(response->networkError(), QNetworkReply::NoError);
+        CHECK_NO_ERROR(response);
         QVERIFY(!data.isEmpty());
         QCOMPARE(data["username"], obj["username"]);
         QVERIFY(!data["id"].toString().isEmpty());
@@ -944,7 +949,7 @@ void tst_EnginioClient::users_crud()
         QVERIFY(reqId);
         QTRY_COMPARE(spy.count(), spyCount + 1);
         QCOMPARE(spyError.count(), 0);
-        QCOMPARE(reqId->networkError(), QNetworkReply::NoError);
+        CHECK_NO_ERROR(reqId);
         QJsonArray data = reqId->data()["results"].toArray();
         QCOMPARE(data.count(), 1);
         QCOMPARE(data[0].toObject()["id"].toString(), id);
@@ -960,7 +965,7 @@ void tst_EnginioClient::users_crud()
         QVERIFY(reqId);
         QTRY_COMPARE(spy.count(), spyCount + 1);
         QCOMPARE(spyError.count(), 0);
-        QCOMPARE(reqId->networkError(), QNetworkReply::NoError);
+        CHECK_NO_ERROR(reqId);
         QJsonObject data = reqId->data();
         QCOMPARE(data["id"].toString(), id);
         QCOMPARE(data["username"].toString(), name);
@@ -1000,7 +1005,7 @@ void tst_EnginioClient::update_todos()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QJsonObject data = response->data();
     QVERIFY(!data.isEmpty());
     QJsonObject object = data["results"].toArray().first().toObject();
@@ -1013,11 +1018,12 @@ void tst_EnginioClient::update_todos()
     QCOMPARE(spyError.count(), 0);
     response = spy[1][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     data = response->data();
     QCOMPARE(data["title"], object["title"]);
     QCOMPARE(data["objectType"], object["objectType"]);
     QCOMPARE(data["completed"], object["completed"]);
+    QCOMPARE(response->backendStatus(), 200);
 }
 
 void tst_EnginioClient::update_invalidId()
@@ -1048,6 +1054,7 @@ void tst_EnginioClient::update_invalidId()
     QJsonObject data = response->data();
     QVERIFY(!data["errors"].toArray()[0].toObject()["message"].toString().isEmpty());
     QVERIFY(!data["errors"].toArray()[0].toObject()["reason"].toString().isEmpty());
+    QCOMPARE(response->backendStatus(), 404);
 }
 
 void tst_EnginioClient::remove_todos()
@@ -1073,7 +1080,7 @@ void tst_EnginioClient::remove_todos()
     // confirm that a new object was created
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
 
     query["id"] = response->data()["id"];
     reqId = client.remove(query);
@@ -1082,7 +1089,7 @@ void tst_EnginioClient::remove_todos()
     QCOMPARE(spyError.count(), 0);
     response = spy[1][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
 
     // it seems that object was deleted but lets try to query for it
     QJsonObject checkQuery;
@@ -1096,7 +1103,7 @@ void tst_EnginioClient::remove_todos()
     QCOMPARE(spyError.count(), 0);
     response = spy[2][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     QVERIFY(response->data()["results"].toArray().isEmpty());
 }
 
@@ -1364,7 +1371,7 @@ void tst_EnginioClient::identity_afterLogout()
     const EnginioReply* reqId = client.query(obj);
     QVERIFY(reqId);
     QTRY_VERIFY(!reqId->data().isEmpty());
-    QCOMPARE(reqId->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(reqId);
     QCOMPARE(spy.count(), 1);
 
     QVERIFY(spy[0][0].value<QNetworkReply*>()->request().hasRawHeader(headerName));
@@ -1376,7 +1383,7 @@ void tst_EnginioClient::identity_afterLogout()
     reqId = client.query(obj);
     QVERIFY(reqId);
     QTRY_VERIFY(!reqId->data().isEmpty());
-    QCOMPARE(reqId->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(reqId);
     QCOMPARE(spy.count(), 2);
     QVERIFY(!spy[1][0].value<QNetworkReply*>()->request().hasRawHeader(headerName));
 }
@@ -1437,7 +1444,7 @@ void tst_EnginioClient::acl()
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
     obj = response->data(); // so obj contains valid id
 
     // view acl of the object
@@ -1448,7 +1455,7 @@ void tst_EnginioClient::acl()
     QCOMPARE(spyError.count(), 0);
     QCOMPARE(response, reqId);
     qDebug() << response->data();
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
 
     QJsonObject data(response->data());
     QVERIFY(data["admin"].isArray());
@@ -1472,7 +1479,7 @@ void tst_EnginioClient::acl()
     QCOMPARE(spyError.count(), 0);
     response = spy[2][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
 
     // confirm that the response is correct
     data = response->data();
@@ -1515,7 +1522,7 @@ void tst_EnginioClient::acl()
     QCOMPARE(spyError.count(), 0);
     response = spy[3][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
 
     data = response->data();
     QVERIFY(data["admin"].isArray());
@@ -1555,7 +1562,7 @@ void tst_EnginioClient::acl()
     QCOMPARE(spyError.count(), 0);
     response = spy[4][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);
+    CHECK_NO_ERROR(response);
 }
 
 void tst_EnginioClient::sharingNetworkManager()
