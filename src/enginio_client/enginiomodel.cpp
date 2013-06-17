@@ -160,35 +160,38 @@ public:
         return _query;
     }
 
-    void append(const QJsonObject &value)
+    EnginioReply *append(const QJsonObject &value)
     {
         QJsonObject object(value);
         object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
         q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
-        const EnginioReply* id = _enginio->create(object, _operation);
+        EnginioReply* id = _enginio->create(object, _operation);
         _data.append(value);
         const int row = _data.count() - 1;
         _rowsToSync.insert(row);
         _dataChanged.insert(id, qMakePair(row, object));
         q->endInsertRows();
+        return id;
     }
 
-    void remove(int row)
+    EnginioReply *remove(int row)
     {
         QJsonObject oldObject = _data.at(row).toObject();
-        const EnginioReply* id = _enginio->remove(oldObject, _operation);
+        EnginioReply* id = _enginio->remove(oldObject, _operation);
         _dataChanged.insert(id, qMakePair(row, oldObject));
         QVector<int> roles(1);
         roles.append(SyncedRole);
         emit q->dataChanged(q->index(row), q->index(row) , roles);
+        return id;
     }
 
-    void setValue(int row, const QString &role, const QVariant &value)
+    EnginioReply *setValue(int row, const QString &role, const QVariant &value)
     {
         int key = _roles.key(role, InvalidRole);
         if (key != InvalidRole) {
-            setData(row, value, key);
+            return setData(row, value, key);
         }
+        return 0;
     }
 
     void setQuery(const QJsonObject &query)
@@ -311,7 +314,7 @@ public:
         }
     }
 
-    bool setData(const int row, const QVariant &value, int role)
+    EnginioReply *setData(const int row, const QVariant &value, int role)
     {
         if (role > SyncedRole) {
             _rowsToSync.insert(row);
@@ -322,15 +325,15 @@ public:
             deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
             deltaObject[QString::fromUtf8("id")] = newObject[QString::fromUtf8("id")];
             deltaObject[QString::fromUtf8("objectType")] = newObject[QString::fromUtf8("objectType")];
-            const EnginioReply* id = _enginio->update(deltaObject, _operation);
+            EnginioReply *id = _enginio->update(deltaObject, _operation);
             _dataChanged.insert(id, qMakePair(row, oldObject));
             _data.replace(row, newObject);
             emit q->dataChanged(q->index(row), q->index(row));
-            return true;
+            return id;
         }
 
         Q_UNIMPLEMENTED();
-        return false;
+        return 0;
     }
 
     void syncRoles()
@@ -500,25 +503,25 @@ void EnginioModel::setOperation(const int operation)
     d->setOperation(operation);
 }
 
-void EnginioModel::append(const QJsonObject &value)
+EnginioReply *EnginioModel::append(const QJsonObject &value)
 {
-    d->append(value);
+    return d->append(value);
 }
 
-void EnginioModel::remove(int row)
+EnginioReply *EnginioModel::remove(int row)
 {
     if (row >= d->rowCount())
-        return;
+        return 0;// FIXME never return 0
 
-    d->remove(row);
+    return d->remove(row);
 }
 
-void EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
+EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
     if (row >= d->rowCount())  // TODO remove as soon as we have a sparse array.
-        return;
+        return 0;  // FIXME never return 0
 
-    d->setValue(row, role, value);
+    return d->setValue(row, role, value);
 }
 
 Qt::ItemFlags EnginioModel::flags(const QModelIndex &index) const
