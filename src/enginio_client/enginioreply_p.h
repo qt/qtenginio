@@ -45,6 +45,7 @@
 #include <QtNetwork/qnetworkreply.h>
 
 #include "enginioclient_p.h"
+#include "enginioreply.h"
 
 class EnginioReplyPrivate {
 public:
@@ -63,9 +64,23 @@ public:
         return _nreply->error();
     }
 
+    int backendStatus() const
+    {
+        return _nreply->attribute(QNetworkRequest::HttpStatusCodeAttribute).value<int>();
+    }
+
     QString errorString() const
     {
         return _nreply->errorString();
+    }
+
+    EnginioReply::ErrorTypes errorType() const
+    {
+        if (errorCode() == QNetworkReply::NoError)
+            return EnginioReply::NoError;
+        if (data().isEmpty())
+            return EnginioReply::NetworkError;
+        return EnginioReply::BackendError;
     }
 
     QJsonObject data() const
@@ -87,6 +102,7 @@ public:
         QNetworkRequest request = _nreply->request();
         qDebug() << "Request URL:" << request.url().toString(/*FormattingOptions*/ QUrl::None);
         qDebug() << "Operation:" << operationNames[_nreply->operation()];
+        qDebug() << "HTTP return code:" << backendStatus();
 
         QByteArray json = _client->_requestData.value(_nreply);
         if (!json.isEmpty())

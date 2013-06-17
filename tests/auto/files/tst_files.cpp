@@ -119,7 +119,7 @@ void tst_Files::fileUploadDownload()
 
     const EnginioReply *responseObjectCreation = spy[0][0].value<EnginioReply*>();
     QCOMPARE(responseObjectCreation, createReply);
-    QCOMPARE(responseObjectCreation->errorCode(), QNetworkReply::NoError);
+    QCOMPARE(responseObjectCreation->networkError(), QNetworkReply::NoError);
     QJsonObject data = responseObjectCreation->data();
     QVERIFY(!data.isEmpty());
     QCOMPARE(data["title"], obj["title"]);

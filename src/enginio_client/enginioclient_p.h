@@ -218,8 +218,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
                 QPair<QIODevice *, qint64> deviceState = d->_chunkedUploads.take(nreply);
                 delete deviceState.first;
                 emit q->error(ereply);
-                emit ereply->errorCodeChanged();
-                emit ereply->errorStringChanged();
+                emit ereply->errorChanged();
             }
 
             // continue chunked upload
