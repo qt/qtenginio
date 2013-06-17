@@ -318,10 +318,10 @@ public:
         ObjectAclOperation = EnginioClient::ObjectAclOperation,
         UserOperation = EnginioClient::UserOperation,
         UsergroupOperation = EnginioClient::UsergroupOperation,
+        UsergroupMemberOperation = EnginioClient::UsergroupMembersOperation,
         FileOperation = EnginioClient::FileOperation,
 
         // private
-        UsergroupMemberOperation,
         AuthenticationOperation,
         SessionOperation,
         SearchOperation,
