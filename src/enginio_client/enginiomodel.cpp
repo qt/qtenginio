@@ -239,6 +239,7 @@ public:
             const EnginioReply *id = _enginio->query(_query, _operation);
             if (_canFetchMore)
                 _latestRequestedOffset = _query[EnginioString::limit].toDouble();
+            QObject::connect(id, &EnginioReply::finished, id, &EnginioReply::deleteLater);
             _dataChanged.insert(id, qMakePair(FullModelReset, QJsonObject()));
         }
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
