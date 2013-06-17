@@ -112,8 +112,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         switch (operation) {
         case ObjectOperation: {
             QString objectType = object[EnginioString::objectType].toString();
-            if (objectType.isEmpty())
+            if (objectType.isEmpty()) {
+                qWarning() << "Requested object operation requires non empty \"objectType\" value";
                 return QString();
+            }
 
             result.append(objectType.replace('.', '/'));
             break;
@@ -121,13 +123,17 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         case ObjectAclOperation:
         {
             QString objectType = object[EnginioString::objectType].toString();
-            if (objectType.isEmpty())
+            if (objectType.isEmpty()) {
+                qWarning() << "Requested object acl operation requires non empty \"objectType\" value";
                 return QString();
+            }
 
             result.append(objectType.replace('.', '/'));
             QString id = object[EnginioString::id].toString();
-            if (id.isEmpty())
+            if (id.isEmpty()) {
+                qWarning() << "Requested object acl operation requires non empty \"id\" value";
                 return QString();
+            }
             result.append('/');
             result.append(id);
             result.append('/');
@@ -172,8 +178,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         case UsergroupMemberOperation:
         {
             QString id = object[EnginioString::id].toString();
-            if (id.isEmpty())
+            if (id.isEmpty()) {
+                qWarning() << "Requested usergroup member operation requires non empty \"id\" value";
                 return QString();
+            }
             result.append(EnginioString::usergroups);
             result.append('/');
             result.append(id);
@@ -185,8 +193,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
         if (flags & IncludeIdInPath) {
             QString id = object[EnginioString::id].toString();
-            if (id.isEmpty())
+            if (id.isEmpty()) {
+                qWarning() << "Requested operation requires non empty \"id\" value";
                 return QString();
+            }
             result.append('/');
             result.append(id);
         }
@@ -308,10 +318,10 @@ public:
         ObjectAclOperation = EnginioClient::ObjectAclOperation,
         UserOperation = EnginioClient::UserOperation,
         UsergroupOperation = EnginioClient::UsergroupOperation,
+        UsergroupMemberOperation = EnginioClient::UsergroupMembersOperation,
         FileOperation = EnginioClient::FileOperation,
 
         // private
-        UsergroupMemberOperation,
         AuthenticationOperation,
         SessionOperation,
         SearchOperation,
