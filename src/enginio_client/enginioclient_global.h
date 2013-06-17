@@ -47,6 +47,6 @@
 #  define ENGINIOCLIENT_EXPORT Q_DECL_IMPORT
 #endif
 
-static bool gEnableEnginioDebugInfo = !qgetenv("ENGINIO_DEBUG_INFO").isEmpty();
+extern bool gEnableEnginioDebugInfo;
 
 #endif // ENGINIOCLIENT_GLOBAL_H
