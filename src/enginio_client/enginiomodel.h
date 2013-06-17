@@ -75,9 +75,9 @@ public:
     virtual void fetchMore(const QModelIndex &parent) Q_DECL_OVERRIDE;
     virtual bool canFetchMore(const QModelIndex &parent) const Q_DECL_OVERRIDE;
 
-    Q_INVOKABLE void append(const QJsonObject &value);
-    Q_INVOKABLE void remove(int row);
-    Q_INVOKABLE void setProperty(int row, const QString &role, const QVariant &value);
+    Q_INVOKABLE EnginioReply *append(const QJsonObject &value);
+    Q_INVOKABLE EnginioReply *remove(int row);
+    Q_INVOKABLE EnginioReply *setProperty(int row, const QString &role, const QVariant &value);
 
 protected:
     virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
