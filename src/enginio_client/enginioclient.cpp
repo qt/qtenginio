@@ -126,6 +126,7 @@ const QString EnginioString::complete = QStringLiteral("complete");
 const QString EnginioString::incomplete = QStringLiteral("incomplete");
 const QString EnginioString::headers = QStringLiteral("headers");
 const QString EnginioString::payload = QStringLiteral("payload");
+const QString EnginioString::variant = QStringLiteral("variant");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
@@ -447,6 +448,15 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
   \snippet files/tst_files.cpp download
   The propertyName can be anything, but it must be the same as the one used to upload the file with.
   This way one object can have several files attached to itself (one per propertyName).
+
+  If a file provides several variants, it is possible to request a variant by including it in the
+  \a object.
+  \code
+    {
+        "id": "abc123",
+        "variant": "thumbnail"
+    }
+  \endcode
 */
 EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 {
