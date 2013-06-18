@@ -11,5 +11,6 @@ TEMPLATE = app
 
 SOURCES += \
     tst_files.cpp \
+    ../common/common.cpp
 
 HEADERS += ../common/common.h

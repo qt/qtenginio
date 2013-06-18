@@ -65,9 +65,14 @@ public slots:
         qDebug() << "\n###\n";
     }
 
+    static void wait(bool* condition, int timeout = 10000) {
+        QTRY_VERIFY_WITH_TIMEOUT(*condition, timeout);
+    }
+
 private slots:
     void initTestCase();
     void init();
+    void customRequest();
     void query_todos();
     void query_todos_filter();
     void query_todos_limit();
@@ -277,6 +282,15 @@ void tst_EnginioClient::init()
 {
     if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
         QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
+}
+
+void tst_EnginioClient::customRequest()
+{
+    QString backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
+    EnginioTests::EnginioBackendManager backendManager(&tst_EnginioClient::wait);
+
+    QVERIFY(backendManager.createBackend(backendName));
+    QVERIFY(backendManager.removeBackend(backendName));
 }
 
 void tst_EnginioClient::query_todos()
