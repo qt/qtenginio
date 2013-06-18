@@ -97,6 +97,7 @@ private slots:
     void identity();
     void identity_invalid();
     void identity_afterLogout();
+    void fakedBackendReply();
     void acl();
     void sharingNetworkManager();
 
@@ -1066,6 +1067,7 @@ void tst_EnginioClient::update_invalidId()
     QCOMPARE(reqId, spyError[0][0].value<EnginioReply*>());
     // TODO how ugly is that, improve JSON api
     QJsonObject data = response->data();
+    QVERIFY(data["errors"].isArray());
     QVERIFY(!data["errors"].toArray()[0].toObject()["message"].toString().isEmpty());
     QVERIFY(!data["errors"].toArray()[0].toObject()["reason"].toString().isEmpty());
     QCOMPARE(response->backendStatus(), 404);
@@ -1400,6 +1402,56 @@ void tst_EnginioClient::identity_afterLogout()
     CHECK_NO_ERROR(reqId);
     QCOMPARE(spy.count(), 2);
     QVERIFY(!spy[1][0].value<QNetworkReply*>()->request().hasRawHeader(headerName));
+}
+
+void tst_EnginioClient::fakedBackendReply()
+{
+    EnginioClient client;
+    client.setBackendId(EnginioTests::TESTAPP_ID);
+    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+
+    QSignalSpy spyClientFinished(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyClientError(&client, SIGNAL(error(EnginioReply*)));
+    QSignalSpy spyReplyFinished(&client, SIGNAL(finished(EnginioReply*)));
+
+    QJsonObject empty;
+    QJsonObject objecTypeOnly;
+    objecTypeOnly["objectType"] = QString::fromUtf8("objects.todos");
+
+    client.query(empty, EnginioClient::ObjectOperation);
+    client.query(empty, EnginioClient::ObjectAclOperation);
+    client.query(objecTypeOnly, EnginioClient::ObjectAclOperation);
+    client.query(empty, EnginioClient::UsergroupMembersOperation);
+
+    client.update(empty, EnginioClient::ObjectOperation);
+    client.update(empty, EnginioClient::ObjectAclOperation);
+    client.update(objecTypeOnly, EnginioClient::ObjectAclOperation);
+    client.update(empty, EnginioClient::UsergroupMembersOperation);
+
+    client.remove(empty, EnginioClient::ObjectOperation);
+    client.remove(empty, EnginioClient::ObjectAclOperation);
+    client.remove(objecTypeOnly, EnginioClient::ObjectAclOperation);
+    client.remove(empty, EnginioClient::UsergroupMembersOperation);
+
+    QTRY_COMPARE(spyClientFinished.count(), 12);
+    QCOMPARE(spyClientError.count(), spyClientFinished.count());
+    QCOMPARE(spyReplyFinished.count(), spyClientFinished.count());
+
+    for (int i = 0; i < spyClientFinished.count(); ++i) {
+        EnginioReply *reply = spyClientFinished[i][0].value<EnginioReply*>();
+        QJsonObject data = reply->data();
+        QVERIFY(!data.isEmpty());
+
+        QVERIFY(!data["errors"].toArray()[0].toObject()["message"].toString().isEmpty());
+        QVERIFY(!data["errors"].toArray()[0].toObject()["reason"].toString().isEmpty());
+
+        QCOMPARE(reply->errorType(), EnginioReply::BackendError);
+        QVERIFY(reply->networkError() != QNetworkReply::NoError);
+        QCOMPARE(reply->backendStatus(), 400);
+
+        QCOMPARE(spyReplyFinished[i][0].value<EnginioReply*>(), spyClientFinished[i][0].value<EnginioReply*>());
+    }
 }
 
 void tst_EnginioClient::acl()
