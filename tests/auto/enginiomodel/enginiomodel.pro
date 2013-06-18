@@ -10,5 +10,6 @@ TEMPLATE = app
 
 SOURCES += \
     tst_enginiomodel.cpp \
+    ../common/common.cpp
 
 HEADERS += ../common/common.h

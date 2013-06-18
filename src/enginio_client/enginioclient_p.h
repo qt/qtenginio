@@ -94,6 +94,8 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString empty;
     static const QString complete;
     static const QString incomplete;
+    static const QString headers;
+    static const QString payload;
 };
 
 class ENGINIOCLIENT_EXPORT EnginioClientPrivate
@@ -432,10 +434,55 @@ public:
         QNetworkRequest req(_request);
         req.setUrl(url);
         QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
-        QNetworkReply *reply = q_ptr->networkManager()->post(req, data);
+        QNetworkReply *reply = networkManager()->post(req, data);
 
         if (gEnableEnginioDebugInfo)
             _requestData.insert(reply, data);
+
+        return reply;
+    }
+
+    QNetworkReply *customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)
+    {
+        Q_ASSERT(!url.isEmpty());
+        Q_ASSERT(!httpOperation.isEmpty());
+
+        QUrl reqUrl(_serviceUrl);
+        reqUrl.setPath(url.path());
+        reqUrl.setQuery(url.query());
+
+        QNetworkRequest req(_request);
+        req.setUrl(reqUrl);
+
+        if (data[EnginioString::headers].isObject()) {
+            QJsonObject headers = data[EnginioString::headers].toObject();
+
+            QJsonObject::const_iterator end = headers.constEnd();
+            for (QJsonObject::const_iterator i = headers.constBegin(); i != end; i++) {
+                QByteArray headerName = i.key().toUtf8();
+                QByteArray headerValue = i.value().toString().toUtf8();
+                req.setRawHeader(headerName, headerValue);
+            }
+        }
+
+        QBuffer *buffer = 0;
+        QByteArray payload;
+
+        if (data[EnginioString::payload].isObject()) {
+            ObjectAdaptor<QJsonObject> o(data[EnginioString::payload].toObject());
+            payload = o.toJson();
+            buffer = new QBuffer();
+            buffer->setData(payload);
+            buffer->open(QIODevice::ReadOnly);
+        }
+
+        QNetworkReply *reply = networkManager()->sendCustomRequest(req, httpOperation, buffer);
+
+        if (gEnableEnginioDebugInfo && !payload.isEmpty())
+            _requestData.insert(reply, payload);
+
+        if (buffer)
+            buffer->setParent(reply);
 
         return reply;
     }
@@ -461,7 +508,7 @@ public:
         o.remove(EnginioString::id);
         QByteArray data = o.toJson();
 
-        QNetworkReply *reply = q_ptr->networkManager()->put(req, data);
+        QNetworkReply *reply = networkManager()->put(req, data);
 
         if (gEnableEnginioDebugInfo)
             _requestData.insert(reply, data);
@@ -494,7 +541,7 @@ public:
             QBuffer *buffer = new QBuffer();
             buffer->setData(data);
             buffer->open(QIODevice::ReadOnly);
-            QNetworkReply *reply = q_ptr->networkManager()->sendCustomRequest(req, QByteArrayLiteral("DELETE"), buffer);
+            QNetworkReply *reply = networkManager()->sendCustomRequest(req, QByteArrayLiteral("DELETE"), buffer);
             buffer->setParent(reply);
 
             if (gEnableEnginioDebugInfo)
@@ -502,10 +549,10 @@ public:
 
             return reply;
         }
-        return q_ptr->networkManager()->deleteResource(req);
+        return networkManager()->deleteResource(req);
 #else
         QByteArray data = o.toJson();
-        QNetworkReply *reply = q_ptr->networkManager()->deleteResource(req, data);
+        QNetworkReply *reply = networkManager()->deleteResource(req, data);
 
         if (gEnableEnginioDebugInfo)
             _requestData.insert(reply, data);
@@ -525,7 +572,7 @@ public:
 
         QByteArray data = object.toJson();
 
-        QNetworkReply *reply = q_ptr->networkManager()->post(req, data);
+        QNetworkReply *reply = networkManager()->post(req, data);
 
         if (gEnableEnginioDebugInfo)
             _requestData.insert(reply, data);
@@ -583,7 +630,7 @@ public:
         QNetworkRequest req(_request);
         req.setUrl(url);
 
-        return q_ptr->networkManager()->get(req);
+        return networkManager()->get(req);
     }
 
     template<class T>
@@ -594,7 +641,7 @@ public:
         QNetworkRequest req(_request);
         req.setUrl(url);
 
-        QNetworkReply *reply = q_ptr->networkManager()->get(req);
+        QNetworkReply *reply = networkManager()->get(req);
         return reply;
     }
 
@@ -657,7 +704,7 @@ private:
         req.setUrl(serviceUrl);
 
         QHttpMultiPart *multiPart = createHttpMultiPart(object, device, mimeType);
-        QNetworkReply *reply = q_ptr->networkManager()->post(req, multiPart);
+        QNetworkReply *reply = networkManager()->post(req, multiPart);
         multiPart->setParent(reply);
         device->setParent(multiPart);
         return reply;
@@ -701,7 +748,7 @@ private:
         QNetworkRequest req(_request);
         req.setUrl(serviceUrl);
 
-        QNetworkReply *reply = q_ptr->networkManager()->post(req, object.toJson());
+        QNetworkReply *reply = networkManager()->post(req, object.toJson());
         _chunkedUploads.insert(reply, qMakePair(device, static_cast<qint64>(0)));
         return reply;
     }
@@ -732,7 +779,7 @@ private:
         ChunkDevice *chunkDevice = new ChunkDevice(device, startPos, _uploadChunkSize);
         chunkDevice->open(QIODevice::ReadOnly);
 
-        QNetworkReply *reply = q_ptr->networkManager()->put(req, chunkDevice);
+        QNetworkReply *reply = networkManager()->put(req, chunkDevice);
         chunkDevice->setParent(reply);
         _chunkedUploads.insert(reply, qMakePair(device, endPos));
         ereply->setNetworkReply(reply);
