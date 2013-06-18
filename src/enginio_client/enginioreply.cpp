@@ -138,6 +138,11 @@ void EnginioReply::dumpDebugInfo() const
     d->dumpDebugInfo();
 }
 
+bool EnginioReply::isError() const
+{
+    return d->errorCode() != QNetworkReply::NoError;
+}
+
 int EnginioReply::backendStatus() const
 {
     return d->backendStatus();
