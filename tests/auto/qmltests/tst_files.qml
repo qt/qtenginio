@@ -124,9 +124,7 @@ Item {
 
             //! [download]
             var downloadData = {
-                "objectType": "objects.files",
-                "id": objectId,
-                "propertyName": "fileAttachment"
+                "id": uploadReply.data.id,
             }
             var downloadReply = enginio.downloadFile(downloadData)
             //! [download]
