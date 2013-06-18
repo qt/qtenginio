@@ -347,8 +347,6 @@ public:
         for (QJsonObject::const_iterator i = firstObject.constBegin(); i != firstObject.constEnd(); ++i) {
             _roles[idx++] = i.key();
         }
-        if (firstObject.contains(EnginioString::id))
-            _roles[Qt::DisplayRole] = EnginioString::id;
     }
 
     QHash<int, QByteArray> roleNames() const
@@ -373,6 +371,9 @@ public:
     {
         if (role == SyncedRole)
             return !_rowsToSync.contains(row);
+
+        if (role == Qt::DisplayRole)
+            return _data.at(row);
 
         const QJsonObject object = _data.at(row).toObject();
         if (!object.isEmpty()) {
