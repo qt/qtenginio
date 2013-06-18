@@ -138,7 +138,7 @@ void tst_Files::fileUploadDownload()
     QJsonObject object;
     object["id"] = id;
     object["objectType"] = QStringLiteral("objects.files");
-    object["propertyName"] = QStringLiteral("fileAttachment");;
+    object["propertyName"] = QStringLiteral("fileAttachment");
 
     QJsonObject fileObject;
     fileObject[QStringLiteral("fileName")] = fileName;
