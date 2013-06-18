@@ -1435,7 +1435,9 @@ void tst_EnginioClient::fakedBackendReply()
     client.remove(objecTypeOnly, EnginioClient::ObjectAclOperation);
     client.remove(empty, EnginioClient::UsergroupMembersOperation);
 
-    QTRY_COMPARE(spyClientFinished.count(), 12);
+    client.search(empty);
+
+    QTRY_COMPARE(spyClientFinished.count(), 13);
     QCOMPARE(spyClientError.count(), spyClientFinished.count());
     QCOMPARE(spyReplyFinished.count(), spyClientFinished.count());
 

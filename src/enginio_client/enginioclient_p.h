@@ -119,15 +119,17 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 {
     enum PathOptions { Default, IncludeIdInPath = 1};
 
+    static QByteArray constructErrorMessage(QByteArray msg)
+    {
+        static QByteArray msgBegin = QByteArrayLiteral("{\"errors\": [{\"message\": \"");
+        static QByteArray msgEnd = QByteArrayLiteral("\",\"reason\": \"BadRequest\"}]}");
+        return msgBegin + msg + msgEnd;
+    }
+
     template<class T>
     static bool getPath(const T &object, int operation, QString *path, QByteArray *errorMsg, PathOptions flags = Default)
     {
-        QByteArray msgBegin = QByteArrayLiteral("{\"errors\": [{\"message\": \"");
-        QByteArray msgEnd = QByteArrayLiteral("\",\"reason\": \"BadRequest\"}]}");
         QByteArray &msg = *errorMsg;
-
-        #define CONSTRUCT_ERROR_MSG(Msg)\
-            msg = msgBegin + QByteArrayLiteral(Msg) + msgEnd;
 
         QString &result = *path;
         result.reserve(96);
@@ -139,7 +141,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         case ObjectOperation: {
             QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty()) {
-                CONSTRUCT_ERROR_MSG("Requested object operation requires non empty \'objectType\' value");
+                msg = constructErrorMessage(QByteArrayLiteral("Requested object operation requires non empty \'objectType\' value"));
                 return false;
             }
 
@@ -150,14 +152,14 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {
             QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty()) {
-                CONSTRUCT_ERROR_MSG("Requested object acl operation requires non empty \'objectType\' value");
+                msg = constructErrorMessage(QByteArrayLiteral("Requested object acl operation requires non empty \'objectType\' value"));
                 return false;
             }
 
             result.append(objectType.replace('.', '/'));
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
-                CONSTRUCT_ERROR_MSG("Requested object acl operation requires non empty \'id\' value");
+                msg = constructErrorMessage(QByteArrayLiteral("Requested object acl operation requires non empty \'id\' value"));
                 return false;
             }
             result.append('/');
@@ -205,7 +207,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
-                CONSTRUCT_ERROR_MSG("Requested usergroup member operation requires non empty \'id\' value");
+                msg = constructErrorMessage(QByteArrayLiteral("Requested usergroup member operation requires non empty \'id\' value"));
                 return false;
             }
             result.append(EnginioString::usergroups);
@@ -220,14 +222,12 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         if (flags & IncludeIdInPath) {
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
-                CONSTRUCT_ERROR_MSG("Requested operation requires non empty \'id\' value");
+                msg = constructErrorMessage(QByteArrayLiteral("Requested operation requires non empty \'id\' value"));
                 return false;
             }
             result.append('/');
             result.append(id);
         }
-
-        #undef CONSTRUCT_ERROR_MSG
 
         return true;
     }
@@ -642,9 +642,9 @@ public:
                 }
                 urlQuery.addQueryItem(EnginioString::search,
                     QString::fromUtf8(search.toJson()));
-
-                // FIXME: Think about proper error handling for wrong user input.
-            } else qWarning("!! Fulltext Search: parameter(s) missing !!");
+            } else {
+                return new EnginioFakedReply(this, constructErrorMessage(QByteArrayLiteral("Fulltext Search: 'search' parameter(s) missing")));
+            }
         } else
         if (object[EnginioString::query].isComposedType()) { // TODO docs are inconsistent on that
             urlQuery.addQueryItem(QStringLiteral("q"),
