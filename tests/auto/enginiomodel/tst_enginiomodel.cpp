@@ -225,8 +225,6 @@ void tst_EnginioModel::roleNames()
     QSet<QByteArray> roleNames = roles.values().toSet();
     foreach(const QByteArray role, expectedRoles)
         QVERIFY(roleNames.contains(role));
-
-    QCOMPARE(roles[Qt::DisplayRole], QByteArrayLiteral("id"));
 }
 
 void tst_EnginioModel::listView()
