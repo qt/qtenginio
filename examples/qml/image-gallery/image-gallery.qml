@@ -74,7 +74,8 @@ Rectangle {
                     visible: image.status != Image.Ready
                 }
                 Component.onCompleted: {
-                    var data = { "id": model.file.id }
+                    var data = { "id": model.file.id,
+                                 "variant": "thumbnail"}
                     var reply = client.downloadFile(data)
                     reply.finished.connect(function() {
                         image.source = reply.data.expiringUrl
