@@ -473,12 +473,8 @@ public:
         Q_ASSERT(!url.isEmpty());
         Q_ASSERT(!httpOperation.isEmpty());
 
-        QUrl reqUrl(_serviceUrl);
-        reqUrl.setPath(url.path());
-        reqUrl.setQuery(url.query());
-
         QNetworkRequest req(_request);
-        req.setUrl(reqUrl);
+        req.setUrl(url);
 
         if (data[EnginioString::headers].isObject()) {
             QJsonObject headers = data[EnginioString::headers].toObject();

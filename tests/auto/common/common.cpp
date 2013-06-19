@@ -187,7 +187,6 @@ bool EnginioBackendManager::createObjectType(const QString &backendName, const Q
 
     foreach (const QJsonValue &value, environments) {
         QJsonObject env = value.toObject();
-        qDebug() << env;
         if (env["name"].toString() == environment) {
             backendId = env["id"].toString();
             QJsonArray masterKeys = env["masterKeys"].toArray();

@@ -278,7 +278,7 @@ QNetworkAccessManager * EnginioClient::networkManager() const
 /*!
  * \brief Create custom request to the enginio REST API
  *
- * \param url The url to be used for the request. Note that only the path and the query are used from the url.
+ * \param url The url to be used for the request. Note that the provided url completely replaces the internal serviceUrl.
  * \param httpOperation Verb to the server that is valid according to the HTTP specification (eg. "GET", "POST", "PUT", etc.).
  * \param data optional JSON object possibly containing custom headers and the payload data for the request.
  *
