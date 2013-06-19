@@ -38,19 +38,17 @@
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
 #include <QtCore/qjsonarray.h>
+#include <QSignalSpy>
 
 #include "common.h"
 
 namespace EnginioTests {
 
-EnginioBackendManager::EnginioBackendManager(wait_callback wait, QObject *parent)
+EnginioBackendManager::EnginioBackendManager(QObject *parent)
     : QObject(parent)
-    , _didRequestFinish(false)
-    , _didSeeError(false)
     , _email(qgetenv("ENGINIO_EMAIL_ADDRESS"))
     , _password(qgetenv("ENGINIO_LOGIN_PASSWORD"))
     , _url(EnginioTests::TESTAPP_URL)
-    , _testWaitFunc(wait)
 {
     if (_email.isEmpty() || _password.isEmpty()) {
         qDebug("Needed environment variables ENGINIO_EMAIL_ADDRESS, ENGINIO_LOGIN_PASSWORD are not set. Backend setup failed!");
@@ -65,33 +63,25 @@ EnginioBackendManager::~EnginioBackendManager()
 
 void EnginioBackendManager::finished(EnginioReply *reply)
 {
-    _didRequestFinish = true;
+    Q_ASSERT(reply);
     _responseData = reply->data();
 }
 
 void EnginioBackendManager::error(EnginioReply *reply)
 {
-       _didSeeError = true;
-       qDebug() << "\n\n### ERROR";
-       qDebug() << reply->errorString();
-       reply->dumpDebugInfo();
-       qDebug() << "\n###\n";
-}
-
-bool EnginioBackendManager::wait(int timeout)
-{
-    _testWaitFunc(&_didRequestFinish, timeout);
-    if (!_didRequestFinish)
-        qDebug("Request timed out.");
-
-    return _didRequestFinish;
+    Q_ASSERT(reply);
+    qDebug() << "\n\n### ERROR";
+    qDebug() << reply->errorString();
+    reply->dumpDebugInfo();
+    qDebug() << "\n###\n";
 }
 
 bool EnginioBackendManager::synchronousRequest(const QByteArray &httpOperation, const QJsonObject &data)
 {
-    _didRequestFinish = false;
+    QSignalSpy finishedSpy(&_client, SIGNAL(finished(EnginioReply *)));
+    QSignalSpy errorSpy(&_client, SIGNAL(error(EnginioReply *)));
     _client.customRequest(_url, httpOperation, data);
-    return wait() && !_didSeeError;
+    return finishedSpy.wait(10000) && !errorSpy.count();
 }
 
 QString EnginioBackendManager::authenticate()

@@ -9,9 +9,9 @@ TARGET = tst_qmltests
 
 QT += enginio
 CONFIG += testcase
-CONFIG   -= app_bundle
+CONFIG -= app_bundle
 
-QT += qmltest
+QT += qmltest testlib
 
 DEFINES += QUICK_TEST_SOURCE_DIR=\\\"$$_PRO_FILE_PWD_\\\"
 

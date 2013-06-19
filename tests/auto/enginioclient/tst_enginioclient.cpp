@@ -66,10 +66,6 @@ public slots:
         qDebug() << "\n###\n";
     }
 
-    static void wait(bool* condition, int timeout = 10000) {
-        QTRY_VERIFY_WITH_TIMEOUT(*condition, timeout);
-    }
-
 private slots:
     void initTestCase();
     void init();
@@ -289,7 +285,7 @@ void tst_EnginioClient::init()
 void tst_EnginioClient::customRequest()
 {
     QString backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
-    EnginioTests::EnginioBackendManager backendManager(&tst_EnginioClient::wait);
+    EnginioTests::EnginioBackendManager backendManager(this);
 
     QVERIFY(backendManager.createBackend(backendName));
     QVERIFY(backendManager.removeBackend(backendName));
