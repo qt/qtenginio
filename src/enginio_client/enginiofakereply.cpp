@@ -35,7 +35,7 @@
 **
 ****************************************************************************/
 
-#include "enginiofakedreply_p.h"
+#include "enginiofakereply_p.h"
 #include "enginioclient_p.h"
 #include <QtCore/qmetaobject.h>
 #include <QtNetwork/qnetworkrequest.h>
@@ -43,14 +43,14 @@
 struct FinishedFunctor
 {
     QNetworkAccessManager *_qnam;
-    EnginioFakedReply *_reply;
+    EnginioFakeReply *_reply;
     void operator ()()
     {
         _qnam->finished(_reply);
     }
 };
 
-EnginioFakedReply::EnginioFakedReply(EnginioClientPrivate *parent, QByteArray msg)
+EnginioFakeReply::EnginioFakeReply(EnginioClientPrivate *parent, QByteArray msg)
     : QNetworkReply(parent->q_ptr)
     , _msg(msg)
 {
@@ -59,35 +59,32 @@ EnginioFakedReply::EnginioFakedReply(EnginioClientPrivate *parent, QByteArray ms
     setAttribute(QNetworkRequest::HttpStatusCodeAttribute, 400);
     QNetworkAccessManager *qnam = parent->networkManager();
     FinishedFunctor fin = {qnam, this};
-    QObject::connect(this, &EnginioFakedReply::finished, fin);
+    QObject::connect(this, &EnginioFakeReply::finished, fin);
     QMetaObject::invokeMethod(this, "finished", Qt::QueuedConnection);
 }
 
-void EnginioFakedReply::abort() {}
+void EnginioFakeReply::abort() {}
 
-bool EnginioFakedReply::isSequential() const
+bool EnginioFakeReply::isSequential() const
 {
     return false;
 }
 
-qint64 EnginioFakedReply::bytesAvailable() const
+qint64 EnginioFakeReply::size() const
 {
     return _msg.size();
 }
 
-qint64 EnginioFakedReply::size() const
+qint64 EnginioFakeReply::readData(char *dest, qint64 n)
 {
-    return _msg.size();
-}
-
-qint64 EnginioFakedReply::readData(char *dest, qint64 n)
-{
-    qint64 size = qMin(qint64(_msg.size()), n);
+    if (pos() > _msg.size())
+        return -1;
+    qint64 size = qMin(qint64(_msg.size() - pos()), n);
     strncpy(dest, _msg.constData(), size);
     return size;
 }
 
-qint64 EnginioFakedReply::writeData(const char *data, qint64 maxSize)
+qint64 EnginioFakeReply::writeData(const char *data, qint64 maxSize)
 {
     Q_UNUSED(data);
     Q_UNUSED(maxSize);

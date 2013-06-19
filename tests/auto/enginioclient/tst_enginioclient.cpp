@@ -98,7 +98,7 @@ private slots:
     void identity();
     void identity_invalid();
     void identity_afterLogout();
-    void fakedBackendReply();
+    void backendFakeReply();
     void acl();
     void sharingNetworkManager();
 
@@ -1405,7 +1405,7 @@ void tst_EnginioClient::identity_afterLogout()
     QVERIFY(!spy[1][0].value<QNetworkReply*>()->request().hasRawHeader(headerName));
 }
 
-void tst_EnginioClient::fakedBackendReply()
+void tst_EnginioClient::backendFakeReply()
 {
     EnginioClient client;
     client.setBackendId(EnginioTests::TESTAPP_ID);

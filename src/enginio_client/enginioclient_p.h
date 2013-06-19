@@ -41,7 +41,7 @@
 #include "chunkdevice_p.h"
 #include "enginioclient.h"
 #include "enginioreply.h"
-#include "enginiofakedreply_p.h"
+#include "enginiofakereply_p.h"
 #include "enginioidentity.h"
 #include "enginioobjectadaptor_p.h"
 
@@ -104,7 +104,7 @@ struct ENGINIOCLIENT_EXPORT EnginioString
         QString _path; \
         QByteArray _errorMsg; \
         if (!getPath(Object, Operation, &_path, &_errorMsg, Flags)) \
-            return new EnginioFakedReply(this, _errorMsg); \
+            return new EnginioFakeReply(this, _errorMsg); \
         Url.setPath(_path); \
     }
 
@@ -643,7 +643,7 @@ public:
                 urlQuery.addQueryItem(EnginioString::search,
                     QString::fromUtf8(search.toJson()));
             } else {
-                return new EnginioFakedReply(this, constructErrorMessage(QByteArrayLiteral("Fulltext Search: 'search' parameter(s) missing")));
+                return new EnginioFakeReply(this, constructErrorMessage(QByteArrayLiteral("Fulltext Search: 'search' parameter(s) missing")));
             }
         } else
         if (object[EnginioString::query].isComposedType()) { // TODO docs are inconsistent on that

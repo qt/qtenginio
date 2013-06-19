@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOFAKEDREPLY_P_H
-#define ENGINIOFAKEDREPLY_P_H
+#ifndef ENGINIOFAKEREPLY_P_H
+#define ENGINIOFAKEREPLY_P_H
 
 #include "Enginio/enginioclient_global.h"
 #include "enginioreply.h"
@@ -44,19 +44,18 @@
 #include <QtNetwork/qnetworkreply.h>
 #include <QtCore/qbytearray.h>
 
-class EnginioFakedReply : public QNetworkReply
+class EnginioFakeReply : public QNetworkReply
 {
     Q_OBJECT
     QByteArray _msg;
 public:
-    explicit EnginioFakedReply(EnginioClientPrivate *parent, QByteArray msg);
+    explicit EnginioFakeReply(EnginioClientPrivate *parent, QByteArray msg);
 
     virtual void abort() Q_DECL_OVERRIDE;
     virtual bool isSequential() const Q_DECL_OVERRIDE;
-    virtual qint64 bytesAvailable() const Q_DECL_OVERRIDE;
     virtual qint64 size() const Q_DECL_OVERRIDE;
     virtual qint64 readData(char *dest, qint64 n) Q_DECL_OVERRIDE;
     virtual qint64 writeData(const char *data, qint64 maxSize) Q_DECL_OVERRIDE;
 };
 
-#endif // ENGINIOFAKEDREPLY_P_H
+#endif // ENGINIOFAKEREPLY_P_H
