@@ -2,6 +2,8 @@
 #define ENGINIOTESTSCOMMON_H
 
 #include <Enginio/enginioclient.h>
+#include <QtCore/qjsonobject.h>
+#include <QtCore/qjsonarray.h>
 #include <QtCore/qurl.h>
 
 class EnginioReply;
@@ -17,13 +19,17 @@ class EnginioBackendManager: public QObject
     Q_OBJECT
 
     EnginioClient _client;
+    QJsonObject _headers;
     QJsonObject _responseData;
     QString _email;
     QString _password;
     QUrl _url;
 
     bool synchronousRequest(const QByteArray &httpOperation, const QJsonObject &data = QJsonObject());
-    QString authenticate();
+    bool removeBackendWithId(const QString &backendId);
+    bool authenticate();
+    QString getBackenId(const QString &backendName);
+    QJsonArray getAllBackends();
 
 public slots:
     void error(EnginioReply *reply);
@@ -32,8 +38,9 @@ public slots:
 public:
     explicit EnginioBackendManager(QObject *parent = 0);
     virtual ~EnginioBackendManager();
-    bool createBackend(const QString& backendName);
-    bool removeBackend(const QString& backendName);
+    bool createBackend(const QString &backendName);
+    bool removeBackend(const QString &backendName);
+    bool createObjectType(const QString &backendName, const QString &environment, const QJsonObject &schema);
 };
 
 }

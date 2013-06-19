@@ -44,6 +44,10 @@
 
 namespace EnginioTests {
 
+static const QByteArray GET = QByteArrayLiteral("GET");
+static const QByteArray POST = QByteArrayLiteral("POST");
+static const QByteArray DELETE = QByteArrayLiteral("DELETE");
+
 EnginioBackendManager::EnginioBackendManager(QObject *parent)
     : QObject(parent)
     , _email(qgetenv("ENGINIO_EMAIL_ADDRESS"))
@@ -54,8 +58,14 @@ EnginioBackendManager::EnginioBackendManager(QObject *parent)
         qDebug("Needed environment variables ENGINIO_EMAIL_ADDRESS, ENGINIO_LOGIN_PASSWORD are not set. Backend setup failed!");
         return;
     }
+
+    _headers["Accept"] = QStringLiteral("application/json");
+
     QObject::connect(&_client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     QObject::connect(&_client, SIGNAL(finished(EnginioReply *)), this, SLOT(finished(EnginioReply *)));
+
+    if (!authenticate())
+        qDebug("ERROR: Session authentication failed!");
 }
 
 EnginioBackendManager::~EnginioBackendManager()
@@ -80,92 +90,33 @@ bool EnginioBackendManager::synchronousRequest(const QByteArray &httpOperation, 
 {
     QSignalSpy finishedSpy(&_client, SIGNAL(finished(EnginioReply *)));
     QSignalSpy errorSpy(&_client, SIGNAL(error(EnginioReply *)));
+    _responseData = QJsonObject();
     _client.customRequest(_url, httpOperation, data);
     return finishedSpy.wait(10000) && !errorSpy.count();
 }
 
-QString EnginioBackendManager::authenticate()
+bool EnginioBackendManager::authenticate()
 {
-    qDebug("\tAuthenticating with Enginio server.");
-    QJsonObject obj;
     QJsonObject credentials;
     credentials["email"] = _email;
     credentials["password"] = _password;
-    QJsonObject headers;
-    headers["Accept"] = QStringLiteral("application/json");
+    QJsonObject obj;
     obj["payload"] = credentials;
-    obj["headers"] = headers;
+    obj["headers"] = _headers;
     _url.setPath(QStringLiteral("/v1/account/auth/identity"));
 
     // Authenticate developer
-    if (!synchronousRequest(QByteArrayLiteral("POST"), obj))
-        return QString();
+    synchronousRequest(POST, obj);
+    QString sessionToken = _responseData["sessionToken"].toString();
+    _headers["Enginio-Backend-Session"] = sessionToken;
 
-    return _responseData["sessionToken"].toString();
+    return !sessionToken.isEmpty();
 }
 
-bool EnginioBackendManager::createBackend(const QString& backendName)
+QString EnginioBackendManager::getBackenId(const QString &backendName)
 {
-    qDebug("\t## Creating backend: %s", backendName.toUtf8().data());
-    QString sessionToken = authenticate();
-    if (sessionToken.isEmpty()) {
-        qDebug("ERROR: Session authentication failed!");
-        return false;
-    }
-
-    // Get all backends
-    QJsonObject obj;
-    QJsonObject headers;
-    headers["Accept"] = QStringLiteral("application/json");
-    headers["Enginio-Backend-Session"] = sessionToken;
-    _url.setPath("/v1/account/apps");
-    obj["headers"] = headers;
-
-    if (!synchronousRequest(QByteArrayLiteral("GET"), obj))
-        return false;
-
-    QJsonArray results = _responseData["results"].toArray();
-    qDebug() << "\t" << results.count() << "backends found.";
-    foreach (const QJsonValue& value, results) {
-        if (value.toObject()["name"].toString() == backendName) {
-            removeBackend(backendName);
-            break;
-        }
-    }
-
-    QJsonObject backend;
-    backend["name"] = backendName;
-    obj["payload"] = backend;
-
-    if (!synchronousRequest(QByteArrayLiteral("POST"), obj))
-        return false;
-
-    return true;
-}
-
-bool EnginioBackendManager::removeBackend(const QString &backendName)
-{
-    qDebug("\t## Deleting backend: %s", backendName.toUtf8().data());
-     QString sessionToken = authenticate();
-     if (sessionToken.isEmpty()) {
-        qDebug("ERROR: Session authentication failed!");
-        return false;
-    }
-
-    // Get all backends
-    QJsonObject obj;
-    QJsonObject headers;
-    QString appsPath = QStringLiteral("/v1/account/apps");
-    headers["Accept"] = QStringLiteral("application/json");
-    headers["Enginio-Backend-Session"] = sessionToken;
-    _url.setPath(appsPath);
-    obj["headers"] = headers;
-
-    if (!synchronousRequest(QByteArrayLiteral("GET"), obj))
-        return false;
-
+    QJsonArray results = getAllBackends();
     QString backendId;
-    QJsonArray results = _responseData["results"].toArray();
     foreach (const QJsonValue& value, results) {
         QJsonObject data = value.toObject();
         if (data["name"].toString() == backendName) {
@@ -173,16 +124,87 @@ bool EnginioBackendManager::removeBackend(const QString &backendName)
             break;
         }
     }
+    return backendId;
+}
 
+QJsonArray EnginioBackendManager::getAllBackends()
+{
+    QJsonObject obj;
+    obj["headers"] = _headers;
+    _url.setPath("/v1/account/apps");
+
+    synchronousRequest(GET, obj);
+    return _responseData["results"].toArray();
+}
+
+bool EnginioBackendManager::removeBackendWithId(const QString &backendId)
+{
     if (backendId.isEmpty())
         return false;
 
-    appsPath.append("/").append(backendId);
+    QJsonObject obj;
+    obj["headers"] = _headers;
+    QString appsPath = QStringLiteral("/v1/account/apps/");
+    appsPath.append(backendId);
     _url.setPath(appsPath);
-    if (!synchronousRequest(QByteArrayLiteral("DELETE"), obj))
-        return false;
-
-    return true;
+    return synchronousRequest(DELETE, obj);
 }
 
+bool EnginioBackendManager::createBackend(const QString &backendName)
+{
+    qDebug("## Creating backend: %s", backendName.toUtf8().data());
+
+    QJsonObject obj;
+    obj["headers"] = _headers;
+    QJsonObject backend;
+    backend["name"] = backendName;
+    obj["payload"] = backend;
+    _url.setPath("/v1/account/apps");
+
+    return synchronousRequest(POST, obj);
+}
+
+bool EnginioBackendManager::removeBackend(const QString &backendName)
+{
+    qDebug("## Deleting backend: %s", backendName.toUtf8().data());
+    return removeBackendWithId(getBackenId(backendName));
+}
+
+bool EnginioBackendManager::createObjectType(const QString &backendName, const QString &environment, const QJsonObject &schema)
+{
+    qDebug("## Create new object type on backend: %s", backendName.toUtf8().data());
+
+    QJsonArray environments = _responseData["environments"].toArray();
+    if (environments.isEmpty()) {
+        // FIXME: This should not be needed if we know how to query the environments.
+        removeBackend(backendName);
+        createBackend(backendName);
+        environments = _responseData["environments"].toArray();
+    }
+
+    QString backendId;
+    QString backendMasterKey;
+
+    foreach (const QJsonValue &value, environments) {
+        QJsonObject env = value.toObject();
+        qDebug() << env;
+        if (env["name"].toString() == environment) {
+            backendId = env["id"].toString();
+            QJsonArray masterKeys = env["masterKeys"].toArray();
+            QJsonObject masterKey = masterKeys.first().toObject();
+            backendMasterKey = masterKey["key"].toString();
+        }
+    }
+
+    _headers["Enginio-Backend-Id"] = backendId;
+    _headers["Enginio-Backend-MasterKey"] = backendMasterKey;
+
+    QJsonObject obj;
+    obj["headers"] = _headers;
+    obj["payload"] = schema;
+
+    _url.setPath("/v1/object_types");
+    synchronousRequest(POST, obj);
+    return !_responseData["properties"].toArray().isEmpty();
+}
 }

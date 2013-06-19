@@ -288,6 +288,21 @@ void tst_EnginioClient::customRequest()
     EnginioTests::EnginioBackendManager backendManager(this);
 
     QVERIFY(backendManager.createBackend(backendName));
+    QJsonObject schema;
+    schema["name"] = QStringLiteral("places");
+    QJsonArray array;
+    QJsonObject title;
+    title["name"] = QStringLiteral("title");
+    title["type"] = QStringLiteral("string");
+    title["indexed"] = false;
+    QJsonObject photo;
+    photo["name"] = QStringLiteral("photo");
+    photo["type"] = QStringLiteral("ref");
+    photo["objectType"] = QStringLiteral("files");
+    array.append(title);
+    array.append(photo);
+    schema["properties"] = array;
+    QVERIFY(backendManager.createObjectType(backendName, QStringLiteral("development"), schema));
     QVERIFY(backendManager.removeBackend(backendName));
 }
 
