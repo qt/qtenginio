@@ -149,11 +149,13 @@ void tst_Files::fileUploadDownload()
     const EnginioReply* responseUpload = client.uploadFile(uploadJson, QUrl(filePath));
     //![upload]
 
+    QSignalSpy progressSpy(responseUpload, SIGNAL(progress(qint64,qint64)));
     QVERIFY(responseUpload);
     ++replyCount;
     QTRY_COMPARE(spy.count(), replyCount);
     QCOMPARE(spyError.count(), 0);
     fileId = responseUpload->data().value(QStringLiteral("id")).toString();
+    QVERIFY(progressSpy.count() > 1);
     }
 
     // Query including files

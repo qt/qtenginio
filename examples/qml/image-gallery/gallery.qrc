@@ -5,7 +5,6 @@
     </qresource>
     <qresource prefix="/">
         <file>image-gallery.qml</file>
-        <file>utils.js</file>
         <file>EnginioButton.qml</file>
         <file>ImageDialog.qml</file>
     </qresource>
