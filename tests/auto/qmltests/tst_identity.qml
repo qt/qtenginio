@@ -5,7 +5,7 @@ import "config.js" as AppConfig
 
 Item {
     id: root
-    property string __testObjectName: "QML_TEST_" + (new Date()).getTime()
+    property string __testObjectName: "QML_IDENT_TEST_" + (new Date()).getTime()
 
     Enginio {
         id: enginio
