@@ -88,7 +88,7 @@
     \value UsergroupMembersOperation Operate on group members
 */
 
-ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qgetenv("ENGINIO_DEBUG_INFO").isEmpty();
+ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
 
 const QString EnginioString::pageSize = QStringLiteral("pageSize");
 const QString EnginioString::limit = QStringLiteral("limit");
