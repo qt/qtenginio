@@ -233,7 +233,7 @@ public:
 
     void execute()
     {
-        if (!_enginio)
+        if (!_enginio || _enginio->backendId().isEmpty() || _enginio->backendSecret().isEmpty())
             return;
         if (!_query.isEmpty()) {
             const EnginioReply *id = _enginio->query(_query, _operation);
