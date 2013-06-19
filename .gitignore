@@ -36,6 +36,11 @@ examples/qml/todo/todo
 examples/qml/users/users
 examples/qml/image-gallery/image-gallery
 
+# tests
+tst_*
+!tst_*.cpp
+!tst_*.qml
+!tst_*.h
 # temp files
 *.swp
 *~
