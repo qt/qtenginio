@@ -369,6 +369,8 @@ public:
     QByteArray _backendId;
     QByteArray _backendSecret;
     EnginioIdentity *_identity;
+
+    QVector<QMetaObject::Connection> _connections;
     QVarLengthArray<QMetaObject::Connection, 4> _identityConnections;
     QUrl _serviceUrl;
     QNetworkAccessManager *_networkManager;
@@ -716,6 +718,32 @@ public:
         return q_ptr->isSignalConnected(signal);
     }
 
+    class UploadProgressFunctor
+    {
+    public:
+        UploadProgressFunctor(EnginioClientPrivate *client, QNetworkReply *reply)
+            : _client(client), _reply(reply)
+        {
+            Q_ASSERT(_client);
+            Q_ASSERT(_reply);
+        }
+
+        void operator ()(qint64 progress, qint64 total)
+        {
+            if (_client->_chunkedUploads.contains(_reply)) {
+                EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
+                QPair<QIODevice*, qint64> chunkData = _client->_chunkedUploads.value(_reply);
+                emit ereply->progress(chunkData.second + progress, chunkData.first->size());
+            } else {
+                EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
+                emit ereply->progress(progress, total);
+            }
+        }
+    private:
+        EnginioClientPrivate *_client;
+        QNetworkReply *_reply;
+    };
+
 private:
 
     template<class T>
@@ -732,6 +760,7 @@ private:
         QNetworkReply *reply = networkManager()->post(req, multiPart);
         multiPart->setParent(reply);
         device->setParent(multiPart);
+        _connections.append(QObject::connect(reply, &QNetworkReply::uploadProgress, UploadProgressFunctor(this, reply)));
         return reply;
     }
 
@@ -775,6 +804,7 @@ private:
 
         QNetworkReply *reply = networkManager()->post(req, object.toJson());
         _chunkedUploads.insert(reply, qMakePair(device, static_cast<qint64>(0)));
+        _connections.append(QObject::connect(reply, &QNetworkReply::uploadProgress, UploadProgressFunctor(this, reply)));
         return reply;
     }
 
@@ -814,6 +844,7 @@ private:
         _chunkedUploads.insert(reply, qMakePair(device, endPos));
         ereply->setNetworkReply(reply);
         reply->setParent(ereply);
+        _connections.append(QObject::connect(reply, &QNetworkReply::uploadProgress, UploadProgressFunctor(this, reply)));
     }
 };
 

@@ -86,6 +86,7 @@ Q_SIGNALS:
     void finished(EnginioReply *reply);
     void dataChanged();
     void errorChanged();
+    void progress(qint64 bytesSent, qint64 bytesTotal);
 
 protected:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);

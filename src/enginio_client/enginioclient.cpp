@@ -159,6 +159,8 @@ EnginioClientPrivate::~EnginioClientPrivate()
 {
     foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
         QObject::disconnect(identityConnection);
+    foreach (const QMetaObject::Connection &connection, _connections)
+        QObject::disconnect(connection);
     QObject::disconnect(_networkManagerConnection);
 }
 

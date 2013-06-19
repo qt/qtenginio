@@ -8,7 +8,7 @@ SOURCES += main.cpp
 
 mac: CONFIG -= app_bundle
 
-OTHER_FILES += *.qml *.js
+OTHER_FILES += *.qml
 
 RESOURCES += \
     ../qml.qrc \

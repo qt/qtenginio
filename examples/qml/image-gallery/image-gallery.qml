@@ -1,9 +1,10 @@
 import QtQuick 2.0
 import Enginio 1.0
 import "qrc:///config.js" as AppConfig
-import "qrc:///utils.js" as Utils
 
 import QtQuick.Dialogs 1.0
+import QtQuick.Controls 1.0
+import QtQuick.Layouts 1.0
 
 /*
  * Enginio image gallery example.
@@ -44,16 +45,6 @@ Rectangle {
     }
     //! [model]
 
-    ListView {
-        id: imageListView
-        model: enginioModel // get the data from EnginioModel
-        delegate: imageListDelegate
-        anchors.top: parent.top
-        anchors.bottom: uploadButton.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-    }
-
     // Delegate for displaying individual rows of the model
     Component {
         id: imageListDelegate
@@ -84,7 +75,6 @@ Rectangle {
                 }
                 Component.onCompleted: {
                     var data = { "id": model.file.id }
-                    console.log("file id" + model.file.id)
                     var reply = client.downloadFile(data)
                     reply.finished.connect(function() {
                         image.source = reply.data.expiringUrl
@@ -111,13 +101,13 @@ Rectangle {
                         height: 33
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: height * 0.5
-                        text: Utils.sizeStringFromFile(model.file)
+                        text: sizeStringFromFile(model.file)
                     }
                     Text {
                         height: 33
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: height * 0.5
-                        text: Utils.timeStringFromFile(model.file)
+                        text: timeStringFromFile(model.file)
                     }
                 }
             }
@@ -154,22 +144,34 @@ Rectangle {
         }
     }
 
+    ColumnLayout {
+        anchors.fill: parent
+        ListView {
+            id: imageListView
+            model: enginioModel // get the data from EnginioModel
+            delegate: imageListDelegate
+            Layout.fillHeight: true
+            width: parent.width
+            clip: true
+        }
+        RowLayout {
+            width: parent.width
+            Button {
+                text: "Upload new image..."
+                onClicked: fileDialog.visible = true;
+            }
+            ProgressBar {
+                id: progressBar
+                visible: false
+
+                Layout.fillWidth: true
+            }
+        }
+    }
+
     // Dialog for showing full size image
     ImageDialog {
         id: imageDialog
-    }
-
-    // Button that opens the file dialog
-    EnginioButton {
-        id: uploadButton
-        width: parent.width
-        height: 50
-        anchors.bottom: parent.bottom
-        text: "Upload"
-        textPixelSize: 20
-        onClicked: {
-            fileDialog.visible = true;
-        }
     }
 
     // File dialog for selecting image file from local file system
@@ -198,9 +200,48 @@ Rectangle {
                 };
                 console.log("data: " + reply.data + " id: " + reply.data.id)
                 var uploadReply = client.uploadFile(uploadData, fileUrl)
-                uploadReply.finished.connect(function() { var tmp = enginioModel.query; enginioModel.query = {}; enginioModel.query = tmp; })
+                progressBar.visible = true
+                uploadReply.progress.connect(function(progress, total) {
+                    progressBar.visible = progress/total
+                })
+                uploadReply.finished.connect(function() {
+                    var tmp = enginioModel.query; enginioModel.query = {}; enginioModel.query = tmp;
+                    progressBar.visible = false
+                })
             })
             console.log("File selected: " + fileUrl);
         }
+    }
+
+    function sizeStringFromFile(fileData) {
+        var str = [];
+        if (fileData && fileData.fileSize) {
+            str.push("Size: ");
+            str.push(fileData.fileSize);
+            str.push(" bytes");
+        }
+        return str.join("");
+    }
+
+    function doubleDigitNumber(number) {
+        if (number < 10)
+            return "0" + number;
+        return number;
+    }
+
+    function timeStringFromFile(fileData) {
+        var str = [];
+        if (fileData && fileData.createdAt) {
+            var date = new Date(fileData.createdAt);
+            if (date) {
+                str.push("Uploaded: ");
+                str.push(date.toDateString());
+                str.push(" ");
+                str.push(doubleDigitNumber(date.getHours()));
+                str.push(":");
+                str.push(doubleDigitNumber(date.getMinutes()));
+            }
+        }
+        return str.join("");
     }
 }
