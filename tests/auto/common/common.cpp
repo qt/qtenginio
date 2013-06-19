@@ -113,18 +113,23 @@ bool EnginioBackendManager::authenticate()
     return !sessionToken.isEmpty();
 }
 
-QString EnginioBackendManager::getBackenId(const QString &backendName)
+QString EnginioBackendManager::getAppId(const QString &backendName)
 {
+    QString appId = _backendEnvironments.value(backendName).first().toObject()["appId"].toString();
+
+    if (!appId.isEmpty())
+        return appId;
+
     QJsonArray results = getAllBackends();
-    QString backendId;
     foreach (const QJsonValue& value, results) {
         QJsonObject data = value.toObject();
         if (data["name"].toString() == backendName) {
-            backendId = data["id"].toString();
+            appId = data["id"].toString();
             break;
         }
     }
-    return backendId;
+
+    return appId;
 }
 
 QJsonArray EnginioBackendManager::getAllBackends()
@@ -137,15 +142,15 @@ QJsonArray EnginioBackendManager::getAllBackends()
     return _responseData["results"].toArray();
 }
 
-bool EnginioBackendManager::removeBackendWithId(const QString &backendId)
+bool EnginioBackendManager::removeAppWithId(const QString &appId)
 {
-    if (backendId.isEmpty())
+    if (appId.isEmpty())
         return false;
 
     QJsonObject obj;
     obj["headers"] = _headers;
     QString appsPath = QStringLiteral("/v1/account/apps/");
-    appsPath.append(backendId);
+    appsPath.append(appId);
     _url.setPath(appsPath);
     return synchronousRequest(DELETE, obj);
 }
@@ -161,25 +166,34 @@ bool EnginioBackendManager::createBackend(const QString &backendName)
     obj["payload"] = backend;
     _url.setPath("/v1/account/apps");
 
-    return synchronousRequest(POST, obj);
+    if (!synchronousRequest(POST, obj))
+        return false;
+
+    _backendEnvironments[backendName] = _responseData["environments"].toArray();
+    return true;
 }
 
 bool EnginioBackendManager::removeBackend(const QString &backendName)
 {
     qDebug("## Deleting backend: %s", backendName.toUtf8().data());
-    return removeBackendWithId(getBackenId(backendName));
+    QString appId = _backendEnvironments.take(backendName).first().toObject()["appId"].toString();
+
+    if (appId.isEmpty())
+        appId = getAppId(backendName);
+
+    return removeAppWithId(appId);
 }
 
 bool EnginioBackendManager::createObjectType(const QString &backendName, const QString &environment, const QJsonObject &schema)
 {
     qDebug("## Create new object type on backend: %s", backendName.toUtf8().data());
 
-    QJsonArray environments = _responseData["environments"].toArray();
+    QJsonArray environments = _backendEnvironments.value(backendName);
     if (environments.isEmpty()) {
         // FIXME: This should not be needed if we know how to query the environments.
         removeBackend(backendName);
         createBackend(backendName);
-        environments = _responseData["environments"].toArray();
+        environments = _backendEnvironments.value(backendName);
     }
 
     QString backendId;
@@ -192,6 +206,7 @@ bool EnginioBackendManager::createObjectType(const QString &backendName, const Q
             QJsonArray masterKeys = env["masterKeys"].toArray();
             QJsonObject masterKey = masterKeys.first().toObject();
             backendMasterKey = masterKey["key"].toString();
+            break;
         }
     }
 
