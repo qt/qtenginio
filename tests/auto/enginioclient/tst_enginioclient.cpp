@@ -54,9 +54,14 @@
     QCOMPARE(response->networkError(), QNetworkReply::NoError);\
     QVERIFY(response->backendStatus() >= 200 && response->backendStatus() < 300);
 
+static const QString kTestEnvironment = QStringLiteral("development");
+
 class tst_EnginioClient: public QObject
 {
     Q_OBJECT
+
+    QString _backendName;
+    EnginioTests::EnginioBackendManager _backendManager;
 
 public slots:
     void error(EnginioReply *reply) {
@@ -68,8 +73,9 @@ public slots:
 
 private slots:
     void initTestCase();
+    void cleanupTestCase();
     void init();
-    void customRequest();
+    void internal_createObjectType();
     void query_todos();
     void query_todos_filter();
     void query_todos_limit();
@@ -120,16 +126,46 @@ private:
         return id;
     }
 
-    void populateForSearchIfNeeded() {
+    void prepareForSearch() {
+        QJsonObject customObject;
+        customObject["name"] = QStringLiteral("CustomObject");
+        QJsonObject selfLinkedObject;
+        selfLinkedObject["name"] = QStringLiteral("SelfLinkedObject");
+
+        QJsonObject intValue;
+        intValue["name"] = QStringLiteral("intValue");
+        intValue["type"] = QStringLiteral("number");
+        intValue["indexed"] = false;
+        QJsonObject stringValue;
+        stringValue["name"] = QStringLiteral("stringValue");
+        stringValue["type"] = QStringLiteral("string");
+        stringValue["indexed"] = true;
+
+        QJsonArray properties;
+        properties.append(intValue);
+        properties.append(stringValue);
+        customObject["properties"] = properties;
+        selfLinkedObject["properties"] = properties;
+
+        QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject));
+        QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, selfLinkedObject));
+
+        QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, kTestEnvironment);
+        QString id = apiKeys["backendId"].toString();
+        QString secret = apiKeys["backendSecret"].toString();
+        QVERIFY(!id.isEmpty());
+        QVERIFY(!secret.isEmpty());
+
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        client.setBackendId(EnginioTests::TESTAPP_ID);
-        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+        client.setBackendId(id.toUtf8());
+        client.setBackendSecret(secret.toUtf8());
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
+        qDebug("Populating backend with data");
         QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
-        int iterations = 10;
+        int iterations = 5;
 
         {
             QJsonObject obj;
@@ -150,7 +186,7 @@ private:
                     client.create(obj);
                 }
 
-                QTRY_COMPARE(spy.count(), iterations);
+                QTRY_COMPARE_WITH_TIMEOUT(spy.count(), iterations, 10000);
                 QCOMPARE(spyError.count(), 0);
             }
 
@@ -175,7 +211,7 @@ private:
                     client.create(obj);
                 }
 
-                QTRY_COMPARE(spy.count(), iterations);
+                QTRY_COMPARE_WITH_TIMEOUT(spy.count(), iterations, 10000);
                 QCOMPARE(spyError.count(), 0);
             }
         }
@@ -184,6 +220,11 @@ private:
 
 void tst_EnginioClient::initTestCase()
 {
+    _backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
+    QVERIFY(_backendManager.createBackend(_backendName));
+
+    prepareForSearch();
+
     // Create some users to be used in later tests
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
@@ -276,18 +317,21 @@ void tst_EnginioClient::initTestCase()
     QCOMPARE(spyError.count(), 0);
 }
 
+void tst_EnginioClient::cleanupTestCase()
+{
+    EnginioTests::EnginioBackendManager backendManager;
+    QVERIFY(backendManager.removeBackend(_backendName));
+}
+
 void tst_EnginioClient::init()
 {
     if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
         QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
 }
 
-void tst_EnginioClient::customRequest()
+void tst_EnginioClient::internal_createObjectType()
 {
-    QString backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
-    EnginioTests::EnginioBackendManager backendManager(this);
-
-    QVERIFY(backendManager.createBackend(backendName));
+    EnginioTests::EnginioBackendManager backendManager;
     QJsonObject schema;
     schema["name"] = QStringLiteral("places");
     QJsonArray array;
@@ -302,8 +346,7 @@ void tst_EnginioClient::customRequest()
     array.append(title);
     array.append(photo);
     schema["properties"] = array;
-    QVERIFY(backendManager.createObjectType(backendName, QStringLiteral("development"), schema));
-    QVERIFY(backendManager.removeBackend(backendName));
+    QVERIFY(backendManager.createObjectType(_backendName, kTestEnvironment, schema));
 }
 
 void tst_EnginioClient::query_todos()
@@ -833,13 +876,17 @@ void tst_EnginioClient::query_users_filter()
 
 void tst_EnginioClient::search()
 {
+    QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, kTestEnvironment);
+    QString id = apiKeys["backendId"].toString();
+    QString secret = apiKeys["backendSecret"].toString();
+    QVERIFY(!id.isEmpty());
+    QVERIFY(!secret.isEmpty());
+
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(id.toUtf8());
+    client.setBackendSecret(secret.toUtf8());
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-
-    populateForSearchIfNeeded();
 
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
