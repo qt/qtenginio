@@ -345,9 +345,6 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation o
 {
     Q_D(EnginioClient);
 
-    if (object.empty())
-        return 0;
-
     QNetworkReply *nreply = d->create<QJsonObject>(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
@@ -367,9 +364,6 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
 {
     Q_D(EnginioClient);
 
-    if (object.empty())
-        return 0;
-
     QNetworkReply *nreply = d->update<QJsonObject>(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     nreply->setParent(ereply);
@@ -388,9 +382,6 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
 EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
-
-    if (object.empty())
-        return 0;
 
     QNetworkReply *nreply = d->remove<QJsonObject>(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);

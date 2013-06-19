@@ -41,6 +41,7 @@
 #include "chunkdevice_p.h"
 #include "enginioclient.h"
 #include "enginioreply.h"
+#include "enginiofakereply_p.h"
 #include "enginioidentity.h"
 #include "enginioobjectadaptor_p.h"
 
@@ -98,14 +99,39 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString payload;
 };
 
+#define CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, Flags) \
+    {\
+        QString _path; \
+        QByteArray _errorMsg; \
+        if (!getPath(Object, Operation, &_path, &_errorMsg, Flags)) \
+            return new EnginioFakeReply(this, _errorMsg); \
+        Url.setPath(_path); \
+    }
+
+#define CHECK_AND_SET_PATH(Url, Object, Operation) \
+    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientPrivate::Default)
+
+#define CHECK_AND_SET_PATH_WITH_ID(Url, Object, Operation) \
+    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientPrivate::IncludeIdInPath)
+
+
 class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 {
     enum PathOptions { Default, IncludeIdInPath = 1};
 
-    template<class T>
-    static QString getPath(const T &object, int operation, PathOptions flags = Default)
+    static QByteArray constructErrorMessage(QByteArray msg)
     {
-        QString result;
+        static QByteArray msgBegin = QByteArrayLiteral("{\"errors\": [{\"message\": \"");
+        static QByteArray msgEnd = QByteArrayLiteral("\",\"reason\": \"BadRequest\"}]}");
+        return msgBegin + msg + msgEnd;
+    }
+
+    template<class T>
+    static bool getPath(const T &object, int operation, QString *path, QByteArray *errorMsg, PathOptions flags = Default)
+    {
+        QByteArray &msg = *errorMsg;
+
+        QString &result = *path;
         result.reserve(96);
         result.append(QStringLiteral("/v1/"));
 
@@ -115,8 +141,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         case ObjectOperation: {
             QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty()) {
-                qWarning() << "Requested object operation requires non empty \"objectType\" value";
-                return QString();
+                msg = constructErrorMessage(QByteArrayLiteral("Requested object operation requires non empty \'objectType\' value"));
+                return false;
             }
 
             result.append(objectType.replace('.', '/'));
@@ -126,21 +152,21 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {
             QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty()) {
-                qWarning() << "Requested object acl operation requires non empty \"objectType\" value";
-                return QString();
+                msg = constructErrorMessage(QByteArrayLiteral("Requested object acl operation requires non empty \'objectType\' value"));
+                return false;
             }
 
             result.append(objectType.replace('.', '/'));
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
-                qWarning() << "Requested object acl operation requires non empty \"id\" value";
-                return QString();
+                msg = constructErrorMessage(QByteArrayLiteral("Requested object acl operation requires non empty \'id\' value"));
+                return false;
             }
             result.append('/');
             result.append(id);
             result.append('/');
             result.append(EnginioString::access);
-            return result;
+            return true;
         }
         case AuthenticationOperation:
             result.append(EnginioString::authIdentity);
@@ -181,29 +207,29 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
-                qWarning() << "Requested usergroup member operation requires non empty \"id\" value";
-                return QString();
+                msg = constructErrorMessage(QByteArrayLiteral("Requested usergroup member operation requires non empty \'id\' value"));
+                return false;
             }
             result.append(EnginioString::usergroups);
             result.append('/');
             result.append(id);
             result.append('/');
             result.append(EnginioString::members);
-            return result;
+            return true;
         }
         }
 
         if (flags & IncludeIdInPath) {
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
-                qWarning() << "Requested operation requires non empty \"id\" value";
-                return QString();
+                msg = constructErrorMessage(QByteArrayLiteral("Requested operation requires non empty \'id\' value"));
+                return false;
             }
             result.append('/');
             result.append(id);
         }
 
-        return result;
+        return true;
     }
 
     class ReplyFinishedFunctor
@@ -429,7 +455,7 @@ public:
     QNetworkReply *identify(const QJsonObject &object)
     {
         QUrl url(_serviceUrl);
-        url.setPath(getPath(object, AuthenticationOperation));
+        CHECK_AND_SET_PATH(url, object, AuthenticationOperation);
 
         QNetworkRequest req(_request);
         req.setUrl(url);
@@ -491,7 +517,7 @@ public:
     QNetworkReply *update(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
         QUrl url(_serviceUrl);
-        url.setPath(getPath(object, operation, IncludeIdInPath));
+        CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
 
         QNetworkRequest req(_request);
         req.setUrl(url);
@@ -520,7 +546,7 @@ public:
     QNetworkReply *remove(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
         QUrl url(_serviceUrl);
-        url.setPath(getPath(object, operation, IncludeIdInPath));
+        CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
 
         QNetworkRequest req(_request);
         req.setUrl(url);
@@ -565,7 +591,7 @@ public:
     QNetworkReply *create(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
     {
         QUrl url(_serviceUrl);
-        url.setPath(getPath(object, operation));
+        CHECK_AND_SET_PATH(url, object, operation);
 
         QNetworkRequest req(_request);
         req.setUrl(url);
@@ -584,8 +610,7 @@ public:
     QNetworkReply *query(const ObjectAdaptor<T> &object, const Operation operation)
     {
         QUrl url(_serviceUrl);
-        url.setPath(getPath(object, operation));
-
+        CHECK_AND_SET_PATH(url, object, operation);
 
         // TODO add all params here
         QUrlQuery urlQuery;
@@ -617,9 +642,9 @@ public:
                 }
                 urlQuery.addQueryItem(EnginioString::search,
                     QString::fromUtf8(search.toJson()));
-
-                // FIXME: Think about proper error handling for wrong user input.
-            } else qWarning("!! Fulltext Search: parameter(s) missing !!");
+            } else {
+                return new EnginioFakeReply(this, constructErrorMessage(QByteArrayLiteral("Fulltext Search: 'search' parameter(s) missing")));
+            }
         } else
         if (object[EnginioString::query].isComposedType()) { // TODO docs are inconsistent on that
             urlQuery.addQueryItem(QStringLiteral("q"),
@@ -637,7 +662,7 @@ public:
     QNetworkReply *downloadFile(const ObjectAdaptor<T> &object)
     {
         QUrl url(_serviceUrl);
-        url.setPath(getPath(object, FileGetDownloadUrlOperation));
+        CHECK_AND_SET_PATH(url, object, FileGetDownloadUrlOperation);
         QNetworkRequest req(_request);
         req.setUrl(url);
 
@@ -697,7 +722,7 @@ private:
     QNetworkReply *uploadAsHttpMultiPart(const ObjectAdaptor<T> &object, QIODevice *device, const QString &mimeType)
     {
         QUrl serviceUrl = _serviceUrl;
-        serviceUrl.setPath(getPath(QJsonObject(), FileOperation));
+        CHECK_AND_SET_PATH(serviceUrl, QJsonObject(), FileOperation);
 
         QNetworkRequest req(_request);
         req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray());
@@ -743,7 +768,7 @@ private:
     QNetworkReply *uploadChunked(const ObjectAdaptor<T> &object, QIODevice *device)
     {
         QUrl serviceUrl = _serviceUrl;
-        serviceUrl.setPath(getPath(QJsonObject(), FileOperation));
+        CHECK_AND_SET_PATH(serviceUrl, QJsonObject(), FileOperation);
 
         QNetworkRequest req(_request);
         req.setUrl(serviceUrl);
@@ -756,8 +781,13 @@ private:
     void uploadChunk(EnginioReply *ereply, QIODevice *device, qint64 startPos)
     {
         QUrl serviceUrl = _serviceUrl;
-        QString path = getPath(ereply->data(), FileChunkUploadOperation);
-        serviceUrl.setPath(path);
+        {
+            QString path;
+            QByteArray errorMsg;
+            if (!getPath(ereply->data(), FileChunkUploadOperation, &path, &errorMsg))
+                Q_UNREACHABLE(); // sequential upload can not have an invalid path!
+            serviceUrl.setPath(path);
+        }
 
         QNetworkRequest req(_request);
         req.setUrl(serviceUrl);
@@ -786,5 +816,9 @@ private:
         reply->setParent(ereply);
     }
 };
+
+#undef CHECK_AND_SET_URL_PATH_IMPL
+#undef CHECK_AND_SET_PATH_WITH_ID
+#undef CHECK_AND_SET_PATH
 
 #endif // ENGINIOCLIENT_P_H

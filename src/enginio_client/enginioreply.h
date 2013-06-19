@@ -78,6 +78,8 @@ public:
     QString errorString() const;
     int backendStatus() const;
 
+    bool isError() const;
+
     Q_SLOT void dumpDebugInfo() const;
 
 Q_SIGNALS:

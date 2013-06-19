@@ -19,6 +19,7 @@ SOURCES += \
     enginioreply.cpp \
     enginiomodel.cpp \
     enginioidentity.cpp \
+    enginiofakereply.cpp
 
 HEADERS += \
     chunkdevice_p.h \
@@ -30,4 +31,5 @@ HEADERS += \
     enginioidentity.h \
     enginioobjectadaptor_p.h \
     enginioreply_p.h \
+    enginiofakereply_p.h
 

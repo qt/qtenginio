@@ -53,18 +53,6 @@ Item {
         }
     }
 
-    EnginioAuthentication {
-        id: validIdentity
-        user: "logintest"
-        password: "logintest"
-    }
-
-    EnginioAuthentication {
-        id: invalidIdentity
-        user: "INVALID"
-        password: "INVALID"
-    }
-
     SignalSpy {
            id: finishedSpy
            target: enginio
@@ -77,56 +65,9 @@ Item {
            signalName: "error"
     }
 
-    SignalSpy {
-        id: sessionAuthenticatedSpy
-        target: enginio
-        signalName: "sessionAuthenticated"
-    }
-
-    SignalSpy {
-        id: sessionAuthenticationErrorSpy
-        target: enginio
-        signalName: "sessionAuthenticationError"
-    }
-
     TestCase {
         id: cleanupTest
         name: "Database clean-up Dummy Test"
-    }
-
-    TestCase {
-        name: "EnginioClient: Assign an identity"
-
-        function init() {
-            enginio.identity = null
-            sessionAuthenticatedSpy.clear()
-            sessionAuthenticationErrorSpy.clear()
-        }
-
-        function cleanupTestCase() {
-            init()
-        }
-
-        function test_assignValidIdentity() {
-            verify(enginio.authenticationState !== Enginio.Authenticated)
-            enginio.identity = validIdentity
-            sessionAuthenticatedSpy.wait()
-            verify(enginio.authenticationState === Enginio.Authenticated)
-
-            // reassign the same
-            enginio.identity = null
-            tryCompare(enginio, "isAuthenticated", false)
-            enginio.identity = validIdentity
-            sessionAuthenticatedSpy.wait()
-            verify(enginio.authenticationState === Enginio.Authenticated)
-        }
-
-        function test_assignInvalidIdentity() {
-            verify(enginio.authenticationState !== Enginio.Authenticated)
-            enginio.identity = invalidIdentity
-            sessionAuthenticationErrorSpy.wait()
-            verify(enginio.authenticationState !== Enginio.Authenticated)
-        }
     }
 
     TestCase {
