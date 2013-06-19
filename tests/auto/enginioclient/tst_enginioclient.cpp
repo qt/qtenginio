@@ -125,7 +125,7 @@ private:
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         client.setBackendId(EnginioTests::TESTAPP_ID);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-        client.setserviceUrl(EnginioTests::TESTAPP_URL);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -189,7 +189,7 @@ void tst_EnginioClient::initTestCase()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -312,7 +312,7 @@ void tst_EnginioClient::query_todos()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -338,7 +338,7 @@ void tst_EnginioClient::query_todos_filter()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -369,7 +369,7 @@ void tst_EnginioClient::query_todos_limit()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -398,7 +398,7 @@ void tst_EnginioClient::query_todos_count()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -426,7 +426,7 @@ void tst_EnginioClient::query_todos_sort()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -469,7 +469,7 @@ void tst_EnginioClient::query_users()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -496,7 +496,7 @@ void tst_EnginioClient::query_users_sort()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     {
         QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -560,7 +560,7 @@ void tst_EnginioClient::query_usersgroup_crud()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -625,7 +625,7 @@ void tst_EnginioClient::query_usersgroup_limit()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -653,7 +653,7 @@ void tst_EnginioClient::query_usersgroup_count()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -680,7 +680,7 @@ void tst_EnginioClient::query_usersgroup_sort()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -715,7 +715,7 @@ void tst_EnginioClient::query_usersgroupmembers_limit()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString id = usergroupId(&client);
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -745,7 +745,7 @@ void tst_EnginioClient::query_usersgroupmembers_count()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString id = usergroupId(&client);
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -774,7 +774,7 @@ void tst_EnginioClient::query_usersgroupmembers_sort()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString id = usergroupId(&client);
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -809,7 +809,7 @@ void tst_EnginioClient::query_users_filter()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -837,7 +837,7 @@ void tst_EnginioClient::search()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     populateForSearchIfNeeded();
 
@@ -904,7 +904,7 @@ void tst_EnginioClient::create_todos()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -935,7 +935,7 @@ void tst_EnginioClient::users_crud()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -1016,7 +1016,7 @@ void tst_EnginioClient::update_todos()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -1058,7 +1058,7 @@ void tst_EnginioClient::update_invalidId()
     EnginioClient client;
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -1091,7 +1091,7 @@ void tst_EnginioClient::remove_todos()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -1151,7 +1151,7 @@ void tst_EnginioClient::identity()
 
         client.setBackendId(EnginioTests::TESTAPP_ID);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-        client.setserviceUrl(EnginioTests::TESTAPP_URL);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setIdentity(&identity);
 
         QTRY_COMPARE(spy.count(), 1);
@@ -1177,7 +1177,7 @@ void tst_EnginioClient::identity()
         identity.setPassword("logintest");
 
         client.setIdentity(&identity);
-        client.setserviceUrl(EnginioTests::TESTAPP_URL);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendId(EnginioTests::TESTAPP_ID);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
@@ -1197,7 +1197,7 @@ void tst_EnginioClient::identity()
         identity.setUser("logintest");
         identity.setPassword("logintest");
         client.setIdentity(&identity);
-        client.setserviceUrl(EnginioTests::TESTAPP_URL);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendId(EnginioTests::TESTAPP_ID);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
@@ -1224,7 +1224,7 @@ void tst_EnginioClient::identity()
         identity.setUser("logintest");
         identity.setPassword("logintest");
         client.setIdentity(&identity);
-        client.setserviceUrl(EnginioTests::TESTAPP_URL);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendId(EnginioTests::TESTAPP_ID);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
@@ -1241,7 +1241,7 @@ void tst_EnginioClient::identity()
         // fast identity change before initialization
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        client.setserviceUrl(EnginioTests::TESTAPP_URL);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
@@ -1281,7 +1281,7 @@ void tst_EnginioClient::identity()
     {
         // check if EnginoClient is properly detached from identity in destructor.
         EnginioClient *client = new EnginioClient;
-        client->setserviceUrl(EnginioTests::TESTAPP_URL);
+        client->setServiceUrl(EnginioTests::TESTAPP_URL);
         client->setBackendSecret(EnginioTests::TESTAPP_SECRET);
 
         EnginioAuthentication identity;
@@ -1297,7 +1297,7 @@ void tst_EnginioClient::identity()
         // check if EnginoClient is properly detached from identity destructor.
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        client.setserviceUrl(EnginioTests::TESTAPP_URL);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
         {
             EnginioAuthentication identity;
@@ -1322,7 +1322,7 @@ void tst_EnginioClient::identity_invalid()
 
         client.setBackendId(EnginioTests::TESTAPP_ID);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-        client.setserviceUrl(EnginioTests::TESTAPP_URL);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setIdentity(&identity);
 
         QTRY_COMPARE(spyAuthError.count(), 1);
@@ -1343,7 +1343,7 @@ void tst_EnginioClient::identity_invalid()
 
         client.setBackendId(EnginioTests::TESTAPP_ID);
         client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-        client.setserviceUrl(EnginioTests::TESTAPP_URL);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setIdentity(&identity);
 
         QTRY_COMPARE(spy.count(), 1);
@@ -1383,7 +1383,7 @@ void tst_EnginioClient::identity_afterLogout()
 
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
     client.setIdentity(&identity);
 
     QVERIFY(client.networkManager());
@@ -1421,7 +1421,7 @@ void tst_EnginioClient::backendFakeReply()
     EnginioClient client;
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spyClientFinished(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyClientError(&client, SIGNAL(error(EnginioReply*)));
@@ -1475,7 +1475,7 @@ void tst_EnginioClient::acl()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(EnginioTests::TESTAPP_ID);
     client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
-    client.setserviceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioAuthentication identity;
     identity.setUser("logintest");
