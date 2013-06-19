@@ -163,6 +163,7 @@ Rectangle {
             ProgressBar {
                 id: progressBar
                 visible: false
+                maximumValue: 1.0
 
                 Layout.fillWidth: true
             }
@@ -202,7 +203,7 @@ Rectangle {
                 var uploadReply = client.uploadFile(uploadData, fileUrl)
                 progressBar.visible = true
                 uploadReply.progress.connect(function(progress, total) {
-                    progressBar.visible = progress/total
+                    progressBar.value = progress/total
                 })
                 uploadReply.finished.connect(function() {
                     var tmp = enginioModel.query; enginioModel.query = {}; enginioModel.query = tmp;
