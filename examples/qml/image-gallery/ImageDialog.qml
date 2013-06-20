@@ -9,65 +9,43 @@ import QtQuick.Layouts 1.0
 Rectangle {
     id: root
     property alias source: image.source
+    color: "#646464"
+    opacity: visible ? 1.0 : 0.0
 
-    color: "white"
-
-    AnimatedImage {
-        id: spinner
+    Label {
+        id: label
+        text: "Loading ..."
+        color: "white"
         anchors.centerIn: parent
-        source: "qrc:icons/spinner.gif"
-        visible: image.status == Image.Loading
-
-        ProgressBar {
-            height: 10
-            width: parent.width
-
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.bottom
-            anchors.margins: 10
-
-            maximumValue: 1.0
-            minimumValue: 0
-            value: image.progress
-
-            Layout.fillWidth: true
-        }
+        visible: image.status != Image.Ready
+    }
+    ProgressBar {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: label.bottom
+        anchors.topMargin: 10
+        height: 20
+        width: root.width / 3
+        minimumValue: 0.0
+        maximumValue: 1.0
+        value: image.progress
+        visible: image.status != Image.Ready
     }
 
     Image {
         id: image
         anchors.fill: parent
+        anchors.margins: 10
+        smooth: true
         fillMode: Image.PreserveAspectFit
     }
-
     Behavior on opacity {
         NumberAnimation {
             duration: 300
         }
     }
 
-    state: "hiden"
-    states: [
-        State {
-            name: "shown"
-            PropertyChanges {
-                target: root
-                opacity: 1
-                enabled: true
-            }
-        },
-        State {
-            name: "hiden"
-            PropertyChanges {
-                target: root
-                opacity: 0
-                enabled: false
-            }
-        }
-    ]
-
     MouseArea {
         anchors.fill: parent
-        onClicked: root.state = "hiden"
+        onClicked: root.visible = false
     }
 }

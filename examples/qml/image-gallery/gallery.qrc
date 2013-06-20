@@ -1,11 +1,9 @@
 <RCC>
     <qresource prefix="/icons">
         <file>delete_icon.png</file>
-        <file>spinner.gif</file>
     </qresource>
     <qresource prefix="/">
         <file>image-gallery.qml</file>
-        <file>EnginioButton.qml</file>
         <file>ImageDialog.qml</file>
     </qresource>
 </RCC>
