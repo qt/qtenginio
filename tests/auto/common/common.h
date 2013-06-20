@@ -44,6 +44,7 @@ public:
     bool createBackend(const QString &backendName);
     bool removeBackend(const QString &backendName);
     bool createObjectType(const QString &backendName, const QString &environment, const QJsonObject &schema);
+    QJsonObject backendApiKeys(const QString &backendName, const QString &environment);
 };
 
 }

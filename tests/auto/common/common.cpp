@@ -237,4 +237,33 @@ bool EnginioBackendManager::createObjectType(const QString &backendName, const Q
     synchronousRequest(POST, obj);
     return !_responseData["properties"].toArray().isEmpty();
 }
+
+QJsonObject EnginioBackendManager::backendApiKeys(const QString &backendName, const QString &environment)
+{
+    QJsonArray environments = getEnvironments(backendName);
+
+    if (environments.isEmpty())
+        return QJsonObject();
+
+    QString backendId;
+    QString backendSecret;
+
+    foreach (const QJsonValue &value, environments) {
+        QJsonObject env = value.toObject();
+        if (env["name"].toString() == environment) {
+            backendId = env["id"].toString();
+            QJsonArray keys = env["apiKeys"].toArray();
+            QJsonObject apiKey = keys.first().toObject();
+            backendSecret = apiKey["key"].toString();
+            break;
+        }
+    }
+
+    QJsonObject apiKeys;
+    apiKeys["backendId"] = backendId;
+    apiKeys["backendSecret"] = backendSecret;
+
+    return apiKeys;
 }
+
+} // namespace EnginioTests
