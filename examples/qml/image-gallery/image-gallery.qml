@@ -112,7 +112,7 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    imageDialog.source = AppConfig.backendData.serviceUrl + model.file.url;
+                    imageDialog.fileId = model.file.id;
                     imageDialog.visible = true
                 }
                 onContainsMouseChanged: deleteIcon.opacity = containsMouse ? 1.0 : 0.0
@@ -164,10 +164,56 @@ Rectangle {
     }
 
     // Dialog for showing full size image
-    ImageDialog {
+    Rectangle {
         id: imageDialog
         anchors.fill: parent
+        property string fileId
+        color: "#646464"
         visible: false
+        opacity: visible ? 1.0 : 0.0
+
+        onFileIdChanged: {
+            image.source = ""
+            // Download the full image, not the thumbnail
+            var data = { "id": fileId }
+            var reply = client.downloadFile(data)
+            reply.finished.connect(function() {
+                image.source = reply.data.expiringUrl
+            })
+        }
+
+        Label {
+            id: label
+            text: "Loading ..."
+            color: "white"
+            anchors.centerIn: parent
+            visible: image.status != Image.Ready
+        }
+        ProgressBar {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: label.bottom
+            anchors.topMargin: 10
+            width: parent.width / 3
+            value: image.progress
+            visible: image.status != Image.Ready
+        }
+        Image {
+            id: image
+            anchors.fill: parent
+            anchors.margins: 10
+            smooth: true
+            cache: false
+            fillMode: Image.PreserveAspectFit
+        }
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 300
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: parent.visible = false
+        }
     }
 
     // File dialog for selecting image file from local file system
@@ -194,7 +240,6 @@ Rectangle {
                         propertyName: "file"
                     },
                 };
-                console.log("data: " + reply.data + " id: " + reply.data.id)
                 var uploadReply = client.uploadFile(uploadData, fileUrl)
                 progressBar.visible = true
                 uploadReply.progress.connect(function(progress, total) {
@@ -205,7 +250,6 @@ Rectangle {
                     progressBar.visible = false
                 })
             })
-            console.log("File selected: " + fileUrl);
         }
     }
 
