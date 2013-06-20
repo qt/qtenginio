@@ -42,7 +42,7 @@
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qscopedpointer.h>
 
-#include "Enginio/enginioclient.h"
+#include "enginioclient.h"
 
 class EnginioModelPrivate;
 class ENGINIOCLIENT_EXPORT EnginioModel : public QAbstractListModel
