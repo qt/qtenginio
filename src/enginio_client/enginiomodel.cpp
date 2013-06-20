@@ -498,7 +498,7 @@ EnginioClient::Operation EnginioModel::operation() const
     return d->operation();
 }
 
-void EnginioModel::setOperation(const int operation)
+void EnginioModel::setOperation(EnginioClient::Operation operation)
 {
     if (operation == d->operation())
         return;
