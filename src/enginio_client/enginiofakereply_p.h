@@ -38,7 +38,7 @@
 #ifndef ENGINIOFAKEREPLY_P_H
 #define ENGINIOFAKEREPLY_P_H
 
-#include "Enginio/enginioclient_global.h"
+#include "enginioclient_global.h"
 #include "enginioreply.h"
 
 #include <QtNetwork/qnetworkreply.h>
