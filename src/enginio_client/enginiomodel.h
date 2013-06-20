@@ -55,7 +55,7 @@ public:
 
     Q_PROPERTY(EnginioClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
     Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged)
-    Q_PROPERTY(int operation READ operation WRITE setOperation NOTIFY operationChanged)
+    Q_PROPERTY(EnginioClient::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
 
     // TODO: that is a pretty silly name
     EnginioClient *enginio() const;
@@ -65,7 +65,7 @@ public:
     void setQuery(const QJsonObject &query);
 
     EnginioClient::Operation operation() const;
-    void setOperation(const int opertaion);
+    void setOperation(EnginioClient::Operation opertaion);
 
     virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
