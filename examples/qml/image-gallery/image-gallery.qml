@@ -53,40 +53,25 @@ Rectangle {
             height: 120
             width: parent.width
             color: index % 2 ? "#eeeeee" : "transparent"
-
-            Item {
-                id: thumbnailRect
-                height: 100
-                width: 100
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.margins: 10
-                Image {
-                    id: image
-                    anchors.fill: parent
-                    smooth: true
-                    fillMode: Image.PreserveAspectFit
-                }
-
-                AnimatedImage {
-                    id: spinner
+            Image {
+                id: image
+                x: 10
+                y: 10
+                height: parent.height - 20
+                width: 80
+                smooth: true
+                fillMode: Image.PreserveAspectFit
+                ProgressBar {
+                    height: 10
+                    width: parent.width - 20
                     anchors.centerIn: parent
-                    source: "qrc:icons/spinner.gif"
+
+                    maximumValue: 1.0
+                    minimumValue: 0
+                    value: image.progress
+
+                    Layout.fillWidth: true
                     visible: image.status != Image.Ready
-                    ProgressBar {
-                        height: 10
-                        width: parent.width
-
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.top: parent.bottom
-                        anchors.margins: 10
-
-                        maximumValue: 1.0
-                        minimumValue: 0
-                        value: image.progress
-
-                        Layout.fillWidth: true
-                    }
                 }
                 Component.onCompleted: {
                     var data = { "id": model.file.id }
@@ -97,33 +82,26 @@ Rectangle {
                 }
             }
 
-            Item {
-                id: textRect
-                height: 100
-                anchors.left: thumbnailRect.right
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.margins: 10
-
-                Column {
-                    Text {
-                        height: 33
-                        verticalAlignment: Text.AlignVCenter
-                        font.pixelSize: height * 0.5
-                        text: model.name ? model.name : ""
-                    }
-                    Text {
-                        height: 33
-                        verticalAlignment: Text.AlignVCenter
-                        font.pixelSize: height * 0.5
-                        text: sizeStringFromFile(model.file)
-                    }
-                    Text {
-                        height: 33
-                        verticalAlignment: Text.AlignVCenter
-                        font.pixelSize: height * 0.5
-                        text: timeStringFromFile(model.file)
-                    }
+            Column {
+                x: 100
+                y: 10
+                Text {
+                    height: 33
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: height * 0.5
+                    text: model.name ? model.name : ""
+                }
+                Text {
+                    height: 33
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: height * 0.5
+                    text: sizeStringFromFile(model.file)
+                }
+                Text {
+                    height: 33
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: height * 0.5
+                    text: timeStringFromFile(model.file)
                 }
             }
 
@@ -134,7 +112,7 @@ Rectangle {
                 hoverEnabled: true
                 onClicked: {
                     imageDialog.source = AppConfig.backendData.serviceUrl + model.file.url;
-                    imageDialog.state = "shown"
+                    imageDialog.visible = true
                 }
                 onContainsMouseChanged: deleteIcon.opacity = containsMouse ? 1.0 : 0.0
             }
@@ -165,7 +143,7 @@ Rectangle {
             model: enginioModel // get the data from EnginioModel
             delegate: imageListDelegate
             Layout.fillHeight: true
-            width: parent.width
+            Layout.fillWidth: true
             clip: true
         }
         RowLayout {
@@ -188,6 +166,7 @@ Rectangle {
     ImageDialog {
         id: imageDialog
         anchors.fill: parent
+        visible: false
     }
 
     // File dialog for selecting image file from local file system
