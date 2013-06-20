@@ -142,6 +142,28 @@ QJsonArray EnginioBackendManager::getAllBackends()
     return _responseData["results"].toArray();
 }
 
+QJsonArray EnginioBackendManager::getEnvironments(const QString &backendName)
+{
+    QJsonArray environments = _backendEnvironments.value(backendName);
+
+    if (!environments.isEmpty())
+        return environments;
+
+    QString appPath = QStringLiteral("/v1/account/apps/");
+    QString appId = getAppId(backendName);
+    appPath.append(appId);
+    QJsonObject obj;
+    obj["headers"] = _headers;
+    _url.setPath(appPath);
+
+    if (synchronousRequest(GET, obj)) {
+        environments = _responseData["environments"].toArray();
+        _backendEnvironments[backendName] = environments;
+    }
+
+    return environments;
+}
+
 bool EnginioBackendManager::removeAppWithId(const QString &appId)
 {
     if (appId.isEmpty())
@@ -176,25 +198,19 @@ bool EnginioBackendManager::createBackend(const QString &backendName)
 bool EnginioBackendManager::removeBackend(const QString &backendName)
 {
     qDebug("## Deleting backend: %s", backendName.toUtf8().data());
-    QString appId = _backendEnvironments.take(backendName).first().toObject()["appId"].toString();
+    if (!removeAppWithId(getAppId(backendName)))
+        return false;
 
-    if (appId.isEmpty())
-        appId = getAppId(backendName);
-
-    return removeAppWithId(appId);
+    _backendEnvironments.remove(backendName);
+    return true;
 }
 
 bool EnginioBackendManager::createObjectType(const QString &backendName, const QString &environment, const QJsonObject &schema)
 {
-    qDebug("## Create new object type on backend: %s", backendName.toUtf8().data());
-
-    QJsonArray environments = _backendEnvironments.value(backendName);
-    if (environments.isEmpty()) {
-        // FIXME: This should not be needed if we know how to query the environments.
-        removeBackend(backendName);
-        createBackend(backendName);
-        environments = _backendEnvironments.value(backendName);
-    }
+    qDebug("## Creating new object type: %s on backend: %s", schema["name"].toString().toUtf8().data(), backendName.toUtf8().data());
+    QJsonArray environments = getEnvironments(backendName);
+    if (environments.isEmpty())
+        return false;
 
     QString backendId;
     QString backendMasterKey;

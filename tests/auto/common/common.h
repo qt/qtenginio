@@ -32,6 +32,7 @@ class EnginioBackendManager: public QObject
     bool authenticate();
     QString getAppId(const QString &backendName);
     QJsonArray getAllBackends();
+    QJsonArray getEnvironments(const QString &backendName);
 
 public slots:
     void error(EnginioReply *reply);
