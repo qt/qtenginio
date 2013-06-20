@@ -257,7 +257,7 @@ QUrl EnginioClient::serviceUrl() const
     return d->_serviceUrl;
 }
 
-void EnginioClient::setserviceUrl(const QUrl &serviceUrl)
+void EnginioClient::setServiceUrl(const QUrl &serviceUrl)
 {
     Q_D(EnginioClient);
     if (d->_serviceUrl != serviceUrl) {
