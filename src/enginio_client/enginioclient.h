@@ -47,8 +47,6 @@
 #include <QtCore/qurl.h>
 #include <QtNetwork/qnetworkaccessmanager.h>
 
-class EnginioAbstractObject;
-class EnginioAbstractObjectFactory;
 class EnginioClientPrivate;
 class QNetworkAccessManager;
 
