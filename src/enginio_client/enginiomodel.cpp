@@ -406,7 +406,8 @@ public:
 
         qDebug() << Q_FUNC_INFO << query;
         _latestRequestedOffset += limit;
-        const EnginioReply *id = _enginio->query(query, _operation);
+        EnginioReply *id = _enginio->query(query, _operation);
+        QObject::connect(id, &EnginioReply::finished, id, &EnginioReply::deleteLater);
         _dataChanged.insert(id, qMakePair(IncrementalModelUpdate, query));
     }
 };
