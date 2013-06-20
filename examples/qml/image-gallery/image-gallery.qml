@@ -67,11 +67,26 @@ Rectangle {
                     smooth: true
                     fillMode: Image.PreserveAspectFit
                 }
+
                 AnimatedImage {
                     id: spinner
                     anchors.centerIn: parent
                     source: "qrc:icons/spinner.gif"
                     visible: image.status != Image.Ready
+                    ProgressBar {
+                        height: 10
+                        width: parent.width
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.bottom
+                        anchors.margins: 10
+
+                        maximumValue: 1.0
+                        minimumValue: 0
+                        value: image.progress
+
+                        Layout.fillWidth: true
+                    }
                 }
                 Component.onCompleted: {
                     var data = { "id": model.file.id }
@@ -118,9 +133,8 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    imageDialog.title = model.name ? model.name : "";
                     imageDialog.source = AppConfig.backendData.serviceUrl + model.file.url;
-                    imageDialog.visible = true;
+                    imageDialog.state = "shown"
                 }
                 onContainsMouseChanged: deleteIcon.opacity = containsMouse ? 1.0 : 0.0
             }
@@ -173,6 +187,7 @@ Rectangle {
     // Dialog for showing full size image
     ImageDialog {
         id: imageDialog
+        anchors.fill: parent
     }
 
     // File dialog for selecting image file from local file system
