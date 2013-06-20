@@ -167,8 +167,6 @@ EnginioClientPrivate::~EnginioClientPrivate()
 /*!
  * \brief Create a new EnginioClient.
  * \param parent the QObject parent.
- *
- * \sa backendId, backendSecret
  */
 EnginioClient::EnginioClient(QObject *parent)
     : QObject(parent)

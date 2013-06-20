@@ -494,6 +494,13 @@ void EnginioModel::setQuery(const QJsonObject &query)
     return d->setQuery(query);
 }
 
+/*!
+  \property EnginioModel::operation
+  \brief The operation type of the query
+  \sa query
+  \sa EnginioClient::Operation
+  \return
+*/
 EnginioClient::Operation EnginioModel::operation() const
 {
     return d->operation();
@@ -506,11 +513,23 @@ void EnginioModel::setOperation(EnginioClient::Operation operation)
     d->setOperation(operation);
 }
 
+/*!
+  Append \value to this model local cache and send a create request
+  to enginio backend.
+  \sa EnginioClient::create
+  \return reply from backend
+*/
 EnginioReply *EnginioModel::append(const QJsonObject &value)
 {
     return d->append(value);
 }
 
+/*!
+  Remove a value from \row in this model local cache and send
+  a remove request to enginio backend.
+  \sa EnginioClient::remove
+  \return reply from backend
+*/
 EnginioReply *EnginioModel::remove(int row)
 {
     if (row >= d->rowCount())
@@ -519,6 +538,12 @@ EnginioReply *EnginioModel::remove(int row)
     return d->remove(row);
 }
 
+/*!
+  Update a value on \row of this model local cache
+  and send an update request to enginio backend.
+  \sa EnginioClient::update
+  \return reply from backend
+*/
 EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
     if (row >= d->rowCount())  // TODO remove as soon as we have a sparse array.
