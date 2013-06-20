@@ -152,7 +152,7 @@ void EnginioClientPrivate::init()
     QObject::connect(q_ptr, &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
     QObject::connect(q_ptr, &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClient::Authenticated));
     QObject::connect(q_ptr, &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClient::AuthenticationFailure));
-    QObject::connect(q_ptr, &EnginioClient::identityChanged, AuthenticationStateTrackerFunctor(this));
+    QObject::connect(q_ptr, &EnginioClient::identityChanged, AuthenticationStateTrackerIdentFunctor(this));
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()

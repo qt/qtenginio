@@ -317,7 +317,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
     class AuthenticationStateTrackerFunctor
     {
-        EnginioClientPrivate * _enginio;
+        EnginioClientPrivate *_enginio;
         EnginioClient::AuthenticationState _state;
     public:
         AuthenticationStateTrackerFunctor(EnginioClientPrivate *enginio, EnginioClient::AuthenticationState state = EnginioClient::NotAuthenticated)
@@ -329,6 +329,15 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {
             _enginio->setAuthenticationState(_state);
         }
+    };
+
+    class AuthenticationStateTrackerIdentFunctor
+    {
+        EnginioClientPrivate *_enginio;
+    public:
+        AuthenticationStateTrackerIdentFunctor(EnginioClientPrivate *enginio)
+            : _enginio(enginio)
+        {}
 
         void operator()(const EnginioIdentity *identity) const
         {
