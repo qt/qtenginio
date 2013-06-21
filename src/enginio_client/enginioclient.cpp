@@ -65,14 +65,19 @@
   after logging in to \l {http://engin.io}{Enginio}.
   \code
     EnginioClient *client = new EnginioClient(parent);
-    client->setBackendId(QStringLiteral("YOUR_BACKEND_ID"));
-    client->setBackendSecret(QStringLiteral("YOUR_BACKEND_SECRET"));
+    client->setBackendId(QByteArrayLiteral("YOUR_BACKEND_ID"));
+    client->setBackendSecret(QByteArrayLiteral("YOUR_BACKEND_SECRET"));
   \endcode
 
   The basic functions used to interact with the backend are
   \l create(), \l query(), \l remove() and \l update().
   It is possible to do a fulltext search on the server using \l search().
   For file handling \l downloadFile() and \l uploadFile() are provided.
+
+  \note After the request has finished, it is the responsibility of the
+  user to delete the EnginioReply object at an appropriate time.
+  Do not directly delete it inside the slot connected to finished().
+  You can use the deleteLater() function.
 
   In order to make queries that return an array of data more convenient
   a model is provided by \l {EnginioModelCpp}{EnginioModel}.

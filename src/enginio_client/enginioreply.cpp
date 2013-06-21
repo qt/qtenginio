@@ -115,7 +115,6 @@ EnginioReply::~EnginioReply()
 /*!
   \property EnginioReply::networkError
   This property holds the network error for the request.
-  \sa QNetworkReply::NetworkError
 */
 QNetworkReply::NetworkError EnginioReply::networkError() const
 {
