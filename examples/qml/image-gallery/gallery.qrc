@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>delete_icon.png</file>
+        <file alias="delete_icon.png">../common/delete_icon.png</file>
     </qresource>
     <qresource prefix="/">
         <file>image-gallery.qml</file>

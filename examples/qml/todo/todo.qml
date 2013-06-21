@@ -66,17 +66,19 @@ Rectangle {
                 color: textTitle.color
             }
 
-            Rectangle {
+            Image {
                 id: rem
                 width: 25
-                height: 6
+                height: 25
+
+                source: "qrc:icons/delete_icon.png"
 
                 anchors.margins: 5
                 anchors.top: parent.top
                 anchors.right: parent.right
                 enabled: _synced
                 opacity: 0
-                color: "red"
+
                 states: State {
                     name: "visible"
                     when: mouse.containsMouse
