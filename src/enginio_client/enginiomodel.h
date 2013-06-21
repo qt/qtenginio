@@ -79,7 +79,6 @@ public:
     Q_INVOKABLE EnginioReply *remove(int row);
     Q_INVOKABLE EnginioReply *setProperty(int row, const QString &role, const QVariant &value);
 
-protected:
     virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
 Q_SIGNALS:

@@ -56,14 +56,31 @@
   \class EnginioClient
   \inmodule enginio-qt
   \ingroup enginio-client
-  \brief EnginioClient handles API keys, sessions and authorization.
-  \mainclass
+  \brief EnginioClient handles all communication with the Enginio server
 
-  When using Enginio you need to set up your backend using this class.
+  The Enginio server supports several separate "backends" with each account.
+  By setting the \l backendId and \l backendSecret a backend is chosen.
+  After setting the ID and secret interaction with the server is possible.
+  The information about the backend is available on the Enginio Dashboard
+  after logging in to \l {http://engin.io}{Enginio}.
+  \code
+    EnginioClient *client = new EnginioClient(parent);
+    client->setBackendId(QByteArrayLiteral("YOUR_BACKEND_ID"));
+    client->setBackendSecret(QByteArrayLiteral("YOUR_BACKEND_SECRET"));
+  \endcode
 
-  The \l backendId and \l backendSecret are required for Engino to work.
-  Once the client is set up you can use it to make queries to the backend
-  or use higher level API such as \l {EnginioModelCpp}{EnginioModel}.
+  The basic functions used to interact with the backend are
+  \l create(), \l query(), \l remove() and \l update().
+  It is possible to do a fulltext search on the server using \l search().
+  For file handling \l downloadFile() and \l uploadFile() are provided.
+
+  \note After the request has finished, it is the responsibility of the
+  user to delete the EnginioReply object at an appropriate time.
+  Do not directly delete it inside the slot connected to finished().
+  You can use the deleteLater() function.
+
+  In order to make queries that return an array of data more convenient
+  a model is provided by \l {EnginioModelCpp}{EnginioModel}.
 */
 
 /*!
@@ -300,6 +317,14 @@ void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
   Usually it is not needed to change the default URL.
 */
 
+/*!
+  \fn EnginioClient::serviceUrlChanged(const QUrl &url)
+  \internal
+*/
+
+/*!
+  \internal
+*/
 QUrl EnginioClient::serviceUrl() const
 {
     Q_D(const EnginioClient);
@@ -345,7 +370,6 @@ QNetworkAccessManager * EnginioClient::networkManager() const
  * \sa EnginioReply, create(), query(), update(), remove()
  * \internal
  */
-
 EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)
 {
     Q_D(EnginioClient);
@@ -356,8 +380,10 @@ EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &ht
 }
 
 /*!
-  \brief Search the Enginio backend
-  The \a query is JSON sent to the backend.
+  \brief Fulltext search on the Enginio backend
+
+  The \a query is JSON sent to the backend to perform a fulltext search.
+  Note that the search requires the searched properties to be indexed (on the server, configureable in the backend).
 
   \return EnginioReply containing the status and the result once it is finished.
   \sa EnginioReply, create(), query(), update(), remove()
