@@ -56,61 +56,6 @@
  * QML types.
  */
 
-
-/* FIXME if needed
- * \qmlproperty enumeration EnginioReply::errorCode
- * \list
- * \li Error.NoError - No errors.
- * \li Error.UnknownError - Something went wrong but we don't know what.
- * \li Error.NetworkError - Enginio service is unavailable or can't handle request.
- * \li Error.RequestError - Request or reply is invalid.
- * \li Error.InternalError - Enginio service is malfunctioning.
- * \endlist
- */
-
-/*
- * \qmltype Acl
- * \instantiates EnginioAcl
- * \inqmlmodule enginio-plugin
- * \brief Access control list for Enginio objects.
- *
- * Access control list contains a list of subjects and set of permissions
- * granted for each subject.
- *
- * Subjects can be:
- * \list
- *   \li Users
- *   \li Usergroups
- *   \li Well known subjects like "everyone"
- * \endlist
- *
- * And possible permissions in ACL for objects are:
- * \list
- *   \li "read"
- *   \li "update"
- *   \li "delete"
- *   \li "admin"
- * \endlist
- *
- * Subjects are presented as objects with \c id and \c objectType and
- * permissions as Acl::Permission type enumerations.
- *
- * Well known subjects are constants which identify generic Users or Usergroups.
- * For example 'everyone' subject presents all Users (even anonymous) and its
- * value is \c {{ "id": "*", "objectType": "aclSubject" }}.
- */
-
-/*
- * \qmlproperty enumeration Acl::Permission
- * \list
- * \li Acl.ReadPermission - Permission to read object data
- * \li Acl.UpdatePermission - Permission to update object data
- * \li Acl.DeletePermission - Permission to delete object
- * \li Acl.AdminPermission - Permission to read, update and delete object and to
- *     read and change object permissions
- * \endlist
- */
-
 QQmlEngine *g_qmlEngine = 0;
 
 class EnginioNetworkAccessManagerFactory: public QQmlNetworkAccessManagerFactory
