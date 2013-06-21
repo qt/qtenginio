@@ -43,15 +43,7 @@
 #include <QtQml/qjsvalue.h>
 #include <QQmlParserStatus>
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
 class EnginioQmlClientPrivate;
-class EnginioQmlUsergroupOperation;
-
-
 class EnginioQmlClient : public EnginioClient
 {
     Q_OBJECT
