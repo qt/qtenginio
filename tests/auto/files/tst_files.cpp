@@ -203,7 +203,19 @@ void tst_Files::fileUploadDownload()
 
     QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
     QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
+    QNetworkAccessManager nam;
+    QNetworkRequest req;
+    req.setUrl(QUrl(downloadData["expiringUrl"].toString()));
+    QNetworkReply *reply = nam.get(req);
+    QVERIFY(reply);
+    QSignalSpy downloadSpy(reply, SIGNAL(finished()));
+    QTRY_COMPARE(downloadSpy.count(), 1);
+    QByteArray imageData = reply->readAll();
+    QImage img = QImage::fromData(imageData);
+    qDebug() << "full size:" << imageData.size();
+    QCOMPARE(img.size(), QSize(181, 54));
     }
+
 
     // View/Query the file details
     {
@@ -217,6 +229,59 @@ void tst_Files::fileUploadDownload()
     QCOMPARE(fileInfo->data()["fileName"].toString(), fileName);
     QFile file(filePath);
     QCOMPARE(fileInfo->data()["fileSize"].toDouble(), (double)file.size());
+    QVERIFY(fileInfo->data()["variants"].toObject().contains("thumbnail"));
+    QString thumbnailStatus = fileInfo->data()["variants"].toObject()["thumbnail"].toObject()["status"].toString();
+    int count = 0;
+    while (thumbnailStatus == "processing" && ++count < 10) {
+        QTest::qWait(1000);
+        fileInfo = client.query(fileObject, EnginioClient::FileOperation);
+        QVERIFY(fileInfo);
+        ++replyCount;
+        QTRY_COMPARE(spy.count(), replyCount);
+        QCOMPARE(spyError.count(), 0);
+        thumbnailStatus = fileInfo->data()["variants"].toObject()["thumbnail"].toObject()["status"].toString();
+    }
+    QCOMPARE(thumbnailStatus, EnginioString::complete);
+    }
+
+
+    // Download thumbnail
+// Needs an image processor on the server
+/*
+{
+    "thumbnail": {
+        "crop": "20x20"
+    }
+}
+*/
+    {
+    QJsonObject object;
+    object["id"] = fileId; // ID of an existing object with attached file
+    object[EnginioString::variant] = QStringLiteral("thumbnail");
+
+    const EnginioReply* replyDownload = client.downloadFile(object);
+
+    QVERIFY(replyDownload);
+    ++replyCount;
+    QTRY_COMPARE(spy.count(), replyCount);
+    QCOMPARE(spyError.count(), 0);
+    const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
+    QJsonObject downloadData = responseDownload->data();
+
+    QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
+    QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
+
+    QNetworkAccessManager nam;
+    QNetworkRequest req;
+    req.setUrl(QUrl(downloadData["expiringUrl"].toString()));
+    QNetworkReply *reply = nam.get(req);
+    QVERIFY(reply);
+    QSignalSpy downloadSpy(reply, SIGNAL(finished()));
+    QTRY_COMPARE(downloadSpy.count(), 1);
+    QByteArray imageData = reply->readAll();
+    QImage img = QImage::fromData(imageData);
+    QEXPECT_FAIL("", "The server returns the original image instead of thumbnail", Continue);
+    QCOMPARE(img.size(), QSize(20, 20));
     }
 }
 

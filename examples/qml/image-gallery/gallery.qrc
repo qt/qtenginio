@@ -4,6 +4,5 @@
     </qresource>
     <qresource prefix="/">
         <file>image-gallery.qml</file>
-        <file>ImageDialog.qml</file>
     </qresource>
 </RCC>

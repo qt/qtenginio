@@ -97,6 +97,7 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString incomplete;
     static const QString headers;
     static const QString payload;
+    static const QString variant;
 };
 
 #define CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, Flags) \
@@ -670,6 +671,13 @@ public:
     {
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH(url, object, FileGetDownloadUrlOperation);
+        if (object.contains(EnginioString::variant)) {
+            QString variant = object[EnginioString::variant].toString();
+            QUrlQuery query;
+            query.addQueryItem(EnginioString::variant, variant);
+            url.setQuery(query);
+        }
+
         QNetworkRequest req(_request);
         req.setUrl(url);
 
