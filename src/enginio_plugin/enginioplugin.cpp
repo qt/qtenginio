@@ -56,8 +56,6 @@
  * QML types.
  */
 
-QQmlEngine *g_qmlEngine = 0;
-
 class EnginioNetworkAccessManagerFactory: public QQmlNetworkAccessManagerFactory
 {
 public:
@@ -71,7 +69,6 @@ public:
 void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
 {
     Q_UNUSED(uri);
-    g_qmlEngine = engine;
 
     if (!engine->networkAccessManagerFactory()) {
         static EnginioNetworkAccessManagerFactory factory;

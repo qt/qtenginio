@@ -40,8 +40,6 @@
 
 #include <QQmlExtensionPlugin>
 
-extern QQmlEngine *g_qmlEngine;
-
 class EnginioPlugin : public QQmlExtensionPlugin
 {
     Q_OBJECT
