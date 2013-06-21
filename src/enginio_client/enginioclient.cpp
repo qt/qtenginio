@@ -71,7 +71,7 @@
   \brief This signal is emitted when a request to the backend returns an error.
 
   The \a reply contains the details about the error that occured.
-  \sa EnginioError
+  \sa EnginioReply
 */
 
 /*!
@@ -79,7 +79,7 @@
   \brief This signal is emitted when a request to the backend finishes.
 
   The \a reply contains the data returned. This signal is emitted for both, successful requests and failed ones.
-  \sa EnginioError
+  \sa EnginioReply
 */
 
 /*!
@@ -299,6 +299,7 @@ void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
   The API URL determines the server used by Enginio.
   Usually it is not needed to change the default URL.
 */
+
 QUrl EnginioClient::serviceUrl() const
 {
     Q_D(const EnginioClient);
@@ -355,11 +356,12 @@ EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &ht
 }
 
 /*!
- * \brief Search.
- *
- * \return EnginioReply containing the status and the result once it is finished.
- * \sa EnginioReply, create(), query(), update(), remove()
- */
+  \brief Search the Enginio backend
+  The \a query is JSON sent to the backend.
+
+  \return EnginioReply containing the status and the result once it is finished.
+  \sa EnginioReply, create(), query(), update(), remove()
+*/
 EnginioReply *EnginioClient::search(const QJsonObject &query)
 {
     Q_D(EnginioClient);

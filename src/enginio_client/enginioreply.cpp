@@ -58,6 +58,14 @@
 */
 
 /*!
+  \enum ErrorTypes
+  Describes the type of error that occured when making a request to the Enginio backend.
+  \value NoError The reply returned without errors
+  \value NetworkError The error was a networking problem
+  \value BackendError The backend did not accept the query
+*/
+
+/*!
   \internal
 */
 EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
