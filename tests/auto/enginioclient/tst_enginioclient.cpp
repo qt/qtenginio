@@ -54,8 +54,6 @@
     QCOMPARE(response->networkError(), QNetworkReply::NoError);\
     QVERIFY(response->backendStatus() >= 200 && response->backendStatus() < 300);
 
-static const QString kTestEnvironment = QStringLiteral("development");
-
 class tst_EnginioClient: public QObject
 {
     Q_OBJECT
@@ -138,7 +136,7 @@ void tst_EnginioClient::initTestCase()
     _backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
     QVERIFY(_backendManager.createBackend(_backendName));
 
-    QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, kTestEnvironment);
+    QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, EnginioTests::TESTAPP_ENV);
     _backendId = apiKeys["backendId"].toString().toUtf8();
     _backendSecret = apiKeys["backendSecret"].toString().toUtf8();
 
@@ -171,7 +169,7 @@ void tst_EnginioClient::internal_createObjectType()
     array.append(title);
     array.append(photo);
     schema["properties"] = array;
-    QVERIFY(backendManager.createObjectType(_backendName, kTestEnvironment, schema));
+    QVERIFY(backendManager.createObjectType(_backendName, EnginioTests::TESTAPP_ENV, schema));
 }
 
 void tst_EnginioClient::query_todos()
@@ -788,7 +786,7 @@ void tst_EnginioClient::create_todos()
     properties.append(count);
     todos["properties"] = properties;
 
-    QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, todos));
+    QVERIFY(_backendManager.createObjectType(_backendName, EnginioTests::TESTAPP_ENV, todos));
 
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
@@ -1586,8 +1584,8 @@ void tst_EnginioClient::prepareForSearch()
     customObject1["properties"] = properties;
     customObject2["properties"] = properties;
 
-    QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject1));
-    QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject2));
+    QVERIFY(_backendManager.createObjectType(_backendName, EnginioTests::TESTAPP_ENV, customObject1));
+    QVERIFY(_backendManager.createObjectType(_backendName, EnginioTests::TESTAPP_ENV, customObject2));
 
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));

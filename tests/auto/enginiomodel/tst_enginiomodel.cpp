@@ -56,6 +56,11 @@ class tst_EnginioModel: public QObject
 {
     Q_OBJECT
 
+    QString _backendName;
+    EnginioTests::EnginioBackendManager _backendManager;
+    QByteArray _backendId;
+    QByteArray _backendSecret;
+
 public slots:
     void error(EnginioReply *reply) {
         qDebug() << "\n\n### ERROR";
@@ -65,7 +70,8 @@ public slots:
     }
 
 private slots:
-    void init();
+    void initTestCase();
+    void cleanupTestCase();
     void ctor();
     void enginio_property();
     void query_property();
@@ -74,10 +80,28 @@ private slots:
     void listView();
 };
 
-void tst_EnginioModel::init()
+void tst_EnginioModel::initTestCase()
 {
     if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
         QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
+
+    _backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
+    QVERIFY(_backendManager.createBackend(_backendName));
+
+    QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, EnginioTests::TESTAPP_ENV);
+    _backendId = apiKeys["backendId"].toString().toUtf8();
+    _backendSecret = apiKeys["backendSecret"].toString().toUtf8();
+
+    QVERIFY(!_backendId.isEmpty());
+    QVERIFY(!_backendSecret.isEmpty());
+
+    // The test operates on user data.
+    _backendManager.createUsersAndUserGroups(_backendId, _backendSecret);
+}
+
+void tst_EnginioModel::cleanupTestCase()
+{
+    QVERIFY(_backendManager.removeBackend(_backendName));
 }
 
 void tst_EnginioModel::ctor()
@@ -97,9 +121,9 @@ void tst_EnginioModel::ctor()
 
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setBackendId(_backendId);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
-        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+        client.setBackendSecret(_backendSecret);
         model.setEnginio(&client);
     }
     {   // check if destructor of a fully initilized EnginioClient detach fully initilized model
@@ -108,9 +132,9 @@ void tst_EnginioModel::ctor()
         EnginioModel model;
         model.setOperation(EnginioClient::ObjectOperation);
         model.setQuery(query);
-        client.setBackendId(EnginioTests::TESTAPP_ID);
+        client.setBackendId(_backendId);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
-        client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+        client.setBackendSecret(_backendSecret);
         model.setEnginio(&client);
     }
 }
@@ -207,8 +231,8 @@ void tst_EnginioModel::roleNames()
 
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
@@ -237,8 +261,8 @@ void tst_EnginioModel::listView()
 
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
