@@ -1,6 +1,5 @@
-# Enginio Qt Library 
+# Enginio Qt Library development branch
 Client library for accessing Enginio service from Qt and QML code. 
-
 
 # System Requirements
 * Qt 5.0 or newer (Qt 5.1 recommended)
@@ -24,7 +23,7 @@ Client library for accessing Enginio service from Qt and QML code.
 
 
 2. Shared library config
-	* `qmake CONFIG+=no-package && make install`
+	* `qmake CONFIG+=sharedlib && make install`
 	* Produces shared library and installs it as a globally available Qt5 module
 
 # Usage
@@ -33,7 +32,6 @@ Client library for accessing Enginio service from Qt and QML code.
     * Include Enginio headers with `<Enginio/...>` (for example: `#include <Enginio/enginioclient.h>`) 
 * In QML applications 
     * Import Enginio components with `import Enginio 1.0`
-
 
 # Contributing
 * Fork the repository on [GitHub](https://github.com/enginio/enginio-qt)

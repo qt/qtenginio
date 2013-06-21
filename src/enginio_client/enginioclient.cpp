@@ -36,294 +36,547 @@
 ****************************************************************************/
 
 #include "enginioclient_p.h"
-#include "enginiojsonobjectfactory.h"
+#include "enginioreply.h"
+#include "enginiomodel.h"
+#include "enginioidentity.h"
 
-#include <QDebug>
 #include <QNetworkReply>
 #include <QSslError>
+#include <QtCore/qthreadstorage.h>
 
 /*!
- * \module enginio-client
- * \title Enginio Client Interface
- * 
- * This interface provides access to the Enginio service through a set of C++ classes
- * based on Qt.
- */
+  \module enginio-client
+  \title Enginio Client Interface
+
+  This interface provides access to the Enginio service through a set of C++ classes
+  based on Qt.
+*/
 
 /*!
- * \class EnginioClient
- * \inmodule enginio-client
- * \brief Enginio client class
- * Used for handling API keys, sessions and authorization.
- */
+  \class EnginioClient
+  \inmodule enginio-qt
+  \ingroup enginio-client
+  \brief EnginioClient handles all communication with the Enginio server
+
+  The Enginio server supports several separate "backends" with each account.
+  By setting the \l backendId and \l backendSecret a backend is chosen.
+  After setting the ID and secret interaction with the server is possible.
+  The information about the backend is available on the Enginio Dashboard
+  after logging in to \l {http://engin.io}{Enginio}.
+  \code
+    EnginioClient *client = new EnginioClient(parent);
+    client->setBackendId(QByteArrayLiteral("YOUR_BACKEND_ID"));
+    client->setBackendSecret(QByteArrayLiteral("YOUR_BACKEND_SECRET"));
+  \endcode
+
+  The basic functions used to interact with the backend are
+  \l create(), \l query(), \l remove() and \l update().
+  It is possible to do a fulltext search on the server using \l search().
+  For file handling \l downloadFile() and \l uploadFile() are provided.
+
+  \note After the request has finished, it is the responsibility of the
+  user to delete the EnginioReply object at an appropriate time.
+  Do not directly delete it inside the slot connected to finished().
+  You can use the deleteLater() function.
+
+  In order to make queries that return an array of data more convenient
+  a model is provided by \l {EnginioModelCpp}{EnginioModel}.
+*/
 
 /*!
- * \fn EnginioClient::sessionAuthenticated() const
- * \brief Emitted when user logs in.
- */
+  \fn void EnginioClient::error(EnginioReply *reply)
+  \brief This signal is emitted when a request to the backend returns an error.
+
+  The \a reply contains the details about the error that occured.
+  \sa EnginioReply
+*/
 
 /*!
- * \fn EnginioClient::sessionTerminated() const
- * \brief Emitted when user logs out.
- */
+  \fn void EnginioClient::finished(EnginioReply *reply)
+  \brief This signal is emitted when a request to the backend finishes.
 
-int FactoryUnit::nextId = 0;
+  The \a reply contains the data returned. This signal is emitted for both, successful requests and failed ones.
+  \sa EnginioReply
+*/
+
+/*!
+  \property EnginioClient::authenticationState
+  \brief The state of the authentication.
+
+  Enginio provides convenient user management.
+  The authentication state reflects whether the current user is authenticated.
+  \sa AuthenticationState
+*/
+
+/*!
+  \fn EnginioClient::sessionAuthenticated(EnginioReply *reply) const
+  \brief Emitted when a user logs in.
+
+  The \a reply contains the details about the login.
+
+  \sa sessionAuthenticationError(), EnginioReply
+*/
+
+/*!
+  \fn EnginioClient::sessionAuthenticationError(EnginioReply *reply) const
+  \brief Emitted when a user login fails.
+
+  The \a reply contains the details about why the login failed.
+  \sa sessionAuthenticated(), EnginioReply
+*/
+
+/*!
+  \fn EnginioClient::sessionTerminated() const
+  \brief Emitted when a user logs out.
+*/
+
+/*!
+    \enum EnginioClient::Operation
+
+    This enum describes which operation a query uses.
+
+    \value ObjectOperation Operate on objects
+    \value ObjectAclOperation Operate on the ACL
+    \value FileOperation Operate with files
+    \value UserOperation Operate on users
+    \value UsergroupOperation Operate on groups
+    \value UsergroupMembersOperation Operate on group members
+*/
+
+/*!
+    \enum EnginioClient::AuthenticationState
+
+    This enum describes the state of the user authentication.
+    \value NotAuthenticated No attempt to authenticate was made
+    \value Authenticating Authentication request has been sent to the server
+    \value Authenticated Authentication was successful
+    \value AuthenticationFailure Authentication failed
+
+    \sa authenticationState
+*/
+
+ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
+
+const QString EnginioString::pageSize = QStringLiteral("pageSize");
+const QString EnginioString::limit = QStringLiteral("limit");
+const QString EnginioString::offset = QStringLiteral("offset");
+const QString EnginioString::include = QStringLiteral("include");
+const QString EnginioString::query = QStringLiteral("query");
+const QString EnginioString::message = QStringLiteral("message");
+const QString EnginioString::results = QStringLiteral("results");
+const QString EnginioString::_synced = QStringLiteral("_synced");
+const QString EnginioString::objectType = QStringLiteral("objectType");
+const QString EnginioString::id = QStringLiteral("id");
+const QString EnginioString::username = QStringLiteral("username");
+const QString EnginioString::password = QStringLiteral("password");
+const QString EnginioString::sessionToken = QStringLiteral("sessionToken");
+const QString EnginioString::authIdentity = QStringLiteral("auth/identity");
+const QString EnginioString::files = QStringLiteral("files");
+const QString EnginioString::file = QStringLiteral("file");
+const QString EnginioString::fileName = QStringLiteral("fileName");
+const QString EnginioString::search = QStringLiteral("search");
+const QString EnginioString::session = QStringLiteral("session");
+const QString EnginioString::users = QStringLiteral("users");
+const QString EnginioString::usergroups = QStringLiteral("usergroups");
+const QString EnginioString::object = QStringLiteral("object");
+const QString EnginioString::url = QStringLiteral("url");
+const QString EnginioString::access = QStringLiteral("access");
+const QString EnginioString::sort = QStringLiteral("sort");
+const QString EnginioString::count = QStringLiteral("count");
+const QString EnginioString::targetFileProperty = QStringLiteral("targetFileProperty");
+const QString EnginioString::members = QStringLiteral("members");
+const QString EnginioString::propertyName = QStringLiteral("propertyName");
+const QString EnginioString::apiEnginIo = QStringLiteral("https://api.engin.io");
+const QString EnginioString::status = QStringLiteral("status");
+const QString EnginioString::empty = QStringLiteral("empty");
+const QString EnginioString::complete = QStringLiteral("complete");
+const QString EnginioString::incomplete = QStringLiteral("incomplete");
+const QString EnginioString::headers = QStringLiteral("headers");
+const QString EnginioString::payload = QStringLiteral("payload");
+const QString EnginioString::variant = QStringLiteral("variant");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
-    m_apiUrl(QStringLiteral("https://api.engin.io")),
-    m_networkManager(),
-    m_deleteNetworkManager(true)
+    _identity(),
+    _serviceUrl(EnginioString::apiEnginIo),
+    _networkManager(),
+    _uploadChunkSize(512 * 1024),
+    _authenticationState(EnginioClient::NotAuthenticated)
 {
-    addFactory(new EnginioJsonObjectFactory());
+    assignNetworkManager();
+
+    _request.setHeader(QNetworkRequest::ContentTypeHeader,
+                          QStringLiteral("application/json"));
+}
+
+void EnginioClientPrivate::init()
+{
+    qRegisterMetaType<EnginioClient*>();
+    qRegisterMetaType<EnginioModel*>();
+    qRegisterMetaType<EnginioReply*>();
+    qRegisterMetaType<EnginioIdentity*>();
+    qRegisterMetaType<EnginioAuthentication*>();
+
+    QObject::connect(q_ptr, &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
+    QObject::connect(q_ptr, &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClient::Authenticated));
+    QObject::connect(q_ptr, &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClient::AuthenticationFailure));
+    QObject::connect(q_ptr, &EnginioClient::identityChanged, AuthenticationStateTrackerIdentFunctor(this));
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
 {
-    if (m_deleteNetworkManager)
-        delete m_networkManager;
-
-    while (m_factories.size() > 0) {
-        FactoryUnit *unit = m_factories.takeFirst();
-        delete unit->factory;
-        delete unit;
-    }
-}
-
-int EnginioClientPrivate::addFactory(EnginioAbstractObjectFactory *factory)
-{
-    FactoryUnit *unit = new FactoryUnit;
-    unit->factory = factory;
-    unit->id = FactoryUnit::nextId++;
-    m_factories.prepend(unit);
-    return unit->id;
-}
-
-void EnginioClientPrivate::removeFactory(int factoryId)
-{
-    for (int i = 0; i < m_factories.size(); ++i) {
-        if (m_factories.at(i)->id == factoryId) {
-            FactoryUnit *unit = m_factories.takeAt(i);
-            delete unit->factory;
-            delete unit;
-            return;
-        }
-    }
+    foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
+        QObject::disconnect(identityConnection);
+    foreach (const QMetaObject::Connection &connection, _connections)
+        QObject::disconnect(connection);
+    QObject::disconnect(_networkManagerConnection);
 }
 
 /*!
- * Create a new client object. \a backendId and \a backendSecret define which
- * Enginio backend will be used with this client. Both can be found from the
- * Enginio dashboard. \a parent is optional.
- */
-EnginioClient::EnginioClient(const QString &backendId,
-                             const QString &backendSecret,
-                             QObject *parent) :
-    QObject(parent),
-    d_ptr(new EnginioClientPrivate(this))
+  \brief Creates a new EnginioClient with \a parent as QObject parent.
+*/
+EnginioClient::EnginioClient(QObject *parent)
+    : QObject(parent)
+    , d_ptr(new EnginioClientPrivate(this))
 {
-    qDebug() << this << "created. Backend ID:" << backendId;
-
     Q_D(EnginioClient);
-    d->m_backendId = backendId;
-    d->m_backendSecret = backendSecret;
+    d->init();
 }
 
 /*!
- * Constructor used in inheriting classes.
+ * \internal
  */
-EnginioClient::EnginioClient(const QString &backendId,
-                             const QString &backendSecret,
-                             EnginioClientPrivate &dd,
-                             QObject *parent) :
-    QObject(parent),
-    d_ptr(&dd)
+EnginioClient::EnginioClient(QObject *parent, EnginioClientPrivate *d)
+    : QObject(parent)
+    , d_ptr(d)
 {
-    qDebug() << this << "created. Backend ID:" << backendId;
-
-    Q_D(EnginioClient);
-    d->m_backendId = backendId;
-    d->m_backendSecret = backendSecret;
 }
 
 /*!
- * Destructor.
+ * Destroys the EnginioClient.
+ *
+ * This ends the Enginio session.
  */
 EnginioClient::~EnginioClient()
-{
-    qDebug() << this << "deleted";
-    delete d_ptr;
-}
+{}
 
 /*!
- * Get the Enginio backend ID.
- */
-QString EnginioClient::backendId() const
-{
-    Q_D(const EnginioClient);
-    return d->m_backendId;
-}
-
-/*!
- * Change Enginio backend ID to \a backendId.
- */
-void EnginioClient::setBackendId(const QString &backendId)
-{
-    Q_D(EnginioClient);
-    d->m_backendId = backendId;
-}
-
-/*!
- * Get the Enginio backend secret.
- */
-QString EnginioClient::backendSecret() const
-{
-    Q_D(const EnginioClient);
-    return d->m_backendSecret;
-}
-
-/*!
- * Change Enginio backend secret to \a backendSecret.
- */
-void EnginioClient::setBackendSecret(const QString &backendSecret)
-{
-    Q_D(EnginioClient);
-    d->m_backendSecret = backendSecret;
-}
-
-/*!
- * Get the Enginio backend URL.
- */
-QUrl EnginioClient::apiUrl() const
-{
-    Q_D(const EnginioClient);
-    return d->m_apiUrl;
-}
-
-/*!
- * Change Enginio backend URL to \a apiUrl.
- */
-void EnginioClient::setApiUrl(const QUrl &apiUrl)
-{
-    Q_D(EnginioClient);
-    d->m_apiUrl = apiUrl;
-}
-
-/*!
- * Get the QNetworkAccessManager used by the Enginio library. Note that it
- * will be deleted with the client object.
- */
-QNetworkAccessManager * EnginioClient::networkManager()
-{
-    Q_D(EnginioClient);
-    if (d->m_networkManager.isNull()) {
-        d->m_networkManager = new QNetworkAccessManager(this);
-        d->m_deleteNetworkManager = true;
-
-        // Ignore SSL errors when staging backend is used.
-        if (apiUrl() == QStringLiteral("https://api.staging.engin.io")) {
-            qWarning() << "SSL errors will be ignored";
-            connect(d->m_networkManager,
-                    SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError> &)),
-                    this,
-                    SLOT(ignoreSslErrors(QNetworkReply*, const QList<QSslError> &)));
-        }
-    }
-    return d->m_networkManager;
-}
-
-/*!
- * Set Enginio library to use existing QNetworkAccessManager instance,
- * \a networkManager, for all network traffic.
- */
-void EnginioClient::setNetworkManager(QNetworkAccessManager *networkManager)
-{
-    Q_D(EnginioClient);
-    if (d->m_deleteNetworkManager && !d->m_networkManager.isNull())
-        delete d->m_networkManager;
-
-    d->m_networkManager = networkManager;
-    d->m_deleteNetworkManager = false;
-}
-
-/*!
- * Get the token of currently authenticated session. Returns empty string if
- * there's no authenticated session.
+ * \property EnginioClient::backendId
+ * \brief The unique ID for the used Enginio backend.
  *
- * \sa EnginioIdentityAuthOperation::attachToSessionWithToken()
+ * The backend ID determines which Enginio backend is used
+ * by this instance of EnginioClient. The backend ID and \l backendSecret are
+ * required for Enginio to work.
+ * It is possible to use several Enginio backends simultaneously
+ * by having several instances of EnginioClient.
+ * \sa backendSecret
  */
-QString EnginioClient::sessionToken() const
+QByteArray EnginioClient::backendId() const
 {
     Q_D(const EnginioClient);
-    return d->m_sessionToken;
+    return d->_backendId;
 }
 
-void EnginioClient::setSessionToken(const QString &sessionToken)
+void EnginioClient::setBackendId(const QByteArray &backendId)
 {
     Q_D(EnginioClient);
-    d->m_sessionToken = sessionToken;
-
-    if (sessionToken.isEmpty())
-        emit sessionTerminated();
-    else
-        emit sessionAuthenticated();
+    if (d->_backendId != backendId) {
+        d->_backendId = backendId;
+        d->_request.setRawHeader("Enginio-Backend-Id", d->_backendId);
+        emit backendIdChanged(backendId);
+    }
 }
 
 /*!
- * Register object factory, \a factory, for custom object classes. Only used when
- * you implement object class(es) as subclass of EnginioAbstractObject. If
- * there are no factories that can create objects of type 'x', internal
- * EnginioJsonObjectFactory is used to create EnginioJsonObject instances where,
- * \c objectType property is set to 'x'.
- *
- * Calling this function will take the ownership of the factory object.
- *
- * Returns unique ID for registered factory which can be used to unregister the
- * factory.
+ * \property EnginioClient::backendSecret
+ * \brief The backend secret that corresponds to the \l backendId.
+ * The secret is used to authenticate the Enginio connection.
  */
-int EnginioClient::registerObjectFactory(EnginioAbstractObjectFactory *factory)
-{
-    Q_D(EnginioClient);
-    return d->addFactory(factory);
-}
-
-/*!
- * Unregister custom object factory. \a factoryId is the ID received from
- * EnginioClient::registerObjectFactory()
- */
-void EnginioClient::unregisterObjectFactory(int factoryId)
-{
-    Q_D(EnginioClient);
-    d->removeFactory(factoryId);
-}
-
-/*!
- * Create new object of specified \a type and optionally with \a id.
- * Note that types of user-defined objects have "objects." prefix.
- */
-EnginioAbstractObject * EnginioClient::createObject(const QString &type,
-                                                    const QString &id) const
+QByteArray EnginioClient::backendSecret() const
 {
     Q_D(const EnginioClient);
-    EnginioAbstractObject *obj = 0;
-
-    for (int i = 0; i < d->m_factories.size(); ++i) {
-        obj = d->m_factories.at(i)->factory->createObjectForType(type, id);
-        if (obj)
-            break;
-    }
-
-    return obj;
+    return d->_backendSecret;
 }
 
-void EnginioClient::ignoreSslErrors(QNetworkReply* reply,
-                                    const QList<QSslError> &errors)
+void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
 {
-    QList<QSslError>::ConstIterator i = errors.constBegin();
-    while (i != errors.constEnd()) {
-        qWarning() << "Ignoring SSL error:" << i->errorString();
-        i++;
+    Q_D(EnginioClient);
+    if (d->_backendSecret != backendSecret) {
+        d->_backendSecret = backendSecret;
+        d->_request.setRawHeader("Enginio-Backend-Secret", d->_backendSecret);
+        emit backendSecretChanged(backendSecret);
     }
-    reply->ignoreSslErrors(errors);
 }
 
+/*!
+  \property EnginioClient::serviceUrl
+  \brief Enginio backend URL.
+  \internal
+
+  The API URL determines the server used by Enginio.
+  Usually it is not needed to change the default URL.
+*/
+
+/*!
+  \fn EnginioClient::serviceUrlChanged(const QUrl &url)
+  \internal
+*/
+
+/*!
+  \internal
+*/
+QUrl EnginioClient::serviceUrl() const
+{
+    Q_D(const EnginioClient);
+    return d->_serviceUrl;
+}
+
+/*!
+    \internal
+*/
+void EnginioClient::setServiceUrl(const QUrl &serviceUrl)
+{
+    Q_D(EnginioClient);
+    if (d->_serviceUrl != serviceUrl) {
+        d->_serviceUrl = serviceUrl;
+        emit serviceUrlChanged(serviceUrl);
+    }
+}
+
+/*!
+ * \brief Get the QNetworkAccessManager used by the Enginio library.
+ *
+ * Note that it will be deleted with the client object.
+ */
+QNetworkAccessManager * EnginioClient::networkManager() const
+{
+    Q_D(const EnginioClient);
+    return d->networkManager();
+}
+
+/*!
+ * \brief Create custom request to the enginio REST API
+ *
+ * \param url The url to be used for the request. Note that the provided url completely replaces the internal serviceUrl.
+ * \param httpOperation Verb to the server that is valid according to the HTTP specification (eg. "GET", "POST", "PUT", etc.).
+ * \param data optional JSON object possibly containing custom headers and the payload data for the request.
+ *
+ *   {
+ *       "headers" : { "Accept" : "application/json" }
+ *       "payload" : { "email": "me@engin.io", "password": "password" }
+ *   }
+ *
+ * \return EnginioReply containing the status and the result once it is finished.
+ * \sa EnginioReply, create(), query(), update(), remove()
+ * \internal
+ */
+EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)
+{
+    Q_D(EnginioClient);
+    QNetworkReply *nreply = d->customRequest(url, httpOperation, data);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+    return ereply;
+}
+
+/*!
+  \brief Fulltext search on the Enginio backend
+
+  The \a query is JSON sent to the backend to perform a fulltext search.
+  Note that the search requires the searched properties to be indexed (on the server, configureable in the backend).
+
+  \return EnginioReply containing the status and the result once it is finished.
+  \sa EnginioReply, create(), query(), update(), remove()
+*/
+EnginioReply *EnginioClient::search(const QJsonObject &query)
+{
+    Q_D(EnginioClient);
+
+    QNetworkReply *nreply = d->query<QJsonObject>(query, EnginioClientPrivate::SearchOperation);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+    return ereply;
+}
+
+/*!
+  \brief Query the database.
+
+  The \a query is a JSON object containing the actual query to the backend.
+  The query will be run on the \a operation part of the backend.
+  \return EnginioReply containing the status and the result once it is finished.
+  \sa EnginioReply, create(), update(), remove(), Operation
+ */
+EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation operation)
+{
+    Q_D(EnginioClient);
+
+    QNetworkReply *nreply = d->query<QJsonObject>(query, static_cast<EnginioClientPrivate::Operation>(operation));
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+    return ereply;
+}
+
+/*!
+ * \brief Insert a new \a object into the database.
+ *
+ * The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
+ * to create new objects by default.
+ * \return EnginioReply containing the status of the query and the data once it is finished.
+ * \sa EnginioReply, query(), update(), remove()
+ */
+EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation operation)
+{
+    Q_D(EnginioClient);
+
+    QNetworkReply *nreply = d->create<QJsonObject>(object, operation);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+/*!
+ * \brief Update an existing \a object in the database.
+ *
+ * The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
+ * to create new objects by default.
+ * \return EnginioReply containing the status of the query and the data once it is finished.
+ * \sa EnginioReply, create(), query(), remove()
+ */
+EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation operation)
+{
+    Q_D(EnginioClient);
+
+    QNetworkReply *nreply = d->update<QJsonObject>(object, operation);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+/*!
+ * \brief Remove an existing \a object from the database.
+ *
+ * The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
+ * to create new objects by default.
+ * \return EnginioReply containing the status of the query and the data once it is finished.
+ * \sa EnginioReply, create(), query(), update()
+ */
+EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation operation)
+{
+    Q_D(EnginioClient);
+
+    QNetworkReply *nreply = d->remove<QJsonObject>(object, operation);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+/*!
+ * \property EnginioClient::identity
+ * Represents a user.
+ * \sa EnginioIdentity
+ */
+EnginioIdentity *EnginioClient::identity() const
+{
+    Q_D(const EnginioClient);
+    return d->identity();
+}
+
+void EnginioClient::setIdentity(EnginioIdentity *identity)
+{
+    Q_D(EnginioClient);
+    if (d->_identity == identity)
+        return;
+    d->setIdentity(identity);
+}
+
+/*!
+  \brief Stores a \a file attached to an \a object in Enginio
+
+  Each uploaded file needs to be associated with an object in the database.
+  \note The upload will only work with the propper server setup: in the dashboard create a property
+  of the type that you will use. Set this property to be a reference to files.
+
+  Each uploaded file needs to be associated with an object in the database.
+
+  In order to upload a file, first create an object:
+  \snippet files/tst_files.cpp upload-create-object
+
+  Then do the actual upload:
+  \snippet files/tst_files.cpp upload
+
+  Note: There is no need to directly delete files.
+  Instead when the object that contains the link to the file gets deleted,
+  the file will automatically be deleted as well.
+
+  \sa downloadFile()
+*/
+EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &file)
+{
+    Q_D(EnginioClient);
+
+    QNetworkReply *nreply = d->uploadFile<QJsonObject>(object, file);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+/*!
+  \brief Download a file stored in Enginio
+
+  \snippet files/tst_files.cpp download
+  The propertyName can be anything, but it must be the same as the one used to upload the file with.
+  This way one object can have several files attached to itself (one per propertyName).
+
+  If a file provides several variants, it is possible to request a variant by including it in the
+  \a object.
+  \code
+    {
+        "id": "abc123",
+        "variant": "thumbnail"
+    }
+  \endcode
+*/
+EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
+{
+    Q_D(EnginioClient);
+
+    QNetworkReply *nreply = d->downloadFile<QJsonObject>(object);
+    EnginioReply *ereply = new EnginioReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
+}
+
+Q_GLOBAL_STATIC(QThreadStorage<QNetworkAccessManager*>, NetworkManager)
+
+void EnginioClientPrivate::assignNetworkManager()
+{
+    Q_ASSERT(!_networkManager);
+
+    _networkManager = prepareNetworkManagerInThread();
+    _networkManagerConnection = QObject::connect(_networkManager, &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
+}
+
+QNetworkAccessManager *EnginioClientPrivate::prepareNetworkManagerInThread()
+{
+    QNetworkAccessManager *qnam;
+    qnam = NetworkManager->localData();
+    if (!qnam) {
+        qnam = new QNetworkAccessManager(); // it will be deleted by QThreadStorage.
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+        qnam->connectToHostEncrypted(EnginioString::apiEnginIo);
+#endif
+        NetworkManager->setLocalData(qnam);
+    }
+    return qnam;
+}
+
+EnginioClient::AuthenticationState EnginioClient::authenticationState() const
+{
+    Q_D(const EnginioClient);
+    return d->authenticationState();
+}

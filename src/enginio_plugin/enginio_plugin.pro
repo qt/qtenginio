@@ -1,6 +1,5 @@
+requires(qtHaveModule(quick))
 TARGETPATH = Enginio
-
-CONFIG += force_independent
 
 load(qml_plugin)
 include($$PWD/../../enginio.pri)
@@ -8,29 +7,21 @@ include($$PWD/../../enginio.pri)
 TARGET = enginioplugin
 TARGET.module_name = Enginio
 
-QT += qml quick enginio
+QT += qml quick enginio enginio-private
 
 SOURCES += \
     enginioqmlclient.cpp \
+    enginioqmlmodel.cpp \
     enginioplugin.cpp \
-    enginioqmlobjectmodel.cpp \
-    enginioqmlqueryoperation.cpp \
-    enginioqmlobjectoperation.cpp \
-    enginioqmlidentityauthoperation.cpp \
-    enginioqmlacloperation.cpp \
-    enginioqmlfileoperation.cpp \
-    enginioqmlusergroupoperation.cpp
+    enginioqmlreply.cpp \
 
 HEADERS += \
     enginioqmlclient.h \
+    enginioqmlmodel.h \
     enginioplugin.h \
-    enginioqmlobjectmodel.h \
-    enginioqmlqueryoperation.h \
-    enginioqmlobjectoperation.h \
-    enginioqmlidentityauthoperation.h \
-    enginioqmlacloperation.h \
-    enginioqmlfileoperation.h \
-    enginioqmlusergroupoperation.h
+    enginioqmlobjectadaptor_p.h \
+    enginioqmlclient_p.h \
+    enginioqmlreply.h \
 
 QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 
@@ -49,4 +40,4 @@ copy2build.output = ../../qml/$${TARGET.module_name}/qmldir
 copy2build.commands = $$QMAKE_COPY ${QMAKE_FILE_IN} ${QMAKE_FILE_OUT}
 copy2build.name = COPY ${QMAKE_FILE_IN}
 copy2build.CONFIG += no_link
-QMAKE_EXTRA_COMPILERS += copy2build
+force_independent: QMAKE_EXTRA_COMPILERS += copy2build

@@ -39,11 +39,14 @@
 #define ENGINIOCLIENT_GLOBAL_H
 
 #include <QtCore/qglobal.h>
+#include <QDebug>
 
 #if defined(ENGINIOCLIENT_LIBRARY)
 #  define ENGINIOCLIENT_EXPORT Q_DECL_EXPORT
 #else
 #  define ENGINIOCLIENT_EXPORT Q_DECL_IMPORT
 #endif
+
+extern bool gEnableEnginioDebugInfo;
 
 #endif // ENGINIOCLIENT_GLOBAL_H

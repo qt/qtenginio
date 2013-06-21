@@ -18,7 +18,30 @@ moc_*.cpp
 qrc_*.cpp
 Makefile
 *-build-*
+.qmake.cache
+.moc
 
 # Docs
 
 doc/html
+
+# Prevent leaking of secret when working on this repo
+examples/qml/config.js
+
+examples/qml/loganalyzer/loganalyzer
+examples/qml/logviewer/logviewer
+examples/qml/logwriter/logwriter
+examples/qml/reuseclient/reuseclient
+examples/qml/todo/todo
+examples/qml/users/users
+examples/qml/image-gallery/image-gallery
+
+# tests
+tst_*
+!tst_*.cpp
+!tst_*.qml
+!tst_*.h
+# temp files
+*.swp
+*~
+

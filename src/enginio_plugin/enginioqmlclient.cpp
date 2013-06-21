@@ -35,133 +35,222 @@
 **
 ****************************************************************************/
 
-#include "enginioqmlacloperation.h"
 #include "enginioqmlclient.h"
-#include "enginioqmlidentityauthoperation.h"
-#include "enginioqmlobjectoperation.h"
-#include "enginioqmlqueryoperation.h"
-#include "enginioqmlusergroupoperation.h"
+#include "Enginio/private/enginioclient_p.h"
+#include "enginioqmlobjectadaptor_p.h"
 
-#include <QUrl>
+#include <QtQml/qjsvalue.h>
+
 #include <QDebug>
 
 /*!
- * \qmltype Client
- * \instantiates EnginioQmlClient
- * \inqmlmodule enginio-plugin
- * \brief Enginio client inteface to access the service.
- *
- * Client is used in all communication with the Enginio backend. The backend
- * application is identified with backend ID and secret.
- *
- * It also provides methods for creating operation objects dynamically.
- */
+  \qmltype Enginio
+  \instantiates EnginioQmlClient
+  \inqmlmodule enginio-plugin
+  \ingroup engino-qml
+
+  \brief client interface to access Enginio
+
+  \snippet simple.qml import
+
+  Enginio is the heart of the QML API for Enginio.
+  It is used for all communication with the Enginio backend.
+  \l EnginioModel compliments it to make handling of multiple objects simple.
+
+  The backend is identified by \l{backendId}{backend ID} and \l{backendSecret}{secret}.
+  \snippet simple.qml client
+
+  Once the backend is configured, it is possible to run queries by calling query on
+  Enginio.
+  For example to get all objects stored with the type "objects.image" run this query:
+  \snippet simple.qml client-query
+
+  Enginio gives you a convenient way to handle the responses to your queryies as well:
+  \snippet simple.qml client-signals
+*/
 
 /*!
- * \qmlproperty string Client::backendId
- * Enginio backend ID. This can be obtained from the Enginio dashboard.
- */
+  \qmlproperty string Enginio::backendId
+  Enginio backend ID. This can be obtained from the Enginio dashboard.
+*/
 
 /*!
- * \qmlproperty string Client::backendSecret
- * Enginio backend secret. This can be obtained from the Enginio dashboard.
- */
+  \qmlproperty string Enginio::backendSecret
+  Enginio backend secret. This can be obtained from the Enginio dashboard.
+*/
 
 /*!
- * \qmlproperty string Client::apiUrl
- * Enginio backend URL. Normally there's no need to change the default URL.
- */
+  \qmlproperty url Enginio::serviceUrl
+  \internal
+  Enginio backend URL.
+
+  Usually there is no need to change the default URL.
+*/
 
 /*!
- * \qmlproperty string Client::sessionToken
- * Token of currently authenticated session. This is empty string if there's no
- * authenticated session.
- */
+  \qmlmethod EnginioReply Enginio::uploadFile(QJsonObject object, QUrl file)
+  \brief Stores a \a file attached to an \a object in Enginio
+
+  Each uploaded file needs to be associated with an object in the database.
+  \note The upload will only work with the propper server setup: in the dashboard create a property
+  of the type that you will use. Set this property to be a reference to files.
+
+  In order to upload a file, first create an object:
+  \snippet qmltests/tst_files.qml upload-create-object
+
+  Then do the actual upload:
+  \snippet qmltests/tst_files.qml upload
+
+  Note: There is no need to directly delete files.
+  Instead when the object that contains the link to the file gets deleted,
+  the file will automatically be deleted as well.
+
+  \sa downloadFile()
+*/
 
 /*!
- * \qmlsignal Client::sessionAuthenticated()
- * This signal is emitted when the user logs in.
- */
+  \qmlmethod EnginioReply Enginio::downloadFile(QJsonObject object)
+  \brief Get the download URL for a file
 
-/*!
- * \qmlsignal Client::sessionTerminated()
- * This signal is emitted when the user logs out.
- */
+  \snippet qmltests/tst_files.qml download
 
+  The response contains the download URL and the duration how long the URL will be valid.
+  \code
+    downloadReply.data.expiringUrl
+    downloadReply.data.expiresAt
+  \endcode
 
-EnginioQmlClient::EnginioQmlClient(const QString &backendId,
-                                   const QString &backendSecret,
-                                   QObject *parent) :
-    EnginioClient(backendId, backendSecret, parent)
+  \sa uploadFile()
+*/
+
+EnginioQmlClient::EnginioQmlClient(QObject *parent)
+    : EnginioClient(parent, new EnginioQmlClientPrivate(this))
 {
+    Q_D(EnginioQmlClient);
+    d->init();
 }
 
-QString EnginioQmlClient::apiUrlAsString() const
+void EnginioQmlClientPrivate::init()
 {
-    return apiUrl().toString();
+    EnginioClientPrivate::init();
+    qRegisterMetaType<EnginioQmlClient*>();
+    qRegisterMetaType<EnginioQmlReply*>();
 }
 
-void EnginioQmlClient::setApiUrlFromString(const QString &apiUrl)
+EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation operation)
 {
-    setApiUrl(QUrl(apiUrl));
+    Q_D(EnginioQmlClient);
+
+    d->setEngine(query);
+    ObjectAdaptor<QJSValue> o(query, d);
+    QNetworkReply *nreply = d_ptr->query<QJSValue>(o, static_cast<EnginioClientPrivate::Operation>(operation));
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+    return ereply;
 }
 
-/*!
- * \qmlmethod Client::createObjectOperation(ObjectModel model = 0)
- * Returns new \l ObjectOperation which can be used to create new objects on
- * backend or read, update or delete existing objects. If \a model is specified,
- * when operation finishes corresponding object in \a model will be updated.
- * Returned operation can be deleted with \c destroy().
- */
-EnginioQmlObjectOperation * EnginioQmlClient::createObjectOperation(
-        EnginioQmlObjectModel *model)
+EnginioQmlReply *EnginioQmlClient::create(const QJSValue &object, const Operation operation)
 {
-    return new EnginioQmlObjectOperation(this, model);
+    Q_D(EnginioQmlClient);
+
+    if (!object.isObject())
+        return 0;
+
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->create<QJSValue>(o, operation);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
 }
 
-/*!
- * \qmlmethod Client::createQueryOperation(ObjectModel model = 0)
- *
- * Returns new \l QueryOperation which can be used to query objects from
- * backend. If \a model is specified, when operation finishes any objects
- * fetched from backend will be added to \a model. Returned operation can be
- * deleted with \c destroy().
- */
-EnginioQmlQueryOperation * EnginioQmlClient::createQueryOperation(
-        EnginioQmlObjectModel *model)
+EnginioQmlReply *EnginioQmlClient::update(const QJSValue &object, const Operation operation)
 {
-    return new EnginioQmlQueryOperation(this, model);
+    Q_D(EnginioQmlClient);
+
+    if (!object.isObject())
+        return 0;
+
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->update<QJSValue>(o, operation);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
 }
 
-/*!
- * \qmlmethod Client::createIdentityAuthOperation()
- *
- * Returns new \l IdentityAuthOperation which can be used to authenticate user
- * with Enginio backend. Returned operation can be deleted with \c destroy().
- */
-EnginioQmlIdentityAuthOperation * EnginioQmlClient::createIdentityAuthOperation()
+EnginioQmlReply *EnginioQmlClient::remove(const QJSValue &object, const Operation operation)
 {
-    return new EnginioQmlIdentityAuthOperation(this);
+    Q_D(EnginioQmlClient);
+
+    if (!object.isObject())
+        return 0;
+
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->remove<QJSValue>(o, operation);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
 }
 
-/*!
- * \qmlmethod Client::createAclOperation()
- *
- * Returns new \l AclOperation which can be used to read and modify permissions
- * of Enginio objects. Returned operation can be deleted with \c destroy().
- */
-EnginioQmlAclOperation * EnginioQmlClient::createAclOperation()
+EnginioQmlReply *EnginioQmlClient::downloadFile(const QJSValue &object)
 {
-    return new EnginioQmlAclOperation(this);
+    Q_D(EnginioQmlClient);
+
+    if (!object.isObject())
+        return 0;
+
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->downloadFile<QJSValue>(o);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
 }
 
-/*!
- * \qmlmethod Client::createUsergroupOperation()
- *
- * Returns new \l UsergroupOperation which can be used to add and remove members
- * to/from usergroups. Returned operation can be deleted with \c destroy().
- */
-EnginioQmlUsergroupOperation * EnginioQmlClient::createUsergroupOperation()
+EnginioQmlReply *EnginioQmlClient::uploadFile(const QJSValue &object, const QUrl &url)
 {
-    return new EnginioQmlUsergroupOperation(this);
+    Q_D(EnginioQmlClient);
+
+    if (!object.isObject())
+        return 0;
+
+    d->setEngine(object);
+    ObjectAdaptor<QJSValue> o(object, d);
+    QNetworkReply *nreply = d_ptr->uploadFile<QJSValue>(o, url);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    nreply->setParent(ereply);
+
+    return ereply;
 }
+
+QByteArray EnginioQmlClientPrivate::toJson(const QJSValue &value)
+{
+    if (!_stringify.isCallable())
+        Q_UNIMPLEMENTED(); // TODO maybe _value.toString().toUtf8()?
+    return _stringify.call(QJSValueList() << value).toString().toUtf8();
+}
+
+QJSValue EnginioQmlClientPrivate::fromJson(const QByteArray &value)
+{
+    if (!_parse.isCallable())
+        Q_UNIMPLEMENTED();
+    return _parse.call(QJSValueList() << _engine->toScriptValue(value));
+}
+
+void EnginioQmlClientPrivate::_setEngine(QJSEngine *engine)
+{
+    Q_ASSERT(!_engine);
+    if (engine) {
+        _engine = engine;
+        _stringify = engine->evaluate("JSON.stringify");
+        _parse = engine->evaluate("JSON.parse");
+        Q_ASSERT(_stringify.isCallable());
+    }
+}
+

@@ -39,38 +39,35 @@
 #define ENGINIOQMLCLIENT_H
 
 #include "enginioclient.h"
+#include "enginioqmlreply.h"
+#include <QtQml/qjsvalue.h>
+#include <QQmlParserStatus>
 
-class EnginioQmlAclOperation;
-class EnginioQmlIdentityAuthOperation;
-class EnginioQmlObjectModel;
-class EnginioQmlObjectOperation;
-class EnginioQmlQueryOperation;
-class EnginioQmlUsergroupOperation;
-
+class EnginioQmlClientPrivate;
 class EnginioQmlClient : public EnginioClient
 {
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlClient)
-    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId)
-    Q_PROPERTY(QString backendSecret READ backendSecret WRITE setBackendSecret)
-    Q_PROPERTY(QString apiUrl READ apiUrlAsString WRITE setApiUrlFromString)
-    Q_PROPERTY(QString sessionToken READ sessionToken)
 
 public:
-    EnginioQmlClient(const QString &backendId = QString(),
-                     const QString &backendSecret = QString(),
-                     QObject *parent = 0);
+    EnginioQmlClient(QObject *parent = 0);
 
-    QString apiUrlAsString() const;
-    void setApiUrlFromString(const QString &apiUrl);
+    using EnginioClient::query;
+    using EnginioClient::create;
+    using EnginioClient::update;
+    using EnginioClient::remove;
+    using EnginioClient::downloadFile;
+    using EnginioClient::uploadFile;
 
-    Q_INVOKABLE EnginioQmlObjectOperation * createObjectOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlQueryOperation * createQueryOperation(
-            EnginioQmlObjectModel *model = 0);
-    Q_INVOKABLE EnginioQmlIdentityAuthOperation * createIdentityAuthOperation();
-    Q_INVOKABLE EnginioQmlAclOperation * createAclOperation();
-    Q_INVOKABLE EnginioQmlUsergroupOperation * createUsergroupOperation();
+    Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *downloadFile(const QJSValue &object);
+    Q_INVOKABLE EnginioQmlReply *uploadFile(const QJSValue &object, const QUrl &url);
+
+private:
+    Q_DECLARE_PRIVATE(EnginioQmlClient);
 };
 
 #endif // ENGINIOQMLCLIENT_H
