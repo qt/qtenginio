@@ -67,8 +67,45 @@
 */
 
 /*!
+  \fn void EnginioClient::error(EnginioReply *reply)
+  \brief This signal is emitted when a request to the backend returns an error.
+
+  The \a reply contains the details about the error that occured.
+  \sa EnginioReply
+*/
+
+/*!
+  \fn void EnginioClient::finished(EnginioReply *reply)
+  \brief This signal is emitted when a request to the backend finishes.
+
+  The \a reply contains the data returned. This signal is emitted for both, successful requests and failed ones.
+  \sa EnginioReply
+*/
+
+/*!
+  \property EnginioClient::authenticationState
+  \brief The state of the authentication.
+
+  Enginio provides convenient user management.
+  The authentication state reflects whether the current user is authenticated.
+  \sa AuthenticationState
+*/
+
+/*!
   \fn EnginioClient::sessionAuthenticated(EnginioReply *reply) const
   \brief Emitted when a user logs in.
+
+  The \a reply contains the details about the login.
+
+  \sa sessionAuthenticationError(), EnginioReply
+*/
+
+/*!
+  \fn EnginioClient::sessionAuthenticationError(EnginioReply *reply) const
+  \brief Emitted when a user login fails.
+
+  The \a reply contains the details about why the login failed.
+  \sa sessionAuthenticated(), EnginioReply
 */
 
 /*!
@@ -83,9 +120,22 @@
 
     \value ObjectOperation Operate on objects
     \value ObjectAclOperation Operate on the ACL
+    \value FileOperation Operate with files
     \value UserOperation Operate on users
     \value UsergroupOperation Operate on groups
     \value UsergroupMembersOperation Operate on group members
+*/
+
+/*!
+    \enum EnginioClient::AuthenticationState
+
+    This enum describes the state of the user authentication.
+    \value NotAuthenticated No attempt to authenticate was made
+    \value Authenticating Authentication request has been sent to the server
+    \value Authenticated Authentication was successful
+    \value AuthenticationFailure Authentication failed
+
+    \sa authenticationState
 */
 
 ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
@@ -166,9 +216,8 @@ EnginioClientPrivate::~EnginioClientPrivate()
 }
 
 /*!
- * \brief Create a new EnginioClient.
- * \param parent the QObject parent.
- */
+  \brief Creates a new EnginioClient with \a parent as QObject parent.
+*/
 EnginioClient::EnginioClient(QObject *parent)
     : QObject(parent)
     , d_ptr(new EnginioClientPrivate(this))
@@ -243,19 +292,23 @@ void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
 }
 
 /*!
- * \property EnginioClient::serviceUrl
- * \brief Enginio backend URL.
- * \internal
- *
- * The API URL determines the server used by Enginio.
- * Usually it is not needed to change the default URL.
- */
+  \property EnginioClient::serviceUrl
+  \brief Enginio backend URL.
+  \internal
+
+  The API URL determines the server used by Enginio.
+  Usually it is not needed to change the default URL.
+*/
+
 QUrl EnginioClient::serviceUrl() const
 {
     Q_D(const EnginioClient);
     return d->_serviceUrl;
 }
 
+/*!
+    \internal
+*/
 void EnginioClient::setServiceUrl(const QUrl &serviceUrl)
 {
     Q_D(EnginioClient);
@@ -303,11 +356,12 @@ EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &ht
 }
 
 /*!
- * \brief Search.
- *
- * \return EnginioReply containing the status and the result once it is finished.
- * \sa EnginioReply, create(), query(), update(), remove()
- */
+  \brief Search the Enginio backend
+  The \a query is JSON sent to the backend.
+
+  \return EnginioReply containing the status and the result once it is finished.
+  \sa EnginioReply, create(), query(), update(), remove()
+*/
 EnginioReply *EnginioClient::search(const QJsonObject &query)
 {
     Q_D(EnginioClient);
@@ -319,10 +373,12 @@ EnginioReply *EnginioClient::search(const QJsonObject &query)
 }
 
 /*!
- * \brief Query the database.
- *
- * \return EnginioReply containing the status and the result once it is finished.
- * \sa EnginioReply, create(), update(), remove()
+  \brief Query the database.
+
+  The \a query is a JSON object containing the actual query to the backend.
+  The query will be run on the \a operation part of the backend.
+  \return EnginioReply containing the status and the result once it is finished.
+  \sa EnginioReply, create(), update(), remove(), Operation
  */
 EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation operation)
 {

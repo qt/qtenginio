@@ -30,7 +30,7 @@
 \contentspage {Enginio Overview}{Contents}
 \indexpage Enginio Overview
 \startpage Enginio Overview
-\nextpage Getting Started with Enginio using Qt Quick
+\nextpage Getting Started
 
 \title Enginio Overview
 
@@ -40,6 +40,7 @@ Enginio works from both, C++ and Qt Quick.
 
 To get started quickly follow the mini-tutorial:
 \list
+\li \l {Enginio Installation and Prerequisits}
 \li \l {Getting Started with Enginio using Qt Quick}
 \li \l {Getting Started with Enginio using C++}
 \endlist
@@ -52,10 +53,67 @@ The reference documentation and examples:
 */
 
 /*!
+\page enginio-getting-started
+\indexpage Enginio Overview
+\nextpage Getting Started with Enginio using Qt Quick
+\previouspage Enginio Overview
+
+\title Enginio Installation and Prerequisits
+
+This guide shows how to use the Enginio Qt library in a Qt application
+(both Qt C++ and QML cases are covered).
+This guide can be also applied when integrating Enginio with existing Qt projects.
+
+\note The Enginio Qt library is currently under heavy development and not yet production ready.
+
+\section1 Prerequisites
+
+You can use Enginio with an existing installation of Qt 5.1 or later or get Qt packages containing Engino (starting with Qt 5.2).
+
+
+\list
+  \li  Development environment (Linux, Windows or Mac OS X) and compiler toolchain.
+  \li  Qt framework, 5.1 or newer (Qt 5.1.1 recommended)
+  \li  OpenSSL to enable SSL support in Qt.
+       Install the OpenSSL binaries into your system and Qt will automatically pick them up.
+
+       \list
+         \li Mac OS X: OpenSSL library should exist as preinstalled in system
+         \li Linux: Most distributions have preinstalled OpenSSL library. If yours doesn't, install libssl via your distribution's package manager
+         \li Windows: Install Win32 OpenSSL (light version is enough, copy DLLs to windows system directory when asked)
+       \endlist
+
+    \li Perl 5.10 or newer to enable Qt5 module compilation
+    \list
+        \li Mac OS X: Perl should exist as preinstalled in system
+        \li Linux: Perl should exist as preinstalled in system
+        \li Windows: Install some Perl distribution
+    \endlist
+\endlist
+
+\section1 Install Enginio Qt library
+
+\list
+  \li  Download the latest library release from Enginio dashboard.
+
+       Go to Enginio Dashboard ⇒ Open Dashboard left menu ⇒ Create backend
+        ⇒ Give some meaningful name for backend ⇒ Create
+        ⇒ See ’Libraries box’ in backend home view
+        ⇒ Select ’Qt/QML’ library from drop-down ⇒ Click Download
+  \li  Extract the zip package
+  \li  Build and install Enginio as Qt5 module
+  \endlist
+      \code
+            qmake
+            make install // or nmake or mingw32-make
+      \endcode
+*/
+
+/*!
 \page enginio-qml
 \indexpage Enginio Overview
 \nextpage Getting Started with Enginio using C++
-\previouspage Enginio Overview
+\previouspage Enginio Installation and Prerequisits
 
 \title Getting Started with Enginio using Qt Quick
 \brief Introduction to using Enginio using Qt Quick

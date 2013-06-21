@@ -497,9 +497,8 @@ void EnginioModel::setQuery(const QJsonObject &query)
 /*!
   \property EnginioModel::operation
   \brief The operation type of the query
-  \sa query
-  \sa EnginioClient::Operation
-  \return
+  \sa EnginioClient::Operation, query()
+  \return returns the Operation
 */
 EnginioClient::Operation EnginioModel::operation() const
 {
@@ -516,8 +515,8 @@ void EnginioModel::setOperation(EnginioClient::Operation operation)
 /*!
   Append \value to this model local cache and send a create request
   to enginio backend.
-  \sa EnginioClient::create
   \return reply from backend
+  \sa EnginioClient::create()
 */
 EnginioReply *EnginioModel::append(const QJsonObject &value)
 {
@@ -525,10 +524,10 @@ EnginioReply *EnginioModel::append(const QJsonObject &value)
 }
 
 /*!
-  Remove a value from \row in this model local cache and send
+  Remove a value from \a row in this model local cache and send
   a remove request to enginio backend.
-  \sa EnginioClient::remove
   \return reply from backend
+  \sa EnginioClient::remove()
 */
 EnginioReply *EnginioModel::remove(int row)
 {
@@ -539,10 +538,13 @@ EnginioReply *EnginioModel::remove(int row)
 }
 
 /*!
-  Update a value on \row of this model local cache
-  and send an update request to enginio backend.
-  \sa EnginioClient::update
+  Update a value on \a row of this model's local cache
+  and send an update request to the Enginio backend.
+
+  The \a role is the property of the object that will be updated to be the new \a value.
+
   \return reply from backend
+  \sa EnginioClient::update()
 */
 EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
