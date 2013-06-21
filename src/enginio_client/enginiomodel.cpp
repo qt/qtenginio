@@ -513,7 +513,7 @@ void EnginioModel::setOperation(EnginioClient::Operation operation)
 }
 
 /*!
-  Append \value to this model local cache and send a create request
+  Append \a value to this model local cache and send a create request
   to enginio backend.
   \return reply from backend
   \sa EnginioClient::create()
@@ -554,11 +554,21 @@ EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVar
     return d->setValue(row, role, value);
 }
 
+/*!
+    \overload
+    \internal
+*/
 Qt::ItemFlags EnginioModel::flags(const QModelIndex &index) const
 {
     return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
 }
 
+/*!
+    \overload
+    Use this function to access the model data at \a index.
+    With the \l roleNames() function the mapping of JSON property names to data roles used as \a role is available.
+    The data returned will be JSON (for example a string for simple objects, or a JSON Object).
+*/
 QVariant EnginioModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= d->rowCount())
@@ -567,12 +577,20 @@ QVariant EnginioModel::data(const QModelIndex &index, int role) const
     return d->data(index.row(), role);
 }
 
+/*!
+    \overload
+    \internal
+*/
 int EnginioModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return d->rowCount();
 }
 
+/*!
+    \overload
+    \internal
+*/
 bool EnginioModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.row() >= d->rowCount()) // TODO remove as soon as we have a sparse array.
@@ -581,16 +599,31 @@ bool EnginioModel::setData(const QModelIndex &index, const QVariant &value, int 
     return d->setData(index.row(), value, role);
 }
 
+/*!
+    \overload
+    Returns the mapping of the model's roles to names.
+    EnginioModel will assign the properties of the objects in the \l query()
+    to roles (greater than \l Qt::UserRole).
+    Use this function to map the object property names to the role integers.
+*/
 QHash<int, QByteArray> EnginioModel::roleNames() const
 {
     return d->roleNames();
 }
 
+/*!
+    \overload
+    \internal
+*/
 void EnginioModel::fetchMore(const QModelIndex &parent)
 {
     d->fetchMore(parent.row());
 }
 
+/*!
+    \overload
+    \internal
+*/
 bool EnginioModel::canFetchMore(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);

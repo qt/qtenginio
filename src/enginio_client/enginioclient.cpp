@@ -300,6 +300,14 @@ void EnginioClient::setBackendSecret(const QByteArray &backendSecret)
   Usually it is not needed to change the default URL.
 */
 
+/*!
+  \fn EnginioClient::serviceUrlChanged(const QUrl &url)
+  \internal
+*/
+
+/*!
+  \internal
+*/
 QUrl EnginioClient::serviceUrl() const
 {
     Q_D(const EnginioClient);

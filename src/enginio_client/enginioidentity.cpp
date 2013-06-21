@@ -48,7 +48,12 @@
   \class EnginioIdentity
   \inmodule enginio-qt
   \ingroup enginio-client
-  \brief Represents a user
+  \brief Represents a user that is authenticated with the backend
+  This class is an abstract base class for the different authentication methods and is never used directly.
+*/
+
+/*!
+  \fn EnginioIdentity::dataChanged()
   \internal
 */
 

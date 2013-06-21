@@ -58,11 +58,24 @@
 */
 
 /*!
-  \enum ErrorTypes
+  \enum EnginioReply::ErrorTypes
   Describes the type of error that occured when making a request to the Enginio backend.
   \value NoError The reply returned without errors
   \value NetworkError The error was a networking problem
   \value BackendError The backend did not accept the query
+*/
+
+/*!
+  \fn EnginioReply::finished(EnginioReply *reply)
+  This signal is emitted when the EnginioReply \a reply is finished.
+  After the network operation, use the \l isError() function to check for
+  potential problems and then use the \l data property to access the returned data.
+*/
+
+/*!
+  \fn EnginioReply::progress(qint64 bytesSent, qint64 bytesTotal)
+  This signal is emitted for file operations, indicating the progress of up or downloads.
+  The \a bytesSent is the current progress relative to the total \a bytesTotal.
 */
 
 /*!
@@ -100,29 +113,39 @@ EnginioReply::~EnginioReply()
 }
 
 /*!
- * \brief EnginioReply::errorCode gives the network error for the request.
- */
+  \property EnginioReply::networkError
+  This property holds the network error for the request.
+  \sa QNetworkReply::NetworkError
+*/
 QNetworkReply::NetworkError EnginioReply::networkError() const
 {
     return d->errorCode();
 }
 
 /*!
- * \brief EnginioReply::errorCode gives the network error for the request as human readable string.
- */
+  \property EnginioReply::errorString
+  This property holds the error for the request as human readable string.
+  Check \l isError() first to check if the reply is an error.
+*/
 QString EnginioReply::errorString() const
 {
     return d->errorString();
 }
 
 /*!
- * \brief EnginioReply::data returns the data of any request to the Enginio backend.
- */
+  \property EnginioReply::data
+  \brief The data returned from the backend
+  This property holds the JSON data returned by the server after a successful request.
+*/
+
 QJsonObject EnginioReply::data() const
 {
     return d->data();
 }
 
+/*!
+  \internal
+*/
 void EnginioReply::emitFinished()
 {
     emit finished(this);
@@ -146,16 +169,30 @@ void EnginioReply::dumpDebugInfo() const
     d->dumpDebugInfo();
 }
 
+/*!
+  \brief EnginioReply::isError returns whether this reply was unsuccessful
+  \return true if the reply did not succeed
+*/
 bool EnginioReply::isError() const
 {
     return d->errorCode() != QNetworkReply::NoError;
 }
 
+/*!
+  \property EnginioReply::backendStatus
+  \return the backend return status for this reply.
+  \sa EnginioReply::ErrorTypes
+*/
 int EnginioReply::backendStatus() const
 {
     return d->backendStatus();
 }
 
+/*!
+  \property EnginioReply::errorType
+  \return the type of the error
+  \sa EnginioReply::ErrorTypes
+*/
 EnginioReply::ErrorTypes EnginioReply::errorType() const
 {
     return d->errorType();

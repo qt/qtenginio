@@ -49,7 +49,7 @@ class ENGINIOCLIENT_EXPORT EnginioIdentity : public QObject
 {
     Q_OBJECT
 
-public:
+protected:
     explicit EnginioIdentity(QObject *parent = 0);
 
 Q_SIGNALS:
