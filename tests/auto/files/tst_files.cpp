@@ -56,6 +56,11 @@ class tst_Files: public QObject
 {
     Q_OBJECT
 
+    QString _backendName;
+    EnginioTests::EnginioBackendManager _backendManager;
+    QByteArray _backendId;
+    QByteArray _backendSecret;
+
 public slots:
     void error(EnginioReply *reply) {
         qDebug() << "\n\n### ERROR";
@@ -65,15 +70,33 @@ public slots:
     }
 
 private slots:
-    void init();
+    void initTestCase();
+    void cleanupTestCase();
     void fileUploadDownload_data();
     void fileUploadDownload();
 };
 
-void tst_Files::init()
+void tst_Files::initTestCase()
 {
     if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
         QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
+
+    _backendName = QStringLiteral("Files") + QString::number(QDateTime::currentMSecsSinceEpoch());
+    QVERIFY(_backendManager.createBackend(_backendName));
+
+    QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, EnginioTests::TESTAPP_ENV);
+    _backendId = apiKeys["backendId"].toString().toUtf8();
+    _backendSecret = apiKeys["backendSecret"].toString().toUtf8();
+
+    QVERIFY(!_backendId.isEmpty());
+    QVERIFY(!_backendSecret.isEmpty());
+
+    EnginioTests::prepareTestObjectType(_backendName);
+}
+
+void tst_Files::cleanupTestCase()
+{
+    QVERIFY(_backendManager.removeBackend(_backendName));
 }
 
 void tst_Files::fileUploadDownload_data()
@@ -94,8 +117,8 @@ void tst_Files::fileUploadDownload()
 
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     if (chunkSize > 0) {
@@ -108,7 +131,7 @@ void tst_Files::fileUploadDownload()
 
     //![upload-create-object]
     QJsonObject obj;
-    obj["objectType"] = QString::fromUtf8("objects.files");
+    obj["objectType"] = QString::fromUtf8("objects.%1").arg(EnginioTests::CUSTOM_OBJECT1);
     obj["title"] = QString::fromUtf8("Object With File");
     const EnginioReply* createReply = client.create(obj);
     //![upload-create-object]
@@ -137,7 +160,7 @@ void tst_Files::fileUploadDownload()
     //![upload]
     QJsonObject object;
     object["id"] = id;
-    object["objectType"] = QStringLiteral("objects.files");
+    object["objectType"] = QString::fromUtf8("objects.%1").arg(EnginioTests::CUSTOM_OBJECT1);
     object["propertyName"] = QStringLiteral("fileAttachment");
 
     QJsonObject fileObject;
@@ -163,7 +186,7 @@ void tst_Files::fileUploadDownload()
     QJsonObject obj2;
     obj2 = QJsonDocument::fromJson(
                 "{\"include\": {\"fileAttachment\": {}},"
-                 "\"objectType\": \"objects.files\","
+                 "\"objectType\": \"objects." + EnginioTests::CUSTOM_OBJECT1.toUtf8() + "\","
                  "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
 
     const EnginioReply *reply = client.query(obj2);
@@ -280,6 +303,7 @@ void tst_Files::fileUploadDownload()
     QTRY_COMPARE(downloadSpy.count(), 1);
     QByteArray imageData = reply->readAll();
     QImage img = QImage::fromData(imageData);
+    qDebug() << img.size();
     QEXPECT_FAIL("", "The server returns the original image instead of thumbnail", Continue);
     QCOMPARE(img.size(), QSize(20, 20));
     }
