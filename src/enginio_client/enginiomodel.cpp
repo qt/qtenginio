@@ -525,7 +525,7 @@ EnginioReply *EnginioModel::append(const QJsonObject &value)
 }
 
 /*!
-  Remove a value from \row in this model local cache and send
+  Remove a value from \a row in this model local cache and send
   a remove request to enginio backend.
   \sa EnginioClient::remove
   \return reply from backend
@@ -539,7 +539,7 @@ EnginioReply *EnginioModel::remove(int row)
 }
 
 /*!
-  Update a value on \row of this model local cache
+  Update a value on \a row of this model local cache
   and send an update request to enginio backend.
   \sa EnginioClient::update
   \return reply from backend
