@@ -49,10 +49,9 @@ public:
     bool removeBackend(const QString &backendName);
     bool createObjectType(const QString &backendName, const QString &environment, const QJsonObject &schema);
     QJsonObject backendApiKeys(const QString &backendName, const QString &environment);
-
-    void createUsersAndUserGroups(const QByteArray &backendId, const QByteArray &backendSecret);
 };
 
+void prepareTestUsersAndUserGroups(const QByteArray &backendId, const QByteArray &backendSecret);
 }
 
 #endif // ENGINIOTESTSCOMMON_H

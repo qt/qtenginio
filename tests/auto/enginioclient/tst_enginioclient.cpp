@@ -144,7 +144,7 @@ void tst_EnginioClient::initTestCase()
     QVERIFY(!_backendSecret.isEmpty());
 
     prepareForSearch();
-    _backendManager.createUsersAndUserGroups(_backendId, _backendSecret);
+    EnginioTests::prepareTestUsersAndUserGroups(_backendId, _backendSecret);
 }
 
 void tst_EnginioClient::cleanupTestCase()

@@ -96,7 +96,7 @@ void tst_EnginioModel::initTestCase()
     QVERIFY(!_backendSecret.isEmpty());
 
     // The test operates on user data.
-    _backendManager.createUsersAndUserGroups(_backendId, _backendSecret);
+    EnginioTests::prepareTestUsersAndUserGroups(_backendId, _backendSecret);
 }
 
 void tst_EnginioModel::cleanupTestCase()

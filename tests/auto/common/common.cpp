@@ -267,11 +267,10 @@ QJsonObject EnginioBackendManager::backendApiKeys(const QString &backendName, co
     return apiKeys;
 }
 
-void EnginioBackendManager::createUsersAndUserGroups(const QByteArray& backendId, const QByteArray& backendSecret)
+void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray& backendSecret)
 {
     // Create some users to be used in later tests
     EnginioClient client;
-    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(backendId);
     client.setBackendSecret(backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
