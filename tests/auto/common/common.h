@@ -11,9 +11,13 @@ class EnginioReply;
 
 namespace EnginioTests
 {
+
 const QByteArray TESTAPP_ID(qgetenv("ENGINIO_BACKEND_ID"));
 const QByteArray TESTAPP_SECRET(qgetenv("ENGINIO_BACKEND_SECRET"));
 const QString TESTAPP_URL(qgetenv("ENGINIO_API_URL"));
+const QString TESTAPP_ENV = QStringLiteral("development");
+const QString CUSTOM_OBJECT1(QStringLiteral("CustomObject1"));
+const QString CUSTOM_OBJECT2(QStringLiteral("CustomObject2"));
 
 class EnginioBackendManager: public QObject
 {
@@ -45,6 +49,8 @@ public:
     bool removeBackend(const QString &backendName);
     bool createObjectType(const QString &backendName, const QString &environment, const QJsonObject &schema);
     QJsonObject backendApiKeys(const QString &backendName, const QString &environment);
+
+    void createUsersAndUserGroups(const QByteArray &backendId, const QByteArray &backendSecret);
 };
 
 }
