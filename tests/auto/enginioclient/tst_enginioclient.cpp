@@ -62,6 +62,8 @@ class tst_EnginioClient: public QObject
 
     QString _backendName;
     EnginioTests::EnginioBackendManager _backendManager;
+    QByteArray _backendId;
+    QByteArray _backendSecret;
 
 public slots:
     void error(EnginioReply *reply) {
@@ -150,16 +152,10 @@ private:
         QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject));
         QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, selfLinkedObject));
 
-        QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, kTestEnvironment);
-        QString id = apiKeys["backendId"].toString();
-        QString secret = apiKeys["backendSecret"].toString();
-        QVERIFY(!id.isEmpty());
-        QVERIFY(!secret.isEmpty());
-
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        client.setBackendId(id.toUtf8());
-        client.setBackendSecret(secret.toUtf8());
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         qDebug("Populating backend with data");
@@ -223,13 +219,20 @@ void tst_EnginioClient::initTestCase()
     _backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
     QVERIFY(_backendManager.createBackend(_backendName));
 
+    QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, kTestEnvironment);
+    _backendId = apiKeys["backendId"].toString().toUtf8();
+    _backendSecret = apiKeys["backendSecret"].toString().toUtf8();
+
+    QVERIFY(!_backendId.isEmpty());
+    QVERIFY(!_backendSecret.isEmpty());
+
     prepareForSearch();
 
     // Create some users to be used in later tests
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -510,8 +513,8 @@ void tst_EnginioClient::query_users()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -537,8 +540,8 @@ void tst_EnginioClient::query_users_sort()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     {
@@ -601,8 +604,8 @@ void tst_EnginioClient::query_usersgroup_crud()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -666,8 +669,8 @@ void tst_EnginioClient::query_usersgroup_limit()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -694,8 +697,8 @@ void tst_EnginioClient::query_usersgroup_count()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -721,8 +724,8 @@ void tst_EnginioClient::query_usersgroup_sort()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -756,8 +759,8 @@ void tst_EnginioClient::query_usersgroupmembers_limit()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString id = usergroupId(&client);
@@ -786,8 +789,8 @@ void tst_EnginioClient::query_usersgroupmembers_count()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString id = usergroupId(&client);
@@ -815,8 +818,8 @@ void tst_EnginioClient::query_usersgroupmembers_sort()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString id = usergroupId(&client);
@@ -850,8 +853,8 @@ void tst_EnginioClient::query_users_filter()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
@@ -876,16 +879,10 @@ void tst_EnginioClient::query_users_filter()
 
 void tst_EnginioClient::search()
 {
-    QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, kTestEnvironment);
-    QString id = apiKeys["backendId"].toString();
-    QString secret = apiKeys["backendSecret"].toString();
-    QVERIFY(!id.isEmpty());
-    QVERIFY(!secret.isEmpty());
-
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(id.toUtf8());
-    client.setBackendSecret(secret.toUtf8());
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -980,8 +977,8 @@ void tst_EnginioClient::users_crud()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(EnginioTests::TESTAPP_ID);
-    client.setBackendSecret(EnginioTests::TESTAPP_SECRET);
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
