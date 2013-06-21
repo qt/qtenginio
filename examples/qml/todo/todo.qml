@@ -7,11 +7,9 @@ Rectangle {
     width: 400; height: 800
     color: "lightgray"
 
-    EnginioModel
-    {
-        id: emodel
-        enginio: Enginio
-                 {
+    EnginioModel {
+        id: enginioModel
+        enginio: Enginio {
                      backendId: AppConfig.backendData.id
                      backendSecret: AppConfig.backendData.secret
                  }
@@ -19,7 +17,8 @@ Rectangle {
     }
 
     Component {
-        id: ldelegate
+        id: listItemDelegate
+
         Rectangle {
             color: Qt.lighter(root.color)
             width: lview.width
@@ -30,12 +29,13 @@ Rectangle {
                 hoverEnabled: true
                 onClicked: {
                     if (index !== -1) {
-                        emodel.setProperty(index, "completed", !completed)
+                        enginioModel.setProperty(index, "completed", !completed)
                     }
                 }
             }
+
             TextInput {
-                id: textTitle
+                id: todoText
                 anchors.centerIn: parent
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
@@ -45,12 +45,12 @@ Rectangle {
                 font.pointSize: 23
                 onAccepted: {
                      if (index !== -1) {
-                        emodel.setProperty(index, "title", text)
+                        enginioModel.setProperty(index, "title", text)
                     }
                 }
             }
+
             Rectangle {
-                id: sync
                 width: 20
                 height: 20
                 RotationAnimation on rotation {
@@ -63,32 +63,43 @@ Rectangle {
                 anchors.left: parent.left
                 enabled: false
                 visible: !_synced
-                color: textTitle.color
+                color: todoText.color
             }
 
-            Rectangle {
-                id: rem
+            Image {
+                id: removeIcon
                 width: 25
-                height: 6
+                height: 25
+
+                source: "qrc:icons/delete_icon.png"
 
                 anchors.margins: 5
                 anchors.top: parent.top
                 anchors.right: parent.right
                 enabled: _synced
+
                 opacity: 0
-                color: "red"
-                states: State {
-                    name: "visible"
-                    when: mouse.containsMouse
-                    PropertyChanges { target: rem; opacity: 1}
-                }
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+
+                states: [
+                    State {
+                        name: "visible"
+                        when: mouse.containsMouse
+                        PropertyChanges { target: removeIcon; opacity: 1}
+                    },
+                    State {
+                        name: "invisible"
+                        when: !mouse.containsMouse
+                        PropertyChanges { target: removeIcon; opacity: 0}
+                    }
+                ]
 
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
                         console.log(index)
                         if (index !== -1)
-                            emodel.remove(index)
+                            enginioModel.remove(index)
                     }
                 }
             }
@@ -98,20 +109,24 @@ Rectangle {
     ListView {
         id: lview
         anchors.margins: 5
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: irec.top
 
-        model: emodel
-        delegate: ldelegate
-        spacing: 20
+        model: enginioModel
+        delegate: listItemDelegate
+        spacing: 15
     }
 
     Rectangle {
         id: irec
-        opacity: 0.9
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: 80
+        opacity: 0.9
+
         TextInput {
             id: tinput
             anchors.left: parent.left
@@ -120,7 +135,7 @@ Rectangle {
             text: "New todo..."
             font.pointSize: 23
             onAccepted: {
-                emodel.append({"title": text, "completed": false})
+                enginioModel.append({"title": text, "completed": false})
                 text = "New todo..."
             }
         }
