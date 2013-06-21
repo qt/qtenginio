@@ -78,8 +78,8 @@ private slots:
 
 void tst_Files::initTestCase()
 {
-    if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
-        QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
+    if (EnginioTests::TESTAPP_URL.isEmpty())
+        QFAIL("Needed environment variable ENGINIO_API_URL is not set!");
 
     _backendName = QStringLiteral("Files") + QString::number(QDateTime::currentMSecsSinceEpoch());
     QVERIFY(_backendManager.createBackend(_backendName));

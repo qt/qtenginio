@@ -45,8 +45,8 @@
 
 int main(int argc, char** argv)
 {
-    if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty()) {
-        qFatal("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET and ENGINIO_API_URL are not set!");
+    if (EnginioTests::TESTAPP_URL.isEmpty()) {
+        qFatal("Needed environment variable ENGINIO_API_URL is not set!");
         return EXIT_FAILURE;
     }
 
