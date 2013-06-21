@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>logviewer.qml</file>
-    </qresource>
-</RCC>
