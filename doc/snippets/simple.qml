@@ -58,7 +58,7 @@ Rectangle {
 
     //! [client-query]
     Enginio {
-        Component.onCompleted: query({objectType: "objects.image",})
+        Component.onCompleted: query({"objectType": "objects.image"})
     }
     //! [client-query]
 }
