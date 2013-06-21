@@ -355,20 +355,20 @@ QNetworkAccessManager * EnginioClient::networkManager() const
 }
 
 /*!
- * \brief Create custom request to the enginio REST API
- *
- * \param url The url to be used for the request. Note that the provided url completely replaces the internal serviceUrl.
- * \param httpOperation Verb to the server that is valid according to the HTTP specification (eg. "GET", "POST", "PUT", etc.).
- * \param data optional JSON object possibly containing custom headers and the payload data for the request.
- *
- *   {
- *       "headers" : { "Accept" : "application/json" }
- *       "payload" : { "email": "me@engin.io", "password": "password" }
- *   }
- *
- * \return EnginioReply containing the status and the result once it is finished.
- * \sa EnginioReply, create(), query(), update(), remove()
- * \internal
+  \brief Create custom request to the enginio REST API
+
+  \a url The url to be used for the request. Note that the provided url completely replaces the internal serviceUrl.
+  \a httpOperation Verb to the server that is valid according to the HTTP specification (eg. "GET", "POST", "PUT", etc.).
+  \a data optional JSON object possibly containing custom headers and the payload data for the request.
+
+    {
+        "headers" : { "Accept" : "application/json" }
+        "payload" : { "email": "me@engin.io", "password": "password" }
+    }
+
+  \return EnginioReply containing the status and the result once it is finished.
+  \sa EnginioReply, create(), query(), update(), remove()
+  \internal
  */
 EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)
 {
@@ -403,6 +403,10 @@ EnginioReply *EnginioClient::search(const QJsonObject &query)
 
   The \a query is a JSON object containing the actual query to the backend.
   The query will be run on the \a operation part of the backend.
+
+  To query the database of all objects of type "objects.todo":
+  \snippet enginioclient/tst_enginioclient.cpp query-todo
+
   \return EnginioReply containing the status and the result once it is finished.
   \sa EnginioReply, create(), update(), remove(), Operation
  */
@@ -417,13 +421,16 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
 }
 
 /*!
- * \brief Insert a new \a object into the database.
- *
- * The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
- * to create new objects by default.
- * \return EnginioReply containing the status of the query and the data once it is finished.
- * \sa EnginioReply, query(), update(), remove()
- */
+  \brief Insert a new \a object into the database.
+
+  The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
+  to create new objects by default.
+
+  \snippet enginioclient/tst_enginioclient.cpp query1
+
+  \return EnginioReply containing the status of the query and the data once it is finished.
+  \sa EnginioReply, query(), update(), remove()
+*/
 EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
@@ -436,13 +443,13 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation o
 }
 
 /*!
- * \brief Update an existing \a object in the database.
- *
- * The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
- * to create new objects by default.
- * \return EnginioReply containing the status of the query and the data once it is finished.
- * \sa EnginioReply, create(), query(), remove()
- */
+  \brief Update an existing \a object in the database.
+
+  The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
+  to create new objects by default.
+  \return EnginioReply containing the status of the query and the data once it is finished.
+  \sa EnginioReply, create(), query(), remove()
+*/
 EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
@@ -455,13 +462,16 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
 }
 
 /*!
- * \brief Remove an existing \a object from the database.
- *
- * The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
- * to create new objects by default.
- * \return EnginioReply containing the status of the query and the data once it is finished.
- * \sa EnginioReply, create(), query(), update()
- */
+  \brief Remove an existing \a object from the database.
+
+  The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
+  to create new objects by default.
+
+  \snippet enginioclient/tst_enginioclient.cpp query1
+
+  \return EnginioReply containing the status of the query and the data once it is finished.
+  \sa EnginioReply, create(), query(), update()
+*/
 EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation operation)
 {
     Q_D(EnginioClient);
@@ -474,10 +484,10 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
 }
 
 /*!
- * \property EnginioClient::identity
- * Represents a user.
- * \sa EnginioIdentity
- */
+  \property EnginioClient::identity
+  Represents a user.
+  \sa EnginioIdentity
+*/
 EnginioIdentity *EnginioClient::identity() const
 {
     Q_D(const EnginioClient);
