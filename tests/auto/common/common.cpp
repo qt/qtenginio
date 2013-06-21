@@ -359,4 +359,49 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
     QTRY_COMPARE(spy.count(), spyCount);
     QCOMPARE(spyError.count(), 0);
 }
+
+bool prepareTestObjectType(const QString &backendName)
+{
+    QJsonObject schema;
+    schema["name"] = CUSTOM_OBJECT1;
+    QJsonObject testCase;
+    testCase["name"] = QStringLiteral("testCase");
+    testCase["type"] = QStringLiteral("string");
+    testCase["indexed"] = false;
+    QJsonObject title;
+    title["name"] = QStringLiteral("title");
+    title["type"] = QStringLiteral("string");
+    title["indexed"] = false;
+    QJsonObject count;
+    count["name"] = QStringLiteral("count");
+    count["type"] = QStringLiteral("number");
+    count["indexed"] = false;
+    QJsonObject file;
+    file["name"] = QStringLiteral("fileAttachment");
+    file["type"] = QStringLiteral("ref");
+    file["objectType"] = QStringLiteral("files");
+    file["indexed"] = true;
+    QJsonObject processor;
+    processor["type"] = QStringLiteral("image");
+    QJsonObject thumbnail;
+    thumbnail["crop"] = QStringLiteral("20x20");
+    QJsonObject variants;
+    variants["thumbnail"] = thumbnail;
+    processor["variants"] = variants;
+    QJsonArray processors;
+    processors.append(processor);
+    file["processors"] = processors;
+
+    QJsonArray properties;
+    properties.append(testCase);
+    properties.append(title);
+    properties.append(count);
+    properties.append(file);
+    schema["properties"] = properties;
+
+    qDebug() << schema;
+
+    EnginioTests::EnginioBackendManager backendManager;
+    return backendManager.createObjectType(backendName, EnginioTests::TESTAPP_ENV, schema);
+}
 } // namespace EnginioTests

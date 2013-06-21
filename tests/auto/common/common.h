@@ -52,6 +52,8 @@ public:
 };
 
 void prepareTestUsersAndUserGroups(const QByteArray &backendId, const QByteArray &backendSecret);
+bool prepareTestObjectType(const QString &backendName);
+
 }
 
 #endif // ENGINIOTESTSCOMMON_H
