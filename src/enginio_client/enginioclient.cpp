@@ -56,14 +56,26 @@
   \class EnginioClient
   \inmodule enginio-qt
   \ingroup enginio-client
-  \brief EnginioClient handles API keys, sessions and authorization.
-  \mainclass
+  \brief EnginioClient handles all communication with the Enginio server
 
-  When using Enginio you need to set up your backend using this class.
+  The Enginio server supports several separate "backends" with each account.
+  By setting the \l backendId and \l backendSecret a backend is chosen.
+  After setting the ID and secret interaction with the server is possible.
+  The information about the backend is available on the Enginio Dashboard
+  after logging in to \l {http://engin.io}{Enginio}.
+  \code
+    EnginioClient *client = new EnginioClient(parent);
+    client->setBackendId(QStringLiteral("YOUR_BACKEND_ID"));
+    client->setBackendSecret(QStringLiteral("YOUR_BACKEND_SECRET"));
+  \endcode
 
-  The \l backendId and \l backendSecret are required for Engino to work.
-  Once the client is set up you can use it to make queries to the backend
-  or use higher level API such as \l {EnginioModelCpp}{EnginioModel}.
+  The basic functions used to interact with the backend are
+  \l create(), \l query(), \l remove() and \l update().
+  It is possible to do a fulltext search on the server using \l search().
+  For file handling \l downloadFile() and \l uploadFile() are provided.
+
+  In order to make queries that return an array of data more convenient
+  a model is provided by \l {EnginioModelCpp}{EnginioModel}.
 */
 
 /*!
@@ -353,7 +365,6 @@ QNetworkAccessManager * EnginioClient::networkManager() const
  * \sa EnginioReply, create(), query(), update(), remove()
  * \internal
  */
-
 EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)
 {
     Q_D(EnginioClient);
@@ -364,8 +375,10 @@ EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &ht
 }
 
 /*!
-  \brief Search the Enginio backend
-  The \a query is JSON sent to the backend.
+  \brief Fulltext search on the Enginio backend
+
+  The \a query is JSON sent to the backend to perform a fulltext search.
+  Note that the search requires the searched properties to be indexed (on the server, configureable in the backend).
 
   \return EnginioReply containing the status and the result once it is finished.
   \sa EnginioReply, create(), query(), update(), remove()
