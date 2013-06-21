@@ -107,7 +107,6 @@ You can use Enginio with an existing installation of Qt 5.1 or later or get Qt p
             qmake
             make install // or nmake or mingw32-make
       \endcode
-\endlist
 */
 
 /*!

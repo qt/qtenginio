@@ -539,10 +539,10 @@ EnginioReply *EnginioModel::remove(int row)
 }
 
 /*!
-  Update a value on \a row of this model local cache
-  and send an update request to enginio backend.
-  \sa EnginioClient::update
+  Update a value on \a row of this model's local cache
+  and send an update request to the Enginio backend.
   \return reply from backend
+  \sa EnginioClient::update()
 */
 EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
