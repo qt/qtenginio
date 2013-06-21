@@ -76,7 +76,6 @@ public slots:
 private slots:
     void initTestCase();
     void cleanupTestCase();
-    void init();
     void internal_createObjectType();
     void query_todos();
     void query_todos_filter();
@@ -128,94 +127,14 @@ private:
         return id;
     }
 
-    void prepareForSearch() {
-        QJsonObject customObject1;
-        customObject1["name"] = EnginioTests::CUSTOM_OBJECT1;
-        QJsonObject customObject2;
-        customObject2["name"] = EnginioTests::CUSTOM_OBJECT2;
-
-        QJsonObject intValue;
-        intValue["name"] = QStringLiteral("intValue");
-        intValue["type"] = QStringLiteral("number");
-        intValue["indexed"] = false;
-        QJsonObject stringValue;
-        stringValue["name"] = QStringLiteral("stringValue");
-        stringValue["type"] = QStringLiteral("string");
-        stringValue["indexed"] = true;
-
-        QJsonArray properties;
-        properties.append(intValue);
-        properties.append(stringValue);
-        customObject1["properties"] = properties;
-        customObject2["properties"] = properties;
-
-        QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject1));
-        QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject2));
-
-        EnginioClient client;
-        QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
-        client.setServiceUrl(EnginioTests::TESTAPP_URL);
-
-        qDebug("Populating backend with data");
-        QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
-        QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
-        int iterations = 5;
-
-        {
-            QJsonObject obj;
-            obj["objectType"] = QString::fromUtf8("objects.").append(EnginioTests::CUSTOM_OBJECT1);
-            EnginioReply *reply = client.query(obj);
-            QTRY_COMPARE(spy.count(), 1);
-            QCOMPARE(spyError.count(), 0);
-            QVERIFY2(!reply->data().isEmpty(), "Empty data in EnginioReply.");
-            QVERIFY2(!reply->data()["results"].isUndefined(), "Undefined results array in EnginioReply data.");
-            bool create = reply->data()["results"].toArray().isEmpty();
-            spy.clear();
-
-            if (create) {
-                for (int i = 0; i < iterations; ++i)
-                {
-                    obj["intValue"] = i;
-                    obj["stringValue"] = QString::fromUtf8("Query object");
-                    client.create(obj);
-                }
-
-                QTRY_COMPARE_WITH_TIMEOUT(spy.count(), iterations, 10000);
-                QCOMPARE(spyError.count(), 0);
-            }
-
-            spy.clear();
-        }
-        {
-            QJsonObject obj;
-            obj["objectType"] = QString::fromUtf8("objects.").append(EnginioTests::CUSTOM_OBJECT2);
-            EnginioReply *reply = client.query(obj);
-            QTRY_COMPARE(spy.count(), 1);
-            QCOMPARE(spyError.count(), 0);
-            QVERIFY2(!reply->data().isEmpty(), "Empty data in EnginioReply.");
-            QVERIFY2(!reply->data()["results"].isUndefined(), "Undefined results array in EnginioReply data.");
-            bool create = reply->data()["results"].toArray().isEmpty();
-            spy.clear();
-
-            if (create) {
-                for (int i = 0; i < iterations; ++i)
-                {
-                    obj["intValue"] = i;
-                    obj["stringValue"] = QString::fromUtf8("object test");
-                    client.create(obj);
-                }
-
-                QTRY_COMPARE_WITH_TIMEOUT(spy.count(), iterations, 10000);
-                QCOMPARE(spyError.count(), 0);
-            }
-        }
-    }
+    void prepareForSearch();
 };
 
 void tst_EnginioClient::initTestCase()
 {
+    if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
+        QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
+
     _backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
     QVERIFY(_backendManager.createBackend(_backendName));
 
@@ -227,109 +146,13 @@ void tst_EnginioClient::initTestCase()
     QVERIFY(!_backendSecret.isEmpty());
 
     prepareForSearch();
-
-    // Create some users to be used in later tests
-    EnginioClient client;
-    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
-    client.setServiceUrl(EnginioTests::TESTAPP_URL);
-
-    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
-    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
-
-    QJsonObject obj;
-    int spyCount = spy.count();
-
-    for (int i = 0; i < 5; ++i) {
-        QJsonObject query;
-        query["username"] = QStringLiteral("logintest") + (i ? QString::number(i) : "");
-        obj["query"] = query;
-        client.query(obj, EnginioClient::UserOperation);
-        ++spyCount;
-    }
-
-    QTRY_COMPARE(spy.count(), spyCount);
-    QCOMPARE(spyError.count(), 0);
-
-    for (int i = 0; i < 5; ++i) {
-        EnginioReply *reply = spy[i][0].value<EnginioReply*>();
-        QVERIFY(reply);
-        QVERIFY(!reply->data().isEmpty());
-        QVERIFY(!reply->data()["query"].isUndefined());
-        obj = reply->data()["query"].toObject();
-        QVERIFY(!obj.isEmpty());
-        obj = obj["query"].toObject();
-        QVERIFY(!obj.isEmpty());
-        QString identity = obj["username"].toString();
-        QVERIFY(!identity.isEmpty());
-        QVERIFY(!reply->data()["results"].isUndefined());
-        QJsonArray data = reply->data()["results"].toArray();
-        if (!data.count()) {
-            QJsonObject query;
-            query["username"] = identity;
-            query["password"] = identity;
-            client.create(query, EnginioClient::UserOperation);
-            ++spyCount;
-            qDebug() << "Creating " << query;
-        }
-    }
-
-    QTRY_COMPARE(spy.count(), spyCount);
-    QCOMPARE(spyError.count(), 0);
-
-
-    // Create user groups for later tests if the backend does not have them yet.
-    spy.clear();
-    spyCount = 0;
-
-    for (int i = 0; i < 5; ++i) {
-        QJsonObject query;
-        query["name"] = "usergroup" + (i ? QString::number(i) : "");
-        obj["query"] = query;
-        client.query(obj, EnginioClient::UsergroupOperation);
-        ++spyCount;
-    }
-
-    QTRY_COMPARE(spy.count(), spyCount);
-    QCOMPARE(spyError.count(), 0);
-
-    for (int i = 0; i < 5; ++i) {
-        EnginioReply *reply = spy[i][0].value<EnginioReply*>();
-        QVERIFY(reply);
-        QVERIFY(!reply->data().isEmpty());
-        QVERIFY(!reply->data()["query"].isUndefined());
-        obj = reply->data()["query"].toObject();
-        QVERIFY(!obj.isEmpty());
-        obj = obj["query"].toObject();
-        QVERIFY(!obj.isEmpty());
-        QString groupName = obj["name"].toString();
-        QVERIFY(!groupName.isEmpty());
-        QVERIFY(!reply->data()["results"].isUndefined());
-        QJsonArray data = reply->data()["results"].toArray();
-        if (!data.count()) {
-            QJsonObject query;
-            query["name"] = groupName;
-            client.create(query, EnginioClient::UsergroupOperation);
-            ++spyCount;
-            qDebug() << "Creating " << query;
-        }
-    }
-
-    QTRY_COMPARE(spy.count(), spyCount);
-    QCOMPARE(spyError.count(), 0);
+    _backendManager.createUsersAndUserGroups(_backendId, _backendSecret);
 }
 
 void tst_EnginioClient::cleanupTestCase()
 {
     EnginioTests::EnginioBackendManager backendManager;
     QVERIFY(backendManager.removeBackend(_backendName));
-}
-
-void tst_EnginioClient::init()
-{
-    if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
-        QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
 }
 
 void tst_EnginioClient::internal_createObjectType()
@@ -1716,6 +1539,92 @@ void tst_EnginioClient::sharingNetworkManager()
     QVERIFY(e2->networkManager());
     e2->networkManager()->children(); // should not crash
     delete e2;
+}
+
+void tst_EnginioClient::prepareForSearch()
+{
+    QJsonObject customObject1;
+    customObject1["name"] = EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject customObject2;
+    customObject2["name"] = EnginioTests::CUSTOM_OBJECT2;
+
+    QJsonObject intValue;
+    intValue["name"] = QStringLiteral("intValue");
+    intValue["type"] = QStringLiteral("number");
+    intValue["indexed"] = false;
+    QJsonObject stringValue;
+    stringValue["name"] = QStringLiteral("stringValue");
+    stringValue["type"] = QStringLiteral("string");
+    stringValue["indexed"] = true;
+
+    QJsonArray properties;
+    properties.append(intValue);
+    properties.append(stringValue);
+    customObject1["properties"] = properties;
+    customObject2["properties"] = properties;
+
+    QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject1));
+    QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject2));
+
+    EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    qDebug("Populating backend with data");
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+    int iterations = 5;
+
+    {
+        QJsonObject obj;
+        obj["objectType"] = QString::fromUtf8("objects.").append(EnginioTests::CUSTOM_OBJECT1);
+        EnginioReply *reply = client.query(obj);
+        QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
+        QVERIFY2(!reply->data().isEmpty(), "Empty data in EnginioReply.");
+        QVERIFY2(!reply->data()["results"].isUndefined(), "Undefined results array in EnginioReply data.");
+        bool create = reply->data()["results"].toArray().isEmpty();
+        spy.clear();
+
+        if (create) {
+            for (int i = 0; i < iterations; ++i)
+            {
+                obj["intValue"] = i;
+                obj["stringValue"] = QString::fromUtf8("Query object");
+                client.create(obj);
+            }
+
+            QTRY_COMPARE_WITH_TIMEOUT(spy.count(), iterations, 10000);
+            QCOMPARE(spyError.count(), 0);
+        }
+
+        spy.clear();
+    }
+    {
+        QJsonObject obj;
+        obj["objectType"] = QString::fromUtf8("objects.").append(EnginioTests::CUSTOM_OBJECT2);
+        EnginioReply *reply = client.query(obj);
+        QTRY_COMPARE(spy.count(), 1);
+        QCOMPARE(spyError.count(), 0);
+        QVERIFY2(!reply->data().isEmpty(), "Empty data in EnginioReply.");
+        QVERIFY2(!reply->data()["results"].isUndefined(), "Undefined results array in EnginioReply data.");
+        bool create = reply->data()["results"].toArray().isEmpty();
+        spy.clear();
+
+        if (create) {
+            for (int i = 0; i < iterations; ++i)
+            {
+                obj["intValue"] = i;
+                obj["stringValue"] = QString::fromUtf8("object test");
+                client.create(obj);
+            }
+
+            QTRY_COMPARE_WITH_TIMEOUT(spy.count(), iterations, 10000);
+            QCOMPARE(spyError.count(), 0);
+        }
+    }
 }
 
 QTEST_MAIN(tst_EnginioClient)

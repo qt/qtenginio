@@ -38,7 +38,8 @@
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
 #include <QtCore/qjsonarray.h>
-#include <QSignalSpy>
+#include <QtTest/QSignalSpy>
+#include <QtTest/QtTest>
 
 #include "common.h"
 
@@ -266,4 +267,97 @@ QJsonObject EnginioBackendManager::backendApiKeys(const QString &backendName, co
     return apiKeys;
 }
 
+void EnginioBackendManager::createUsersAndUserGroups(const QByteArray& backendId, const QByteArray& backendSecret)
+{
+    // Create some users to be used in later tests
+    EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+    client.setBackendId(backendId);
+    client.setBackendSecret(backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
+    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+
+    QJsonObject obj;
+    int spyCount = spy.count();
+
+    for (int i = 0; i < 5; ++i) {
+        QJsonObject query;
+        query["username"] = QStringLiteral("logintest") + (i ? QString::number(i) : "");
+        obj["query"] = query;
+        client.query(obj, EnginioClient::UserOperation);
+        ++spyCount;
+    }
+
+    QTRY_COMPARE(spy.count(), spyCount);
+    QCOMPARE(spyError.count(), 0);
+
+    for (int i = 0; i < 5; ++i) {
+        EnginioReply *reply = spy[i][0].value<EnginioReply*>();
+        QVERIFY(reply);
+        QVERIFY(!reply->data().isEmpty());
+        QVERIFY(!reply->data()["query"].isUndefined());
+        obj = reply->data()["query"].toObject();
+        QVERIFY(!obj.isEmpty());
+        obj = obj["query"].toObject();
+        QVERIFY(!obj.isEmpty());
+        QString identity = obj["username"].toString();
+        QVERIFY(!identity.isEmpty());
+        QVERIFY(!reply->data()["results"].isUndefined());
+        QJsonArray data = reply->data()["results"].toArray();
+        if (!data.count()) {
+            QJsonObject query;
+            query["username"] = identity;
+            query["password"] = identity;
+            client.create(query, EnginioClient::UserOperation);
+            ++spyCount;
+            qDebug() << "Creating " << query;
+        }
+    }
+
+    QTRY_COMPARE(spy.count(), spyCount);
+    QCOMPARE(spyError.count(), 0);
+
+
+    // Create user groups for later tests if the backend does not have them yet.
+    spy.clear();
+    spyCount = 0;
+
+    for (int i = 0; i < 5; ++i) {
+        QJsonObject query;
+        query["name"] = "usergroup" + (i ? QString::number(i) : "");
+        obj["query"] = query;
+        client.query(obj, EnginioClient::UsergroupOperation);
+        ++spyCount;
+    }
+
+    QTRY_COMPARE(spy.count(), spyCount);
+    QCOMPARE(spyError.count(), 0);
+
+    for (int i = 0; i < 5; ++i) {
+        EnginioReply *reply = spy[i][0].value<EnginioReply*>();
+        QVERIFY(reply);
+        QVERIFY(!reply->data().isEmpty());
+        QVERIFY(!reply->data()["query"].isUndefined());
+        obj = reply->data()["query"].toObject();
+        QVERIFY(!obj.isEmpty());
+        obj = obj["query"].toObject();
+        QVERIFY(!obj.isEmpty());
+        QString groupName = obj["name"].toString();
+        QVERIFY(!groupName.isEmpty());
+        QVERIFY(!reply->data()["results"].isUndefined());
+        QJsonArray data = reply->data()["results"].toArray();
+        if (!data.count()) {
+            QJsonObject query;
+            query["name"] = groupName;
+            client.create(query, EnginioClient::UsergroupOperation);
+            ++spyCount;
+            qDebug() << "Creating " << query;
+        }
+    }
+
+    QTRY_COMPARE(spy.count(), spyCount);
+    QCOMPARE(spyError.count(), 0);
+}
 } // namespace EnginioTests
