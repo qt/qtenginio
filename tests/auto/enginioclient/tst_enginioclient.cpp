@@ -129,10 +129,10 @@ private:
     }
 
     void prepareForSearch() {
-        QJsonObject customObject;
-        customObject["name"] = QStringLiteral("CustomObject");
-        QJsonObject selfLinkedObject;
-        selfLinkedObject["name"] = QStringLiteral("SelfLinkedObject");
+        QJsonObject customObject1;
+        customObject1["name"] = EnginioTests::CUSTOM_OBJECT1;
+        QJsonObject customObject2;
+        customObject2["name"] = EnginioTests::CUSTOM_OBJECT2;
 
         QJsonObject intValue;
         intValue["name"] = QStringLiteral("intValue");
@@ -146,11 +146,11 @@ private:
         QJsonArray properties;
         properties.append(intValue);
         properties.append(stringValue);
-        customObject["properties"] = properties;
-        selfLinkedObject["properties"] = properties;
+        customObject1["properties"] = properties;
+        customObject2["properties"] = properties;
 
-        QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject));
-        QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, selfLinkedObject));
+        QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject1));
+        QVERIFY(_backendManager.createObjectType(_backendName, kTestEnvironment, customObject2));
 
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
@@ -165,7 +165,7 @@ private:
 
         {
             QJsonObject obj;
-            obj["objectType"] = QString::fromUtf8("objects.CustomObject");
+            obj["objectType"] = QString::fromUtf8("objects.").append(EnginioTests::CUSTOM_OBJECT1);
             EnginioReply *reply = client.query(obj);
             QTRY_COMPARE(spy.count(), 1);
             QCOMPARE(spyError.count(), 0);
@@ -190,7 +190,7 @@ private:
         }
         {
             QJsonObject obj;
-            obj["objectType"] = QString::fromUtf8("objects.SelfLinkedObject");
+            obj["objectType"] = QString::fromUtf8("objects.").append(EnginioTests::CUSTOM_OBJECT2);
             EnginioReply *reply = client.query(obj);
             QTRY_COMPARE(spy.count(), 1);
             QCOMPARE(spyError.count(), 0);
@@ -891,7 +891,7 @@ void tst_EnginioClient::search()
     {
         QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
         QJsonObject searchQuery = QJsonDocument::fromJson(
-                    "{\"objectTypes\": [\"objects.CustomObject\"],"
+                    "{\"objectTypes\": [\"objects." + EnginioTests::CUSTOM_OBJECT1.toUtf8() + "\"],"
                     "\"search\": {\"phrase\": \"Query\"}}").object();
 
         QVERIFY(!searchQuery.isEmpty());
@@ -914,12 +914,12 @@ void tst_EnginioClient::search()
         QVERIFY(!data["results"].isUndefined());
         resultCount1 = data["results"].toArray().count();
         QVERIFY(resultCount1);
-        qDebug() << resultCount1 << "results on objects.CustomObject with phrase \"Query\".";
+        qDebug() << resultCount1 << "results on objects." + EnginioTests::CUSTOM_OBJECT1 + " with phrase \"Query\".";
     }
     {
         QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
         QJsonObject searchQuery = QJsonDocument::fromJson(
-                    "{\"objectTypes\": [\"objects.CustomObject\", \"objects.SelfLinkedObject\"],"
+                    "{\"objectTypes\": [\"objects." + EnginioTests::CUSTOM_OBJECT1.toUtf8() + "\", \"objects." + EnginioTests::CUSTOM_OBJECT2.toUtf8() + "\"],"
                     "\"search\": {\"phrase\": \"object OR test\", \"properties\": [\"stringValue\"]}}").object();
 
         QVERIFY(!searchQuery.isEmpty());
@@ -937,8 +937,8 @@ void tst_EnginioClient::search()
         QVERIFY(!data.isEmpty());
         QVERIFY(!data["results"].isUndefined());
         int resultCount2 = data["results"].toArray().count();
+        qDebug() << resultCount2 << " results on objects." + EnginioTests::CUSTOM_OBJECT1 + "and objects." + EnginioTests::CUSTOM_OBJECT2 + " with phrase \"object OR test\".";
         QVERIFY(resultCount2 > resultCount1);
-        qDebug() << resultCount2 << " results on objects.CustomObject and objects.SelfLinkedObject with phrase \"object OR test\".";
     }
 }
 

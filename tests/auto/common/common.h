@@ -14,6 +14,8 @@ namespace EnginioTests
 const QByteArray TESTAPP_ID(qgetenv("ENGINIO_BACKEND_ID"));
 const QByteArray TESTAPP_SECRET(qgetenv("ENGINIO_BACKEND_SECRET"));
 const QString TESTAPP_URL(qgetenv("ENGINIO_API_URL"));
+const QString CUSTOM_OBJECT1(QStringLiteral("CustomObject1"));
+const QString CUSTOM_OBJECT2(QStringLiteral("CustomObject2"));
 
 class EnginioBackendManager: public QObject
 {
