@@ -10,38 +10,6 @@ import "config.js" as AppConfig
 
 Item {
     id: root
-    property string __testObjectName: "QML_TEST_FILES_" + (new Date()).getTime()
-
-    function cleanupDatabase() {
-        finishedSpy.clear()
-
-        var reply = enginio.query({ "objectType": "objects." + __testObjectName
-                                  }, Enginio.ObjectOperation);
-
-        finishedSpy.wait()
-
-        var results = reply.data.results
-
-        if (results === undefined) {
-            console.log("No data to clean up.")
-            return
-        }
-
-        for (var i = 0; i < results.length; ++i)
-        {
-            enginio.remove({ "objectType": "objects." + __testObjectName,
-                               "id" : results[i].id
-                           }, Enginio.ObjectOperation);
-        }
-
-        while (finishedSpy.count < results.length)
-        {
-            finishedSpy.wait() // Throws an exception if it times out
-        }
-
-        finishedSpy.clear()
-        errorSpy.clear()
-    }
 
     Enginio {
         id: enginio
@@ -72,26 +40,18 @@ Item {
     TestCase {
         name: "Files"
 
-        function initTestCase() {
-            cleanupDatabase()
-        }
-
-        function cleanupTestCase() {
-            cleanupDatabase()
-        }
-
         function init() {
             finishedSpy.clear()
             errorSpy.clear()
         }
 
-        function test_upload() {
+        function test_upload_download() {
             var finished = 0
 
             //! [upload-create-object]
             var fileObject = {
-                "objectType": "objects.files",
-                "name": "Example object with file attachment",
+                "objectType": AppConfig.testObjectType,
+                "title": "Example object with file attachment",
             }
             var reply = enginio.create(fileObject);
             //! [upload-create-object]
@@ -110,7 +70,7 @@ Item {
                     "fileName":"test.png"
                 },
                 "targetFileProperty": {
-                    "objectType": "objects.files",
+                    "objectType": AppConfig.testObjectType,
                     "id": objectId,
                     "propertyName": "fileAttachment"
                 },

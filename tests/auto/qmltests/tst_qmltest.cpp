@@ -35,6 +35,7 @@
 **
 ****************************************************************************/
 #include <QtQuickTest/quicktest.h>
+#include <QtTest/QtTest>
 #include <QGuiApplication>
 #include <QDir>
 #include <QFile>
@@ -62,24 +63,46 @@ int main(int argc, char** argv)
     QString qmlFilePath(QUICK_TEST_SOURCE_DIR);
     QFile qmltestConfig(qmlFilePath + QDir::separator() + "config.js");
 
-    if (!qmltestConfig.exists()) {
-        if (!qmltestConfig.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            qFatal("Could not open configuration file for writing: %s", qmltestConfig.fileName().toLocal8Bit().data());
-            return EXIT_FAILURE;
-        }
+    // Since we create and remove the backend each time the QML tests are run
+    // we always need to recreate the configuration file with the new backend API keys.
+    qmltestConfig.remove();
 
-        QTextStream out(&qmltestConfig);
-        out << "var backendData = {\n" \
-            << "    id: \"" << EnginioTests::TESTAPP_ID << "\",\n" \
-            << "    secret: \"" << EnginioTests::TESTAPP_SECRET << "\",\n" \
-            << "    serviceUrl: \"" << EnginioTests::TESTAPP_URL << "\"\n" \
-            << "}\n"
-            << "var testSourcePath = \"" QUICK_TEST_SOURCE_DIR "\"\n";
-
-        out.flush();
-        qmltestConfig.close();
+    if (!qmltestConfig.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qFatal("Could not open configuration file for writing: %s", qmltestConfig.fileName().toLocal8Bit().data());
+        return EXIT_FAILURE;
     }
 
-    return quick_test_main(argc, argv, "qmltests", QUICK_TEST_SOURCE_DIR);
+    EnginioTests::EnginioBackendManager backendManager;
+    QString backendName = QStringLiteral("EnginioClient_QML") + QString::number(QDateTime::currentMSecsSinceEpoch());
+
+    if (!backendManager.createBackend(backendName))
+        return EXIT_FAILURE;
+
+    if (!EnginioTests::prepareTestObjectType(backendName))
+        return EXIT_FAILURE;
+
+    QJsonObject apiKeys = backendManager.backendApiKeys(backendName, EnginioTests::TESTAPP_ENV);
+    QByteArray backendId = apiKeys["backendId"].toString().toUtf8();
+    QByteArray backendSecret = apiKeys["backendSecret"].toString().toUtf8();
+
+    EnginioTests::prepareTestUsersAndUserGroups(backendId, backendSecret);
+
+    QTextStream out(&qmltestConfig);
+    out << "var backendData = {\n" \
+        << "    id: \"" << backendId << "\",\n" \
+        << "    secret: \"" << backendSecret << "\",\n" \
+        << "    serviceUrl: \"" << EnginioTests::TESTAPP_URL << "\"\n" \
+        << "}\n"
+        << "var testSourcePath = \"" QUICK_TEST_SOURCE_DIR "\"\n" \
+        << "var testObjectType = \"objects." + EnginioTests::CUSTOM_OBJECT1 + "\"";
+
+    out.flush();
+    qmltestConfig.close();
+
+    int exitStatus = quick_test_main(argc, argv, "qmltests", QUICK_TEST_SOURCE_DIR);
+
+    backendManager.removeBackend(backendName);
+
+    return exitStatus;
 }
 
