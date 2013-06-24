@@ -43,7 +43,7 @@ Rectangle {
             //![append]
             TextField {
                 id: textInput
-                placeholderText: "Enter ToDo here..."
+                placeholderText: "Enter Todo here..."
                 onAccepted: {
                     enginioModel.append({"title": text, "completed": false})
                     text = ""
@@ -52,7 +52,7 @@ Rectangle {
             }
             //![append]
             Button {
-                text: "Add ToDo"
+                text: "Add Todo"
                 onClicked: textInput.accepted()
             }
         }
@@ -85,6 +85,7 @@ Rectangle {
                 anchors.bottom: parent.bottom
             }
 
+            //![setProperty]
             MouseArea {
                 id: mouse
                 anchors.fill: parent
@@ -95,7 +96,9 @@ Rectangle {
                     }
                 }
             }
+            //![setProperty]
 
+            //![delegate-properties]
             Text {
                 id: todoText
                 text: title
@@ -110,8 +113,9 @@ Rectangle {
                 anchors.rightMargin: 40
                 elide: Text.ElideRight
             }
+            //![delegate-properties]
 
-            // Show an indication when syncing with the server is in progress
+            //![sync]
             Text {
                 visible: !_synced
                 anchors.margins: 4
@@ -120,6 +124,7 @@ Rectangle {
                 id: syncText
                 text: "Syncing..."
             }
+            //![sync]
 
             // Show a delete button when the mouse is over the delegate
             Image {
@@ -137,13 +142,12 @@ Rectangle {
                 opacity: mouse.containsMouse ? 1.0 : 0.0
                 Behavior on opacity { NumberAnimation { duration: 200 } }
 
+                //![remove]
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: {
-                        if (index !== -1)
-                            enginioModel.remove(index)
-                    }
+                    onClicked: enginioModel.remove(index)
                 }
+                //![remove]
             }
         }
     }

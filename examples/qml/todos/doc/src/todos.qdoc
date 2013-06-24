@@ -33,12 +33,26 @@
 
     In this example a simple list of objects is displayed in a ListView.
     Each item in the list is a "To Do" object which can be "done" or "not yet done".
-    Todos can be added and removed (when hovering
+    Todos can be added and removed (when hovering with the mouse).
+    \image todolist.png
+
+    In this simple schema the objects will only have two properties that are added
+    to the default properties (such as creation date which always exists).
+    A string "title" and a bool "completed". The object type will be created
+    when a call to create, or in this case \l{Enginio1::EnginioModel::append()}{EnginioModel::append()} is made.
+
+    A todo object will look like this (in JSON):
+    \code
+{
+  "title": "Buy Milk",
+  "completed": false
+}
+    \endcode
 
     The example uses Qt Quick Controls, Layouts and Enginio
     \snippet todos/todo.qml imports
 
-    The first step is to create a \l{EnginioModelQml}{EnginioModel} and
+    The first step is to create a \l{Enginio1::EnginioModel} and
     the Enginio instance with the backend configuration.
 
     \snippet todos/todo.qml model
@@ -53,7 +67,22 @@
     so that a new Todo can be entered.
     \snippet todos/todo.qml append
 
-    Inside the delegate the data for the index is available in the "model" property.
+    Inside the delegate the data for the index is available by using the property names (\e title and \e completed).
+    The title property is directly assigned to the text displayed on each list item and the completed
+    boolean is used to display the item with strikeout font and light color.
+    \snippet todos/todo.qml delegate-properties
 
-    \snippet todos/todo.qml delegate
+    To update the data on the Enginio backend \l Enginio1::EnginioModel::setProperty() is called.
+
+    \snippet todos/todo.qml setProperty
+
+    In order to know when an item is not yet synced, the _synced property can be used.
+    It is always available in the delegate and used to show a text while the syncing is ongoing.
+
+    \snippet todos/todo.qml sync
+
+    Finally a remove button is visible when hovering an item
+    with the mouse.
+    Removal is implemented by calling \l{Enginio1::EnginioModel::remove()}{EnginioModel::remove()} with the row of the item.
+    \snippet todos/todo.qml remove
 */

@@ -40,11 +40,11 @@
 /*!
   \qmltype EnginioModel
   \instantiates EnginioQmlModel
-  \inqmlmodule enginio-plugin
+  \inqmlmodule Enginio 1
   \ingroup engino-qml
-  \target EnginioModelQml
 
   \brief Makes accessing collections of objects easy
+  \snippet simple.qml import
 
   The query property of the model takes a JSON object.
 
@@ -58,12 +58,52 @@
   In this example, we have the type "objects.city" in the backend
   with two properties: "name" and "population".
 
-  The model supports several function to modify the data, for example it is
-  easy to add another city to the backend by appending it:
-  \snippet models.qml append
+  The model supports several function to modify the data, for example
+  \l append(), \l remove(), \l setProperty()
 
   The QML version of EnginioModel supports the same functionality as the C++ version.
   \l {EnginioModelCpp}{EnginioModel C++}
+*/
+
+/*!
+  \qmlproperty QJsonObject Enginio1::EnginioModel::query
+  The query used to populate the model with data.
+*/
+
+/*!
+  \qmlproperty Enginio Enginio1::EnginioModel::enginio
+  The instance of \l Enginio used for this model.
+*/
+
+/*!
+  \qmlproperty EnginioClient::Operation Enginio1::EnginioModel::operation
+  The operation used for the \l query.
+*/
+
+/*!
+  \qmlmethod EnginioReply Enginio1::EnginioModel::append(QJsonObject value)
+  \brief Add a new object to the model and database.
+
+  To add a "city" object to the model by appending it:
+  \snippet models.qml append
+  The append will be reflected by the model immediately and will be propagated
+  to the server asynchronously.
+
+  The returned \l Enginio1::EnginioReply can be used to react to a finished object creation.
+*/
+
+/*!
+  \qmlmethod EnginioReply Enginio1::EnginioModel::setProperty(int row, string propertyName, QVariant value)
+  \brief Change a property of an object in the model
+
+  The property \a propertyName of the object at \a row will be set to \a value.
+  The model will locally reflect the change immediately and propagage the change to the
+  server in the background.
+*/
+
+/*!
+  \qmlmethod EnginioReply Enginio1::EnginioModel::remove(int row)
+  \brief removes the object at \a row
 */
 
 EnginioQmlModel::EnginioQmlModel(QObject *parent)

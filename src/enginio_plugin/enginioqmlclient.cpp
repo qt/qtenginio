@@ -46,11 +46,10 @@
 /*!
   \qmltype Enginio
   \instantiates EnginioQmlClient
-  \inqmlmodule enginio-plugin
+  \inqmlmodule Enginio 1
   \ingroup engino-qml
 
   \brief client interface to access Enginio
-
   \snippet simple.qml import
 
   Enginio is the heart of the QML API for Enginio.
@@ -70,17 +69,17 @@
 */
 
 /*!
-  \qmlproperty string Enginio::backendId
+  \qmlproperty string Enginio1::Enginio::backendId
   Enginio backend ID. This can be obtained from the Enginio dashboard.
 */
 
 /*!
-  \qmlproperty string Enginio::backendSecret
+  \qmlproperty string Enginio1::Enginio::backendSecret
   Enginio backend secret. This can be obtained from the Enginio dashboard.
 */
 
 /*!
-  \qmlproperty url Enginio::serviceUrl
+  \qmlproperty url Enginio1::Enginio::serviceUrl
   \internal
   Enginio backend URL.
 
@@ -88,7 +87,29 @@
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio::uploadFile(QJsonObject object, QUrl file)
+  \qmlmethod EnginioReply Enginio1::Enginio::search(QJsonObject query)
+  \brief Perform a full text search on the database
+*/
+
+/*!
+  \qmlmethod EnginioReply Enginio1::Enginio::query(QJsonObject query, Operation operation)
+  \brief Query the database.
+*/
+/*!
+  \qmlmethod EnginioReply Enginio1::Enginio::create(QJsonObject query, Operation operation)
+  \brief Create an object in the database.
+*/
+/*!
+  \qmlmethod EnginioReply Enginio1::Enginio::update(QJsonObject query, Operation operation)
+  \brief Update an object in the database.
+*/
+/*!
+  \qmlmethod EnginioReply Enginio1::Enginio::remove(QJsonObject query, Operation operation)
+  \brief Remove an object from the database.
+*/
+
+/*!
+  \qmlmethod EnginioReply Enginio1::Enginio::uploadFile(QJsonObject object, QUrl file)
   \brief Stores a \a file attached to an \a object in Enginio
 
   Each uploaded file needs to be associated with an object in the database.
@@ -109,7 +130,7 @@
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio::downloadFile(QJsonObject object)
+  \qmlmethod EnginioReply Enginio1::Enginio::downloadFile(QJsonObject object)
   \brief Get the download URL for a file
 
   \snippet qmltests/tst_files.qml download
@@ -121,6 +142,19 @@
   \endcode
 
   \sa uploadFile()
+*/
+
+/*!
+  \qmlsignal Enginio1::Enginio::finished(EnginioReply reply)
+  This signal is emitted when a \a reply finishes.
+
+  \note that this signal is alwasy emitted, independent of whether
+  the reply finished successfully or not.
+*/
+
+/*!
+  \qmlsignal Enginio1::Enginio::error(EnginioReply reply)
+  This signal is emitted when a \a reply finishes and contains an error.
 */
 
 EnginioQmlClient::EnginioQmlClient(QObject *parent)

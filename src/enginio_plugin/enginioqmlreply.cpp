@@ -6,6 +6,42 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qmetaobject.h>
 
+
+/*!
+  \qmltype EnginioReply
+  \instantiates EnginioQmlReply
+  \inqmlmodule Enginio 1
+  \ingroup engino-qml
+  \target EnginioModelQml
+
+  \brief A reply to any \l Enginio request.
+*/
+
+/*!
+  \qmlproperty QJsonObject Enginio1::EnginioReply::data
+  The data of this reply.
+*/
+
+/*!
+  \qmlproperty EnginioReply::ErrorTypes Enginio1::EnginioReply::errorType
+  The type of error (if any) of this reply.
+*/
+
+/*!
+  \qmlproperty QNetworkReply::NetworkError Enginio1::EnginioReply::networkError
+  The network error (if any).
+*/
+
+/*!
+  \qmlproperty string Enginio1::EnginioReply::errorString
+  The error message if this reply was an error.
+*/
+
+/*!
+  \qmlproperty int Enginio1::EnginioReply::backendStatus
+  The backend status code.
+*/
+
 class EnginioQmlReplyPrivate : public EnginioReplyPrivate
 {
     EnginioQmlReply *q;
