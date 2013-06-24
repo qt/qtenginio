@@ -49,6 +49,11 @@
 
     It is easy to add a new object to the model.
     By using a TextField's onAccepted function the data is
-    appended to the model.
+    appended to the model. After appending the new Todo, the text gets cleared
+    so that a new Todo can be entered.
     \snippet todos/todo.qml append
+
+    Inside the delegate the data for the index is available in the "model" property.
+
+    \snippet todos/todo.qml delegate
 */

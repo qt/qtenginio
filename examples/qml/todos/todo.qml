@@ -22,10 +22,8 @@ Rectangle {
     }
     //![model]
 
-
     // A simple layout:
     // a listview and a line edit with button to add to the list
-
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 4
@@ -35,9 +33,8 @@ Rectangle {
         ListView {
             model: enginioModel
             delegate: listItemDelegate
-            spacing: 4
-            width: parent.width
             Layout.fillHeight: true
+            Layout.fillWidth: true
             clip: true
         }
         //![view]
@@ -61,14 +58,33 @@ Rectangle {
         }
     }
 
+
     Component {
         id: listItemDelegate
 
         Rectangle {
-            radius: 10
+            id: item
+            property color gradientColor: "#f4f4f4"
             color: Qt.lighter(root.color)
             width: parent.width
             height: 80
+            gradient: Gradient {
+                GradientStop { color: mouse.pressed ? Qt.darker(gradientColor, 1.05) : gradientColor; position: 0 }
+                GradientStop { color: mouse.pressed ? Qt.darker(gradientColor, 1.05) : Qt.darker(gradientColor, 1.02); position: 1 }
+            }
+            Rectangle {
+                height: 2
+                width: parent.width
+                color: "#55ffffff"
+                visible: !mouse.pressed
+            }
+            Rectangle {
+                height: 2
+                width: parent.width
+                color: "#22000000"
+                anchors.bottom: parent.bottom
+            }
+
             MouseArea {
                 id: mouse
                 anchors.fill: parent
@@ -80,37 +96,29 @@ Rectangle {
                 }
             }
 
-            // Allow editing the title
-            TextInput {
+            Text {
                 id: todoText
-                y: 4
-                anchors.horizontalCenter: parent.horizontalCenter
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-
                 text: title
-                color: model.completed ? "green" : "red"
-                font.pointSize: 23
-                onAccepted: {
-                    if (index !== -1) {
-                        enginioModel.setProperty(index, "title", text)
-                    } else {
-                        console.log("whoot?")
-                    }
-                }
+                font.strikeout: completed
+                color: completed ? "#999" : "#333"
+                font.pointSize: 20
+
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 20
+                anchors.rightMargin: 40
+                elide: Text.ElideRight
             }
 
             // Show an indication when syncing with the server is in progress
-            Column {
+            Text {
                 visible: !_synced
                 anchors.margins: 4
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
-                spacing: 4
-                Text {
-                    id: syncText
-                    text: "Syncing..."
-                }
+                id: syncText
+                text: "Syncing..."
             }
 
             // Show a delete button when the mouse is over the delegate
@@ -121,34 +129,19 @@ Rectangle {
 
                 source: "qrc:icons/delete_icon.png"
 
-                anchors.margins: 4
-                anchors.top: parent.top
+                anchors.margins: 20
+                anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 enabled: _synced
 
-                opacity: mouse.containsMouse
+                opacity: mouse.containsMouse ? 1.0 : 0.0
                 Behavior on opacity { NumberAnimation { duration: 200 } }
 
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        console.log(index)
                         if (index !== -1)
                             enginioModel.remove(index)
-                    }
-                }
-            }
-
-            CheckBox {
-                text: "done"
-                visible: mouse.containsMouse || hovered
-                anchors.margins: 4
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                checked: model.completed
-                onClicked: {
-                    if (index !== -1) {
-                        enginioModel.setProperty(index, "completed", !completed)
                     }
                 }
             }
