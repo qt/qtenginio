@@ -5,6 +5,6 @@ tests are written for.
 The tests need network connection and access to an Enginio backend.
 To be able to run the tests the following environment variables have to be set:
 
-ENGINIO_BACKEND_ID
-ENGINIO_BACKEND_SECRET
+ENGINIO_EMAIL_ADDRESS
+ENGINIO_LOGIN_PASSWORD
 ENGINIO_API_URL
