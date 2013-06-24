@@ -992,7 +992,7 @@ void tst_EnginioClient::remove_todos()
     query["title"] = QString::fromUtf8("A todo");
     query["completed"] = true;
     const EnginioReply* response = client.create(query);
-    //![remove-todo]
+    //![create-todo]
     QVERIFY(response);
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
