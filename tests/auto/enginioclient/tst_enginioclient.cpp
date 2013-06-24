@@ -182,17 +182,18 @@ void tst_EnginioClient::query_todos()
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
-
-    QJsonObject obj;
-    obj["objectType"] = QString::fromUtf8("objects.todos");
-    const EnginioReply* reqId = client.query(obj);
-    QVERIFY(reqId);
+    //![query-todo]
+    QJsonObject object;
+    object["objectType"] = QString::fromUtf8("objects.todos");
+    const EnginioReply* reply = client.query(object);
+    //![query-todo]
+    QVERIFY(reply);
 
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
-    QCOMPARE(response, reqId);
+    QCOMPARE(response, reply);
     CHECK_NO_ERROR(response);
     QVERIFY(!response->data().isEmpty());
     QVERIFY(!response->data()["results"].isUndefined());
@@ -983,41 +984,54 @@ void tst_EnginioClient::remove_todos()
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
-
+    QString objectId;
+    {
+    //![create-todo]
     QJsonObject query;
     query["objectType"] = QString::fromUtf8("objects.todos");
-    query["title"] = QString::fromUtf8("remove");
+    query["title"] = QString::fromUtf8("A todo");
     query["completed"] = true;
-    const EnginioReply* reqId = client.create(query);
-    QVERIFY(reqId);
+    const EnginioReply* response = client.create(query);
+    //![remove-todo]
+    QVERIFY(response);
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
 
     // confirm that a new object was created
-    const EnginioReply *response = spy[0][0].value<EnginioReply*>();
-    QCOMPARE(response, reqId);
-    CHECK_NO_ERROR(response);
+    const EnginioReply *spyResponse = spy[0][0].value<EnginioReply*>();
+    QCOMPARE(response, spyResponse);
+    CHECK_NO_ERROR(spyResponse);
+    objectId = response->data()["id"].toString();
+    QVERIFY(!objectId.isEmpty());
+    }
 
-    query["id"] = response->data()["id"];
-    reqId = client.remove(query);
-    QVERIFY(reqId);
+    {
+    //![remove-todo]
+    QJsonObject query;
+    query["objectType"] = QString::fromUtf8("objects.todos");
+    query["id"] = objectId;
+    const EnginioReply *response = client.remove(query);
+    //![remove-todo]
+
+    QVERIFY(response);
     QTRY_COMPARE(spy.count(), 2);
     QCOMPARE(spyError.count(), 0);
-    response = spy[1][0].value<EnginioReply*>();
-    QCOMPARE(response, reqId);
-    CHECK_NO_ERROR(response);
+    const EnginioReply *spyResponse = spy[1][0].value<EnginioReply*>();
+    QCOMPARE(response, spyResponse);
+    CHECK_NO_ERROR(spyResponse);
+    }
 
     // it seems that object was deleted but lets try to query for it
     QJsonObject checkQuery;
     QJsonObject constructQuery;
-    constructQuery["id"] = query["id"];
+    constructQuery["id"] = objectId;
     checkQuery["query"] = constructQuery;
-    checkQuery["objectType"] = query["objectType"];
-    reqId = client.query(checkQuery);
+    checkQuery["objectType"] = QString::fromUtf8("objects.todos");
+    const EnginioReply *reqId = client.query(checkQuery);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 3);
     QCOMPARE(spyError.count(), 0);
-    response = spy[2][0].value<EnginioReply*>();
+    const EnginioReply *response = spy[2][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     CHECK_NO_ERROR(response);
     QVERIFY(response->data()["results"].toArray().isEmpty());
