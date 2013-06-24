@@ -25,15 +25,30 @@
 **
 ****************************************************************************/
 /*!
-    \title Enginio QML Examples - Image Gallery
-    \example image-gal
-    \brief This is an example showing up and download of files in Enginio.
+    \title Enginio QML Examples - Todos
+    \example todos
+    \brief The Todo example shows the EnginioModel usage in Qt Quick
     \ingroup enginio-examples
     \inmodule enginio-qml
 
-    The first step is to set up the \l Enginio client.
-    \snippet image-gal/image-gallery.qml client
+    In this example a simple list of objects is displayed in a ListView.
+    Each item in the list is a "To Do" object which can be "done" or "not yet done".
+    Todos can be added and removed (when hovering
 
-    The model gets initialized with the client declared above.
-    \snippet image-gal/image-gallery.qml model
+    The example uses Qt Quick Controls, Layouts and Enginio
+    \snippet todos/todo.qml imports
+
+    The first step is to create a \l{EnginioModelQml}{EnginioModel} and
+    the Enginio instance with the backend configuration.
+
+    \snippet todos/todo.qml model
+
+    A ListView is used to display the list of Todos, in the delegate the
+    properties of the Enginio objects are used.
+    \snippet todos/todo.qml view
+
+    It is easy to add a new object to the model.
+    By using a TextField's onAccepted function the data is
+    appended to the model.
+    \snippet todos/todo.qml append
 */
