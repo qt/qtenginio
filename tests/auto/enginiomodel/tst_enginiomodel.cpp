@@ -82,8 +82,8 @@ private slots:
 
 void tst_EnginioModel::initTestCase()
 {
-    if (EnginioTests::TESTAPP_ID.isEmpty() || EnginioTests::TESTAPP_SECRET.isEmpty() || EnginioTests::TESTAPP_URL.isEmpty())
-        QFAIL("Needed environment variables ENGINIO_BACKEND_ID, ENGINIO_BACKEND_SECRET, ENGINIO_API_URL are not set!");
+    if (EnginioTests::TESTAPP_URL.isEmpty())
+        QFAIL("Needed environment variable ENGINIO_API_URL is not set!");
 
     _backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
     QVERIFY(_backendManager.createBackend(_backendName));
@@ -96,7 +96,7 @@ void tst_EnginioModel::initTestCase()
     QVERIFY(!_backendSecret.isEmpty());
 
     // The test operates on user data.
-    _backendManager.createUsersAndUserGroups(_backendId, _backendSecret);
+    EnginioTests::prepareTestUsersAndUserGroups(_backendId, _backendSecret);
 }
 
 void tst_EnginioModel::cleanupTestCase()
