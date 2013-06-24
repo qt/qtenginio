@@ -426,7 +426,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
   The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
   to create new objects by default.
 
-  \snippet enginioclient/tst_enginioclient.cpp query1
+  \snippet enginioclient/tst_enginioclient.cpp create-todo
 
   \return EnginioReply containing the status of the query and the data once it is finished.
   \sa EnginioReply, query(), update(), remove()
@@ -467,7 +467,7 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
   The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
   to create new objects by default.
 
-  \snippet enginioclient/tst_enginioclient.cpp query1
+  \snippet enginioclient/tst_enginioclient.cpp remove-todo
 
   \return EnginioReply containing the status of the query and the data once it is finished.
   \sa EnginioReply, create(), query(), update()

@@ -26,16 +26,14 @@
 ****************************************************************************/
 /*!
     \title Enginio QML Examples - Image Gallery
-    \example image-gallery
+    \example image-gal
     \brief This is an example showing up and download of files in Enginio.
     \ingroup enginio-examples
     \inmodule enginio-qt
 
     The first step is to set up the \l Enginio client.
-    \snippet image-gallery/image-gallery.qml client
+    \snippet image-gal/image-gallery.qml client
 
     The model gets initialized with the client declared above.
-    \snippet image-gallery/image-gallery.qml model
-
+    \snippet image-gal/image-gallery.qml model
 */
-
