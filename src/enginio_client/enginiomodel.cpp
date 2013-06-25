@@ -189,10 +189,7 @@ public:
     EnginioReply *setValue(int row, const QString &role, const QVariant &value)
     {
         int key = _roles.key(role, InvalidRole);
-        if (key != InvalidRole) {
-            return setData(row, value, key);
-        }
-        return 0;
+        return setData(row, value, key);
     }
 
     void setQuery(const QJsonObject &query)
@@ -333,9 +330,11 @@ public:
             emit q->dataChanged(q->index(row), q->index(row));
             return id;
         }
-
-        Q_UNIMPLEMENTED();
-        return 0;
+        EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
+        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel: Trying to update an object with unknown role")));
+        EnginioReply *ereply = new EnginioReply(client, nreply);
+        nreply->setParent(ereply);
+        return ereply;
     }
 
     void syncRoles()

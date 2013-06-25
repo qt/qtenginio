@@ -339,8 +339,9 @@ void tst_EnginioModel::invalidSetProperty()
     QVERIFY(model.setProperty(-10, "Blah", QVariant(123)));
     QVERIFY(model.setProperty(-1, "Blah", QVariant(123)));
     QVERIFY(model.setProperty(model.rowCount(), "Blah", QVariant(123)));
+    QVERIFY(model.setProperty(0, "Blah", QVariant(123))); // invalid Role
 
-    QTRY_COMPARE(spyClientFinished.count(), 3);
+    QTRY_COMPARE(spyClientFinished.count(), 4);
     QCOMPARE(spyClientError.count(), spyClientFinished.count());
     QCOMPARE(spyReplyFinished.count(), spyClientFinished.count());
 
