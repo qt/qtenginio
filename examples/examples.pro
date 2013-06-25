@@ -4,5 +4,5 @@ qtHaveModule(quick) {
     SUBDIRS += qml
 }
 qtHaveModule(widgets) {
-    SUBDIRS += widgets
+    SUBDIRS += qt
 }
