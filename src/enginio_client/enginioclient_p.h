@@ -856,7 +856,6 @@ private:
         chunkDevice->setParent(reply);
         _chunkedUploads.insert(reply, qMakePair(device, endPos));
         ereply->setNetworkReply(reply);
-        reply->setParent(ereply);
         _connections.append(QObject::connect(reply, &QNetworkReply::uploadProgress, UploadProgressFunctor(this, reply)));
     }
 };

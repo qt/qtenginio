@@ -333,7 +333,6 @@ public:
         EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel: Trying to update an object with unknown role")));
         EnginioReply *ereply = new EnginioReply(client, nreply);
-        nreply->setParent(ereply);
         return ereply;
     }
 
@@ -535,7 +534,6 @@ EnginioReply *EnginioModel::remove(int row)
         EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel::remove: row is out of range")));
         EnginioReply *ereply = new EnginioReply(client, nreply);
-        nreply->setParent(ereply);
         return ereply;
     }
 
@@ -557,7 +555,6 @@ EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVar
         EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel::setProperty: row is out of range")));
         EnginioReply *ereply = new EnginioReply(client, nreply);
-        nreply->setParent(ereply);
         return ereply;
     }
 

@@ -375,7 +375,6 @@ EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &ht
     Q_D(EnginioClient);
     QNetworkReply *nreply = d->customRequest(url, httpOperation, data);
     EnginioReply *ereply = new EnginioReply(d, nreply);
-    nreply->setParent(ereply);
     return ereply;
 }
 
@@ -394,7 +393,6 @@ EnginioReply *EnginioClient::search(const QJsonObject &query)
 
     QNetworkReply *nreply = d->query<QJsonObject>(query, EnginioClientPrivate::SearchOperation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
-    nreply->setParent(ereply);
     return ereply;
 }
 
@@ -416,7 +414,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
 
     QNetworkReply *nreply = d->query<QJsonObject>(query, static_cast<EnginioClientPrivate::Operation>(operation));
     EnginioReply *ereply = new EnginioReply(d, nreply);
-    nreply->setParent(ereply);
+
     return ereply;
 }
 
@@ -437,7 +435,6 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation o
 
     QNetworkReply *nreply = d->create<QJsonObject>(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }
@@ -456,7 +453,6 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
 
     QNetworkReply *nreply = d->update<QJsonObject>(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }
@@ -478,7 +474,6 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
 
     QNetworkReply *nreply = d->remove<QJsonObject>(object, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }
@@ -529,7 +524,6 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
 
     QNetworkReply *nreply = d->uploadFile<QJsonObject>(object, file);
     EnginioReply *ereply = new EnginioReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }
@@ -556,7 +550,6 @@ EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 
     QNetworkReply *nreply = d->downloadFile<QJsonObject>(object);
     EnginioReply *ereply = new EnginioReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }
