@@ -64,7 +64,7 @@ Rectangle {
         anchors.fill: parent
         model: enginioModel
         delegate: Text {
-            text: model.name + ": " + model.population
+            text: name + ": " + population
         }
     }
     //! [view]
