@@ -37,7 +37,7 @@ private:
     // Enginio object model containing image objects
     ImageModel *m_model;
 
-    // The list view showing contents of m_objectModel
+    // The list view showing contents of m_model
     QListView *m_view;
     QPushButton *m_uploadButton;
     QFileDialog *m_fileDialog;
