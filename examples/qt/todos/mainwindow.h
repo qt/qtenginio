@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QListView>
 
+class QPushButton;
 class EnginioClient;
 class EnginioReply;
 class TodosModel;
@@ -22,6 +23,7 @@ private slots:
     void removeItem();
     void appendItem();
     void toggleCompleted();
+    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
 private:
     void queryTodos();
@@ -34,6 +36,10 @@ private:
 
     // The list view showing contents of m_model
     QListView *m_view;
+
+    QPushButton *m_addNewButton;
+    QPushButton *m_removeButton;
+    QPushButton *m_toggleButton;
 };
 
 #endif // MAINWINDOW_H

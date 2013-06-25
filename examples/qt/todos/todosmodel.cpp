@@ -3,6 +3,7 @@
 #include <QtCore/qjsonvalue.h>
 #include <QtCore/qjsonobject.h>
 #include <QtGui/qcolor.h>
+#include <QtGui/qfont.h>
 
 #include <Enginio/enginioreply.h>
 
@@ -19,9 +20,17 @@ QVariant TodosModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole)
         return EnginioModel::data(index, TitleRole).value<QJsonValue>().toString();
 
+    if (role == Qt::FontRole) {
+        bool completed = EnginioModel::data(index, DoneRole).value<QJsonValue>().toBool();
+        QFont font;
+        font.setPointSize(20);
+        font.setStrikeOut(completed);
+        return font;
+    }
+
     if (role == Qt::TextColorRole) {
         bool completed = EnginioModel::data(index, DoneRole).value<QJsonValue>().toBool();
-        return completed ? QColor("#2c4d00") /* ~green */ : QColor("#bf0303") /* ~red */;
+        return completed ? QColor("#999") : QColor("#333");
     }
 
     if (role == DoneRole)
