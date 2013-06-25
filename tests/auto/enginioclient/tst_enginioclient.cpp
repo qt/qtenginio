@@ -1333,22 +1333,22 @@ void tst_EnginioClient::backendFakeReply()
     QJsonObject objecTypeOnly;
     objecTypeOnly["objectType"] = QString::fromUtf8("objects.todos");
 
-    client.query(empty, EnginioClient::ObjectOperation);
-    client.query(empty, EnginioClient::ObjectAclOperation);
-    client.query(objecTypeOnly, EnginioClient::ObjectAclOperation);
-    client.query(empty, EnginioClient::UsergroupMembersOperation);
+    QVERIFY(client.query(empty, EnginioClient::ObjectOperation));
+    QVERIFY(client.query(empty, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.query(objecTypeOnly, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.query(empty, EnginioClient::UsergroupMembersOperation));
 
-    client.update(empty, EnginioClient::ObjectOperation);
-    client.update(empty, EnginioClient::ObjectAclOperation);
-    client.update(objecTypeOnly, EnginioClient::ObjectAclOperation);
-    client.update(empty, EnginioClient::UsergroupMembersOperation);
+    QVERIFY(client.update(empty, EnginioClient::ObjectOperation));
+    QVERIFY(client.update(empty, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.update(objecTypeOnly, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.update(empty, EnginioClient::UsergroupMembersOperation));
 
-    client.remove(empty, EnginioClient::ObjectOperation);
-    client.remove(empty, EnginioClient::ObjectAclOperation);
-    client.remove(objecTypeOnly, EnginioClient::ObjectAclOperation);
-    client.remove(empty, EnginioClient::UsergroupMembersOperation);
+    QVERIFY(client.remove(empty, EnginioClient::ObjectOperation));
+    QVERIFY(client.remove(empty, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.remove(objecTypeOnly, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.remove(empty, EnginioClient::UsergroupMembersOperation));
 
-    client.search(empty);
+    QVERIFY(client.search(empty));
 
     QTRY_COMPARE(spyClientFinished.count(), 13);
     QCOMPARE(spyClientError.count(), spyClientFinished.count());
