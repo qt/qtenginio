@@ -38,6 +38,7 @@
 #include "enginiomodel.h"
 #include "enginioreply.h"
 #include "enginioclient_p.h"
+#include "enginiofakereply_p.h"
 
 #include <QtCore/qobject.h>
 #include <QtCore/qvector.h>
@@ -188,10 +189,7 @@ public:
     EnginioReply *setValue(int row, const QString &role, const QVariant &value)
     {
         int key = _roles.key(role, InvalidRole);
-        if (key != InvalidRole) {
-            return setData(row, value, key);
-        }
-        return 0;
+        return setData(row, value, key);
     }
 
     void setQuery(const QJsonObject &query)
@@ -332,9 +330,10 @@ public:
             emit q->dataChanged(q->index(row), q->index(row));
             return id;
         }
-
-        Q_UNIMPLEMENTED();
-        return 0;
+        EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
+        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel: Trying to update an object with unknown role")));
+        EnginioReply *ereply = new EnginioReply(client, nreply);
+        return ereply;
     }
 
     void syncRoles()
@@ -530,8 +529,12 @@ EnginioReply *EnginioModel::append(const QJsonObject &value)
 */
 EnginioReply *EnginioModel::remove(int row)
 {
-    if (row >= d->rowCount())
-        return 0;// FIXME never return 0
+    if (unsigned(row) >= unsigned(d->rowCount())) {
+        EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
+        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel::remove: row is out of range")));
+        EnginioReply *ereply = new EnginioReply(client, nreply);
+        return ereply;
+    }
 
     return d->remove(row);
 }
@@ -547,8 +550,12 @@ EnginioReply *EnginioModel::remove(int row)
 */
 EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
-    if (row >= d->rowCount())  // TODO remove as soon as we have a sparse array.
-        return 0;  // FIXME never return 0
+    if (unsigned(row) >= unsigned(d->rowCount())) {  // TODO remove as soon as we have a sparse array.
+        EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
+        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel::setProperty: row is out of range")));
+        EnginioReply *ereply = new EnginioReply(client, nreply);
+        return ereply;
+    }
 
     return d->setValue(row, role, value);
 }

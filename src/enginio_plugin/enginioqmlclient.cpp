@@ -179,7 +179,6 @@ EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation 
     ObjectAdaptor<QJSValue> o(query, d);
     QNetworkReply *nreply = d_ptr->query<QJSValue>(o, static_cast<EnginioClientPrivate::Operation>(operation));
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
-    nreply->setParent(ereply);
     return ereply;
 }
 
@@ -194,7 +193,6 @@ EnginioQmlReply *EnginioQmlClient::create(const QJSValue &object, const Operatio
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->create<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }
@@ -210,7 +208,6 @@ EnginioQmlReply *EnginioQmlClient::update(const QJSValue &object, const Operatio
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->update<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }
@@ -226,7 +223,6 @@ EnginioQmlReply *EnginioQmlClient::remove(const QJSValue &object, const Operatio
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->remove<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }
@@ -242,7 +238,6 @@ EnginioQmlReply *EnginioQmlClient::downloadFile(const QJSValue &object)
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->downloadFile<QJSValue>(o);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }
@@ -258,7 +253,6 @@ EnginioQmlReply *EnginioQmlClient::uploadFile(const QJSValue &object, const QUrl
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->uploadFile<QJSValue>(o, url);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
-    nreply->setParent(ereply);
 
     return ereply;
 }

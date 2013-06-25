@@ -115,17 +115,17 @@ struct ENGINIOCLIENT_EXPORT EnginioString
 #define CHECK_AND_SET_PATH_WITH_ID(Url, Object, Operation) \
     CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientPrivate::IncludeIdInPath)
 
+static QByteArray constructErrorMessage(QByteArray msg)
+{
+    static QByteArray msgBegin = QByteArrayLiteral("{\"errors\": [{\"message\": \"");
+    static QByteArray msgEnd = QByteArrayLiteral("\",\"reason\": \"BadRequest\"}]}");
+    return msgBegin + msg + msgEnd;
+}
 
 class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 {
     enum PathOptions { Default, IncludeIdInPath = 1};
 
-    static QByteArray constructErrorMessage(QByteArray msg)
-    {
-        static QByteArray msgBegin = QByteArrayLiteral("{\"errors\": [{\"message\": \"");
-        static QByteArray msgEnd = QByteArrayLiteral("\",\"reason\": \"BadRequest\"}]}");
-        return msgBegin + msg + msgEnd;
-    }
 
     template<class T>
     static bool getPath(const T &object, int operation, QString *path, QByteArray *errorMsg, PathOptions flags = Default)
@@ -856,7 +856,6 @@ private:
         chunkDevice->setParent(reply);
         _chunkedUploads.insert(reply, qMakePair(device, endPos));
         ereply->setNetworkReply(reply);
-        reply->setParent(ereply);
         _connections.append(QObject::connect(reply, &QNetworkReply::uploadProgress, UploadProgressFunctor(this, reply)));
     }
 };

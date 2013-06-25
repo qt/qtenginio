@@ -78,6 +78,8 @@ private slots:
     void operation_property();
     void roleNames();
     void listView();
+    void invalidRemove();
+    void invalidSetProperty();
 };
 
 void tst_EnginioModel::initTestCase()
@@ -273,6 +275,109 @@ void tst_EnginioModel::listView()
     QTRY_COMPARE(model.rowCount(), 2);
     QVERIFY(view.model() == &model);
     QVERIFY(view.indexAt(QPoint(1,1)).data().isValid());
+}
+
+struct ReplyCounter
+{
+    int &counter;
+    ReplyCounter(int *storage)
+        : counter(*storage)
+    {}
+
+    void operator ()(EnginioReply *reply)
+    {
+        QVERIFY(reply->isError());
+        QCOMPARE(reply->errorType(), EnginioReply::BackendError);
+        QVERIFY(reply->networkError() != QNetworkReply::NoError);\
+        QCOMPARE(reply->backendStatus(), 400);
+
+        QJsonObject data = reply->data();
+        QVERIFY(!data.isEmpty());
+
+        QVERIFY(!data["errors"].toArray()[0].toObject()["message"].toString().isEmpty());
+        QVERIFY(!data["errors"].toArray()[0].toObject()["reason"].toString().isEmpty());
+
+        ++counter;
+    }
+};
+
+void tst_EnginioModel::invalidRemove()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    EnginioModel model;
+    model.setEnginio(&client);
+
+    int counter = 0;
+    ReplyCounter replyCounter(&counter);
+    EnginioReply *reply;
+
+    reply = model.remove(0);
+    QVERIFY(reply);
+    QVERIFY(reply->parent());
+    QObject::connect(reply, &EnginioReply::finished, replyCounter);
+
+    reply = model.remove(-10);
+    QVERIFY(reply);
+    QVERIFY(reply->parent());
+    QObject::connect(reply, &EnginioReply::finished, replyCounter);
+
+    reply = model.remove(-1);
+    QVERIFY(reply);
+    QVERIFY(reply->parent());
+    QObject::connect(reply, &EnginioReply::finished, replyCounter);
+
+    reply = model.remove(model.rowCount());
+    QVERIFY(reply);
+    QVERIFY(reply->parent());
+    QObject::connect(reply, &EnginioReply::finished, replyCounter);
+
+    QTRY_COMPARE(counter, 4);
+}
+
+void tst_EnginioModel::invalidSetProperty()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    EnginioModel model;
+    model.setEnginio(&client);
+    QJsonObject query = QJsonDocument::fromJson("{\"limit\":2}").object();
+    model.setOperation(EnginioClient::UserOperation);
+    model.setQuery(query);
+
+    QTRY_VERIFY(model.rowCount());
+
+    int counter = 0;
+    ReplyCounter replyCounter(&counter);
+    EnginioReply *reply;
+
+    reply = model.setProperty(-10, "Blah", QVariant(123));
+    QVERIFY(reply);
+    QVERIFY(reply->parent());
+    QObject::connect(reply, &EnginioReply::finished, replyCounter);
+
+    reply = model.setProperty(-1, "Blah", QVariant(123));
+    QVERIFY(reply);
+    QVERIFY(reply->parent());
+    QObject::connect(reply, &EnginioReply::finished, replyCounter);
+
+    reply = model.setProperty(model.rowCount(), "Blah", QVariant(123));
+    QVERIFY(reply);
+    QVERIFY(reply->parent());
+    QObject::connect(reply, &EnginioReply::finished, replyCounter);
+
+    reply = model.setProperty(0, "Blah", QVariant(123)); // invalid Role
+    QVERIFY(reply);
+    QVERIFY(reply->parent());
+    QObject::connect(reply, &EnginioReply::finished, replyCounter);
+
+    QTRY_COMPARE(counter, 4);
 }
 
 QTEST_MAIN(tst_EnginioModel)
