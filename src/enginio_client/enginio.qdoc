@@ -242,6 +242,18 @@ To get convenient access to objects stored in Enginio, consider using \l Enginio
 */
 
 /*!
+\page tutorials.html
+\title Enginio Tutorials
+\indexpage Enginio Overview
+
+\list
+\li \l {Enginio Installation and Prerequisits}
+\li \l {Getting Started with Enginio using Qt Quick}
+\li \l {Getting Started with Enginio using C++}
+\endlist
+*/
+
+/*!
 \page classes.html
 \title All Enginio Classes
 \indexpage Enginio Overview
