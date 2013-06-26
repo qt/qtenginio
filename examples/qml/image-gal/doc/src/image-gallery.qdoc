@@ -31,9 +31,62 @@
     \ingroup enginio-examples
     \inmodule enginio-qml
 
+    The final user interface is a list of images with their meta-information
+    and a button to upload more images.
+    \image image-gallery.png
+
+    \section1 Backend configuration
+    For this example to work the Enginio backend needs to be set up.
+
+    Go to the Enginio Dashboard and create a new backend with `Image Gallery` template.
+    Create a new object type "objects.image" (on the Object Types page).
+
+    Add two properties to the image object:
+    name:"name", type: "String" and name: "file", type: "Ref" with target "files".
+
+    Add a file processor by clicking the "file" property.
+    Choose "Image processor" and in "Variants" enter:
+    \code
+    {
+        "thumbnail": { "crop":"100x100" }
+    }
+    \endcode
+    This JSON snippet will trigger the server to generate thumbnails for all uploaded images.
+    In the image gallery the thumbnails will be used in the list view, the full image will be shown
+    when the thumbnail is clicked.
+
+    \note do not forget to save the changes to the Enginio backend.
+
+    Copy the backend Id and backend Secret from the Enginio dashboard.
+    They need to be filled into the `config.js` file included in the example.
+
+    \section1 The example code
+
     The first step is to set up the \l Enginio client.
     \snippet image-gal/image-gallery.qml client
 
     The model gets initialized with the client declared above.
     \snippet image-gal/image-gallery.qml model
+
+    A delegate is needed to present the images nicely.
+    The model is used to get the list of image objects, but the images
+    are only attached to the objects as file references.
+    Thus the image's thumbnail is fetched by each delegate.
+    \note in a real application it might be neccessary to cache the images.
+
+    The Component.onCompleted function is used to fetch the image.
+    At the time the delegate is created, it has the JSON image object data.
+    The needed information is the "file.id" reference.
+    The "file" property was introduced in the backend setup section and as every
+    object (files are just objects) contains an ID that uniquely identifies the image file.
+    Using the ID the image's thumbnail-url is then fetched ("variant": "thumbnail").
+    \snippet image-gal/image-gallery.qml image-fetch
+
+    The meta-information about each image is displayed in simple Text elements.
+    For the file-name it is possible to directly reference the \c name property as
+    defined in the JSON.
+    \qml
+    Text { text: name }
+    \endqml
+
 */

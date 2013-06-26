@@ -53,6 +53,7 @@ Rectangle {
             height: 120
             width: parent.width
             color: index % 2 ? "#eeeeee" : "transparent"
+            //! [image-fetch]
             Image {
                 id: image
                 x: 10
@@ -61,26 +62,27 @@ Rectangle {
                 width: 80
                 smooth: true
                 fillMode: Image.PreserveAspectFit
-                ProgressBar {
-                    height: 10
-                    width: parent.width - 20
-                    anchors.centerIn: parent
-
-                    maximumValue: 1.0
-                    minimumValue: 0
-                    value: image.progress
-
-                    Layout.fillWidth: true
-                    visible: image.status != Image.Ready
-                }
                 Component.onCompleted: {
-                    var data = { "id": model.file.id,
+                    var data = { "id": file.id,
                                  "variant": "thumbnail"}
                     var reply = client.downloadFile(data)
                     reply.finished.connect(function() {
                         image.source = reply.data.expiringUrl
                     })
                 }
+            }
+            //! [image-fetch]
+            ProgressBar {
+                height: 10
+                width: image.width - 20
+                anchors.centerIn: image
+
+                maximumValue: 1.0
+                minimumValue: 0
+                value: image.progress
+
+                Layout.fillWidth: true
+                visible: image.status != Image.Ready
             }
 
             Column {
@@ -90,19 +92,19 @@ Rectangle {
                     height: 33
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: height * 0.5
-                    text: model.name ? model.name : ""
+                    text: name ? name : ""
                 }
                 Text {
                     height: 33
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: height * 0.5
-                    text: sizeStringFromFile(model.file)
+                    text: sizeStringFromFile(file)
                 }
                 Text {
                     height: 33
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: height * 0.5
-                    text: timeStringFromFile(model.file)
+                    text: timeStringFromFile(file)
                 }
             }
 
@@ -112,7 +114,7 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    imageDialog.fileId = model.file.id;
+                    imageDialog.fileId = file.id;
                     imageDialog.visible = true
                 }
                 onContainsMouseChanged: deleteIcon.opacity = containsMouse ? 1.0 : 0.0
