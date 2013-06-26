@@ -29,7 +29,6 @@ Rectangle {
         id: client
         backendId: AppConfig.backendData.id
         backendSecret: AppConfig.backendData.secret
-        serviceUrl: AppConfig.backendData.serviceUrl
         onError: console.log("Enginio error: " + reply.errorCode + ": " + reply.errorString)
     }
     //! [client]
