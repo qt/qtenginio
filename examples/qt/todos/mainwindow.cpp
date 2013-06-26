@@ -83,13 +83,16 @@ void MainWindow::error(EnginioReply *error)
     qWarning() << Q_FUNC_INFO << error;
 }
 
+//![removeItem]
 void MainWindow::removeItem()
 {
     QModelIndex index = m_view->currentIndex();
     EnginioReply *reply = m_model->remove(index.row());
     QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
 }
+//![removeItem]
 
+//![appendItem]
 void MainWindow::appendItem()
 {
     bool ok;
@@ -99,11 +102,12 @@ void MainWindow::appendItem()
     if (ok && !text.isEmpty()){
         QJsonObject object;
         object["title"] = text;
-        object["completed"] = false;
+        object["completed"] = false; // By default a new To Do is not completed
         EnginioReply *reply = m_model->append(object);
         QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
     }
 }
+//![appendItem]
 
 void MainWindow::toggleCompleted()
 {

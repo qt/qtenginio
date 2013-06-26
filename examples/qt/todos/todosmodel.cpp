@@ -46,7 +46,7 @@ QVariant TodosModel::data(const QModelIndex &index, int role) const
     return EnginioModel::data(index, role);
 }
 //![data]
-
+//![setData]
 bool TodosModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (role == Qt::EditRole) {
@@ -56,6 +56,7 @@ bool TodosModel::setData(const QModelIndex &index, const QVariant &value, int ro
     }
     return false;
 }
+//![setData]
 
 //![updateRoles]
 void TodosModel::updateRoles()
