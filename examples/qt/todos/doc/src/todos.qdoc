@@ -66,7 +66,7 @@
 
     \snippet todos/todosmodel.cpp updateRoles
 
-    By default \l {EnginioModelCpp} operates on \l{QJsonValue} and that is
+    By default \l {EnginioModelCpp::EnginioModel}{EnginioModel} operates on \l{QJsonValue} and that is
     what the \l{EnginioModelCpp::data()}{data()} function returns inside the \l QVariant, but standard
     views such as \l QListView are using predefined roles which does not map directly
     to our roles. That is why we need to write a mapping between them:
@@ -77,37 +77,30 @@
 
     \snippet todos/mainwindow.cpp client
 
-    Then we need to construct and configure our model:
+    It is used by model to connect to Enginio backend. Next we need to construct
+    and configure our model too. The configuration is based on two steps, assigning
+    \l EnginioClient instance and by creating a query.
 
     \snippet todos/mainwindow.cpp model
 
-*/
+    The model has to be assigned to a view, in our case it it is a \l QListView.
 
-//     A ListView is used to display the list of Todos, in the delegate the
-//     properties of the Enginio objects are used.
-//     \snippet todos/todo.qml view
-//
-//     It is easy to add a new object to the model.
-//     By using a TextField's onAccepted function the data is
-//     appended to the model. After appending the new Todo, the text gets cleared
-//     so that a new Todo can be entered.
-//     \snippet todos/todo.qml append
-//
-//     Inside the delegate the data for the index is available by using the property names (\e title and \e completed).
-//     The title property is directly assigned to the text displayed on each list item and the completed
-//     boolean is used to display the item with strikeout font and light color.
-//     \snippet todos/todo.qml delegate-properties
-//
-//     To update the data on the Enginio backend \l EnginioModelCpp::setProperty() is called.
-//
-//     \snippet todos/todo.qml setProperty
-//
-//     In order to know when an item is not yet synced, the _synced property can be used.
-//     It is always available in the delegate and used to show a text while the syncing is ongoing.
-//
-//     \snippet todos/todo.qml sync
-//
-//     Finally a remove button is visible when hovering an item
-//     with the mouse.
-//     Removal is implemented by calling \l{EnginioModelCpp::remove()}{EnginioModel::remove()} with the row of the item.
-//     \snippet todos/todo.qml remove
+    \snippet todos/mainwindow.cpp assignModel
+
+    At this point we are supposed to have working read only View / Model setup. To be able to 
+    modify the model we need to write one more function in model \l{EnginioModelCpp::setData()}{Todos::setData()}.
+    By default \l QListView is using \l{QAbstractItemModel::Roles}{Qt::EditRoles} when an user decide to edit
+    a data content. We need to map that role to our "title" role and call \l {EnginioModelCpp::EnginioModel::setProperty}{setProperty()}
+    to update the data, like that:
+
+    \snippet todos/todosmodel.cpp setData
+
+    To make the application fully functional, way to adding and removing "To Dos" is needed.
+    To do it we need to connect correct buttons to slots, for adding new item:
+
+    \snippet todos/mainwindow.cpp appendItem
+
+    and for removing it:
+
+    \snippet todos/mainwindow.cpp removeItem
+*/
