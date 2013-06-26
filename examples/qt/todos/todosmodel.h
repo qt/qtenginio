@@ -3,13 +3,15 @@
 
 #include <Enginio/enginiomodel.h>
 
+//![definition]
 class TodosModel : public EnginioModel
 {
     Q_OBJECT
 
 public:
     int TitleRole;
-    int DoneRole;
+    int CompletedRole;
+//![definition]
 
     explicit TodosModel(QObject *parent = 0);
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;

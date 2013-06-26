@@ -21,17 +21,22 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowTitle(QStringLiteral("Enginio TODO example"));
 
+    //![client]
     m_client = new EnginioClient(this);
     m_client->setBackendId(Enginio::BACKEND_ID);
     m_client->setBackendSecret(Enginio::BACKEND_SECRET);
+    //![client]
+
     QObject::connect(m_client, &EnginioClient::error, this, &MainWindow::error);
 
+    //![model]
     m_model = new TodosModel(this);
     m_model->setEnginio(m_client);
 
     QJsonObject query;
     query["objectType"] = QString::fromUtf8("objects.todos");
     m_model->setQuery(query);
+    //![model]
 
     QToolBar *toolBar = new QToolBar(this);
     m_addNewButton = new QPushButton(toolBar);
@@ -60,7 +65,10 @@ MainWindow::MainWindow(QWidget *parent)
     windowLayout->addWidget(toolBar);
     setCentralWidget(frame);
 
+    //![assignModel]
     m_view->setModel(m_model);
+    //![assignModel]
+
     m_view->setSelectionModel(new QItemSelectionModel(m_model, m_model));
     QObject::connect(m_view->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::selectionChanged);
 }
@@ -100,7 +108,7 @@ void MainWindow::appendItem()
 void MainWindow::toggleCompleted()
 {
     QModelIndex index = m_view->currentIndex();
-    bool completed = m_model->data(index, m_model->DoneRole).toBool();
+    bool completed = m_model->data(index, m_model->CompletedRole).toBool();
     EnginioReply *reply = m_model->setProperty(index.row(), "completed", !completed);
     QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
 }

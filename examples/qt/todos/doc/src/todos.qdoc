@@ -1,0 +1,115 @@
+/****************************************************************************
+**
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of the documentation of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and Digia.  For licensing terms and
+** conditions see http://qt.digia.com/licensing.  For further information
+** use the contact form at http://qt.digia.com/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file.  Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: http://www.gnu.org/copyleft/fdl.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+/*!
+    \title Enginio Examples - Todos
+    \example todos
+    \brief The Todo example shows the EnginioModel usage together with QtWigets
+    \ingroup enginio-examples
+    \inmodule enginio-qt
+
+    In this example a simple list of objects is displayed in a \l QListView.
+    Each item in the list is a "To Do" object which can be "done" or "not yet done".
+    Todos can be added, removed or altered.
+
+    In this simple schema the objects will only have two properties that are added
+    to the default properties (such as creation date which always exists).
+    A string "title" and a bool "completed". The object type will be created
+    when a call to create, or in this case \l{Enginio::EnginioModel::append()}{EnginioModel::append()} is made.
+
+    A todo object will look like this (in JSON):
+    \code
+{
+  "title": "Buy Milk",
+  "completed": false
+}
+    \endcode
+
+    The first step is to create a TodosModel which inherits \l{Enginio::EnginioModel}
+    and defines main roles which we will be used. As we are intereseted in To Do title
+    and completed information we need to define these two roles.
+    \snippet todos/todosmodel.h definition
+    
+    Newly created model is empty and it doesn't defines any roles. Roles are dynamicly created 
+    based on data json structure and they have not predefined enum number. \l{Enginio::EnginioModel} 
+    automatically populates itself as soon it  has \l{Enginio::EnginioModel::query}{query} and 
+    \l{Enginio::EnginioModel::enginio}{enginio} and properties set. When data is downloaded, 
+    the model does reset, and setup internal data cache and roles names. Therefore we need
+    to connect reset signal in constructor:
+    
+    \snippet todos/todosmodel.cpp resetRoles
+        
+    to a slot that would query them and setup roles ids.
+    
+    \snippet todos/todosmodel.cpp updateRoles
+    
+    By default \l{Enginio::EnginioModel} operates on \l{QJsonValue}{QJsonValues} and that is
+    what \l{Enginio::EnginioModel::data} data() function returns inside \lQVariant, but standard
+    views like for example \lQListView are using predefined roles which does not map directly 
+    to our roles. That is why we need to write a mapping between them:
+
+    \snippet todos/todosmodel.cpp data
+
+    As we have our model defined, we just need to create an instance of \lEnginioClient:
+
+    \snippet todos/mainwindow.cpp client
+
+    Then we need to construct and configure our model:
+    
+    \snippet todos/mainwindow.cpp model
+
+
+
+*/
+
+//     A ListView is used to display the list of Todos, in the delegate the
+//     properties of the Enginio objects are used.
+//     \snippet todos/todo.qml view
+// 
+//     It is easy to add a new object to the model.
+//     By using a TextField's onAccepted function the data is
+//     appended to the model. After appending the new Todo, the text gets cleared
+//     so that a new Todo can be entered.
+//     \snippet todos/todo.qml append
+// 
+//     Inside the delegate the data for the index is available by using the property names (\e title and \e completed).
+//     The title property is directly assigned to the text displayed on each list item and the completed
+//     boolean is used to display the item with strikeout font and light color.
+//     \snippet todos/todo.qml delegate-properties
+// 
+//     To update the data on the Enginio backend \l Enginio1::EnginioModel::setProperty() is called.
+// 
+//     \snippet todos/todo.qml setProperty
+// 
+//     In order to know when an item is not yet synced, the _synced property can be used.
+//     It is always available in the delegate and used to show a text while the syncing is ongoing.
+// 
+//     \snippet todos/todo.qml sync
+// 
+//     Finally a remove button is visible when hovering an item
+//     with the mouse.
+//     Removal is implemented by calling \l{Enginio1::EnginioModel::remove()}{EnginioModel::remove()} with the row of the item.
+//     \snippet todos/todo.qml remove

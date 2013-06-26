@@ -7,21 +7,24 @@
 
 #include <Enginio/enginioreply.h>
 
+//![resetRoles]
 TodosModel::TodosModel(QObject *parent)
     : EnginioModel(parent)
     , TitleRole()
-    , DoneRole()
+    , CompletedRole()
 {
     QObject::connect(this, &EnginioModel::modelReset, this, &TodosModel::updateRoles);
 }
+//![resetRoles]
 
+//![data]
 QVariant TodosModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole)
         return EnginioModel::data(index, TitleRole).value<QJsonValue>().toString();
 
     if (role == Qt::FontRole) {
-        bool completed = EnginioModel::data(index, DoneRole).value<QJsonValue>().toBool();
+        bool completed = EnginioModel::data(index, CompletedRole).value<QJsonValue>().toBool();
         QFont font;
         font.setPointSize(20);
         font.setStrikeOut(completed);
@@ -29,18 +32,20 @@ QVariant TodosModel::data(const QModelIndex &index, int role) const
     }
 
     if (role == Qt::TextColorRole) {
-        bool completed = EnginioModel::data(index, DoneRole).value<QJsonValue>().toBool();
+        bool completed = EnginioModel::data(index, CompletedRole).value<QJsonValue>().toBool();
         return completed ? QColor("#999") : QColor("#333");
     }
 
-    if (role == DoneRole)
-        return EnginioModel::data(index, DoneRole).value<QJsonValue>().toBool();
+    if (role == CompletedRole)
+        return EnginioModel::data(index, CompletedRole).value<QJsonValue>().toBool();
 
     if (role == TitleRole)
         return EnginioModel::data(index, TitleRole).value<QJsonValue>().toString();
 
+    // fallback to base class
     return EnginioModel::data(index, role);
 }
+//![data]
 
 bool TodosModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
@@ -52,6 +57,7 @@ bool TodosModel::setData(const QModelIndex &index, const QVariant &value, int ro
     return false;
 }
 
+//![updateRoles]
 void TodosModel::updateRoles()
 {
     static QByteArray titleRoleName = QByteArrayLiteral("title");
@@ -62,7 +68,9 @@ void TodosModel::updateRoles()
         if (roleName == titleRoleName) {
             TitleRole = role;
         } else if (roleName == doneRoleName) {
-            DoneRole = role;
+            CompletedRole = role;
         }
     }
 }
+//![updateRoles]
+

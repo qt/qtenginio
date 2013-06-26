@@ -16,6 +16,7 @@ outputformats = HTML
 
 exampledirs += \
                ../examples/qml \
+               ../examples/qt \
                snippets \
                ../tests/auto \
 
