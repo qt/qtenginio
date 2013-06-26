@@ -474,8 +474,6 @@ void EnginioModel::setEnginio(const EnginioClient *enginio)
   \property EnginioModel::query
   \brief The query which returns the data for the model.
 
-  FIXME example
-
   Sorting preserved until insertion/deletion
 
   \sa EnginioClient::query()

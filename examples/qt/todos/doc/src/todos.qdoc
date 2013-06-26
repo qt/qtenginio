@@ -25,9 +25,9 @@
 **
 ****************************************************************************/
 /*!
-    \title Enginio Examples - Todos
+    \title Enginio C++ Examples - Todos
     \example todos
-    \brief The Todo example shows the EnginioModel usage together with QtWigets
+    \brief The Todo example shows the \l {EnginioModelCpp}{EnginioModel} usage together with QtWigets
     \ingroup enginio-examples
     \inmodule enginio-qt
 
@@ -35,10 +35,10 @@
     Each item in the list is a "To Do" object which can be "done" or "not yet done".
     Todos can be added, removed or altered.
 
-    In this simple schema the objects will only have two properties that are added
+    In this simple schema the objects will have two properties that are added
     to the default properties (such as creation date which always exists).
     A string "title" and a bool "completed". The object type will be created
-    when a call to create, or in this case \l{Enginio::EnginioModel::append()}{EnginioModel::append()} is made.
+    when a call to create, or in this case \l{EnginioModelCpp::append()}{append()} is made.
 
     A todo object will look like this (in JSON):
     \code
@@ -48,68 +48,66 @@
 }
     \endcode
 
-    The first step is to create a TodosModel which inherits \l{Enginio::EnginioModel}
-    and defines main roles which we will be used. As we are intereseted in To Do title
-    and completed information we need to define these two roles.
+    The first step is to create a TodosModel which inherits \l {EnginioModelCpp}{EnginioModel}
+    and defines the main roles which we will be used. As we are intereseted in To Do \c title
+    and \c completed information we need to define these two roles.
     \snippet todos/todosmodel.h definition
-    
-    Newly created model is empty and it doesn't defines any roles. Roles are dynamicly created 
-    based on data json structure and they have not predefined enum number. \l{Enginio::EnginioModel} 
-    automatically populates itself as soon it  has \l{Enginio::EnginioModel::query}{query} and 
-    \l{Enginio::EnginioModel::enginio}{enginio} and properties set. When data is downloaded, 
-    the model does reset, and setup internal data cache and roles names. Therefore we need
-    to connect reset signal in constructor:
-    
+
+    The newly created model is empty and it doesn't defines any roles. Roles are dynamicly created
+    based on the json data-structure and they have no predefined value in the \l QAbstractItemModel::Roles enum.
+    \l {EnginioModelCpp}{EnginioModel} automatically populates itself as soon it has the
+    \l{EnginioModelCpp::query}{query} and \l{EnginioModelCpp::enginio}{enginio} and properties set. When the data is downloaded,
+    the model resets itself, and sets up the internal data cache and roles names. Therefore we need
+    to connect the reset signal in the constructor:
+
     \snippet todos/todosmodel.cpp resetRoles
-        
-    to a slot that would query them and setup roles ids.
-    
+
+    to a slot that will query them and setup the role ids.
+
     \snippet todos/todosmodel.cpp updateRoles
-    
-    By default \l{Enginio::EnginioModel} operates on \l{QJsonValue}{QJsonValues} and that is
-    what \l{Enginio::EnginioModel::data} data() function returns inside \lQVariant, but standard
-    views like for example \lQListView are using predefined roles which does not map directly 
+
+    By default \l {EnginioModelCpp} operates on \l{QJsonValue} and that is
+    what the \l{EnginioModelCpp::data()}{data()} function returns inside the \l QVariant, but standard
+    views such as \l QListView are using predefined roles which does not map directly
     to our roles. That is why we need to write a mapping between them:
 
     \snippet todos/todosmodel.cpp data
 
-    As we have our model defined, we just need to create an instance of \lEnginioClient:
+    As we have our model defined, we need to create an instance of \l EnginioClient:
 
     \snippet todos/mainwindow.cpp client
 
     Then we need to construct and configure our model:
-    
+
     \snippet todos/mainwindow.cpp model
-
-
 
 */
 
 //     A ListView is used to display the list of Todos, in the delegate the
 //     properties of the Enginio objects are used.
 //     \snippet todos/todo.qml view
-// 
+//
 //     It is easy to add a new object to the model.
 //     By using a TextField's onAccepted function the data is
 //     appended to the model. After appending the new Todo, the text gets cleared
 //     so that a new Todo can be entered.
 //     \snippet todos/todo.qml append
-// 
+//
 //     Inside the delegate the data for the index is available by using the property names (\e title and \e completed).
 //     The title property is directly assigned to the text displayed on each list item and the completed
 //     boolean is used to display the item with strikeout font and light color.
 //     \snippet todos/todo.qml delegate-properties
-// 
-//     To update the data on the Enginio backend \l Enginio1::EnginioModel::setProperty() is called.
-// 
+//
+//     To update the data on the Enginio backend \l EnginioModelCpp::setProperty() is called.
+//
 //     \snippet todos/todo.qml setProperty
-// 
+//
 //     In order to know when an item is not yet synced, the _synced property can be used.
 //     It is always available in the delegate and used to show a text while the syncing is ongoing.
-// 
+//
 //     \snippet todos/todo.qml sync
-// 
+//
 //     Finally a remove button is visible when hovering an item
 //     with the mouse.
-//     Removal is implemented by calling \l{Enginio1::EnginioModel::remove()}{EnginioModel::remove()} with the row of the item.
+//     Removal is implemented by calling \l{EnginioModelCpp::remove()}{EnginioModel::remove()} with the row of the item.
 //     \snippet todos/todo.qml remove
