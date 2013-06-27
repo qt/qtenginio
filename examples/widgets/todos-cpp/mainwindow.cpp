@@ -57,7 +57,8 @@ MainWindow::MainWindow(QWidget *parent)
     toolBar->addWidget(m_removeButton);
     toolBar->addWidget(m_toggleButton);
 
-    m_view = new QListView(this);
+    m_view = new QTreeView(this);
+    m_view->setAlternatingRowColors(true);
     QFrame *frame = new QFrame(this);
     QVBoxLayout *windowLayout = new QVBoxLayout(frame);
     windowLayout->addWidget(m_view);

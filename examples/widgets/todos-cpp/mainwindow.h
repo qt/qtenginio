@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QListView>
+#include <QTreeView>
 
 class QPushButton;
 class EnginioClient;
@@ -35,7 +35,7 @@ private:
     TodosModel *m_model;
 
     // The list view showing contents of m_model
-    QListView *m_view;
+    QTreeView *m_view;
 
     QPushButton *m_addNewButton;
     QPushButton *m_removeButton;

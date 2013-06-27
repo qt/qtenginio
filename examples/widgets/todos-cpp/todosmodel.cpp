@@ -17,6 +17,13 @@ TodosModel::TodosModel(QObject *parent)
 }
 //![resetRoles]
 
+QVariant TodosModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Horizontal && section == 0 && role == Qt::DisplayRole)
+        return QStringLiteral("Todo List");
+    return EnginioModel::headerData(section, orientation, role);
+}
+
 //![data]
 QVariant TodosModel::data(const QModelIndex &index, int role) const
 {
