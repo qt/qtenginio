@@ -80,6 +80,7 @@ private slots:
     void listView();
     void invalidRemove();
     void invalidSetProperty();
+    void multpleConnections();
 };
 
 void tst_EnginioModel::initTestCase()
@@ -378,6 +379,118 @@ void tst_EnginioModel::invalidSetProperty()
     QObject::connect(reply, &EnginioReply::finished, replyCounter);
 
     QTRY_COMPARE(counter, 4);
+}
+
+struct EnginioClientConnectionSpy: public EnginioClient
+{
+    virtual void connectNotify(const QMetaMethod &signal) Q_DECL_OVERRIDE
+    {
+        counter[signal.name()] += 1;
+    }
+    virtual void disconnectNotify(const QMetaMethod &signal) Q_DECL_OVERRIDE
+    {
+        counter[signal.name()] -= 1;
+    }
+
+    QHash<QByteArray, int> counter;
+};
+
+struct EnginioModelConnectionSpy: public EnginioModel
+{
+    virtual void connectNotify(const QMetaMethod &signal) Q_DECL_OVERRIDE
+    {
+        counter[signal.name()] += 1;
+    }
+    virtual void disconnectNotify(const QMetaMethod &signal) Q_DECL_OVERRIDE
+    {
+        counter[signal.name()] -= 1;
+    }
+
+    QHash<QByteArray, int> counter;
+};
+
+void tst_EnginioModel::multpleConnections()
+{
+    {
+        EnginioClientConnectionSpy client1;
+        client1.setBackendId(_backendId);
+        client1.setBackendSecret(_backendSecret);
+        client1.setServiceUrl(EnginioTests::TESTAPP_URL);
+        EnginioClientConnectionSpy client2;
+        client2.setBackendId(_backendId);
+        client2.setBackendSecret(_backendSecret);
+        client2.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+        EnginioModelConnectionSpy model;
+        for (int i = 0; i < 20; ++i) {
+            model.setEnginio(&client1);
+            model.setEnginio(&client2);
+            model.setEnginio(0);
+        }
+
+        // The values here are not strict. Use qDebug() << model.counter; to see what
+        // makes sense. Just to be sure 2097150 or 20 doesn't.
+        QCOMPARE(model.counter["operationChanged"], 0);
+        QCOMPARE(model.counter["queryChanged"], 0);
+        QCOMPARE(model.counter["enginioChanged"], 0);
+
+        // All of them are acctually disconnected but disconnectNotify is not called, it is
+        // a known bug in Qt.
+        QCOMPARE(client1.counter["finished"], 20);
+        QCOMPARE(client1.counter["backendIdChanged"], 20);
+        QCOMPARE(client1.counter["backendSecretChanged"], 20);
+        QCOMPARE(client1.counter["destroyed"], 20);
+        QCOMPARE(client2.counter["finished"], 20);
+        QCOMPARE(client2.counter["backendIdChanged"], 20);
+        QCOMPARE(client2.counter["backendSecretChanged"], 20);
+        QCOMPARE(client2.counter["destroyed"], 20);
+    }
+    {
+        EnginioClientConnectionSpy client;
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+        EnginioModelConnectionSpy model;
+        model.setEnginio(&client);
+        QJsonObject query1, query2;
+        query1.insert("objectType", QString("objects.todos"));
+        query2.insert("objectType", QString("objects.blah"));
+        for (int i = 0; i < 20; ++i) {
+            model.setQuery(query1);
+            model.setQuery(query2);
+            model.setQuery(QJsonObject());
+        }
+
+        // The values here are not strict. Use qDebug() << model.counter; to see what
+        // makes sense. Just to be sure 2097150 or 20 doesn't.
+        QCOMPARE(model.counter["operationChanged"], 0);
+        QCOMPARE(model.counter["queryChanged"], 0);
+        QCOMPARE(model.counter["enginioChanged"], 0);
+    }
+    {
+        EnginioClientConnectionSpy client;
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+        EnginioModelConnectionSpy model;
+        model.setEnginio(&client);
+        QJsonObject query;
+        query.insert("objectType", QString("objects.todos"));
+        model.setQuery(query);
+
+        for (int i = 0; i < 20; ++i) {
+            model.setOperation(EnginioClient::ObjectOperation);
+            model.setOperation(EnginioClient::ObjectAclOperation);
+        }
+
+        // The values here are not strict. Use qDebug() << model.counter; to see what
+        // makes sense. Just to be sure 2097150 or 20 doesn't.
+        QCOMPARE(model.counter["operationChanged"], 0);
+        QCOMPARE(model.counter["queryChanged"], 0);
+        QCOMPARE(model.counter["enginioChanged"], 0);
+    }
 }
 
 QTEST_MAIN(tst_EnginioModel)
