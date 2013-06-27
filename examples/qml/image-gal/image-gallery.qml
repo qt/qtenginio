@@ -23,6 +23,8 @@ Rectangle {
     width: 500
     height: 700
 
+    property var imagesUrl: new Object
+
     // Enginio client specifies the backend to be used
     //! [client]
     Enginio {
@@ -63,13 +65,18 @@ Rectangle {
                 smooth: true
                 fillMode: Image.PreserveAspectFit
                 Component.onCompleted: {
-                    var data = { "id": file.id,
-                                 "variant": "thumbnail"}
-                    var reply = client.downloadFile(data)
-                    reply.finished.connect(function() {
-                        if (image) // It may be deleted as it is delegate
-                            image.source = reply.data.expiringUrl
-                    })
+                    if (id in imagesUrl) {
+                        image.source = imagesUrl[id]
+                    } else {
+                        var data = { "id": file.id,
+                                     "variant": "thumbnail"}
+                        var reply = client.downloadFile(data)
+                        reply.finished.connect(function() {
+                            imagesUrl[id] = reply.data.expiringUrl
+                            if (image) // It may be deleted as it is delegate
+                                image.source = reply.data.expiringUrl
+                        })
+                    }
                 }
             }
             //! [image-fetch]
@@ -243,6 +250,9 @@ Rectangle {
                         propertyName: "file"
                     },
                 };
+
+                imagesUrl[reply.data.id] = reply.data.localPath
+
                 var uploadReply = client.uploadFile(uploadData, fileUrl)
                 progressBar.visible = true
                 uploadReply.progress.connect(function(progress, total) {
