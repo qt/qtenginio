@@ -67,7 +67,8 @@ Rectangle {
                                  "variant": "thumbnail"}
                     var reply = client.downloadFile(data)
                     reply.finished.connect(function() {
-                        image.source = reply.data.expiringUrl
+                        if (image) // It may be deleted as it is delegate
+                            image.source = reply.data.expiringUrl
                     })
                 }
             }
