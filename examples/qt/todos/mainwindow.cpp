@@ -41,7 +41,6 @@ MainWindow::MainWindow(QWidget *parent)
     QToolBar *toolBar = new QToolBar(this);
     m_addNewButton = new QPushButton(toolBar);
     m_addNewButton->setText("Append");
-    m_addNewButton->setEnabled(false);
     QObject::connect(m_addNewButton, &QPushButton::clicked, this, &MainWindow::appendItem);
 
     m_removeButton = new QPushButton(toolBar);
@@ -122,6 +121,5 @@ void MainWindow::selectionChanged(const QItemSelection &selected, const QItemSel
     Q_UNUSED(deselected);
     bool value = selected.count();
     m_removeButton->setEnabled(value);
-    m_addNewButton->setEnabled(value);
     m_toggleButton->setEnabled(value);
 }
