@@ -18,7 +18,7 @@ Rectangle {
             backendId: AppConfig.backendData.id
             backendSecret: AppConfig.backendData.secret
         }
-        query: {"objectType": "objects.todo" }
+        query: {"objectType": "objects.todos" }
     }
     //![model]
 
