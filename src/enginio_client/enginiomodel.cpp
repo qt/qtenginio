@@ -124,7 +124,11 @@ public:
         , q(q_ptr)
         , _latestRequestedOffset(0)
         , _canFetchMore(false)
-    {}
+    {
+        QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
+        QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
+        QObject::connect(q, &EnginioModel::enginioChanged, QueryChanged(this));
+    }
 
     ~EnginioModelPrivate()
     {
@@ -240,9 +244,6 @@ public:
             QObject::connect(id, &EnginioReply::finished, id, &EnginioReply::deleteLater);
             _dataChanged.insert(id, qMakePair(FullModelReset, QJsonObject()));
         }
-        QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
-        QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
-        QObject::connect(q, &EnginioModel::enginioChanged, QueryChanged(this));
     }
 
     void finishedRequest(const EnginioReply *response)
