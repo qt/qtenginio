@@ -26,7 +26,7 @@
 ****************************************************************************/
 /*!
     \title Enginio QML Examples - Image Gallery
-    \example image-gal
+    \example image-gallery
     \brief This is an example showing up and download of files in Enginio.
     \ingroup enginio-examples
     \inmodule enginio-qml
@@ -63,10 +63,10 @@
     \section1 The example code
 
     The first step is to set up the \l Enginio client.
-    \snippet image-gal/image-gallery.qml client
+    \snippet image-gallery/image-gallery.qml client
 
     The model gets initialized with the client declared above.
-    \snippet image-gal/image-gallery.qml model
+    \snippet image-gallery/image-gallery.qml model
 
     A delegate is needed to present the images nicely.
     The model is used to get the list of image objects, but the images
@@ -80,7 +80,7 @@
     The "file" property was introduced in the backend setup section and as every
     object (files are just objects) contains an ID that uniquely identifies the image file.
     Using the ID the image's thumbnail-url is then fetched ("variant": "thumbnail").
-    \snippet image-gal/image-gallery.qml image-fetch
+    \snippet image-gallery/image-gallery.qml image-fetch
 
     The meta-information about each image is displayed in simple Text elements.
     For the file-name it is possible to directly reference the \c name property as

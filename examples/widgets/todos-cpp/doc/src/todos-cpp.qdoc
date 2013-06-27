@@ -51,7 +51,7 @@
     The first step is to create a TodosModel which inherits \l {EnginioModelCpp}{EnginioModel}
     and defines the main roles which we will be used. As we are intereseted in To Do \c title
     and \c completed information we need to define these two roles.
-    \snippet todos/todosmodel.h definition
+    \snippet todos-cpp/todosmodel.h definition
 
     The newly created model is empty and it doesn't defines any roles. Roles are dynamicly created
     based on the json data-structure and they have no predefined value in the \l Qt::ItemDataRole enum.
@@ -60,32 +60,32 @@
     the model resets itself, and sets up the internal data cache and roles names. Therefore we need
     to connect the reset signal in the constructor:
 
-    \snippet todos/todosmodel.cpp resetRoles
+    \snippet todos-cpp/todosmodel.cpp resetRoles
 
     to a slot that will query them and setup the role ids.
 
-    \snippet todos/todosmodel.cpp updateRoles
+    \snippet todos-cpp/todosmodel.cpp updateRoles
 
     By default \l {EnginioModelCpp}{EnginioModel} operates on \l{QJsonValue} and that is
     what the \l{EnginioModel::data()}{data()} function returns inside the \l QVariant, but standard
     views such as \l QListView are using predefined roles which does not map directly
     to our roles. That is why we need to write a mapping between them:
 
-    \snippet todos/todosmodel.cpp data
+    \snippet todos-cpp/todosmodel.cpp data
 
     As we have our model defined, we need to create an instance of \l EnginioClient:
 
-    \snippet todos/mainwindow.cpp client
+    \snippet todos-cpp/mainwindow.cpp client
 
     It is used by model to connect to Enginio backend. Next we need to construct
     and configure our model too. The configuration is based on two steps, assigning
     \l EnginioClient instance and by creating a query.
 
-    \snippet todos/mainwindow.cpp model
+    \snippet todos-cpp/mainwindow.cpp model
 
     The model has to be assigned to a view, in our case it it is a \l QListView.
 
-    \snippet todos/mainwindow.cpp assignModel
+    \snippet todos-cpp/mainwindow.cpp assignModel
 
     At this point we are supposed to have working read only View / Model setup. To be able to 
     modify the model we need to write one more function in model \l{EnginioModel::setData()}{EnginioModel::setData()}.
@@ -94,14 +94,14 @@
     \l {EnginioModel::setProperty}{EnginioModel::setProperty()}
     to update the data, like that:
 
-    \snippet todos/todosmodel.cpp setData
+    \snippet todos-cpp/todosmodel.cpp setData
 
     To make the application fully functional, way to adding and removing "To Dos" is needed.
     To do it we need to connect correct buttons to slots, for adding new item:
 
-    \snippet todos/mainwindow.cpp appendItem
+    \snippet todos-cpp/mainwindow.cpp appendItem
 
     and for removing it:
 
-    \snippet todos/mainwindow.cpp removeItem
+    \snippet todos-cpp/mainwindow.cpp removeItem
 */

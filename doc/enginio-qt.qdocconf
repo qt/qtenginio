@@ -15,8 +15,8 @@ outputdir = ./html
 outputformats = HTML
 
 exampledirs += \
-               ../examples/qml \
-               ../examples/qt \
+               ../examples/quick \
+               ../examples/widgets \
                snippets \
                ../tests/auto \
 

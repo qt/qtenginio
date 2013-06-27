@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    image-gal \
+    image-gallery \
     todos \
     users
