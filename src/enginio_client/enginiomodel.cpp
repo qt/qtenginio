@@ -435,7 +435,7 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
 
   \note that the EnginioClient does not emit the finished and error signals for the model.
 
-  For the QML version of this class see \l {Enginio1::EnginioModel  }{EnginioModel (QML)}
+  For the QML version of this class see \l {Enginio1::EnginioModel}{EnginioModel (QML)}
 */
 
 /*!

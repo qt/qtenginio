@@ -26,7 +26,7 @@
 ****************************************************************************/
 /*!
     \title Enginio C++ Examples - Todos
-    \example todos
+    \example todos-cpp
     \brief The Todo example shows the \l {EnginioModelCpp}{EnginioModel} usage together with QtWigets
     \ingroup enginio-examples
     \inmodule enginio-qt
@@ -38,7 +38,7 @@
     In this simple schema the objects will have two properties that are added
     to the default properties (such as creation date which always exists).
     A string "title" and a bool "completed". The object type will be created
-    when a call to create, or in this case \l{EnginioModelCpp::append()}{append()} is made.
+    when a call to create, or in this case EnginoModel::append() is made.
 
     A todo object will look like this (in JSON):
     \code
@@ -54,9 +54,9 @@
     \snippet todos/todosmodel.h definition
 
     The newly created model is empty and it doesn't defines any roles. Roles are dynamicly created
-    based on the json data-structure and they have no predefined value in the \l QAbstractItemModel::Roles enum.
+    based on the json data-structure and they have no predefined value in the \l Qt::ItemDataRole enum.
     \l {EnginioModelCpp}{EnginioModel} automatically populates itself as soon it has the
-    \l{EnginioModelCpp::query}{query} and \l{EnginioModelCpp::enginio}{enginio} and properties set. When the data is downloaded,
+    \l{EnginioModel::query}{query} and \l{EnginioModel::enginio}{enginio} and properties set. When the data is downloaded,
     the model resets itself, and sets up the internal data cache and roles names. Therefore we need
     to connect the reset signal in the constructor:
 
@@ -66,8 +66,8 @@
 
     \snippet todos/todosmodel.cpp updateRoles
 
-    By default \l {EnginioModelCpp::EnginioModel}{EnginioModel} operates on \l{QJsonValue} and that is
-    what the \l{EnginioModelCpp::data()}{data()} function returns inside the \l QVariant, but standard
+    By default \l {EnginioModelCpp}{EnginioModel} operates on \l{QJsonValue} and that is
+    what the \l{EnginioModel::data()}{data()} function returns inside the \l QVariant, but standard
     views such as \l QListView are using predefined roles which does not map directly
     to our roles. That is why we need to write a mapping between them:
 
@@ -88,9 +88,10 @@
     \snippet todos/mainwindow.cpp assignModel
 
     At this point we are supposed to have working read only View / Model setup. To be able to 
-    modify the model we need to write one more function in model \l{EnginioModelCpp::setData()}{Todos::setData()}.
-    By default \l QListView is using \l{QAbstractItemModel::Roles}{Qt::EditRoles} when an user decide to edit
-    a data content. We need to map that role to our "title" role and call \l {EnginioModelCpp::EnginioModel::setProperty}{setProperty()}
+    modify the model we need to write one more function in model \l{EnginioModel::setData()}{EnginioModel::setData()}.
+    By default \l QListView is using \l{Qt::ItemDataRole} when an user decide to edit
+    a data content. We need to map that role to our "title" role and call
+    \l {EnginioModel::setProperty}{EnginioModel::setProperty()}
     to update the data, like that:
 
     \snippet todos/todosmodel.cpp setData

@@ -25,15 +25,13 @@
 **
 ****************************************************************************/
 /*!
-    \title Enginio QML Examples - Image Gallery
-    \example image-gal
+    \title Enginio C++ Examples - Image Gallery
+    \example image-gallery-cpp
     \brief This is an example showing up and download of files in Enginio.
     \ingroup enginio-examples
-    \inmodule enginio-qml
+    \inmodule enginio-qt
 
-    The user interface is a list of images with their meta-information
-    and a button to upload more images.
-    \image image-gallery.png
+    The user interface is a list of images and a button to upload more images.
 
     \section1 Backend configuration
     For this example to work the Enginio backend needs to be set up.
@@ -62,31 +60,12 @@
 
     \section1 The example code
 
-    The first step is to set up the \l Enginio client.
-    \snippet image-gal/image-gallery.qml client
+    The example consists of three classes.
+    ImageModel is a subclass of \l {EnginioModelCpp}{EnginioModel}
+    that exposes the images in the \l Qt::DecorationRole for the list view.
+    In the MainWindow a normal QListView is used to display the model contents.
+    The ImageObject is a class that takes care of the download and emits a signal
+    when an image has been downloaded.
 
-    The model gets initialized with the client declared above.
-    \snippet image-gal/image-gallery.qml model
-
-    A delegate is needed to present the images nicely.
-    The model is used to get the list of image objects, but the images
-    are only attached to the objects as file references.
-    Thus the image's thumbnail is fetched by each delegate.
-    \note in a real application it might be neccessary to cache the images.
-
-    The Component.onCompleted function is used to fetch the image.
-    At the time the delegate is created, it has the JSON image object data.
-    The needed information is the "file.id" reference.
-    The "file" property was introduced in the backend setup section and as every
-    object (files are just objects) contains an ID that uniquely identifies the image file.
-    Using the ID the image's thumbnail-url is then fetched ("variant": "thumbnail").
-    \snippet image-gal/image-gallery.qml image-fetch
-
-    The meta-information about each image is displayed in simple Text elements.
-    For the file-name it is possible to directly reference the \c name property as
-    defined in the JSON.
-    \qml
-    Text { text: name }
-    \endqml
 
 */
