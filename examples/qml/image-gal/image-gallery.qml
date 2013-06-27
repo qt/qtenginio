@@ -37,9 +37,10 @@ Rectangle {
     EnginioModel {
         id: enginioModel
         enginio: client
-        query: { // query for all objects of type "objects.image" and include references to files
+        query: { // query for all objects of type "objects.image" and include not null references to files
             "objectType": "objects.image",
             "include": {"file": {}},
+            "query" : { "file": { "$ne": null } }
         }
     }
     //! [model]
