@@ -49,7 +49,6 @@ class ENGINIOCLIENT_EXPORT EnginioModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    // TODO: ctor with client
     explicit EnginioModel(QObject *parent = 0);
     ~EnginioModel();
 
