@@ -33,16 +33,18 @@ Rectangle {
         Row {
             id: logo
             anchors.centerIn: parent
-            spacing: 8
+            spacing: 12
             Image {
                 source: "qrc:images/enginio.png"
             }
             Text {
-                text: "Todo"
-                anchors.verticalCenter: parent.verticalCenter
+                text: "Todos"
+                anchors.baseline: logo.bottom
+                anchors.baselineOffset: -13
                 font.bold: true
-                font.pixelSize: 38
+                font.pixelSize: 44
                 color: "#555"
+                textFormat: Text.RichText
             }
         }
         Rectangle {
@@ -68,13 +70,6 @@ Rectangle {
         remove: Transition { NumberAnimation { property: "opacity"; to: 0; duration: 150 } }
     }
     //![view]
-
-    Image {
-        id: headerShadow
-        anchors.top: header.bottom
-        width: parent.width
-        source: "qrc:images/shadow.png"
-    }
 
     BorderImage {
         id: footer
@@ -115,7 +110,7 @@ Rectangle {
                     id: placeholderText
                     anchors.fill: parent
                     verticalAlignment: Text.AlignVCenter
-                    visible: !(parent.text.length || textInput.activeFocus)
+                    visible: !(parent.text.length)
                     font: parent.font
                     text: "New todo..."
                     color: "#aaa"
@@ -136,13 +131,12 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             enabled: textInput.text.length
             Image {
-                id: addIcon
-                source: "qrc:icons/add_icon.png"
+                source: addMouseArea.pressed ? "qrc:icons/add_icon_pressed.png" : "qrc:icons/add_icon.png"
                 anchors.centerIn: parent
                 opacity: enabled ? 1 : 0.5
             }
             MouseArea {
-                id: removeMouseArea
+                id: addMouseArea
                 anchors.fill: parent
                 onClicked: textInput.accepted()
             }
@@ -185,17 +179,19 @@ Rectangle {
                 id: checkbox
                 anchors.left: parent.left
                 anchors.leftMargin: 16
+                width: 32
+                fillMode: Image.PreserveAspectFit
                 anchors.verticalCenter: parent.verticalCenter
-                source: completed ? "qrc:images/checkbox_checked.png" : "qrc:images/checkbox.png"
+                source: completed ? "qrc:images/checkmark.png" : ""
             }
 
             //![delegate-properties]
             Text {
                 id: todoText
                 text: title
-                font.pixelSize: 24
-                font.strikeout: completed
-                color: completed ? "#333" : "black"
+                font.pixelSize: 26
+                color: "#333"
+
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: checkbox.right
                 anchors.right: parent.right
@@ -206,13 +202,11 @@ Rectangle {
             //![delegate-properties]
 
             // Show a delete button when the mouse is over the delegate
+            //![sync]
             Image {
-                //![sync]
                 id: removeIcon
-                source: "qrc:icons/delete_icon.png"
-                enabled: _synced
-                //![sync]
 
+                source: removeMouseArea.pressed ? "qrc:icons/delete_icon_pressed.png" : "qrc:icons/delete_icon.png"
                 anchors.margins: 20
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
@@ -226,6 +220,7 @@ Rectangle {
                 }
                 //![remove]
             }
+            //![sync]
         }
     }
 }
