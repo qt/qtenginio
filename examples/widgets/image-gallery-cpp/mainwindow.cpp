@@ -94,14 +94,14 @@ void MainWindow::fileSelected(const QString &filePath)
     QString fileName = filePath.split(QDir::separator()).last();
     object.insert("name", fileName);
     object.insert("localPath", filePath);
-    m_client->create(object);
-    EnginioReply *reply = m_client->create(object);
+    EnginioReply *reply = m_model->append(object);
     connect(reply, SIGNAL(finished(EnginioReply*)), this, SLOT(beginUpload(EnginioReply*)));
     m_uploads.insert(reply, filePath);
 }
 
 void MainWindow::beginUpload(EnginioReply *reply)
 {
+    reply->deleteLater();
     QString path = m_uploads.take(reply);
     QString objectId = reply->data().value("id").toString();
 
@@ -123,5 +123,5 @@ void MainWindow::beginUpload(EnginioReply *reply)
 
 void MainWindow::uploadFinished(EnginioReply *reply)
 {
-    qDebug() << "uploading image" << reply;
+    reply->deleteLater();
 }

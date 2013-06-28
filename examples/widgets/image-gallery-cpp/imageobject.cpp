@@ -5,17 +5,30 @@
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
 
-ImageObject::ImageObject(EnginioClient *enginio, const QJsonObject &file)
-    : m_enginio(enginio), m_fileObject(file)
-{
-    QString fileId;
-    fileId = file.value("id").toString();
+ImageObject::ImageObject(EnginioClient *enginio)
+    : m_enginio(enginio)
+{}
 
-    QJsonObject fileObject;
-    fileObject.insert("id", fileId);
-    fileObject.insert("variant", QString("thumbnail"));
-    EnginioReply *reply = m_enginio->downloadFile(fileObject);
-    connect(reply, SIGNAL(finished(EnginioReply*)), this, SLOT(replyFinished(EnginioReply*)));
+void ImageObject::setObject(const QJsonObject &object)
+{
+    m_object = object;
+    QString fileId;
+    fileId = object.value("file").toObject().value("id").toString();
+
+    if (!fileId.isEmpty()) {
+        QJsonObject fileObject;
+        fileObject.insert("id", fileId);
+        fileObject.insert("variant", QString("thumbnail"));
+        EnginioReply *reply = m_enginio->downloadFile(fileObject);
+        connect(reply, SIGNAL(finished(EnginioReply*)), this, SLOT(replyFinished(EnginioReply*)));
+    } else {
+        // Try to fall back to the local file
+        QString localPath = object.value("localPath").toString();
+        if (QFile::exists(localPath)) {
+            m_image = QImage(localPath);
+            emit imageChanged(object.value("id").toString());
+        }
+    }
 }
 
 void ImageObject::replyFinished(EnginioReply *enginioReply)
@@ -31,9 +44,7 @@ void ImageObject::downloadFinished()
 {
     QByteArray imageData = m_reply->readAll();
     m_image.loadFromData(imageData);
-    emit imageChanged(m_fileObject.value("id").toString());
-
-    qDebug() << "image: " << m_image;
+    emit imageChanged(m_object.value("id").toString());
 
     delete m_reply;
     m_reply = 0;
