@@ -77,7 +77,7 @@
     \snippet todos/todo.qml setProperty
 
     In order to know when an item is not yet synced, the _synced property can be used.
-    It is always available in the delegate and used to show a text while the syncing is ongoing.
+    It is always available in the delegate and may be used for example to disable delegate interface
 
     \snippet todos/todo.qml sync
 

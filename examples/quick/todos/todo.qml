@@ -207,14 +207,15 @@ Rectangle {
 
             // Show a delete button when the mouse is over the delegate
             Image {
+                //![sync]
                 id: removeIcon
-
                 source: "qrc:icons/delete_icon.png"
+                enabled: _synced
+                //![sync]
 
                 anchors.margins: 20
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
-                enabled: _synced
                 opacity: enabled ? 1 : 0.5
                 Behavior on opacity {NumberAnimation{duration: 100}}
                 //![remove]
