@@ -79,6 +79,7 @@
   Do not directly delete it inside the slot connected to finished().
   You can use the deleteLater() function.
 
+  For a higher level overview, consult the \l {Enginio Overview} documentation.
   In order to make queries that return an array of data more convenient
   a model is provided by \l {EnginioModelCpp}{EnginioModel}.
 */
@@ -133,7 +134,11 @@
 /*!
     \enum EnginioClient::Operation
 
-    This enum describes which operation a query uses.
+    Enginio has a unified API for several \c operations.
+    For example when using query(), the default is \c ObjectOperation,
+    which means that the query will return objects from the database.
+    When passing in UserOperation instead, the query will return
+    users.
 
     \value ObjectOperation Operate on objects
     \value ObjectAclOperation Operate on the ACL

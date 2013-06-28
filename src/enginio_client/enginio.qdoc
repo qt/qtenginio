@@ -34,22 +34,75 @@
 
 \title Enginio Overview
 
-\brief Enginio is a Backend-as-a-Service solution to ease backend development for any connected and data-driven application.
+Enginio is a Backend-as-a-Service solution to ease backend development for any connected and data-driven application.
 
-Enginio works from both, C++ and Qt Quick.
+\section1 Tutorials
 
-To get started quickly follow the mini-tutorial:
+To get started quickly follow the mini-tutorial using Qt Quick or C++.
 \list
 \li \l {Enginio Installation and Prerequisits}
 \li \l {Getting Started with Enginio using Qt Quick}
 \li \l {Getting Started with Enginio using C++}
 \endlist
 
-The reference documentation and examples:
+\section1 Reference documentation and examples:
 \list
 \li \l {All Enginio Classes}
 \li \l {Enginio Examples}
 \endlist
+
+\section1 Overview
+
+When using Enginio (with Qt Quick or C++) the API is following a general pattern that will be helpful to understand.
+This section gives a short high-level overview of the concepts used throughout the library.
+
+The Qt library is a client side library to communicate with the server at \l {http://engin.io}.
+For each account on the server several backends can exist.
+For all communication with the server the backend is determined by it's ID combined with a secret (similar to a password).
+When shipping an application built with Enginio the backend ID and secret will be the same for all users of that application.
+
+\section2 Objects
+
+Enginio provides several types of objects: "custom objects", "users", "user groups", "files" and more.
+All communication with the backend uses JSON. For QML JSON comes in very natural since
+the objects can simply be written inline. On the C++ side \l QJsonObject and \l QJsonValue are used.
+
+Each object in the database has an \c id, \c objectType, \c createdAt and \c updatedAt property that are reserved and always exist.
+For example a custom object with no additional properties (in JSON) might look like this:
+\code
+{
+    "id": "51cdbc08989e975ec300772a",
+    "objectType": "objects.todos",
+    "createdAt": "2013-06-28T16:38:32.369Z",
+    "updatedAt": "2013-06-28T16:38:32.725Z"
+}
+\endcode
+With this basis the objects can be augmented with user defined properties that contain the actual application data and can
+even contain other objects.
+For a more detailed description see the \l{http://engin.io/documentation/overview/objects}{Enginio Object documentation}.
+
+\section2 Operations
+
+To operate on objects of any type the basic operations are:
+\list
+\li create to create a new object
+\li query to list objects
+\li update to change an object
+\li remove to delete an object
+\endlist
+
+For a detailed description of the operations see the functions
+in the \l {EnginioClient}{EnginioClient Class} in C++ or \l {Enginio1::Enginio}{Enginio type} in QML.
+
+\note User management and access control lists are conveniently done by the same functions.
+
+\section2 File Management
+
+File management the operations are slightly different.
+Files are always attached to objects and can only be referenced through them.
+The Qt library provides convenient functions to up- and download files.
+
+The entire Enginio documentation including backend and client is available here: \l{http://engin.io/documentation/}{Enginio Documentation}
 */
 
 /*!
