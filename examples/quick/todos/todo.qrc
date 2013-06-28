@@ -1,8 +1,18 @@
 <RCC>
     <qresource prefix="/icons">
         <file alias="delete_icon.png">../common/delete_icon.png</file>
+        <file alias="add_icon.png">../common/add_icon.png</file>
+        <file alias="add_icon_pressed.png">../common/add_icon_pressed.png</file>
+        <file alias="delete_icon_pressed.png">../common/delete_icon_pressed.png</file>
     </qresource>
     <qresource prefix="/">
         <file>todo.qml</file>
+        <file>images/delegate.png</file>
+        <file>images/delegate_pressed.png</file>
+        <file>images/shadow.png</file>
+        <file>images/textfield.png</file>
+        <file>images/checkbox.png</file>
+        <file>images/checkbox_checked.png</file>
+        <file>images/enginio.png</file>
     </qresource>
 </RCC>

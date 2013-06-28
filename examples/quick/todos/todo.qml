@@ -1,15 +1,14 @@
 import QtQuick 2.0
 //![imports]
-import QtQuick.Controls 1.0
-import QtQuick.Layouts 1.0
 import Enginio 1.0
 //![imports]
 import "qrc:///config.js" as AppConfig
 
 Rectangle {
     id: root
-    width: 400; height: 800
-    color: "lightgray"
+    width: 400
+    height: 640
+    color: "#f4f4f4"
 
     //![model]
     EnginioModel {
@@ -24,65 +23,151 @@ Rectangle {
 
     // A simple layout:
     // a listview and a line edit with button to add to the list
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 4
-        spacing: 4
+    Rectangle {
+        id: header
+        anchors.top: parent.top
+        width: parent.width
+        height: 70
+        color: "white"
 
-        //![view]
-        ListView {
-            model: enginioModel
-            delegate: listItemDelegate
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            clip: true
-        }
-        //![view]
-
-        RowLayout {
-            //![append]
-            TextField {
-                id: textInput
-                placeholderText: "Enter Todo here..."
-                onAccepted: {
-                    enginioModel.append({"title": text, "completed": false})
-                    text = ""
-                }
-                Layout.fillWidth: true
+        Row {
+            id: logo
+            anchors.centerIn: parent
+            spacing: 8
+            Image {
+                source: "qrc:images/enginio.png"
             }
-            //![append]
-            Button {
-                text: "Add Todo"
+            Text {
+                text: "Todo"
+                anchors.verticalCenter: parent.verticalCenter
+                font.bold: true
+                font.pixelSize: 38
+                color: "#555"
+            }
+        }
+        Rectangle {
+            width: parent.width ; height: 1
+            anchors.bottom: parent.bottom
+            color: "#bbb"
+        }
+    }
+
+    //![view]
+    ListView {
+        id: listview
+        model: enginioModel
+        delegate: listItemDelegate
+        anchors.top: header.bottom
+        anchors.bottom: footer.top
+        width: parent.width
+        clip: true
+
+        // Animations
+        add: Transition { NumberAnimation { properties: "y"; from: root.height; duration: 250 } }
+        removeDisplaced: Transition { NumberAnimation { properties: "y"; duration: 150 } }
+        remove: Transition { NumberAnimation { property: "opacity"; to: 0; duration: 150 } }
+    }
+    //![view]
+
+    Image {
+        id: headerShadow
+        anchors.top: header.bottom
+        width: parent.width
+        source: "qrc:images/shadow.png"
+    }
+
+    BorderImage {
+        id: footer
+
+        width: parent.width
+        anchors.bottom: parent.bottom
+        source: "qrc:images/delegate.png"
+        border.left: 5; border.top: 5
+        border.right: 5; border.bottom: 5
+
+        Rectangle {
+            // Horizontal line
+            height: 1
+            width: parent.width
+            color: "#bbb"
+        }
+
+        //![append]
+
+        BorderImage {
+
+            anchors.left: parent.left
+            anchors.right: addButton.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: 16
+            source:"images/textfield.png"
+            border.left: 14 ; border.right: 14 ; border.top: 8 ; border.bottom: 8
+
+            TextInput{
+                id: textInput
+                anchors.fill: parent
+                clip: true
+                anchors.leftMargin: 14
+                anchors.rightMargin: 14
+                verticalAlignment: Text.AlignVCenter
+                font.pixelSize: 22
+                Text {
+                    id: placeholderText
+                    anchors.fill: parent
+                    verticalAlignment: Text.AlignVCenter
+                    visible: !(parent.text.length || textInput.activeFocus)
+                    font: parent.font
+                    text: "New todo..."
+                    color: "#aaa"
+                }
+                onAccepted: {
+                    enginioModel.append({"title": textInput.text, "completed": false})
+                    textInput.text = ""
+                }
+            }
+        }
+
+        Item {
+            id: addButton
+
+            width: 40 ; height: 40
+            anchors.margins: 20
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            enabled: textInput.text.length
+            Image {
+                id: removeIcon
+                source: "qrc:icons/add_icon.png"
+                anchors.centerIn: parent
+                enabled: _synced
+                opacity: enabled ? 1 : 0.5
+            }
+            MouseArea {
+                id: removeMouseArea
+                anchors.fill: parent
                 onClicked: textInput.accepted()
             }
         }
     }
-
+    //![append]
 
     Component {
         id: listItemDelegate
 
-        Rectangle {
+        BorderImage {
             id: item
-            property color gradientColor: "#f4f4f4"
-            color: Qt.lighter(root.color)
-            width: parent.width
-            height: 80
-            gradient: Gradient {
-                GradientStop { color: mouse.pressed ? Qt.darker(gradientColor, 1.05) : gradientColor; position: 0 }
-                GradientStop { color: mouse.pressed ? Qt.darker(gradientColor, 1.05) : Qt.darker(gradientColor, 1.02); position: 1 }
-            }
-            Rectangle {
-                height: 2
+
+            width: parent.width ; height: 70
+            source: mouse.pressed ? "qrc:images/delegate_pressed.png" : "qrc:images/delegate.png"
+            border.left: 5; border.top: 5
+            border.right: 5; border.bottom: 5
+
+            Image {
+                id: shadow
+                anchors.top: parent.bottom
                 width: parent.width
-                color: "#55ffffff"
                 visible: !mouse.pressed
-            }
-            Rectangle {
-                height: 2
-                width: parent.width
-                color: "#22000000"
-                anchors.bottom: parent.bottom
+                source: "qrc:images/shadow.png"
             }
 
             //![setProperty]
@@ -97,40 +182,33 @@ Rectangle {
                 }
             }
             //![setProperty]
+            Image {
+                id: checkbox
+                anchors.left: parent.left
+                anchors.leftMargin: 16
+                anchors.verticalCenter: parent.verticalCenter
+                source: completed ? "qrc:images/checkbox_checked.png" : "qrc:images/checkbox.png"
+            }
 
             //![delegate-properties]
             Text {
                 id: todoText
                 text: title
+                font.pixelSize: 24
                 font.strikeout: completed
-                color: completed ? "#999" : "#333"
-                font.pointSize: 20
-
+                color: completed ? "#333" : "black"
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
+                anchors.left: checkbox.right
                 anchors.right: parent.right
-                anchors.leftMargin: 20
+                anchors.leftMargin: 12
                 anchors.rightMargin: 40
                 elide: Text.ElideRight
             }
             //![delegate-properties]
 
-            //![sync]
-            Text {
-                visible: !_synced
-                anchors.margins: 4
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                id: syncText
-                text: "Syncing..."
-            }
-            //![sync]
-
             // Show a delete button when the mouse is over the delegate
             Image {
                 id: removeIcon
-                width: 25
-                height: 25
 
                 source: "qrc:icons/delete_icon.png"
 
@@ -138,12 +216,11 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 enabled: _synced
-
-                opacity: mouse.containsMouse ? 1.0 : 0.0
-                Behavior on opacity { NumberAnimation { duration: 200 } }
-
+                opacity: enabled ? 1 : 0.5
+                Behavior on opacity {NumberAnimation{duration: 100}}
                 //![remove]
                 MouseArea {
+                    id: removeMouseArea
                     anchors.fill: parent
                     onClicked: enginioModel.remove(index)
                 }
