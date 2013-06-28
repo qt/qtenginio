@@ -11,13 +11,15 @@ class ImageObject : public QObject
 {
     Q_OBJECT
 public:
-    explicit ImageObject(EnginioClient *enginio, const QJsonObject &file);
+    explicit ImageObject(EnginioClient *enginio);
+
+    void setObject(const QJsonObject &object);
 
     QImage image() { return m_image; }
     QPixmap thumbnail();
 
 signals:
-    void imageChanged(const QString &fileId);
+    void imageChanged(const QString &id);
 
 private slots:
     void replyFinished(EnginioReply *enginioReply);
@@ -28,7 +30,7 @@ private:
     QPixmap m_thumbnail;
     QNetworkReply *m_reply;
     EnginioClient *m_enginio;
-    QJsonObject m_fileObject;
+    QJsonObject m_object;
 };
 
 #endif // IMAGEOBJECT_H

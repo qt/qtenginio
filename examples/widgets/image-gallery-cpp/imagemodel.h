@@ -12,7 +12,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const;
 
     enum Roles {
-        FileId = Qt::UserRole + 1,
+        Id = Qt::UserRole + 1,
         Image,
         FileName,
         FileSize,
@@ -20,9 +20,10 @@ public:
     };
 
 public slots:
-    void rowsInserted(const QModelIndex &, int start, int end);
+    void updateRows(const QModelIndex &, int start, int end);
+    void onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     void reset();
-    void imageChanged(const QString &fileId);
+    void imageChanged(const QString &id);
 
 private:
     QMap<QString, ImageObject*> m_images;

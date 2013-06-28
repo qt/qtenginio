@@ -12,35 +12,49 @@ ImageModel::ImageModel(QObject *parent)
     connect(this, SIGNAL(modelReset()),
             this, SLOT(reset()));
     connect(this, SIGNAL(rowsInserted(QModelIndex,int,int)),
-            this, SLOT(rowsInserted(QModelIndex,int,int)));
+            this, SLOT(updateRows(QModelIndex,int,int)));
+
+    connect(this, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+            this, SLOT(onDataChanged(QModelIndex,QModelIndex)));
 }
 
 void ImageModel::reset()
 {
-    rowsInserted(QModelIndex(), 0, rowCount() - 1);
+    updateRows(QModelIndex(), 0, rowCount() - 1);
 }
 
-void ImageModel::rowsInserted(const QModelIndex &, int start, int end)
+void ImageModel::updateRows(const QModelIndex &, int start, int end)
 {
     for (int row = start; row <= end; ++row) {
         QJsonValue rowData = EnginioModel::data(index(row)).value<QJsonValue>();
-        QString fileId = rowData.toObject().value("file").toObject().value("id").toString();
-        if (m_images.contains(fileId))
+        QString id = rowData.toObject().value("id").toString();
+        if (id.isEmpty() || m_images.contains(id))
             continue;
-        ImageObject *image = new ImageObject(enginio(), rowData.toObject().value("file").toObject());
-        m_images.insert(fileId, image);
+        ImageObject *image = new ImageObject(enginio());
         connect(image, SIGNAL(imageChanged(QString)), this, SLOT(imageChanged(QString)));
+        m_images.insert(id, image);
+        image->setObject(rowData.toObject());
+        QModelIndex changedIndex = index(row);
+        emit dataChanged(changedIndex, changedIndex);
     }
 }
 
-void ImageModel::imageChanged(const QString &fileId)
+void ImageModel::imageChanged(const QString &id)
 {
     for (int row = 0; row < rowCount(); ++row) {
-        if (data(index(row), FileId) == fileId) {
+        if (data(index(row), Id) == id) {
             QModelIndex changedIndex = index(row);
             emit dataChanged(changedIndex, changedIndex);
         }
     }
+}
+
+void ImageModel::onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+{
+    int start = topLeft.row();
+    int end = bottomRight.row();
+
+    updateRows(QModelIndex(), start, end);
 }
 
 QVariant ImageModel::data(const QModelIndex &index, int role) const
@@ -52,20 +66,17 @@ QVariant ImageModel::data(const QModelIndex &index, int role) const
     QJsonObject rowData = EnginioModel::data(index).value<QJsonValue>().toObject();
 
     switch (role) {
-    case FileId: {
-        return rowData.value("file").toObject().value("id").toString();
+    case Id: {
+        return rowData.value("id").toString();
     }
     case Qt::DecorationRole: {
-        QString fileId = rowData.value("file").toObject().value("id").toString();
-        if (m_images.contains(fileId))
-            return m_images.value(fileId)->thumbnail();
+        QString id = rowData.value("id").toString();
+        if (m_images.contains(id))
+            return m_images.value(id)->thumbnail();
         return QVariant();
     }
     case Qt::SizeHintRole: {
-        QString fileId = rowData.value("file").toObject().value("id").toString();
-        if (m_images.contains(fileId))
-            return m_images.value(fileId)->thumbnail().size();
-        return QVariant();
+        return QVariant(QSize(100, 100));
     }
     case FileName:
         return rowData.value("file").toObject().value("fileName").toString();
