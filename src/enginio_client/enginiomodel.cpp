@@ -62,9 +62,14 @@ class EnginioModelPrivate {
 
     enum {
         InvalidRole = -1,
-        SyncedRole = Qt::UserRole + 1
+        SyncedRole = Qt::UserRole + 1,
+        CreatedAtRole,
+        UpdatedAtRole,
+        IdRole,
+        ObjectTypeRole,
+        LastRole // the first fully dynamic role
     };
-
+    unsigned _rolesCounter;
     QHash<int, QString> _roles;
 
     QJsonArray _data; // TODO replace by a sparse array, and add laziness
@@ -124,6 +129,7 @@ public:
         , q(q_ptr)
         , _latestRequestedOffset(0)
         , _canFetchMore(false)
+        , _rolesCounter(SyncedRole)
     {
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
@@ -169,13 +175,22 @@ public:
     {
         QJsonObject object(value);
         object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
-        q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
         EnginioReply* id = _enginio->create(object, _operation);
-        _data.append(value);
-        const int row = _data.count() - 1;
-        _rowsToSync.insert(row);
-        _dataChanged.insert(id, qMakePair(row, object));
-        q->endInsertRows();
+        const int row = _data.count();
+        if (!row) { // the first item need to update roles
+            q->beginResetModel();
+            _rowsToSync.insert(row);
+            _data.append(value);
+            syncRoles();
+            _dataChanged.insert(id, qMakePair(row, object));
+            q->endResetModel();
+        } else {
+            q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
+            _rowsToSync.insert(row);
+            _data.append(value);
+            _dataChanged.insert(id, qMakePair(row, object));
+            q->endInsertRows();
+        }
         return id;
     }
 
@@ -339,13 +354,28 @@ public:
 
     void syncRoles()
     {
-        // estimate new roles:
-        _roles.clear();
-        int idx = SyncedRole;
-        _roles[idx++] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
         QJsonObject firstObject(_data.first().toObject()); // TODO it expects certain data structure in all objects, add way to specify roles
+
+        if (!_roles.count()) {
+            _roles.reserve(firstObject.count());
+            _roles[SyncedRole] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
+            _roles[CreatedAtRole] = EnginioString::createdAt;
+            _roles[UpdatedAtRole] = EnginioString::updatedAt;
+            _roles[IdRole] = EnginioString::id;
+            _roles[ObjectTypeRole] = EnginioString::objectType;
+            _rolesCounter = LastRole;
+        }
+
+        // estimate additional dynamic roles:
+        QSet<QString> definedRoles = _roles.values().toSet();
         for (QJsonObject::const_iterator i = firstObject.constBegin(); i != firstObject.constEnd(); ++i) {
-            _roles[idx++] = i.key();
+            const QString key = i.key();
+            if (definedRoles.contains(key)) {
+                // we skip predefined keys so we can keep constant id for them
+                if (Q_UNLIKELY(key == EnginioString::_synced))
+                    qWarning("EnginioModel can not be used with objects having \"_synced\" property. The property will be overriden.");
+            } else
+                _roles[_rolesCounter++] = i.key();
         }
     }
 

@@ -194,6 +194,8 @@ const QString EnginioString::incomplete = QStringLiteral("incomplete");
 const QString EnginioString::headers = QStringLiteral("headers");
 const QString EnginioString::payload = QStringLiteral("payload");
 const QString EnginioString::variant = QStringLiteral("variant");
+const QString EnginioString::createdAt = QStringLiteral("createdAt");
+const QString EnginioString::updatedAt = QStringLiteral("updatedAt");
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),

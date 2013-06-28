@@ -98,6 +98,8 @@ struct ENGINIOCLIENT_EXPORT EnginioString
     static const QString headers;
     static const QString payload;
     static const QString variant;
+    static const QString createdAt;
+    static const QString updatedAt;
 };
 
 #define CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, Flags) \
