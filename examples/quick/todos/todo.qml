@@ -136,10 +136,9 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             enabled: textInput.text.length
             Image {
-                id: removeIcon
+                id: addIcon
                 source: "qrc:icons/add_icon.png"
                 anchors.centerIn: parent
-                enabled: _synced
                 opacity: enabled ? 1 : 0.5
             }
             MouseArea {
