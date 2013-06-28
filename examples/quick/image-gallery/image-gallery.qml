@@ -20,6 +20,8 @@ import QtQuick.Layouts 1.0
  */
 
 Rectangle {
+    id: root
+
     width: 500
     height: 700
 
@@ -41,7 +43,7 @@ Rectangle {
         enginio: client
         query: { // query for all objects of type "objects.image" and include not null references to files
             "objectType": "objects.image",
-            "include": {"file": {}},
+                    "include": {"file": {}},
             "query" : { "file": { "$ne": null } }
         }
     }
@@ -51,68 +53,83 @@ Rectangle {
     Component {
         id: imageListDelegate
 
-        Rectangle {
+        BorderImage {
             height: 120
             width: parent.width
-            color: index % 2 ? "#eeeeee" : "transparent"
+            border.top: 4
+            border.bottom: 4
+            source: hitbox.pressed ? "qrc:images/delegate_pressed.png" : "qrc:images/delegate.png"
             //! [image-fetch]
             Image {
                 id: image
                 x: 10
-                y: 10
-                height: parent.height - 20
-                width: 80
-                smooth: true
-                fillMode: Image.PreserveAspectFit
+                width: 100
+                height: 100
+                anchors.verticalCenter: parent.verticalCenter
+                opacity: image.status == Image.Ready ? 1 : 0
+                Behavior on opacity {NumberAnimation{duration: 100}}
                 Component.onCompleted: {
                     if (id in imagesUrl) {
                         image.source = imagesUrl[id]
                     } else {
                         var data = { "id": file.id,
-                                     "variant": "thumbnail"}
+                            "variant": "thumbnail"}
                         var reply = client.downloadFile(data)
                         reply.finished.connect(function() {
                             imagesUrl[id] = reply.data.expiringUrl
-                            if (image) // It may be deleted as it is delegate
+                            if (image && reply.data.expiringUrl) // It may be deleted as it is delegate
                                 image.source = reply.data.expiringUrl
                         })
                     }
                 }
             }
-            //! [image-fetch]
-            ProgressBar {
-                height: 10
-                width: image.width - 20
-                anchors.centerIn: image
-
-                maximumValue: 1.0
-                minimumValue: 0
-                value: image.progress
-
-                Layout.fillWidth: true
-                visible: image.status != Image.Ready
+            Rectangle {
+                color: "transparent"
+                anchors.fill: image
+                border.color: "#aaa"
+                Rectangle {
+                    id: progressBar
+                    property real value:  image.progress
+                    anchors.bottom: parent.bottom
+                    width: image.width * value
+                    height: 4
+                    color: "#49f"
+                    opacity: image.status != Image.Ready ? 1 : 0
+                    Behavior on opacity {NumberAnimation {duration: 100}}
+                }
             }
+            //! [image-fetch]
 
             Column {
-                x: 100
+                anchors.left: image.right
+                anchors.right: deleteIcon.left
+                anchors.margins: 12
                 y: 10
                 Text {
                     height: 33
+                    width: parent.width
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: height * 0.5
                     text: name ? name : ""
+                    elide: Text.ElideRight
                 }
                 Text {
                     height: 33
+                    width: parent.width
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: height * 0.5
                     text: sizeStringFromFile(file)
+                    elide:Text.ElideRight
+                    color: "#555"
                 }
                 Text {
                     height: 33
+                    width: parent.width
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: height * 0.5
                     text: timeStringFromFile(file)
+                    elide:Text.ElideRight
+                    color: "#555"
                 }
             }
 
@@ -120,109 +137,186 @@ Rectangle {
             MouseArea {
                 id: hitbox
                 anchors.fill: parent
-                hoverEnabled: true
                 onClicked: {
                     imageDialog.fileId = file.id;
                     imageDialog.visible = true
+                    root.state = "view"
                 }
-                onContainsMouseChanged: deleteIcon.opacity = containsMouse ? 1.0 : 0.0
             }
 
             // Delete button
             Image {
                 id: deleteIcon
-                width: 32
-                height: 32
                 anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.margins: 10
-                opacity: 0.0
-                source: "qrc:icons/delete_icon.png"
-                Behavior on opacity { NumberAnimation { duration: 200 } }
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.rightMargin: 18
+                source: removeMouseArea.pressed ?"qrc:icons/delete_icon_pressed.png" : "qrc:icons/delete_icon.png"
                 MouseArea {
+                    id: removeMouseArea
                     anchors.fill: parent
+                    anchors.margins: -10
                     onClicked: enginioModel.remove(index)
                 }
             }
         }
     }
 
-    ColumnLayout {
-        anchors.fill: parent
+    // A simple layout:
+    // a listview and a line edit with button to add to the list
+    Rectangle {
+        id: header
+        anchors.top: parent.top
+        width: parent.width
+        height: 70
+        color: "white"
+
+        Row {
+            id: logo
+            anchors.centerIn: parent
+            spacing: 12
+            Image {
+                source: "qrc:images/enginio.png"
+            }
+            Text {
+                text: "Gallery"
+                anchors.baseline: logo.bottom
+                anchors.baselineOffset: -13
+                font.bold: true
+                font.pixelSize: 38
+                color: "#555"
+            }
+        }
+        Rectangle {
+            width: parent.width ; height: 1
+            anchors.bottom: parent.bottom
+            color: "#bbb"
+        }
+    }
+
+    Row {
+        id: listLayout
+
+        Behavior on x {NumberAnimation{ duration: 400 ; easing.type: "InOutCubic"}}
+        anchors.top: header.bottom
+        anchors.bottom: footer.top
+
         ListView {
             id: imageListView
             model: enginioModel // get the data from EnginioModel
             delegate: imageListDelegate
-            Layout.fillHeight: true
-            Layout.fillWidth: true
             clip: true
+            width: root.width
+            height: parent.height
+            // Animations
+            add: Transition { NumberAnimation { properties: "y"; from: root.height; duration: 250 } }
+            removeDisplaced: Transition { NumberAnimation { properties: "y"; duration: 150 } }
+            remove: Transition { NumberAnimation { property: "opacity"; to: 0; duration: 150 } }
         }
-        RowLayout {
-            width: parent.width
-            Button {
-                text: "Upload new image..."
-                onClicked: fileDialog.visible = true;
-            }
-            ProgressBar {
-                id: progressBar
-                visible: false
-                maximumValue: 1.0
 
-                Layout.fillWidth: true
+        // Dialog for showing full size image
+        Rectangle {
+            id: imageDialog
+            width: root.width
+            height: parent.height
+            property string fileId
+            color: "#333"
+
+            onFileIdChanged: {
+                image.source = ""
+                // Download the full image, not the thumbnail
+                var data = { "id": fileId }
+                var reply = client.downloadFile(data)
+                reply.finished.connect(function() {
+                    image.source = reply.data.expiringUrl
+                })
+            }
+            Label {
+                id: label
+                text: "Loading ..."
+                font.pixelSize: 28
+                color: "white"
+                anchors.centerIn: parent
+                visible: image.status != Image.Ready
+            }
+            Rectangle {
+                property real value: image.progress
+                anchors.bottom: parent.bottom
+                width: parent.width * value
+                height: 4
+                color: "#49f"
+                Behavior on opacity {NumberAnimation {duration: 200}}
+                opacity: image.status !== Image.Ready ? 1 : 0
+            }
+            Image {
+                id: image
+                anchors.fill: parent
+                anchors.margins: 10
+                smooth: true
+                cache: false
+                fillMode: Image.PreserveAspectCrop
+                Behavior on opacity {NumberAnimation {duration: 100}}
+                opacity: image.status === Image.Ready ? 1 : 0
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.state = ""
             }
         }
     }
 
-    // Dialog for showing full size image
-    Rectangle {
-        id: imageDialog
-        anchors.fill: parent
-        property string fileId
-        color: "#646464"
-        visible: false
-        opacity: visible ? 1.0 : 0.0
+    BorderImage {
+        id: footer
 
-        onFileIdChanged: {
-            image.source = ""
-            // Download the full image, not the thumbnail
-            var data = { "id": fileId }
-            var reply = client.downloadFile(data)
-            reply.finished.connect(function() {
-                image.source = reply.data.expiringUrl
-            })
+        width: parent.width
+        anchors.bottom: parent.bottom
+        source: addMouseArea.pressed ? "qrc:images/delegate_pressed.png" : "qrc:images/delegate.png"
+        border.left: 5; border.top: 5
+        border.right: 5; border.bottom: 5
+
+        Rectangle {
+            // Horizontal line
+            height: 1
+            width: parent.width
+            color: "#bbb"
         }
 
-        Label {
-            id: label
-            text: "Loading ..."
-            color: "white"
+        //![append]
+
+        Text {
+            text: "Click to upload..."
+            font.bold: true
+            font.pixelSize: 28
+            color: "#444"
             anchors.centerIn: parent
-            visible: image.status != Image.Ready
         }
-        ProgressBar {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: label.bottom
-            anchors.topMargin: 10
-            width: parent.width / 3
-            value: image.progress
-            visible: image.status != Image.Ready
-        }
-        Image {
-            id: image
-            anchors.fill: parent
-            anchors.margins: 10
-            smooth: true
-            cache: false
-            fillMode: Image.PreserveAspectFit
-        }
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 300
+
+        Item {
+            id: addButton
+
+            width: 40 ; height: 40
+            anchors.margins: 20
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            Image {
+                id: removeIcon
+                source: addMouseArea.pressed ? "qrc:icons/add_icon_pressed.png" : "qrc:icons/add_icon.png"
+                anchors.centerIn: parent
             }
         }
+
         MouseArea {
+            id: addMouseArea
             anchors.fill: parent
-            onClicked: parent.visible = false
+            onClicked: fileDialog.visible = true;
+        }
+        Rectangle {
+            id: progressBar
+            property real value:0
+            anchors.bottom: parent.bottom
+            width: parent.width * value
+            height: 4
+            color: "#49f"
+            Behavior on opacity {NumberAnimation {duration: 100}}
         }
     }
 
@@ -254,13 +348,13 @@ Rectangle {
                 imagesUrl[reply.data.id] = reply.data.localPath
 
                 var uploadReply = client.uploadFile(uploadData, fileUrl)
-                progressBar.visible = true
+                progressBar.opacity = 1
                 uploadReply.progress.connect(function(progress, total) {
                     progressBar.value = progress/total
                 })
                 uploadReply.finished.connect(function() {
                     var tmp = enginioModel.query; enginioModel.query = {}; enginioModel.query = tmp;
-                    progressBar.visible = false
+                    progressBar.opacity = 0
                 })
             })
         }
@@ -297,4 +391,15 @@ Rectangle {
         }
         return str.join("");
     }
+
+    states: [
+        State {
+            name: "view"
+            PropertyChanges {
+                target: listLayout
+                x: -root.width
+            }
+        }
+    ]
+
 }
