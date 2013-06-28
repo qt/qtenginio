@@ -175,7 +175,7 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    if (index !== -1) {
+                    if (index !== -1 && _synced) {
                         enginioModel.setProperty(index, "completed", !completed)
                     }
                 }
