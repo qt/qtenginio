@@ -67,7 +67,7 @@ Rectangle {
                 height: 100
                 anchors.verticalCenter: parent.verticalCenter
                 opacity: image.status == Image.Ready ? 1 : 0
-                Behavior on opacity {NumberAnimation{duration: 100}}
+                Behavior on opacity { NumberAnimation { duration: 100 } }
                 Component.onCompleted: {
                     if (id in imagesUrl) {
                         image.source = imagesUrl[id]
@@ -253,8 +253,8 @@ Rectangle {
                 anchors.margins: 10
                 smooth: true
                 cache: false
-                fillMode: Image.PreserveAspectCrop
-                Behavior on opacity {NumberAnimation {duration: 100}}
+                fillMode: Image.PreserveAspectFit
+                Behavior on opacity { NumberAnimation { duration: 100 } }
                 opacity: image.status === Image.Ready ? 1 : 0
             }
             MouseArea {
