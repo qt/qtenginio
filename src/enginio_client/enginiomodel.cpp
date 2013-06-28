@@ -338,8 +338,8 @@ public:
             QJsonObject deltaObject;
             QJsonObject newObject = oldObject;
             deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
-            deltaObject[QString::fromUtf8("id")] = newObject[QString::fromUtf8("id")];
-            deltaObject[QString::fromUtf8("objectType")] = newObject[QString::fromUtf8("objectType")];
+            deltaObject[EnginioString::id] = newObject[EnginioString::id];
+            deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
             EnginioReply *id = _enginio->update(deltaObject, _operation);
             _dataChanged.insert(id, qMakePair(row, oldObject));
             _data.replace(row, newObject);
