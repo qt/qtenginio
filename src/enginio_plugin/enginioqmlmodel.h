@@ -41,7 +41,7 @@
 #include "enginiomodel.h"
 #include "enginioqmlclient.h"
 
-class ENGINIOCLIENT_EXPORT EnginioQmlModel : public EnginioModel
+class EnginioQmlModel : public EnginioModel
 {
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlModel)
