@@ -22,8 +22,9 @@ import QtQuick.Layouts 1.0
 Rectangle {
     id: root
 
-    width: 500
-    height: 700
+    width: 460
+    height: 640
+    color: "#f4f4f4"
 
     property var imagesUrl: new Object
 
@@ -59,6 +60,15 @@ Rectangle {
             border.top: 4
             border.bottom: 4
             source: hitbox.pressed ? "qrc:images/delegate_pressed.png" : "qrc:images/delegate.png"
+
+            Image {
+                id: shadow
+                anchors.top: parent.bottom
+                width: parent.width
+                visible: !hitbox.pressed
+                source: "qrc:images/shadow.png"
+            }
+
             //! [image-fetch]
             Image {
                 id: image
@@ -173,16 +183,19 @@ Rectangle {
         Row {
             id: logo
             anchors.centerIn: parent
-            spacing: 12
+            anchors.horizontalCenterOffset: -4
+            spacing: 6
             Image {
                 source: "qrc:images/enginio.png"
+                width:160 ; height: 60
+                fillMode:Image.PreserveAspectFit
             }
             Text {
                 text: "Gallery"
-                anchors.baseline: logo.bottom
-                anchors.baselineOffset: -13
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: -3
                 font.bold: true
-                font.pixelSize: 38
+                font.pixelSize: 46
                 color: "#555"
             }
         }
@@ -274,10 +287,14 @@ Rectangle {
         border.right: 5; border.bottom: 5
 
         Rectangle {
-            // Horizontal line
-            height: 1
+            y: -1 ; height: 1
             width: parent.width
             color: "#bbb"
+        }
+        Rectangle {
+            y: 0 ; height: 1
+            width: parent.width
+            color: addMouseArea.pressed ? "transparent" : "white"
         }
 
         //![append]
@@ -292,7 +309,6 @@ Rectangle {
 
         Item {
             id: addButton
-
             width: 40 ; height: 40
             anchors.margins: 20
             anchors.right: parent.right

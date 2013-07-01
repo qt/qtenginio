@@ -33,18 +33,20 @@ Rectangle {
         Row {
             id: logo
             anchors.centerIn: parent
-            spacing: 12
+            anchors.horizontalCenterOffset: -4
+            spacing: 4
             Image {
                 source: "qrc:images/enginio.png"
+                width: 160 ; height: 60
+                fillMode: Image.PreserveAspectFit
             }
             Text {
                 text: "Todos"
-                anchors.baseline: logo.bottom
-                anchors.baselineOffset: -13
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: -3
                 font.bold: true
-                font.pixelSize: 44
+                font.pixelSize: 46
                 color: "#555"
-                textFormat: Text.RichText
             }
         }
         Rectangle {
@@ -81,10 +83,14 @@ Rectangle {
         border.right: 5; border.bottom: 5
 
         Rectangle {
-            // Horizontal line
-            height: 1
+            y: -1 ; height: 1
             width: parent.width
             color: "#bbb"
+        }
+        Rectangle {
+            y: 0 ; height: 1
+            width: parent.width
+            color: "white"
         }
 
         //![append]
