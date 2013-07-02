@@ -138,8 +138,6 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         result.reserve(96);
         result.append(QStringLiteral("/v1/"));
 
-        // FIXME warn about invalid paths
-
         switch (operation) {
         case ObjectOperation: {
             QString objectType = object[EnginioString::objectType].toString();
@@ -178,13 +176,19 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
             result.append(EnginioString::files);
             // if we have a fileID, it becomes "view", otherwise it is up/download
             QString fileId = object[EnginioString::id].toString();
-            if (!fileId.isEmpty())
-                result.append(QLatin1Char('/') + fileId);
+            if (!fileId.isEmpty()) {
+                result.append('/');
+                result.append(fileId);
+            }
             break;
         }
         case FileGetDownloadUrlOperation: {
             result.append(EnginioString::files);
             QString fileId = object[EnginioString::id].toString();
+            if (fileId.isEmpty()) {
+                msg = constructErrorMessage(QByteArrayLiteral("Download operation requires non empty \'fileId\' value"));
+                return false;
+            }
             result.append(QLatin1Char('/') + fileId + QStringLiteral("/download_url"));
             break;
         }
