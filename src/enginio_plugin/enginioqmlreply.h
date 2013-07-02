@@ -44,7 +44,7 @@
 class EnginioQmlClientPrivate;
 class EnginioQmlReplyPrivate;
 
-class ENGINIOCLIENT_EXPORT EnginioQmlReply : public EnginioReply
+class EnginioQmlReply : public EnginioReply
 {
     Q_OBJECT
     Q_PROPERTY(QJSValue data READ data NOTIFY dataChanged FINAL)

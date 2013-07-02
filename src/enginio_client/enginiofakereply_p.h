@@ -44,7 +44,7 @@
 #include <QtNetwork/qnetworkreply.h>
 #include <QtCore/qbytearray.h>
 
-class EnginioFakeReply : public QNetworkReply
+class ENGINIOCLIENT_EXPORT EnginioFakeReply : public QNetworkReply
 {
     Q_OBJECT
     QByteArray _msg;
