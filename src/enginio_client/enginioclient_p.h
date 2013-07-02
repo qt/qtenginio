@@ -176,8 +176,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
             result.append(EnginioString::files);
             // if we have a fileID, it becomes "view", otherwise it is up/download
             QString fileId = object[EnginioString::id].toString();
-            if (!fileId.isEmpty())
-                result.append(QLatin1Char('/') + fileId);
+            if (!fileId.isEmpty()) {
+                result.append('/');
+                result.append(fileId);
+            }
             break;
         }
         case FileGetDownloadUrlOperation: {
