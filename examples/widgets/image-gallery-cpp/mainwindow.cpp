@@ -12,7 +12,10 @@
 #include <enginioclient.h>
 #include <enginioreply.h>
 
-#include "applicationconfig.h"
+// To get the backend right, we use a helper class in the example.
+// Usually one would just insert the backend information below.
+#include "backendhelper.h"
+
 #include "imageobject.h"
 #include "mainwindow.h"
 #include "imagemodel.h"
@@ -22,9 +25,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowTitle(QStringLiteral("Enginio Image Gallery"));
 
+    QPair<QByteArray, QByteArray> backendData = backendIdAndSecret("image-gallery");
     m_client = new EnginioClient(this);
-    m_client->setBackendId(Enginio::BACKEND_ID);
-    m_client->setBackendSecret(Enginio::BACKEND_SECRET);
+    m_client->setBackendId(backendData.first);
+    m_client->setBackendSecret(backendData.second);
 
     m_model = new ImageModel(this);
     m_model->setEnginio(m_client);

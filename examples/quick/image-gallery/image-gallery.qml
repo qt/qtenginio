@@ -1,6 +1,5 @@
 import QtQuick 2.0
 import Enginio 1.0
-import "qrc:///config.js" as AppConfig
 
 import QtQuick.Dialogs 1.0
 import QtQuick.Controls 1.0
@@ -32,8 +31,8 @@ Rectangle {
     //! [client]
     Enginio {
         id: client
-        backendId: AppConfig.backendData.id
-        backendSecret: AppConfig.backendData.secret
+        backendId: enginioBackendId
+        backendSecret: enginioBackendSecret
         onError: console.log("Enginio error: " + reply.errorCode + ": " + reply.errorString)
     }
     //! [client]
