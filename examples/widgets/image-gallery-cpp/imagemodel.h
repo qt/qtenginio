@@ -19,6 +19,8 @@ public:
         CreationTime
     };
 
+    virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
+
 public slots:
     void updateRows(const QModelIndex &, int start, int end);
     void onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);

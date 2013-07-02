@@ -57,50 +57,59 @@
 #include <QtCore/qmimedatabase.h>
 #include <QtCore/qjsonarray.h>
 #include <QtCore/qbuffer.h>
+#include <QtCore/qlinkedlist.h>
+
+#define FOR_EACH_ENGINIO_STRING(F)\
+    F(_synced, "_synced")\
+    F(access, "access")\
+    F(apiEnginIo, "https://api.engin.io")\
+    F(authIdentity, "auth/identity")\
+    F(complete, "complete")\
+    F(count, "count")\
+    F(createdAt, "createdAt")\
+    F(empty, "empty")\
+    F(file, "file")\
+    F(fileName, "fileName")\
+    F(files, "files")\
+    F(headers, "headers")\
+    F(id, "id")\
+    F(include, "include")\
+    F(incomplete, "incomplete")\
+    F(limit, "limit")\
+    F(members, "members")\
+    F(message, "message")\
+    F(object, "object")\
+    F(objectType, "objectType")\
+    F(offset, "offset")\
+    F(pageSize, "pageSize")\
+    F(password, "password")\
+    F(payload, "payload")\
+    F(propertyName, "propertyName")\
+    F(query, "query")\
+    F(results, "results")\
+    F(search, "search")\
+    F(session, "session")\
+    F(sessionToken, "sessionToken")\
+    F(sort, "sort")\
+    F(status, "status")\
+    F(targetFileProperty, "targetFileProperty")\
+    F(updatedAt, "updatedAt")\
+    F(url, "url")\
+    F(usergroups, "usergroups")\
+    F(username, "username")\
+    F(users, "users")\
+    F(variant, "variant")\
 
 
 struct ENGINIOCLIENT_EXPORT EnginioString
 {
-    static const QString pageSize;
-    static const QString limit;
-    static const QString offset;
-    static const QString include;
-    static const QString query;
-    static const QString message;
-    static const QString results;
-    static const QString _synced;
-    static const QString objectType;
-    static const QString id;
-    static const QString username;
-    static const QString password;
-    static const QString sessionToken;
-    static const QString authIdentity;
-    static const QString files;
-    static const QString file;
-    static const QString fileName;
-    static const QString search;
-    static const QString session;
-    static const QString users;
-    static const QString usergroups;
-    static const QString object;
-    static const QString url;
-    static const QString access;
-    static const QString sort;
-    static const QString count;
-    static const QString targetFileProperty;
-    static const QString members;
-    static const QString propertyName;
-    static const QString apiEnginIo;
-    static const QString status;
-    static const QString empty;
-    static const QString complete;
-    static const QString incomplete;
-    static const QString headers;
-    static const QString payload;
-    static const QString variant;
-    static const QString createdAt;
-    static const QString updatedAt;
+#define DECLARE_ENGINIO_STRING(Name, String)\
+    static const QString Name;
+
+    FOR_EACH_ENGINIO_STRING(DECLARE_ENGINIO_STRING)
+#undef DECLARE_ENGINIO_STRING
 };
+
 
 #define CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, Flags) \
     {\
@@ -278,6 +287,9 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
                 // should never get here unless upload was successful
                 Q_ASSERT(status == EnginioString::complete);
                 delete deviceState.first;
+                if (d->_connections.count() * 2 > d->_chunkedUploads.count()) {
+                    d->_connections.removeAll(QMetaObject::Connection());
+                }
             }
 
             ereply->dataChanged();
@@ -386,7 +398,7 @@ public:
     QByteArray _backendSecret;
     EnginioIdentity *_identity;
 
-    QVector<QMetaObject::Connection> _connections;
+    QLinkedList<QMetaObject::Connection> _connections;
     QVarLengthArray<QMetaObject::Connection, 4> _identityConnections;
     QUrl _serviceUrl;
     QNetworkAccessManager *_networkManager;
@@ -699,9 +711,19 @@ public:
         QString path = fileUrl.isLocalFile() ? fileUrl.toLocalFile() : fileUrl.path();
 
         QFile *file = new QFile(path);
-        Q_ASSERT(file->exists());
-        file->open(QFile::ReadOnly);
-        Q_ASSERT(file->isOpen());
+        if (!file->exists()) {
+            QByteArray msg = QByteArray("Cannot upload a not existing file ('") + path.toUtf8() + QByteArray("')");
+            msg = constructErrorMessage(msg);
+            delete file;
+            return new EnginioFakeReply(this, msg);
+        }
+
+        if (!file->open(QFile::ReadOnly)) {
+            QByteArray msg = QByteArray("File ('") + path.toUtf8() + QByteArray("') could not be opened for reading");
+            msg = constructErrorMessage(msg);
+            delete file;
+            return new EnginioFakeReply(this, msg);
+        }
         QMimeDatabase mimeDb;
         QString mimeType = mimeDb.mimeTypeForFile(path).name();
         return upload(object, file, mimeType);
@@ -749,14 +771,15 @@ public:
 
         void operator ()(qint64 progress, qint64 total)
         {
+            EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
+            qint64 p = progress;
+            qint64 t = total;
             if (_client->_chunkedUploads.contains(_reply)) {
-                EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
                 QPair<QIODevice*, qint64> chunkData = _client->_chunkedUploads.value(_reply);
-                emit ereply->progress(chunkData.second + progress, chunkData.first->size());
-            } else {
-                EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
-                emit ereply->progress(progress, total);
+                t = chunkData.first->size();
+                p += chunkData.second;
             }
+            emit ereply->progress(p, t);
         }
     private:
         EnginioClientPrivate *_client;
