@@ -2,10 +2,12 @@ TEMPLATE = app
 
 DEFINES += ENGINIO_SAMPLE_NAME=\\\"todo\\\"
 
-QT += quick qml enginio
+include(../../backendhelper/backendhelper.pri)
+
+QT += quick qml enginio widgets
 SOURCES += ../main.cpp
 
 mac: CONFIG -= app_bundle
 
-OTHER_FILES += ../config.js todo.qml
-RESOURCES += ../qml.qrc todo.qrc
+OTHER_FILES += todo.qml
+RESOURCES += todo.qrc

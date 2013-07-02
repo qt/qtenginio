@@ -2,7 +2,6 @@ import QtQuick 2.0
 //![imports]
 import Enginio 1.0
 //![imports]
-import "qrc:///config.js" as AppConfig
 
 Rectangle {
     id: root
@@ -14,8 +13,8 @@ Rectangle {
     EnginioModel {
         id: enginioModel
         enginio: Enginio {
-            backendId: AppConfig.backendData.id
-            backendSecret: AppConfig.backendData.secret
+            backendId: enginioBackendId
+            backendSecret: enginioBackendSecret
         }
         query: {"objectType": "objects.todos" }
     }

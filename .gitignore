@@ -25,9 +25,6 @@ Makefile
 
 doc/html
 
-# Prevent leaking of secret when working on this repo
-examples/qml/config.js
-
 examples/qml/loganalyzer/loganalyzer
 examples/qml/logviewer/logviewer
 examples/qml/logwriter/logwriter

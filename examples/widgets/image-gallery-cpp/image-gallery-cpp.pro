@@ -3,6 +3,8 @@ QT += network gui widgets enginio
 TARGET = image-gallery
 TEMPLATE = app
 
+include(../../backendhelper/backendhelper.pri)
+
 SOURCES += \
     main.cpp\
     mainwindow.cpp \
@@ -11,6 +13,5 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    applicationconfig.h \
     imageobject.h \
     imagemodel.h

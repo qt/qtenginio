@@ -12,7 +12,10 @@
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
 
-#include "applicationconfig.h"
+// To get the backend right, we use a helper class in the example.
+// Usually one would just insert the backend information below.
+#include "backendhelper.h"
+
 #include "mainwindow.h"
 #include "todosmodel.h"
 
@@ -21,10 +24,14 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowTitle(QStringLiteral("Enginio TODO example"));
 
+    QPair<QByteArray, QByteArray> backendData = backendIdAndSecret("todo");
+    QByteArray EnginioBackendId = backendData.first;
+    QByteArray EnginioBackendSecret = backendData.second;
+
     //![client]
     m_client = new EnginioClient(this);
-    m_client->setBackendId(Enginio::BACKEND_ID);
-    m_client->setBackendSecret(Enginio::BACKEND_SECRET);
+    m_client->setBackendId(EnginioBackendId);
+    m_client->setBackendSecret(EnginioBackendSecret);
     //![client]
 
     QObject::connect(m_client, &EnginioClient::error, this, &MainWindow::error);
