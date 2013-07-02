@@ -699,9 +699,19 @@ public:
         QString path = fileUrl.isLocalFile() ? fileUrl.toLocalFile() : fileUrl.path();
 
         QFile *file = new QFile(path);
-        Q_ASSERT(file->exists());
-        file->open(QFile::ReadOnly);
-        Q_ASSERT(file->isOpen());
+        if (!file->exists()) {
+            QByteArray msg = QByteArray("Cannot upload a not existing file ('") + path.toUtf8() + QByteArray("')");
+            msg = constructErrorMessage(msg);
+            delete file;
+            return new EnginioFakeReply(this, msg);
+        }
+
+        if (!file->open(QFile::ReadOnly)) {
+            QByteArray msg = QByteArray("File ('") + path.toUtf8() + QByteArray("') could not be opened for reading");
+            msg = constructErrorMessage(msg);
+            delete file;
+            return new EnginioFakeReply(this, msg);
+        }
         QMimeDatabase mimeDb;
         QString mimeType = mimeDb.mimeTypeForFile(path).name();
         return upload(object, file, mimeType);

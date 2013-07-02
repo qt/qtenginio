@@ -1349,10 +1349,10 @@ void tst_EnginioClient::backendFakeReply()
     QVERIFY(client.remove(empty, EnginioClient::UsergroupMembersOperation));
 
     QVERIFY(client.search(empty));
-
     QVERIFY(client.downloadFile(empty));
+    QVERIFY(client.uploadFile(empty, QUrl()));
 
-    QTRY_COMPARE(spyClientFinished.count(), 14);
+    QTRY_COMPARE(spyClientFinished.count(), 15);
     QCOMPARE(spyClientError.count(), spyClientFinished.count());
     QCOMPARE(spyReplyFinished.count(), spyClientFinished.count());
 
