@@ -59,49 +59,57 @@
 #include <QtCore/qbuffer.h>
 #include <QtCore/qlinkedlist.h>
 
+#define FOR_EACH_ENGINIO_STRING(F)\
+    F(_synced, "_synced")\
+    F(access, "access")\
+    F(apiEnginIo, "https://api.engin.io")\
+    F(authIdentity, "auth/identity")\
+    F(complete, "complete")\
+    F(count, "count")\
+    F(createdAt, "createdAt")\
+    F(empty, "empty")\
+    F(file, "file")\
+    F(fileName, "fileName")\
+    F(files, "files")\
+    F(headers, "headers")\
+    F(id, "id")\
+    F(include, "include")\
+    F(incomplete, "incomplete")\
+    F(limit, "limit")\
+    F(members, "members")\
+    F(message, "message")\
+    F(object, "object")\
+    F(objectType, "objectType")\
+    F(offset, "offset")\
+    F(pageSize, "pageSize")\
+    F(password, "password")\
+    F(payload, "payload")\
+    F(propertyName, "propertyName")\
+    F(query, "query")\
+    F(results, "results")\
+    F(search, "search")\
+    F(session, "session")\
+    F(sessionToken, "sessionToken")\
+    F(sort, "sort")\
+    F(status, "status")\
+    F(targetFileProperty, "targetFileProperty")\
+    F(updatedAt, "updatedAt")\
+    F(url, "url")\
+    F(usergroups, "usergroups")\
+    F(username, "username")\
+    F(users, "users")\
+    F(variant, "variant")\
+
 
 struct ENGINIOCLIENT_EXPORT EnginioString
 {
-    static const QString pageSize;
-    static const QString limit;
-    static const QString offset;
-    static const QString include;
-    static const QString query;
-    static const QString message;
-    static const QString results;
-    static const QString _synced;
-    static const QString objectType;
-    static const QString id;
-    static const QString username;
-    static const QString password;
-    static const QString sessionToken;
-    static const QString authIdentity;
-    static const QString files;
-    static const QString file;
-    static const QString fileName;
-    static const QString search;
-    static const QString session;
-    static const QString users;
-    static const QString usergroups;
-    static const QString object;
-    static const QString url;
-    static const QString access;
-    static const QString sort;
-    static const QString count;
-    static const QString targetFileProperty;
-    static const QString members;
-    static const QString propertyName;
-    static const QString apiEnginIo;
-    static const QString status;
-    static const QString empty;
-    static const QString complete;
-    static const QString incomplete;
-    static const QString headers;
-    static const QString payload;
-    static const QString variant;
-    static const QString createdAt;
-    static const QString updatedAt;
+#define DECLARE_ENGINIO_STRING(Name, String)\
+    static const QString Name;
+
+    FOR_EACH_ENGINIO_STRING(DECLARE_ENGINIO_STRING)
+#undef DECLARE_ENGINIO_STRING
 };
+
 
 #define CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, Flags) \
     {\

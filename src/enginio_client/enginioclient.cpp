@@ -162,45 +162,12 @@
 
 ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
 
-const QString EnginioString::pageSize = QStringLiteral("pageSize");
-const QString EnginioString::limit = QStringLiteral("limit");
-const QString EnginioString::offset = QStringLiteral("offset");
-const QString EnginioString::include = QStringLiteral("include");
-const QString EnginioString::query = QStringLiteral("query");
-const QString EnginioString::message = QStringLiteral("message");
-const QString EnginioString::results = QStringLiteral("results");
-const QString EnginioString::_synced = QStringLiteral("_synced");
-const QString EnginioString::objectType = QStringLiteral("objectType");
-const QString EnginioString::id = QStringLiteral("id");
-const QString EnginioString::username = QStringLiteral("username");
-const QString EnginioString::password = QStringLiteral("password");
-const QString EnginioString::sessionToken = QStringLiteral("sessionToken");
-const QString EnginioString::authIdentity = QStringLiteral("auth/identity");
-const QString EnginioString::files = QStringLiteral("files");
-const QString EnginioString::file = QStringLiteral("file");
-const QString EnginioString::fileName = QStringLiteral("fileName");
-const QString EnginioString::search = QStringLiteral("search");
-const QString EnginioString::session = QStringLiteral("session");
-const QString EnginioString::users = QStringLiteral("users");
-const QString EnginioString::usergroups = QStringLiteral("usergroups");
-const QString EnginioString::object = QStringLiteral("object");
-const QString EnginioString::url = QStringLiteral("url");
-const QString EnginioString::access = QStringLiteral("access");
-const QString EnginioString::sort = QStringLiteral("sort");
-const QString EnginioString::count = QStringLiteral("count");
-const QString EnginioString::targetFileProperty = QStringLiteral("targetFileProperty");
-const QString EnginioString::members = QStringLiteral("members");
-const QString EnginioString::propertyName = QStringLiteral("propertyName");
-const QString EnginioString::apiEnginIo = QStringLiteral("https://api.engin.io");
-const QString EnginioString::status = QStringLiteral("status");
-const QString EnginioString::empty = QStringLiteral("empty");
-const QString EnginioString::complete = QStringLiteral("complete");
-const QString EnginioString::incomplete = QStringLiteral("incomplete");
-const QString EnginioString::headers = QStringLiteral("headers");
-const QString EnginioString::payload = QStringLiteral("payload");
-const QString EnginioString::variant = QStringLiteral("variant");
-const QString EnginioString::createdAt = QStringLiteral("createdAt");
-const QString EnginioString::updatedAt = QStringLiteral("updatedAt");
+#define DEFINE_ENGINIO_STRING(Name, String)\
+    const QString EnginioString::Name = QStringLiteral(String);
+
+FOR_EACH_ENGINIO_STRING(DEFINE_ENGINIO_STRING)
+
+#undef DEFINE_ENGINIO_STRING
 
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
