@@ -57,6 +57,7 @@
 #include <QtCore/qmimedatabase.h>
 #include <QtCore/qjsonarray.h>
 #include <QtCore/qbuffer.h>
+#include <QtCore/qlinkedlist.h>
 
 
 struct ENGINIOCLIENT_EXPORT EnginioString
@@ -278,6 +279,9 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
                 // should never get here unless upload was successful
                 Q_ASSERT(status == EnginioString::complete);
                 delete deviceState.first;
+                if (d->_connections.count() * 2 > d->_chunkedUploads.count()) {
+                    d->_connections.removeAll(QMetaObject::Connection());
+                }
             }
 
             ereply->dataChanged();
@@ -386,7 +390,7 @@ public:
     QByteArray _backendSecret;
     EnginioIdentity *_identity;
 
-    QVector<QMetaObject::Connection> _connections;
+    QLinkedList<QMetaObject::Connection> _connections;
     QVarLengthArray<QMetaObject::Connection, 4> _identityConnections;
     QUrl _serviceUrl;
     QNetworkAccessManager *_networkManager;
