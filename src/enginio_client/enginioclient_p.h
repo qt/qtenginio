@@ -759,14 +759,15 @@ public:
 
         void operator ()(qint64 progress, qint64 total)
         {
+            EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
+            qint64 p = progress;
+            qint64 t = total;
             if (_client->_chunkedUploads.contains(_reply)) {
-                EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
                 QPair<QIODevice*, qint64> chunkData = _client->_chunkedUploads.value(_reply);
-                emit ereply->progress(chunkData.second + progress, chunkData.first->size());
-            } else {
-                EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
-                emit ereply->progress(progress, total);
+                t = chunkData.first->size();
+                p += chunkData.second;
             }
+            emit ereply->progress(p, t);
         }
     private:
         EnginioClientPrivate *_client;
