@@ -47,6 +47,6 @@
 #  define ENGINIOCLIENT_EXPORT Q_DECL_IMPORT
 #endif
 
-extern bool gEnableEnginioDebugInfo;
+ENGINIOCLIENT_EXPORT extern bool gEnableEnginioDebugInfo;
 
 #endif // ENGINIOCLIENT_GLOBAL_H
