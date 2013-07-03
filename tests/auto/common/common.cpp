@@ -45,9 +45,9 @@
 
 namespace EnginioTests {
 
-static const QByteArray GET = QByteArrayLiteral("GET");
-static const QByteArray POST = QByteArrayLiteral("POST");
-static const QByteArray DELETE = QByteArrayLiteral("DELETE");
+static const QByteArray getRequest = QByteArrayLiteral("GET");
+static const QByteArray postRequest = QByteArrayLiteral("POST");
+static const QByteArray deleteRequest = QByteArrayLiteral("DELETE");
 
 EnginioBackendManager::EnginioBackendManager(QObject *parent)
     : QObject(parent)
@@ -107,7 +107,7 @@ bool EnginioBackendManager::authenticate()
     _url.setPath(QStringLiteral("/v1/account/auth/identity"));
 
     // Authenticate developer
-    synchronousRequest(POST, obj);
+    synchronousRequest(postRequest, obj);
     QString sessionToken = _responseData["sessionToken"].toString();
     _headers["Enginio-Backend-Session"] = sessionToken;
 
@@ -139,7 +139,7 @@ QJsonArray EnginioBackendManager::getAllBackends()
     obj["headers"] = _headers;
     _url.setPath("/v1/account/apps");
 
-    synchronousRequest(GET, obj);
+    synchronousRequest(getRequest, obj);
     return _responseData["results"].toArray();
 }
 
@@ -157,7 +157,7 @@ QJsonArray EnginioBackendManager::getEnvironments(const QString &backendName)
     obj["headers"] = _headers;
     _url.setPath(appPath);
 
-    if (synchronousRequest(GET, obj)) {
+    if (synchronousRequest(getRequest, obj)) {
         environments = _responseData["environments"].toArray();
         _backendEnvironments[backendName] = environments;
     }
@@ -175,7 +175,7 @@ bool EnginioBackendManager::removeAppWithId(const QString &appId)
     QString appsPath = QStringLiteral("/v1/account/apps/");
     appsPath.append(appId);
     _url.setPath(appsPath);
-    return synchronousRequest(DELETE, obj);
+    return synchronousRequest(deleteRequest, obj);
 }
 
 bool EnginioBackendManager::createBackend(const QString &backendName)
@@ -189,7 +189,7 @@ bool EnginioBackendManager::createBackend(const QString &backendName)
     obj["payload"] = backend;
     _url.setPath("/v1/account/apps");
 
-    if (!synchronousRequest(POST, obj))
+    if (!synchronousRequest(postRequest, obj))
         return false;
 
     _backendEnvironments[backendName] = _responseData["environments"].toArray();
@@ -235,7 +235,7 @@ bool EnginioBackendManager::createObjectType(const QString &backendName, const Q
     obj["payload"] = schema;
 
     _url.setPath("/v1/object_types");
-    synchronousRequest(POST, obj);
+    synchronousRequest(postRequest, obj);
     return !_responseData["properties"].toArray().isEmpty();
 }
 

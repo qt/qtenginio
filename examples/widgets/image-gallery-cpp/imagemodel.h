@@ -1,5 +1,5 @@
 #include <enginiomodel.h>
-#include <imageobject.h>
+#include "imageobject.h"
 
 #ifndef IMAGEMODEL_H
 #define IMAGEMODEL_H
