@@ -47,16 +47,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     QToolBar *toolBar = new QToolBar(this);
     m_addNewButton = new QPushButton(toolBar);
-    m_addNewButton->setText("Append");
+    m_addNewButton->setText("&Add");
     QObject::connect(m_addNewButton, &QPushButton::clicked, this, &MainWindow::appendItem);
 
     m_removeButton = new QPushButton(toolBar);
-    m_removeButton->setText("Remove");
+    m_removeButton->setText("&Remove");
     m_removeButton->setEnabled(false);
     QObject::connect(m_removeButton, &QPushButton::clicked, this, &MainWindow::removeItem);
 
     m_toggleButton = new QPushButton(toolBar);
-    m_toggleButton->setText("Toggle completed");
+    m_toggleButton->setText("&Toggle Completed");
     m_toggleButton->setEnabled(false);
     QObject::connect(m_toggleButton, &QPushButton::clicked, this, &MainWindow::toggleCompleted);
 
