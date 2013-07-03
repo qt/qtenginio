@@ -58,7 +58,7 @@ subprocess.check_call(["nmake", "docs"])
 os.chdir("../..")
 
 packages = {
-    "com.digia.enginio": ["include", "lib", "qml", "mkspecs", "doc/enginio-qt.qch", ],
+    "com.digia.enginio": ["include", "lib", "qml", "doc/enginio-qt.qch", ],
     "com.digia.enginioExamples": ["examples",],
     "com.digia.enginioDocumentation": ["doc/enginio-qt",],
     "com.digia.enginioSources": ["src",],
@@ -85,7 +85,37 @@ for package in packages:
         else:
             shutil.copytree(sourcePath, dest)
 
+# copy the real headers
+# src/enginio_client
+# src/enginio_plugin
+headerPath = "dist/packages/com.digia.enginio/data/include/Enginio/"
+
+#FIXME FIXME FIXME version string
+privateHeaderPath = headerPath + "0.5.0/Enginio/private"
+import glob
+allHeaders = glob.glob("src/*/*.h")
+for header in allHeaders:
+    # FIXME this is windows-only
+    fileName = header[header.rindex("\\"):]
+    if header.endswith("_p.h"):
+        print("Copy ", header, " to ", privateHeaderPath + fileName)
+        shutil.copyfile(header, privateHeaderPath + fileName)
+    else:
+        print("Copy ", header, " to ", headerPath + fileName)
+        shutil.copyfile(header, headerPath + fileName)
+
+
 os.chdir("dist")
+
+
+
+# the Module .pri file is special - take the one from mkspecs/modules_inst
+modulesPath = "packages/com.digia.enginio/data/mkspecs/modules/"
+os.mkdir(modulesPath + "..")
+os.mkdir(modulesPath)
+shutil.copyfile("build/mkspecs/modules-inst/qt_lib_enginio.pri", modulesPath + "qt_lib_enginio.pri")
+
+
 subprocess.check_call([binarycreator, "-c", "config\config.xml", "-p", "packages", "EnginioInstaller"])
 
 print("Installer created.")

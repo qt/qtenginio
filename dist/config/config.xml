@@ -8,4 +8,5 @@
     <StartMenuDir>Enginio</StartMenuDir>
 	<ProductUrl>http://engin.io</ProductUrl>
     <TargetDir>@homeDir@/enginio</TargetDir>
+    <AllowSpaceInPath>true</AllowSpaceInPath>
 </Installer>

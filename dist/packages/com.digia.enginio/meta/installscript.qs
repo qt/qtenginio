@@ -64,6 +64,7 @@ showFileDialog = function()
 {
     try {
         path = QFileDialog.getExistingDirectory("Select qmake.exe path", "c:\\qt\\");
+        path = path.replace(/\//g, "\\");
         component.userInterface("QtSelectionPage").qmakePathLineEdit.text = path;
     } catch (e) {
         QMessageBox.warning("", "Error Installing Enginio", e);
