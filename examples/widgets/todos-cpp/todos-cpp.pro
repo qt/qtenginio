@@ -12,5 +12,4 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    applicationconfig.h \
     todosmodel.h \
