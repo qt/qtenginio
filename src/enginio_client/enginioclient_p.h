@@ -80,6 +80,7 @@
     F(message, "message")\
     F(object, "object")\
     F(objectType, "objectType")\
+    F(objectTypes, "objectTypes")\
     F(offset, "offset")\
     F(pageSize, "pageSize")\
     F(password, "password")\
@@ -661,7 +662,7 @@ public:
         }
         if (operation == SearchOperation) {
             ValueAdaptor<T> search = object[EnginioString::search];
-            ArrayAdaptor<T> objectTypes = object[QStringLiteral("objectTypes")].toArray();
+            ArrayAdaptor<T> objectTypes = object[EnginioString::objectTypes].toArray();
             if (search.isComposedType()) {
                 for (typename ArrayAdaptor<T>::const_iterator i = objectTypes.constBegin(); i != objectTypes.constEnd(); ++i) {
                     urlQuery.addQueryItem(QStringLiteral("objectTypes[]"), (*i).toString());
