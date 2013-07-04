@@ -303,7 +303,6 @@ public:
             // TODO update, insert and remove
             Q_ASSERT(row < _data.count());
             // update or insert data
-            QJsonObject currentValue = _data.at(row).toObject();
             QJsonObject oldValue = requestInfo.second;
             QJsonObject newValue(response->data());
 
