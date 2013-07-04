@@ -65,7 +65,7 @@ EnginioIdentity::EnginioIdentity(QObject *parent) :
 {
 }
 
-class EnginioAuthenticationPrivate
+class EnginioBasicAuthenticationPrivate
 {
 public:
     class SessionSetterFunctor
@@ -90,31 +90,57 @@ public:
         }
     };
 
-    EnginioAuthenticationPrivate(EnginioAuthentication *q)
+    EnginioBasicAuthenticationPrivate(EnginioBasicAuthentication *q)
         : q_ptr(q)
     {}
-    EnginioAuthentication *q_ptr;
+    EnginioBasicAuthentication *q_ptr;
     QString _user;
     QString _pass;
 };
 
-EnginioAuthentication::EnginioAuthentication(QObject *parent)
+/*!
+  \class EnginioBasicAuthentication
+  \inmodule enginio-qt
+  \ingroup enginio-client
+  \brief Represents a user that is authenticated directly by the backend.
+
+  The class can authenticate an user by checking it's login and password. The user
+  has to be registered in the backend.
+*/
+
+/*!
+  \property EnginioBasicAuthentication::user
+  The property keeps user name used for authentication.
+*/
+
+/*!
+  \property EnginioBasicAuthentication::password
+  The property keeps user password used for authentication.
+*/
+
+/*!
+  Constructs a EnginioBasicAuthentication instance with \a parent as QObject parent.
+*/
+EnginioBasicAuthentication::EnginioBasicAuthentication(QObject *parent)
     : EnginioIdentity(parent)
-    , d_ptr(new EnginioAuthenticationPrivate(this))
+    , d_ptr(new EnginioBasicAuthenticationPrivate(this))
 {
-    connect(this, &EnginioAuthentication::userChanged, this, &EnginioIdentity::dataChanged);
-    connect(this, &EnginioAuthentication::passwordChanged, this, &EnginioIdentity::dataChanged);
+    connect(this, &EnginioBasicAuthentication::userChanged, this, &EnginioIdentity::dataChanged);
+    connect(this, &EnginioBasicAuthentication::passwordChanged, this, &EnginioIdentity::dataChanged);
 }
 
-EnginioAuthentication::~EnginioAuthentication()
+/*!
+  Destructs this EnginioBasicAuthentication instance.
+*/
+EnginioBasicAuthentication::~EnginioBasicAuthentication()
 {}
 
-QString EnginioAuthentication::user() const
+QString EnginioBasicAuthentication::user() const
 {
     return d_ptr->_user;
 }
 
-void EnginioAuthentication::setUser(const QString &user)
+void EnginioBasicAuthentication::setUser(const QString &user)
 {
     if (d_ptr->_user == user)
         return;
@@ -122,12 +148,12 @@ void EnginioAuthentication::setUser(const QString &user)
     emit userChanged(user);
 }
 
-QString EnginioAuthentication::password() const
+QString EnginioBasicAuthentication::password() const
 {
     return d_ptr->_pass;
 }
 
-void EnginioAuthentication::setPassword(const QString &password)
+void EnginioBasicAuthentication::setPassword(const QString &password)
 {
     if (d_ptr->_pass == password)
         return;
@@ -149,7 +175,10 @@ struct DisconnectConnection
     }
 };
 
-void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
+/*!
+  \internal
+*/
+void EnginioBasicAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
 {
     Q_ASSERT(enginio);
     Q_ASSERT(enginio->identity());
@@ -158,7 +187,7 @@ void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
     data[EnginioString::username] = d_ptr->_user;
     data[EnginioString::password] = d_ptr->_pass;
     QNetworkReply *reply = enginio->identify(data);
-    QMetaObject::Connection requestFinished = QObject::connect(reply, &QNetworkReply::finished, EnginioAuthenticationPrivate::SessionSetterFunctor(enginio, reply));
+    QMetaObject::Connection requestFinished = QObject::connect(reply, &QNetworkReply::finished, EnginioBasicAuthenticationPrivate::SessionSetterFunctor(enginio, reply));
     QObject::connect(enginio->q_ptr, &EnginioClient::destroyed, DisconnectConnection(requestFinished));
 }
 

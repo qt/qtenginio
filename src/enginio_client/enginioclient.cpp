@@ -40,9 +40,9 @@
 #include "enginiomodel.h"
 #include "enginioidentity.h"
 
-#include <QNetworkReply>
-#include <QSslError>
 #include <QtCore/qthreadstorage.h>
+#include <QtNetwork/qnetworkaccessmanager.h>
+#include <QtNetwork/qnetworkreply.h>
 
 /*!
   \module enginio-client
@@ -189,7 +189,7 @@ void EnginioClientPrivate::init()
     qRegisterMetaType<EnginioModel*>();
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
-    qRegisterMetaType<EnginioAuthentication*>();
+    qRegisterMetaType<EnginioBasicAuthentication*>();
 
     QObject::connect(q_ptr, &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
     QObject::connect(q_ptr, &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClient::Authenticated));
