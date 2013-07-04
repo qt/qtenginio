@@ -80,7 +80,7 @@ qint64 EnginioFakeReply::readData(char *dest, qint64 n)
     if (pos() > _msg.size())
         return -1;
     qint64 size = qMin(qint64(_msg.size() - pos()), n);
-    qstrncpy(dest, _msg.constData(), size);
+    memcpy(dest, _msg.constData(), size);
     return size;
 }
 
