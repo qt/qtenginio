@@ -378,6 +378,8 @@ public:
     QJsonObject _identityToken;
     EnginioClient::AuthenticationState _authenticationState;
 
+    QSet<EnginioReply*> _delayedReplies; // Used only for testing
+
     void init();
 
     void replyFinished(QNetworkReply *nreply);

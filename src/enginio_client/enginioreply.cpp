@@ -171,6 +171,29 @@ void EnginioReply::dumpDebugInfo() const
 }
 
 /*!
+  \internal
+  Register \a function that allows to delay emittion of the finished signal.
+  It is supposed to be used in autotests to re-oder responses from the Enginio server,
+  to simulate a random network delay. The status of the \a function is
+  checked after arrival of any other request.
+
+  \attention The feature can be used only with one Enginioclient
+*/
+void EnginioReply::setDelayFinishedSignalFunction(DelayFinishedSignalFunction function)
+{
+    d->_delayFunction = function;
+}
+
+/*!
+  \internal
+  Returns true if signal should be delayed
+ */
+bool EnginioReply::delayFinishedSignal()
+{
+    return Q_UNLIKELY(d->_delayFunction) ? d->_delayFunction(this) : false;
+}
+
+/*!
   \brief EnginioReply::isError returns whether this reply was unsuccessful
   \return true if the reply did not succeed
 */

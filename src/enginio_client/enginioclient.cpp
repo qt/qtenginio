@@ -37,6 +37,7 @@
 
 #include "enginioclient_p.h"
 #include "enginioreply.h"
+#include "enginioreply_p.h"
 #include "enginiomodel.h"
 #include "enginioidentity.h"
 
@@ -228,12 +229,29 @@ void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
         }
     }
 
-    ereply->dataChanged();
-    ereply->emitFinished();
-    q_ptr->finished(ereply);
+    if (Q_UNLIKELY(ereply->delayFinishedSignal())) {
+        // delay emittion of finished signal for autotests
+        _delayedReplies.insert(ereply);
+    } else {
+        ereply->dataChanged();
+        ereply->emitFinished();
+        q_ptr->finished(ereply);
+        if (gEnableEnginioDebugInfo)
+            _requestData.remove(nreply);
+    }
 
-    if (gEnableEnginioDebugInfo)
-        _requestData.remove(nreply);
+    if (Q_UNLIKELY(_delayedReplies.count())) {
+        // search if we can trigger an old finished signal.
+        foreach (EnginioReply *reply, _delayedReplies) {
+            if (!reply->delayFinishedSignal()) {
+                reply->dataChanged();
+                reply->emitFinished();
+                q_ptr->finished(reply);
+                if (gEnableEnginioDebugInfo)
+                    _requestData.remove(reply->d->_nreply); // FIXME it is ugly, and breaks encapsulation
+            }
+        }
+    }
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()

@@ -52,9 +52,11 @@ public:
     EnginioClientPrivate *_client;
     QNetworkReply *_nreply;
     mutable QJsonObject _data;
+    EnginioReply::DelayFinishedSignalFunction _delayFunction;
     EnginioReplyPrivate(EnginioClientPrivate *p, QNetworkReply *reply)
         : _client(p)
         , _nreply(reply)
+        , _delayFunction(0)
     {
         Q_ASSERT(reply);
     }
