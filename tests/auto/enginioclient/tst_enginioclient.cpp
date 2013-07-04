@@ -1042,7 +1042,7 @@ void tst_EnginioClient::identity()
     {
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        EnginioAuthentication identity;
+        EnginioBasicAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionAuthenticated(EnginioReply*)));
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -1070,7 +1070,7 @@ void tst_EnginioClient::identity()
         // Different initialization order
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        EnginioAuthentication identity;
+        EnginioBasicAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionAuthenticated(EnginioReply*)));
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -1092,7 +1092,7 @@ void tst_EnginioClient::identity()
         // login / logout
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        EnginioAuthentication identity;
+        EnginioBasicAuthentication identity;
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
@@ -1119,7 +1119,7 @@ void tst_EnginioClient::identity()
         // change backend id
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        EnginioAuthentication identity;
+        EnginioBasicAuthentication identity;
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
@@ -1149,9 +1149,9 @@ void tst_EnginioClient::identity()
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
-        EnginioAuthentication identity1;
-        EnginioAuthentication identity2;
-        EnginioAuthentication identity3;
+        EnginioBasicAuthentication identity1;
+        EnginioBasicAuthentication identity2;
+        EnginioBasicAuthentication identity3;
 
         identity1.setUser("logintest");
         identity1.setPassword("logintest");
@@ -1186,7 +1186,7 @@ void tst_EnginioClient::identity()
         client->setServiceUrl(EnginioTests::TESTAPP_URL);
         client->setBackendSecret(_backendSecret);
 
-        EnginioAuthentication identity;
+        EnginioBasicAuthentication identity;
         client->setIdentity(&identity);
 
         delete client;
@@ -1202,7 +1202,7 @@ void tst_EnginioClient::identity()
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(_backendSecret);
         {
-            EnginioAuthentication identity;
+            EnginioBasicAuthentication identity;
             client.setIdentity(&identity);
         }
         QVERIFY(!client.identity());
@@ -1214,7 +1214,7 @@ void tst_EnginioClient::identity_invalid()
     {
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        EnginioAuthentication identity;
+        EnginioBasicAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionAuthenticated(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
@@ -1235,7 +1235,7 @@ void tst_EnginioClient::identity_invalid()
     {   // check if an old session is _not_ invalidated on an invalid re-loggin
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-        EnginioAuthentication identity;
+        EnginioBasicAuthentication identity;
         QSignalSpy spy(&client, SIGNAL(sessionAuthenticated(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
@@ -1279,7 +1279,7 @@ void tst_EnginioClient::identity_afterLogout()
     qRegisterMetaType<QNetworkReply*>();
     EnginioClient client;
 
-    EnginioAuthentication identity;
+    EnginioBasicAuthentication identity;
     identity.setUser("logintest");
     identity.setPassword("logintest");
 
@@ -1381,7 +1381,7 @@ void tst_EnginioClient::acl()
     client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
-    EnginioAuthentication identity;
+    EnginioBasicAuthentication identity;
     identity.setUser("logintest");
     identity.setPassword("logintest");
     client.setIdentity(&identity);

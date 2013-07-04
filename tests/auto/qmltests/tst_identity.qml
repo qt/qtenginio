@@ -20,13 +20,13 @@ Item {
         }
     }
 
-    EnginioAuthentication {
+    EnginioBasicAuthentication {
         id: validIdentity
         user: "logintest"
         password: "logintest"
     }
 
-    EnginioAuthentication {
+    EnginioBasicAuthentication {
         id: invalidIdentity
         user: "INVALID"
         password: "INVALID"

@@ -59,14 +59,14 @@ private:
     friend class EnginioClientPrivate;
 };
 
-class EnginioAuthenticationPrivate;
-class ENGINIOCLIENT_EXPORT EnginioAuthentication : public EnginioIdentity
+class EnginioBasicAuthenticationPrivate;
+class ENGINIOCLIENT_EXPORT EnginioBasicAuthentication : public EnginioIdentity
 {
     Q_OBJECT
 
 public:
-    EnginioAuthentication(QObject *parent = 0);
-    ~EnginioAuthentication();
+    EnginioBasicAuthentication(QObject *parent = 0);
+    ~EnginioBasicAuthentication();
 
     Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
     Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
@@ -83,7 +83,7 @@ Q_SIGNALS:
 
 private:
     virtual void prepareSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
-    QScopedPointer<EnginioAuthenticationPrivate> d_ptr;
+    QScopedPointer<EnginioBasicAuthenticationPrivate> d_ptr;
 };
 
 #endif // ENGINIOIDENTITY_H

@@ -189,7 +189,7 @@ void EnginioClientPrivate::init()
     qRegisterMetaType<EnginioModel*>();
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
-    qRegisterMetaType<EnginioAuthentication*>();
+    qRegisterMetaType<EnginioBasicAuthentication*>();
 
     QObject::connect(q_ptr, &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
     QObject::connect(q_ptr, &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClient::Authenticated));
