@@ -98,6 +98,29 @@ public:
     QString _pass;
 };
 
+/*!
+  \class EnginioAuthentication
+  \inmodule enginio-qt
+  \ingroup enginio-client
+  \brief Represents a user that is authenticated directly by the backend.
+
+  The class can authenticate an user by checking it's login and password. The user
+  has to be registered in the backend.
+*/
+
+/*!
+  \property EnginioAuthentication::user
+  The property keeps user name used for authentication.
+*/
+
+/*!
+  \property EnginioAuthentication::password
+  The property keeps user password used for authentication.
+*/
+
+/*!
+  Constructs a EnginioAuthentication instance with \a parent as QObject parent.
+*/
 EnginioAuthentication::EnginioAuthentication(QObject *parent)
     : EnginioIdentity(parent)
     , d_ptr(new EnginioAuthenticationPrivate(this))
@@ -106,6 +129,9 @@ EnginioAuthentication::EnginioAuthentication(QObject *parent)
     connect(this, &EnginioAuthentication::passwordChanged, this, &EnginioIdentity::dataChanged);
 }
 
+/*!
+  Destructs this EnginioAuthentication instance.
+*/
 EnginioAuthentication::~EnginioAuthentication()
 {}
 
@@ -149,6 +175,9 @@ struct DisconnectConnection
     }
 };
 
+/*!
+  \internal
+*/
 void EnginioAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
 {
     Q_ASSERT(enginio);
