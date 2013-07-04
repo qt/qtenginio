@@ -2,7 +2,7 @@ TEMPLATE = app
 
 DEFINES += ENGINIO_SAMPLE_NAME=\\\"todo\\\"
 
-include(../../backendhelper/backendhelper.pri)
+include(../../common/backendhelper/backendhelper.pri)
 
 QT += quick qml enginio widgets
 SOURCES += ../main.cpp
