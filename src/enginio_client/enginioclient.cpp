@@ -40,9 +40,9 @@
 #include "enginiomodel.h"
 #include "enginioidentity.h"
 
-#include <QNetworkReply>
-#include <QSslError>
 #include <QtCore/qthreadstorage.h>
+#include <QtNetwork/qnetworkaccessmanager.h>
+#include <QtNetwork/qnetworkreply.h>
 
 /*!
   \module enginio-client

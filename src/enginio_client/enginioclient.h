@@ -51,7 +51,6 @@ class EnginioClientPrivate;
 class QNetworkAccessManager;
 
 class QNetworkReply;
-class QSslError;
 class EnginioReply;
 class EnginioIdentity;
 
