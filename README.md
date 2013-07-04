@@ -2,7 +2,7 @@
 Client library for accessing Enginio service from Qt and QML code. 
 
 # System Requirements
-* Qt 5.0 or newer (Qt 5.1 recommended)
+* Qt 5.1 or newer
 * OpenSSL library
   * Mac OS X: OpenSSL library should be preinstalled.
   * Linux: Most distributions have preinstalled OpenSSL library. If yours doesn't, seach for `libssl` in package repository.
