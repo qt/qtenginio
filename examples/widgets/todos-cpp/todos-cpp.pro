@@ -3,7 +3,7 @@ QT += network gui widgets enginio
 TARGET = todos
 TEMPLATE = app
 
-include(../../backendhelper/backendhelper.pri)
+include(../../common/backendhelper/backendhelper.pri)
 
 SOURCES += \
     main.cpp\
