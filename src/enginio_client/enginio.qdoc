@@ -47,7 +47,7 @@ To get started quickly follow the mini-tutorial using Qt Quick or C++.
 
 \section1 Reference documentation and examples:
 \list
-\li \l {All Enginio Classes}
+\li \l {Enginio Classes and QML Types}
 \li \l {Enginio Examples}
 \endlist
 
@@ -278,7 +278,7 @@ Now you can \l{Checking stored objects in the Dashboard}{check the Enginio dashb
 \title Checking stored objects in the Dashboard
 \indexpage Enginio Overview
 \previouspage Getting Started with Enginio using C++
-\nextpage All Enginio Classes
+\nextpage Enginio Classes and QML Types
 
 When you have successfully stored objects with Qt C++ or QML code, go to your \l{https://dashboard.engin.io/}{Enginio Dashboard}
 and check the status there.
@@ -307,8 +307,26 @@ To get convenient access to objects stored in Enginio, consider using \l Enginio
 */
 
 /*!
-\page classes.html
-\title All Enginio Classes
+\page enginio-classes.html
+\title Enginio C++ Classes
+\indexpage Enginio Overview
+
+Enginio provides these \b{C++ classes}:
+\generatelist {classesbymodule enginio-qt}
+*/
+
+/*!
+\page enginio-qml-types.html
+\title Enginio QML Types
+\indexpage Enginio Overview
+
+Enginio provides these \b{QML types}:
+\annotatedlist engino-qml
+*/
+
+/*!
+\page enginio-classes-and-types.html
+\title Enginio Classes and QML Types
 \indexpage Enginio Overview
 \startpage Enginio Overview
 \previouspage Checking stored objects in the Dashboard
@@ -329,7 +347,7 @@ Enginio provides these \b{QML types}:
 \page enginio-examples.html
 \indexpage Enginio Overview
 \startpage Enginio Overview
-\previouspage All Enginio Classes
+\previouspage Enginio Classes and QML Types
 
 \title Enginio Examples
 \brief Using Enginio
