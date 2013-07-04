@@ -104,18 +104,18 @@ public:
   \ingroup enginio-client
   \brief Represents a user that is authenticated directly by the backend.
 
-  The class can authenticate an user by checking it's login and password. The user
-  has to be registered in the backend.
+  This class can authenticate an user by verifying the user's login and password.
+  The user has to exist in the backend already.
 */
 
 /*!
   \property EnginioBasicAuthentication::user
-  The property keeps user name used for authentication.
+  This property contains the user name used for authentication.
 */
 
 /*!
   \property EnginioBasicAuthentication::password
-  The property keeps user password used for authentication.
+  This property contains the password used for authentication.
 */
 
 /*!
