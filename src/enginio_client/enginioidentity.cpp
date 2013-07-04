@@ -104,7 +104,7 @@ public:
   \ingroup enginio-client
   \brief Represents a user that is authenticated directly by the backend.
 
-  This class can authenticate an user by verifying the user's login and password.
+  This class can authenticate a user by verifying the user's login and password.
   The user has to exist in the backend already.
 */
 

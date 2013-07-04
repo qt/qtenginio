@@ -89,7 +89,7 @@
 
     At this point we are supposed to have working read only View / Model setup. To be able to 
     modify the model we need to write one more function in model \l{EnginioModel::setData()}{EnginioModel::setData()}.
-    By default \l QListView is using \l{Qt::ItemDataRole} when an user decide to edit
+    By default \l QListView is using \l{Qt::ItemDataRole} when a user decide to edit
     a data content. We need to map that role to our "title" role and call
     \l {EnginioModel::setProperty}{EnginioModel::setProperty()}
     to update the data, like that:
