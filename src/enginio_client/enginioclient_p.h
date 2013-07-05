@@ -262,43 +262,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
         void operator ()(QNetworkReply *nreply)
         {
-            EnginioReply *ereply = d->_replyReplyMap.take(nreply);
-
-            if (!ereply)
-                return;
-
-            EnginioClient *q = static_cast<EnginioClient*>(d->q_ptr);
-
-            if (nreply->error() != QNetworkReply::NoError) {
-                QPair<QIODevice *, qint64> deviceState = d->_chunkedUploads.take(nreply);
-                delete deviceState.first;
-                emit q->error(ereply);
-                emit ereply->errorChanged();
-            }
-
-            // continue chunked upload
-            else if (d->_chunkedUploads.contains(nreply)) {
-                QPair<QIODevice *, qint64> deviceState = d->_chunkedUploads.take(nreply);
-                QString status = ereply->data().value(EnginioString::status).toString();
-                if (status == EnginioString::empty || status == EnginioString::incomplete) {
-                    Q_ASSERT(ereply->data().value(EnginioString::objectType).toString() == EnginioString::files);
-                    d->uploadChunk(ereply, deviceState.first, deviceState.second);
-                    return;
-                }
-                // should never get here unless upload was successful
-                Q_ASSERT(status == EnginioString::complete);
-                delete deviceState.first;
-                if (d->_connections.count() * 2 > d->_chunkedUploads.count()) {
-                    d->_connections.removeAll(QMetaObject::Connection());
-                }
-            }
-
-            ereply->dataChanged();
-            ereply->emitFinished();
-            q->finished(ereply);
-
-            if (gEnableEnginioDebugInfo)
-                d->_requestData.remove(nreply);
+            d->replyFinished(nreply);
         }
     };
 
@@ -414,7 +378,11 @@ public:
     QJsonObject _identityToken;
     EnginioClient::AuthenticationState _authenticationState;
 
+    QSet<EnginioReply*> _delayedReplies; // Used only for testing
+
     void init();
+
+    void replyFinished(QNetworkReply *nreply);
 
     void setAuthenticationState(const EnginioClient::AuthenticationState state)
     {

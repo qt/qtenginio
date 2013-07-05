@@ -81,6 +81,10 @@ private slots:
     void invalidRemove();
     void invalidSetProperty();
     void multpleConnections();
+    void deletionReordered();
+    void deleteTwiceTheSame();
+    void updateAndDeleteReordered();
+    void updateReordered();
 };
 
 void tst_EnginioModel::initTestCase()
@@ -285,6 +289,18 @@ struct ReplyCounter
         : counter(*storage)
     {}
 
+    void operator ()(EnginioReply *)
+    {
+        ++counter;
+    }
+};
+
+struct InvalidRemoveErrorChecker: public ReplyCounter
+{
+    InvalidRemoveErrorChecker(int *storage)
+        : ReplyCounter(storage)
+    {}
+
     void operator ()(EnginioReply *reply)
     {
         QVERIFY(reply->isError());
@@ -298,10 +314,9 @@ struct ReplyCounter
         QVERIFY(!data["errors"].toArray()[0].toObject()["message"].toString().isEmpty());
         QVERIFY(!data["errors"].toArray()[0].toObject()["reason"].toString().isEmpty());
 
-        ++counter;
+        ReplyCounter::operator ()(reply);
     }
 };
-
 void tst_EnginioModel::invalidRemove()
 {
     EnginioClient client;
@@ -313,7 +328,7 @@ void tst_EnginioModel::invalidRemove()
     model.setEnginio(&client);
 
     int counter = 0;
-    ReplyCounter replyCounter(&counter);
+    InvalidRemoveErrorChecker replyCounter(&counter);
     EnginioReply *reply;
 
     reply = model.remove(0);
@@ -492,6 +507,213 @@ void tst_EnginioModel::multpleConnections()
         QCOMPARE(model.counter["enginioChanged"], 0);
     }
 }
+
+struct ReorderWaitForReply : public ReplyCounter
+{
+    bool &_trigger;
+    ReorderWaitForReply(int *storage, bool *trigger, EnginioReply *ptr = 0)
+        : ReplyCounter(storage)
+        , _trigger(*trigger)
+    {
+        waitPointer = ptr;
+    }
+
+    void operator ()(EnginioReply *reply)
+    {
+        if (reply == waitPointer)
+            _trigger = false;
+        ReplyCounter::operator ()(reply);
+    }
+    static EnginioReply *waitPointer;
+};
+EnginioReply *ReorderWaitForReply::waitPointer = 0;
+
+static bool reorderDelay = true;
+bool reorderDelayer(EnginioReply */*reply*/)
+{
+    return reorderDelay;
+}
+
+void tst_EnginioModel::deletionReordered()
+{
+    QJsonObject query = QJsonDocument::fromJson("{\"limit\":2}").object();
+    QVERIFY(!query.isEmpty());
+    EnginioModel model;
+    model.setQuery(query);
+    model.setOperation(EnginioClient::UserOperation);
+
+    EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    model.setEnginio(&client);
+
+    QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
+    QVERIFY(model.rowCount() >= 2);
+
+    EnginioReply *r2 = model.remove(model.rowCount() - 1);
+    EnginioReply *r1 = model.remove(0);
+
+    QVERIFY(!r1->isError());
+    QVERIFY(!r2->isError());
+
+    r2->setDelayFinishedSignalFunction(reorderDelayer);
+
+    int counter = 0;
+    reorderDelay = true;
+    ReorderWaitForReply replyCounter(&counter, &reorderDelay, r1);
+    QObject::connect(r1, &EnginioReply::finished, replyCounter);
+    QObject::connect(r2, &EnginioReply::finished, replyCounter);
+
+    QTRY_COMPARE(counter, 2);
+}
+
+struct MessageHandler
+{
+    MessageHandler(QString messageBegining)
+        : oldMsgHandler(qInstallMessageHandler(handler))
+    {
+        msgBegining = messageBegining;
+        ok = false;
+    }
+
+    ~MessageHandler()
+    {
+        qInstallMessageHandler(oldMsgHandler);
+    }
+
+    QtMessageHandler oldMsgHandler;
+
+    static void handler(QtMsgType type, const QMessageLogContext & /*ctxt*/, const QString &msg)
+    {
+        Q_UNUSED(type);
+        ok = msg.startsWith(msgBegining);
+        QVERIFY2(ok, (QString::fromLatin1("Message is not started correctly: '") + msg + '\'').toLatin1().constData());
+    }
+    static QString msgBegining;
+    static bool ok;
+};
+bool MessageHandler::ok;
+QString MessageHandler::msgBegining;
+
+void tst_EnginioModel::deleteTwiceTheSame()
+{
+    QJsonObject query = QJsonDocument::fromJson("{\"limit\":1}").object();
+    QVERIFY(!query.isEmpty());
+    EnginioModel model;
+    model.setQuery(query);
+    model.setOperation(EnginioClient::UserOperation);
+
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    model.setEnginio(&client);
+
+    QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
+
+    EnginioReply *r2 = model.remove(model.rowCount() - 1);
+    EnginioReply *r1 = model.remove(model.rowCount() - 1);
+
+    QVERIFY(!r1->isError());
+    QVERIFY(!r2->isError());
+
+    int counter = 0;
+    ReplyCounter replyCounter(&counter);
+    QObject::connect(r1, &EnginioReply::finished, replyCounter);
+    QObject::connect(r2, &EnginioReply::finished, replyCounter);
+
+    MessageHandler handler("The same row was removed twice, removed object was: ");
+    QTRY_COMPARE(counter, 2);
+
+    // That is flaky sometimes server send us two positive message about deletion and
+    // sometimes one positive and one 404. In the first case we expect model to handle
+    // that gently with a warning.
+    QVERIFY(MessageHandler::ok || r1->backendStatus() == 404 || r2->backendStatus() == 404);
+}
+
+
+void tst_EnginioModel::updateAndDeleteReordered()
+{
+    QJsonObject query = QJsonDocument::fromJson("{\"limit\":1}").object();
+    QVERIFY(!query.isEmpty());
+    EnginioModel model;
+    model.setQuery(query);
+    model.setOperation(EnginioClient::UserOperation);
+
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    model.setEnginio(&client);
+
+    QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
+
+    EnginioReply *r2 = model.setProperty(model.rowCount() - 1, "email", "email@email.com");
+    EnginioReply *r1 = model.remove(model.rowCount() - 1);
+
+    QVERIFY(!r1->isError());
+    QVERIFY(!r2->isError());
+
+    int counter = 0;
+    ReplyCounter replyCounter(&counter);
+    QObject::connect(r1, &EnginioReply::finished, replyCounter);
+    QObject::connect(r2, &EnginioReply::finished, replyCounter);
+
+    MessageHandler handler("Trying to update a removed object:");
+    QTRY_COMPARE(counter, 2);
+
+    // That is flaky sometimes server send us two positive message and
+    // sometimes one positive and one 404. In the first case we expect model to handle
+    // that gently with a warning.
+    QVERIFY(MessageHandler::ok || r1->backendStatus() == 404 || r2->backendStatus() == 404);
+}
+
+void tst_EnginioModel::updateReordered()
+{
+    QJsonObject query = QJsonDocument::fromJson("{\"limit\":1}").object();
+    QVERIFY(!query.isEmpty());
+    EnginioModel model;
+    model.setQuery(query);
+    model.setOperation(EnginioClient::UserOperation);
+
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    model.setEnginio(&client);
+
+    QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
+    qDebug() << "orginal" << model.data(model.index(0)).value<QJsonValue>().toObject();
+
+    int counter = 0;
+    reorderDelay = true;
+
+    EnginioReply *r2 = model.setProperty(0, "email", "email2@email.com");
+    QVERIFY(!r2->isError());
+    r2->setDelayFinishedSignalFunction(reorderDelayer);
+    ReorderWaitForReply replyCounter(&counter, &reorderDelay);
+    QObject::connect(r2, &EnginioReply::finished, replyCounter);
+
+    QTRY_VERIFY(!r2->data().isEmpty()); // at this point r2 is done but finished signal is not emited
+    QTRY_COMPARE(counter, 0);
+
+    EnginioReply *r1 = model.setProperty(0, "email", "email1@email.com");
+    QVERIFY(!r1->isError());
+
+    ReorderWaitForReply::waitPointer = r1; // r1 finish signal will trigger r2 finish signal
+    QObject::connect(r1, &EnginioReply::finished, replyCounter);
+
+    QTRY_COMPARE(counter, 2);
+
+    QDateTime r1UpdatedAt = QDateTime::fromString(r1->data()["updatedAt"].toString(), Qt::ISODate);
+    QDateTime r2UpdatedAt = QDateTime::fromString(r2->data()["updatedAt"].toString(), Qt::ISODate);
+
+    QVERIFY(r2UpdatedAt < r1UpdatedAt);
+    QCOMPARE(model.data(model.index(0)).value<QJsonValue>().toObject(), r1->data());
+}
+
 
 QTEST_MAIN(tst_EnginioModel)
 #include "tst_enginiomodel.moc"

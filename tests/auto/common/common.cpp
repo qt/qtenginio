@@ -309,6 +309,7 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
             QJsonObject query;
             query["username"] = identity;
             query["password"] = identity;
+            query["email"] = identity + "@email.com";
             client.create(query, EnginioClient::UserOperation);
             ++spyCount;
             qDebug() << "Creating " << query;

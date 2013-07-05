@@ -44,6 +44,7 @@
 #include <QtCore/qvector.h>
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qjsonarray.h>
+#include <QtCore/qdatetime.h>
 
 
 class EnginioModelPrivate {
@@ -261,6 +262,27 @@ public:
         }
     }
 
+    int findId(QString id, int rowHint)
+    {
+        Q_ASSERT(rowHint >= 0);
+
+        const int count = _data.count();
+        if (rowHint < count) {
+            QJsonValue hintId = _data[rowHint].toObject()[EnginioString::id];
+            if (hintId == id)
+                return rowHint;
+            if (id.isEmpty() && (hintId.isNull() || hintId.isUndefined()))
+                return rowHint;
+        }
+
+        // TODO optimize it, in most caseses we need to just check around rowHint
+        for (int i = count - 1; i >= 0; --i) {
+            if (_data[i].toObject()[EnginioString::id] == id)
+                return i;
+        }
+        return -1;
+    }
+
     void finishedRequest(const EnginioReply *response)
     {
         // We get all finished requests, check if we started this one
@@ -299,29 +321,50 @@ public:
             _canFetchMore = limit <= dataCount;
             q->endInsertRows();
         } else {
-            _rowsToSync.remove(row);
-            // TODO update, insert and remove
-            Q_ASSERT(row < _data.count());
-            // update or insert data
-            QJsonObject oldValue = requestInfo.second;
+            _rowsToSync.remove(row); // FIXME the row is may not be right
             QJsonObject newValue(response->data());
+            QJsonObject oldValue = requestInfo.second;
+
+            const bool removeOperation = newValue.isEmpty();
+            // update the row number
+            row = findId(oldValue[EnginioString::id].toString(), row);
+            if (row == -1) {
+                // The object is not in the cache, which means that it was deleted already
+                if (removeOperation)
+                    qWarning() << "The same row was removed twice, removed object was:"
+                               << QJsonDocument(oldValue).toJson();
+                else
+                    qWarning() << "Trying to update a removed object:\nOldValue: "
+                               << QJsonDocument(oldValue).toJson()
+                               << "\nNewValue: " << QJsonDocument(newValue).toJson();
+                return; // nothing to do
+            }
+            Q_ASSERT(row >= 0 && row < _data.count());
 
             if (response->networkError() != QNetworkReply::NoError) {
                 _data.replace(row, oldValue); // FIXME do we have to do more here?
                 return;
             }
 
-            if (newValue.isEmpty()) {
+            if (removeOperation) {
                 q->beginRemoveRows(QModelIndex(), row, row);
                 _data.removeAt(row);
                 q->endRemoveRows();
             } else {
-                _data.replace(row, newValue);
+                QJsonObject current = _data[row].toObject();
+                QDateTime currentUpdateAt = QDateTime::fromString(current[EnginioString::updatedAt].toString(), Qt::ISODate);
+                QDateTime newUpdateAt = QDateTime::fromString(newValue[EnginioString::updatedAt].toString(), Qt::ISODate);
+                if (newUpdateAt < currentUpdateAt) {
+                    // we already have a newer version
+                    return;
+                }
                 if (_data.count() == 1) {
                     q->beginResetModel();
+                    _data.replace(row, newValue);
                     syncRoles();
                     q->endResetModel();
                 } else {
+                    _data.replace(row, newValue);
                     emit q->dataChanged(q->index(row), q->index(row));
                 }
             }

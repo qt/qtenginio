@@ -37,6 +37,7 @@
 
 #include "enginioclient_p.h"
 #include "enginioreply.h"
+#include "enginioreply_p.h"
 #include "enginiomodel.h"
 #include "enginioidentity.h"
 
@@ -195,6 +196,62 @@ void EnginioClientPrivate::init()
     QObject::connect(q_ptr, &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClient::Authenticated));
     QObject::connect(q_ptr, &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClient::AuthenticationFailure));
     QObject::connect(q_ptr, &EnginioClient::identityChanged, AuthenticationStateTrackerIdentFunctor(this));
+}
+
+void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
+{
+    EnginioReply *ereply = _replyReplyMap.take(nreply);
+
+    if (!ereply)
+        return;
+
+    if (nreply->error() != QNetworkReply::NoError) {
+        QPair<QIODevice *, qint64> deviceState = _chunkedUploads.take(nreply);
+        delete deviceState.first;
+        emit q_ptr->error(ereply);
+        emit ereply->errorChanged();
+    }
+
+    // continue chunked upload
+    else if (_chunkedUploads.contains(nreply)) {
+        QPair<QIODevice *, qint64> deviceState = _chunkedUploads.take(nreply);
+        QString status = ereply->data().value(EnginioString::status).toString();
+        if (status == EnginioString::empty || status == EnginioString::incomplete) {
+            Q_ASSERT(ereply->data().value(EnginioString::objectType).toString() == EnginioString::files);
+            uploadChunk(ereply, deviceState.first, deviceState.second);
+            return;
+        }
+        // should never get here unless upload was successful
+        Q_ASSERT(status == EnginioString::complete);
+        delete deviceState.first;
+        if (_connections.count() * 2 > _chunkedUploads.count()) {
+            _connections.removeAll(QMetaObject::Connection());
+        }
+    }
+
+    if (Q_UNLIKELY(ereply->delayFinishedSignal())) {
+        // delay emittion of finished signal for autotests
+        _delayedReplies.insert(ereply);
+    } else {
+        ereply->dataChanged();
+        ereply->emitFinished();
+        q_ptr->finished(ereply);
+        if (gEnableEnginioDebugInfo)
+            _requestData.remove(nreply);
+    }
+
+    if (Q_UNLIKELY(_delayedReplies.count())) {
+        // search if we can trigger an old finished signal.
+        foreach (EnginioReply *reply, _delayedReplies) {
+            if (!reply->delayFinishedSignal()) {
+                reply->dataChanged();
+                reply->emitFinished();
+                q_ptr->finished(reply);
+                if (gEnableEnginioDebugInfo)
+                    _requestData.remove(reply->d->_nreply); // FIXME it is ugly, and breaks encapsulation
+            }
+        }
+    }
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
