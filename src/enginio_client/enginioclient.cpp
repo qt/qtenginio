@@ -197,6 +197,45 @@ void EnginioClientPrivate::init()
     QObject::connect(q_ptr, &EnginioClient::identityChanged, AuthenticationStateTrackerIdentFunctor(this));
 }
 
+void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
+{
+    EnginioReply *ereply = _replyReplyMap.take(nreply);
+
+    if (!ereply)
+        return;
+
+    if (nreply->error() != QNetworkReply::NoError) {
+        QPair<QIODevice *, qint64> deviceState = _chunkedUploads.take(nreply);
+        delete deviceState.first;
+        emit q_ptr->error(ereply);
+        emit ereply->errorChanged();
+    }
+
+    // continue chunked upload
+    else if (_chunkedUploads.contains(nreply)) {
+        QPair<QIODevice *, qint64> deviceState = _chunkedUploads.take(nreply);
+        QString status = ereply->data().value(EnginioString::status).toString();
+        if (status == EnginioString::empty || status == EnginioString::incomplete) {
+            Q_ASSERT(ereply->data().value(EnginioString::objectType).toString() == EnginioString::files);
+            uploadChunk(ereply, deviceState.first, deviceState.second);
+            return;
+        }
+        // should never get here unless upload was successful
+        Q_ASSERT(status == EnginioString::complete);
+        delete deviceState.first;
+        if (_connections.count() * 2 > _chunkedUploads.count()) {
+            _connections.removeAll(QMetaObject::Connection());
+        }
+    }
+
+    ereply->dataChanged();
+    ereply->emitFinished();
+    q_ptr->finished(ereply);
+
+    if (gEnableEnginioDebugInfo)
+        _requestData.remove(nreply);
+}
+
 EnginioClientPrivate::~EnginioClientPrivate()
 {
     foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
