@@ -12,10 +12,15 @@ from __future__ import print_function
 import os
 import shutil
 import subprocess
+import sys
 
 # Qt
 qmake = "qmake"
-jom = "jom"
+
+make = "make"
+if sys.platform == "win32":
+    make = "jom"
+
 
 # from the installer framework
 binarycreator = "binarycreator"
@@ -51,16 +56,20 @@ try:
 except ImportError:
     DEVNULL = open(os.devnull, 'wb')
 
-subprocess.check_call([jom,], stdout=DEVNULL)
-subprocess.check_call(["nmake", "docs"])
+subprocess.check_call([make,], stdout=DEVNULL)
+
+if sys.platform == "win32": # bug with jom subtargets
+    subprocess.check_call(["nmake", "docs"])
+else:
+    subprocess.check_call([make, "docs"])
 
 # Copy files around
 os.chdir("../..")
 
 packages = {
-    "com.digia.enginio": ["include", "lib", "qml", "doc/enginio-qt.qch", ],
+    "com.digia.enginio": ["include", "lib", "qml", ], #"doc/enginio-qt.qch", ],
     "com.digia.enginioExamples": ["examples",],
-    "com.digia.enginioDocumentation": ["doc/enginio-qt",],
+    #"com.digia.enginioDocumentation": ["doc/enginio-qt",],
     "com.digia.enginioSources": ["src",],
     }
 
@@ -95,8 +104,7 @@ privateHeaderPath = headerPath + "0.5.0/Enginio/private"
 import glob
 allHeaders = glob.glob("src/*/*.h")
 for header in allHeaders:
-    # FIXME this is windows-only
-    fileName = header[header.rindex("\\"):]
+    fileName = header[header.rindex(os.sep):]
     if header.endswith("_p.h"):
         print("Copy ", header, " to ", privateHeaderPath + fileName)
         shutil.copyfile(header, privateHeaderPath + fileName)
@@ -110,12 +118,12 @@ os.chdir("dist")
 
 
 # the Module .pri file is special - take the one from mkspecs/modules_inst
-modulesPath = "packages/com.digia.enginio/data/mkspecs/modules/"
-os.mkdir(modulesPath + "..")
+modulesPath = "packages/com.digia.enginio/data/mkspecs/modules"
+os.mkdir("packages/com.digia.enginio/data/mkspecs")
 os.mkdir(modulesPath)
-shutil.copyfile("build/mkspecs/modules-inst/qt_lib_enginio.pri", modulesPath + "qt_lib_enginio.pri")
+shutil.copyfile("build/mkspecs/modules-inst/qt_lib_enginio.pri", modulesPath + "/qt_lib_enginio.pri")
 
 
-subprocess.check_call([binarycreator, "-c", "config\config.xml", "-p", "packages", "EnginioInstaller"])
+subprocess.check_call([binarycreator, "-c", "config" + os.sep + "config.xml", "-p", "packages", "EnginioInstaller"])
 
 print("Installer created.")
