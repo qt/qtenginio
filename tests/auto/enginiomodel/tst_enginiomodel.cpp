@@ -175,6 +175,15 @@ void tst_EnginioModel::enginio_property()
         QTRY_COMPARE(spy.count(), 2);
         QCOMPARE(spy[1][0].value<EnginioClient*>(), static_cast<EnginioClient*>(0));
     }
+    {
+        EnginioModel model;
+        QTest::ignoreMessage(QtWarningMsg, "EnginioModel::append(): Enginio client is not set");
+        QVERIFY(!model.append(QJsonObject()));
+        QTest::ignoreMessage(QtWarningMsg, "EnginioModel::remove(): Enginio client is not set");
+        QVERIFY(!model.remove(0));
+        QTest::ignoreMessage(QtWarningMsg, "EnginioModel::setProperty(): Enginio client is not set");
+        QVERIFY(!model.setProperty(0, "blah", QVariant()));
+    }
 }
 
 void tst_EnginioModel::query_property()

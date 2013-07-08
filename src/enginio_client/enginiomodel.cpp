@@ -589,6 +589,11 @@ void EnginioModel::setOperation(EnginioClient::Operation operation)
 */
 EnginioReply *EnginioModel::append(const QJsonObject &value)
 {
+    if (Q_UNLIKELY(!d->enginio())) {
+        qWarning() << "EnginioModel::append(): Enginio client is not set";
+        return 0;
+    }
+
     return d->append(value);
 }
 
@@ -600,6 +605,11 @@ EnginioReply *EnginioModel::append(const QJsonObject &value)
 */
 EnginioReply *EnginioModel::remove(int row)
 {
+    if (Q_UNLIKELY(!d->enginio())) {
+        qWarning() << "EnginioModel::remove(): Enginio client is not set";
+        return 0;
+    }
+
     if (unsigned(row) >= unsigned(d->rowCount())) {
         EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel::remove: row is out of range")));
@@ -621,6 +631,11 @@ EnginioReply *EnginioModel::remove(int row)
 */
 EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
+    if (Q_UNLIKELY(!d->enginio())) {
+        qWarning() << "EnginioModel::setProperty(): Enginio client is not set";
+        return 0;
+    }
+
     if (unsigned(row) >= unsigned(d->rowCount())) {  // TODO remove as soon as we have a sparse array.
         EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel::setProperty: row is out of range")));
