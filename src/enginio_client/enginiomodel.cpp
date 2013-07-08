@@ -176,34 +176,34 @@ public:
     {
         QJsonObject object(value);
         object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
-        EnginioReply* id = _enginio->create(object, _operation);
+        EnginioReply *ereply = _enginio->create(object, _operation);
         const int row = _data.count();
         if (!row) { // the first item need to update roles
             q->beginResetModel();
             _rowsToSync.insert(row);
             _data.append(value);
             syncRoles();
-            _dataChanged.insert(id, qMakePair(row, object));
+            _dataChanged.insert(ereply, qMakePair(row, object));
             q->endResetModel();
         } else {
             q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
             _rowsToSync.insert(row);
             _data.append(value);
-            _dataChanged.insert(id, qMakePair(row, object));
+            _dataChanged.insert(ereply, qMakePair(row, object));
             q->endInsertRows();
         }
-        return id;
+        return ereply;
     }
 
     EnginioReply *remove(int row)
     {
         QJsonObject oldObject = _data.at(row).toObject();
-        EnginioReply* id = _enginio->remove(oldObject, _operation);
-        _dataChanged.insert(id, qMakePair(row, oldObject));
+        EnginioReply *ereply = _enginio->remove(oldObject, _operation);
+        _dataChanged.insert(ereply, qMakePair(row, oldObject));
         QVector<int> roles(1);
         roles.append(SyncedRole);
         emit q->dataChanged(q->index(row), q->index(row) , roles);
-        return id;
+        return ereply;
     }
 
     EnginioReply *setValue(int row, const QString &role, const QVariant &value)
@@ -254,11 +254,11 @@ public:
         if (!_enginio || _enginio->backendId().isEmpty() || _enginio->backendSecret().isEmpty())
             return;
         if (!_query.isEmpty()) {
-            const EnginioReply *id = _enginio->query(_query, _operation);
+            const EnginioReply *ereply = _enginio->query(_query, _operation);
             if (_canFetchMore)
                 _latestRequestedOffset = _query[EnginioString::limit].toDouble();
-            QObject::connect(id, &EnginioReply::finished, id, &EnginioReply::deleteLater);
-            _dataChanged.insert(id, qMakePair(FullModelReset, QJsonObject()));
+            QObject::connect(ereply, &EnginioReply::finished, ereply, &EnginioReply::deleteLater);
+            _dataChanged.insert(ereply, qMakePair(FullModelReset, QJsonObject()));
         }
     }
 
@@ -382,11 +382,11 @@ public:
             deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
             deltaObject[EnginioString::id] = newObject[EnginioString::id];
             deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
-            EnginioReply *id = _enginio->update(deltaObject, _operation);
-            _dataChanged.insert(id, qMakePair(row, oldObject));
+            EnginioReply *ereply = _enginio->update(deltaObject, _operation);
+            _dataChanged.insert(ereply, qMakePair(row, oldObject));
             _data.replace(row, newObject);
             emit q->dataChanged(q->index(row), q->index(row));
-            return id;
+            return ereply;
         }
         EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel: Trying to update an object with unknown role")));
@@ -478,9 +478,9 @@ public:
 
         qDebug() << Q_FUNC_INFO << query;
         _latestRequestedOffset += limit;
-        EnginioReply *id = _enginio->query(query, _operation);
-        QObject::connect(id, &EnginioReply::finished, id, &EnginioReply::deleteLater);
-        _dataChanged.insert(id, qMakePair(IncrementalModelUpdate, query));
+        EnginioReply *ereply = _enginio->query(query, _operation);
+        QObject::connect(ereply, &EnginioReply::finished, ereply, &EnginioReply::deleteLater);
+        _dataChanged.insert(ereply, qMakePair(IncrementalModelUpdate, query));
     }
 };
 
