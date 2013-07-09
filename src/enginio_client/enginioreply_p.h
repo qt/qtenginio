@@ -61,22 +61,22 @@ public:
         Q_ASSERT(reply);
     }
 
-    QNetworkReply::NetworkError errorCode() const
+    QNetworkReply::NetworkError errorCode() const Q_REQUIRED_RESULT
     {
         return _nreply->error();
     }
 
-    int backendStatus() const
+    int backendStatus() const Q_REQUIRED_RESULT
     {
         return _nreply->attribute(QNetworkRequest::HttpStatusCodeAttribute).value<int>();
     }
 
-    QString errorString() const
+    QString errorString() const Q_REQUIRED_RESULT
     {
         return _nreply->errorString();
     }
 
-    EnginioReply::ErrorTypes errorType() const
+    EnginioReply::ErrorTypes errorType() const Q_REQUIRED_RESULT
     {
         if (errorCode() == QNetworkReply::NoError)
             return EnginioReply::NoError;
@@ -85,7 +85,7 @@ public:
         return EnginioReply::BackendError;
     }
 
-    QJsonObject data() const
+    QJsonObject data() const Q_REQUIRED_RESULT
     {
         if (_data.isEmpty())
             _data = QJsonDocument::fromJson(_nreply->readAll()).object();

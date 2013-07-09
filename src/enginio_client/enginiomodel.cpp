@@ -143,7 +143,7 @@ public:
             QObject::disconnect(connection);
     }
 
-    EnginioClient *enginio() const
+    EnginioClient *enginio() const Q_REQUIRED_RESULT
     {
         return _enginio;
     }
@@ -167,7 +167,7 @@ public:
         emit q->enginioChanged(_enginio);
     }
 
-    QJsonObject query()
+    QJsonObject query() Q_REQUIRED_RESULT
     {
         return _query;
     }
@@ -237,7 +237,7 @@ public:
         emit q->queryChanged(query);
     }
 
-    EnginioClient::Operation operation() const
+    EnginioClient::Operation operation() const Q_REQUIRED_RESULT
     {
         return _operation;
     }
@@ -262,7 +262,7 @@ public:
         }
     }
 
-    int findId(QString id, int rowHint)
+    int findId(QString id, int rowHint) Q_REQUIRED_RESULT
     {
         Q_ASSERT(rowHint >= 0);
 
@@ -421,7 +421,7 @@ public:
         }
     }
 
-    QHash<int, QByteArray> roleNames() const
+    QHash<int, QByteArray> roleNames() const Q_REQUIRED_RESULT
     {
         // TODO this is not optimal, but happen once, do we want to do something about it?
         QHash<int, QByteArray> roles;
@@ -434,12 +434,12 @@ public:
         return roles;
     }
 
-    int rowCount() const
+    int rowCount() const Q_REQUIRED_RESULT
     {
         return _data.count();
     }
 
-    QVariant data(unsigned row, int role)
+    QVariant data(unsigned row, int role) Q_REQUIRED_RESULT
     {
         if (role == SyncedRole)
             return !_rowsToSync.contains(row);
@@ -457,7 +457,7 @@ public:
         return QVariant();
     }
 
-    bool canFetchMore() const
+    bool canFetchMore() const Q_REQUIRED_RESULT
     {
         return _canFetchMore;
     }

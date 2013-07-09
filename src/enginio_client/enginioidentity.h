@@ -71,10 +71,10 @@ public:
     Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
     Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
 
-    QString user() const;
+    QString user() const Q_REQUIRED_RESULT;
     void setUser(const QString &user);
 
-    QString password() const;
+    QString password() const Q_REQUIRED_RESULT;
     void setPassword(const QString &password);
 
 Q_SIGNALS:

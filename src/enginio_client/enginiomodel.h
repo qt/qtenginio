@@ -57,13 +57,13 @@ public:
     Q_PROPERTY(EnginioClient::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
 
     // TODO: that is a pretty silly name
-    EnginioClient *enginio() const;
+    EnginioClient *enginio() const Q_REQUIRED_RESULT;
     void setEnginio(const EnginioClient *enginio);
 
-    QJsonObject query();
+    QJsonObject query() Q_REQUIRED_RESULT;
     void setQuery(const QJsonObject &query);
 
-    EnginioClient::Operation operation() const;
+    EnginioClient::Operation operation() const Q_REQUIRED_RESULT;
     void setOperation(EnginioClient::Operation opertaion);
 
     virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;

@@ -72,19 +72,19 @@ public:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
     virtual ~EnginioReply();
 
-    QJsonObject data() const;
-    ErrorTypes errorType() const;
-    QNetworkReply::NetworkError networkError() const;
-    QString errorString() const;
-    int backendStatus() const;
+    QJsonObject data() const Q_REQUIRED_RESULT;
+    ErrorTypes errorType() const Q_REQUIRED_RESULT;
+    QNetworkReply::NetworkError networkError() const Q_REQUIRED_RESULT;
+    QString errorString() const Q_REQUIRED_RESULT;
+    int backendStatus() const Q_REQUIRED_RESULT;
 
-    bool isError() const;
+    bool isError() const Q_REQUIRED_RESULT;
 
     Q_SLOT void dumpDebugInfo() const;
 
     typedef bool (*DelayFinishedSignalFunction)(EnginioReply*);
     void setDelayFinishedSignalFunction(DelayFinishedSignalFunction function);
-    bool delayFinishedSignal();
+    bool delayFinishedSignal() Q_REQUIRED_RESULT;
 Q_SIGNALS:
     void finished(EnginioReply *reply);
     void dataChanged();
