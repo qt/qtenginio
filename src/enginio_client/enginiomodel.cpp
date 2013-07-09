@@ -61,15 +61,6 @@ class EnginioModelPrivate {
     int _latestRequestedOffset;
     bool _canFetchMore;
 
-    enum {
-        InvalidRole = -1,
-        SyncedRole = Qt::UserRole + 1,
-        CreatedAtRole,
-        UpdatedAtRole,
-        IdRole,
-        ObjectTypeRole,
-        LastRole // the first fully dynamic role
-    };
     unsigned _rolesCounter;
     QHash<int, QString> _roles;
 
@@ -130,7 +121,7 @@ public:
         , q(q_ptr)
         , _latestRequestedOffset(0)
         , _canFetchMore(false)
-        , _rolesCounter(SyncedRole)
+        , _rolesCounter(EnginioModel::SyncedRole)
     {
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
@@ -201,14 +192,14 @@ public:
         EnginioReply *ereply = _enginio->remove(oldObject, _operation);
         _dataChanged.insert(ereply, qMakePair(row, oldObject));
         QVector<int> roles(1);
-        roles.append(SyncedRole);
+        roles.append(EnginioModel::SyncedRole);
         emit q->dataChanged(q->index(row), q->index(row) , roles);
         return ereply;
     }
 
     EnginioReply *setValue(int row, const QString &role, const QVariant &value)
     {
-        int key = _roles.key(role, InvalidRole);
+        int key = _roles.key(role, EnginioModel::InvalidRole);
         return setData(row, value, key);
     }
 
@@ -373,7 +364,7 @@ public:
 
     EnginioReply *setData(const int row, const QVariant &value, int role)
     {
-        if (role > SyncedRole) {
+        if (role > EnginioModel::SyncedRole) {
             _rowsToSync.insert(row);
             const QString roleName(_roles.value(role));
             QJsonObject oldObject = _data.at(row).toObject();
@@ -400,12 +391,12 @@ public:
 
         if (!_roles.count()) {
             _roles.reserve(firstObject.count());
-            _roles[SyncedRole] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
-            _roles[CreatedAtRole] = EnginioString::createdAt;
-            _roles[UpdatedAtRole] = EnginioString::updatedAt;
-            _roles[IdRole] = EnginioString::id;
-            _roles[ObjectTypeRole] = EnginioString::objectType;
-            _rolesCounter = LastRole;
+            _roles[EnginioModel::SyncedRole] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
+            _roles[EnginioModel::CreatedAtRole] = EnginioString::createdAt;
+            _roles[EnginioModel::UpdatedAtRole] = EnginioString::updatedAt;
+            _roles[EnginioModel::IdRole] = EnginioString::id;
+            _roles[EnginioModel::ObjectTypeRole] = EnginioString::objectType;
+            _rolesCounter = EnginioModel::LastRole;
         }
 
         // estimate additional dynamic roles:
@@ -441,7 +432,8 @@ public:
 
     QVariant data(unsigned row, int role) Q_REQUIRED_RESULT
     {
-        if (role == SyncedRole)
+
+        if (role == EnginioModel::SyncedRole)
             return !_rowsToSync.contains(row);
 
         if (role == Qt::DisplayRole)
@@ -524,6 +516,29 @@ EnginioModel::EnginioModel(QObject *parent)
 EnginioModel::~EnginioModel()
 {}
 
+/*!
+  \enum EnginioModel::Roles
+
+  EnginioModel defines roles which represent data used by every object
+  stored in the Enginio backend
+
+  \value CreatedAtRole \c When an item was created
+  \value UpdatedAtRole \c When an item was updated last time
+  \value IdRole \c What is the id of an item
+  \value ObjectTypeRole \c What is item type
+  \value SyncedRole \c Mark if an item is in sync with the backend
+  \omitvalue InvalidRole
+  \omitvalue LastRole
+
+  Additionally EnginioModel supports dynamic roles which are mapped
+  directly from recieved data. EnginioModel is mapping first item properties
+  to role names.
+
+  \note Some objects may not contain value for a static role, it may happen
+  for example when an item is not in sync with the backend.
+
+  \sa EnginioModel::roleNames()
+*/
 
 /*!
   \property EnginioModel::enginio
