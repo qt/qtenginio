@@ -392,12 +392,12 @@ public:
         emit q_ptr->authenticationStateChanged(state);
     }
 
-    EnginioClient::AuthenticationState authenticationState() const
+    EnginioClient::AuthenticationState authenticationState() const Q_REQUIRED_RESULT
     {
         return _authenticationState;
     }
 
-    QJsonObject identityToken() const
+    QJsonObject identityToken() const Q_REQUIRED_RESULT
     {
         return _identityToken;
     }
@@ -422,7 +422,7 @@ public:
         _replyReplyMap[nreply] = ereply;
     }
 
-    EnginioIdentity *identity() const
+    EnginioIdentity *identity() const Q_REQUIRED_RESULT
     {
         return _identity;
     }
@@ -715,15 +715,15 @@ public:
         return reply;
     }
 
-    QNetworkAccessManager *networkManager() const
+    QNetworkAccessManager *networkManager() const Q_REQUIRED_RESULT
     {
         return _networkManager;
     }
 
     void assignNetworkManager();
-    static QNetworkAccessManager *prepareNetworkManagerInThread();
+    static QNetworkAccessManager *prepareNetworkManagerInThread() Q_REQUIRED_RESULT;
 
-    bool isSignalConnected(const QMetaMethod &signal) const
+    bool isSignalConnected(const QMetaMethod &signal) const Q_REQUIRED_RESULT
     {
         return q_ptr->isSignalConnected(signal);
     }

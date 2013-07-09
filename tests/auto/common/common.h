@@ -32,8 +32,8 @@ class EnginioBackendManager: public QObject
     bool synchronousRequest(const QByteArray &httpOperation, const QJsonObject &data = QJsonObject());
     bool removeAppWithId(const QString &appId);
     bool authenticate();
-    QString getAppId(const QString &backendName);
-    QJsonArray getAllBackends();
+    QString getAppId(const QString &backendName) Q_REQUIRED_RESULT;
+    QJsonArray getAllBackends() Q_REQUIRED_RESULT;
     QJsonArray getEnvironments(const QString &backendName);
 
 public slots:

@@ -86,17 +86,17 @@ public:
     Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
     Q_PROPERTY(AuthenticationState authenticationState READ authenticationState NOTIFY authenticationStateChanged FINAL)
 
-    QByteArray backendId() const;
+    QByteArray backendId() const Q_REQUIRED_RESULT;
     void setBackendId(const QByteArray &backendId);
-    QByteArray backendSecret() const;
+    QByteArray backendSecret() const Q_REQUIRED_RESULT;
     void setBackendSecret(const QByteArray &backendSecret);
-    EnginioIdentity *identity() const;
+    EnginioIdentity *identity() const Q_REQUIRED_RESULT;
     void setIdentity(EnginioIdentity *identity);
-    AuthenticationState authenticationState() const;
+    AuthenticationState authenticationState() const Q_REQUIRED_RESULT;
 
-    QUrl serviceUrl() const;
+    QUrl serviceUrl() const Q_REQUIRED_RESULT;
     void setServiceUrl(const QUrl &serviceUrl);
-    QNetworkAccessManager *networkManager() const;
+    QNetworkAccessManager *networkManager() const Q_REQUIRED_RESULT;
 
     Q_INVOKABLE EnginioReply *customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data = QJsonObject());
     Q_INVOKABLE EnginioReply *search(const QJsonObject &query);

@@ -53,7 +53,7 @@ public:
     ~EnginioQmlReply();
 
     virtual void emitFinished();
-    QJSValue data() const;
+    QJSValue data() const Q_REQUIRED_RESULT;
 private:
     friend class EnginioQmlReplyPrivate;
 
