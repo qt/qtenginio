@@ -333,6 +333,7 @@ struct InvalidRemoveErrorChecker: public ReplyCounter
 
     void operator ()(EnginioReply *reply)
     {
+        QVERIFY(reply->isFinished());
         QVERIFY(reply->isError());
         QCOMPARE(reply->errorType(), EnginioReply::BackendError);
         QVERIFY(reply->networkError() != QNetworkReply::NoError);\
@@ -571,6 +572,8 @@ void tst_EnginioModel::deletionReordered()
     EnginioReply *r2 = model.remove(model.rowCount() - 1);
     EnginioReply *r1 = model.remove(0);
 
+    QVERIFY(!r1->isFinished());
+    QVERIFY(!r2->isFinished());
     QVERIFY(!r1->isError());
     QVERIFY(!r2->isError());
 
@@ -633,6 +636,8 @@ void tst_EnginioModel::deleteTwiceTheSame()
     EnginioReply *r2 = model.remove(model.rowCount() - 1);
     EnginioReply *r1 = model.remove(model.rowCount() - 1);
 
+    QVERIFY(!r1->isFinished());
+    QVERIFY(!r2->isFinished());
     QVERIFY(!r1->isError());
     QVERIFY(!r2->isError());
 
@@ -670,6 +675,8 @@ void tst_EnginioModel::updateAndDeleteReordered()
     EnginioReply *r2 = model.setProperty(model.rowCount() - 1, "email", "email@email.com");
     EnginioReply *r1 = model.remove(model.rowCount() - 1);
 
+    QVERIFY(!r1->isFinished());
+    QVERIFY(!r2->isFinished());
     QVERIFY(!r1->isError());
     QVERIFY(!r2->isError());
 

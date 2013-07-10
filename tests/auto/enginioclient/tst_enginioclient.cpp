@@ -49,6 +49,7 @@
 #include "../common/common.h"
 
 #define CHECK_NO_ERROR(response) \
+    QVERIFY(response->isFinished()); \
     QVERIFY(!response->isError()); \
     QCOMPARE(response->errorType(), EnginioReply::NoError);\
     QCOMPARE(response->networkError(), QNetworkReply::NoError);\
@@ -1358,6 +1359,8 @@ void tst_EnginioClient::backendFakeReply()
 
     for (int i = 0; i < spyClientFinished.count(); ++i) {
         EnginioReply *reply = spyClientFinished[i][0].value<EnginioReply*>();
+        QVERIFY(reply->isFinished());
+        QVERIFY(reply->isError());
         QJsonObject data = reply->data();
         QVERIFY(!data.isEmpty());
 

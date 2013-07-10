@@ -110,7 +110,10 @@ QJSValue EnginioQmlReply::data() const
     return static_cast<const EnginioQmlReplyPrivate*>(d.data())->data();
 }
 
-void EnginioQmlReply::emitFinished()
+/*!
+  \internal
+*/
+void EnginioQmlReply::emitFinishedImpl()
 {
     static_cast<EnginioQmlReplyPrivate*>(d.data())->emitFinished();
 }

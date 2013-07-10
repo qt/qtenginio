@@ -52,7 +52,7 @@ public:
     explicit EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply);
     ~EnginioQmlReply();
 
-    virtual void emitFinished();
+    virtual void emitFinishedImpl();
     QJSValue data() const Q_REQUIRED_RESULT;
 private:
     friend class EnginioQmlReplyPrivate;

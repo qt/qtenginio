@@ -146,9 +146,18 @@ QJsonObject EnginioReply::data() const
 /*!
   \internal
 */
-void EnginioReply::emitFinished()
+void EnginioReply::emitFinishedImpl()
 {
     emit finished(this);
+}
+
+/*!
+  \internal
+*/
+void EnginioReply::emitFinished()
+{
+    d->_isFinished = true;
+    emitFinishedImpl();
 }
 
 void EnginioReply::setNetworkReply(QNetworkReply *reply)
@@ -198,6 +207,15 @@ bool EnginioReply::delayFinishedSignal()
 bool EnginioReply::isError() const
 {
     return d->errorCode() != QNetworkReply::NoError;
+}
+
+/*!
+  \brief EnginioReply::isFinished returns whether this reply was finished or not
+  \return true if the reply was finished, false otherwise.
+*/
+bool EnginioReply::isFinished() const
+{
+    return d->isFinished();
 }
 
 /*!
