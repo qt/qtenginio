@@ -39,7 +39,11 @@ function Component()
 {
     installer.addWizardPage(component, "QtSelectionPage", QInstaller.ComponentSelection);
     component.userInterface("QtSelectionPage").complete = false;
-    component.userInterface("QtSelectionPage").qmakePathLineEdit.text = "C:\\Qt\\";
+    if (installer.value("os") == "win") {
+        component.userInterface("QtSelectionPage").qmakePathLineEdit.text = "C:\\Qt\\";
+    } else {
+        component.userInterface("QtSelectionPage").qmakePathLineEdit.text = "/";
+    }
     component.userInterface("QtSelectionPage").qmakePathLineEdit.textChanged.connect(checkQmakePath);
     component.userInterface("QtSelectionPage").browseButton.clicked.connect(showFileDialog);
 }
@@ -63,8 +67,15 @@ checkQmakePath = function()
 showFileDialog = function()
 {
     try {
-        path = QFileDialog.getExistingDirectory("Select qmake.exe path", "c:\\qt\\");
-        component.userInterface("QtSelectionPage").qmakePathLineEdit.text = path;
+        if (installer.value("os") == "win") {
+            path = QFileDialog.getExistingDirectory("Select Qt path (the directory containing bin\\qmake.exe)", "c:\\qt\\");
+            path = path.replace(/\//g, "\\");
+            component.userInterface("QtSelectionPage").qmakePathLineEdit.text = path;
+        } else {
+            // FIXME on linux the prefixes might be different (bin/lib etc in different places)
+            path = QFileDialog.getExistingDirectory("Select qt path", "");
+            component.userInterface("QtSelectionPage").qmakePathLineEdit.text = path;
+        }
     } catch (e) {
         QMessageBox.warning("", "Error Installing Enginio", e);
     }
