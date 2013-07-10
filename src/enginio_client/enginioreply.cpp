@@ -66,11 +66,6 @@
 */
 
 /*!
-  \typedef EnginioReply::DelayFinishedSignalFunction
-  \internal
-*/
-
-/*!
   \fn EnginioReply::finished(EnginioReply *reply)
   This signal is emitted when the EnginioReply \a reply is finished.
   After the network operation, use the \l isError() function to check for
@@ -177,16 +172,14 @@ void EnginioReply::dumpDebugInfo() const
 
 /*!
   \internal
-  Register \a function that allows to delay emittion of the finished signal.
-  It is supposed to be used in autotests to re-oder responses from the Enginio server,
-  to simulate a random network delay. The status of the \a function is
-  checked after arrival of any other request.
+  Mark this EnginioReply as not finished, the finished signal
+  will be delayed until delayFinishedSignal() is returning true.
 
-  \note The feature can be used only with one Enginioclient
+  \note The feature can be used only with one EnginioClient
 */
-void EnginioReply::setDelayFinishedSignalFunction(DelayFinishedSignalFunction function)
+void EnginioReply::setDelayFinishedSignal(bool delay)
 {
-    d->_delayFunction = function;
+    d->_delay = delay;
 }
 
 /*!
@@ -195,7 +188,7 @@ void EnginioReply::setDelayFinishedSignalFunction(DelayFinishedSignalFunction fu
  */
 bool EnginioReply::delayFinishedSignal()
 {
-    return Q_UNLIKELY(d->_delayFunction) ? d->_delayFunction(this) : false;
+    return d->_delay;
 }
 
 /*!

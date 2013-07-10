@@ -538,31 +538,17 @@ void tst_EnginioModel::multpleConnections()
     }
 }
 
-struct ReorderWaitForReply : public ReplyCounter
+struct StopDelayingFunctor
 {
-    bool &_trigger;
-    ReorderWaitForReply(int *storage, bool *trigger, EnginioReply *ptr = 0)
-        : ReplyCounter(storage)
-        , _trigger(*trigger)
+    EnginioReply *reply;
+    StopDelayingFunctor(EnginioReply *r)
+        : reply(r)
+    {}
+    void operator()()
     {
-        waitPointer = ptr;
+        reply->setDelayFinishedSignal(false);
     }
-
-    void operator ()(EnginioReply *reply)
-    {
-        if (reply == waitPointer)
-            _trigger = false;
-        ReplyCounter::operator ()(reply);
-    }
-    static EnginioReply *waitPointer;
 };
-EnginioReply *ReorderWaitForReply::waitPointer = 0;
-
-static bool reorderDelay = true;
-bool reorderDelayer(EnginioReply */*reply*/)
-{
-    return reorderDelay;
-}
 
 void tst_EnginioModel::deletionReordered()
 {
@@ -588,11 +574,12 @@ void tst_EnginioModel::deletionReordered()
     QVERIFY(!r1->isError());
     QVERIFY(!r2->isError());
 
-    r2->setDelayFinishedSignalFunction(reorderDelayer);
+    r2->setDelayFinishedSignal(true);
+    StopDelayingFunctor activateR2(r2);
+    QObject::connect(r1, &EnginioReply::finished, activateR2);
 
     int counter = 0;
-    reorderDelay = true;
-    ReorderWaitForReply replyCounter(&counter, &reorderDelay, r1);
+    ReplyCounter replyCounter(&counter);
     QObject::connect(r1, &EnginioReply::finished, replyCounter);
     QObject::connect(r2, &EnginioReply::finished, replyCounter);
 
@@ -717,12 +704,12 @@ void tst_EnginioModel::updateReordered()
     QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
 
     int counter = 0;
-    reorderDelay = true;
 
     EnginioReply *r2 = model.setProperty(0, "email", "email2@email.com");
     QVERIFY(!r2->isError());
-    r2->setDelayFinishedSignalFunction(reorderDelayer);
-    ReorderWaitForReply replyCounter(&counter, &reorderDelay);
+    r2->setDelayFinishedSignal(true);
+
+    ReplyCounter replyCounter(&counter);
     QObject::connect(r2, &EnginioReply::finished, replyCounter);
 
     QTRY_VERIFY(!r2->data().isEmpty()); // at this point r2 is done but finished signal is not emited
@@ -731,8 +718,9 @@ void tst_EnginioModel::updateReordered()
     EnginioReply *r1 = model.setProperty(0, "email", "email1@email.com");
     QVERIFY(!r1->isError());
 
-    ReorderWaitForReply::waitPointer = r1; // r1 finish signal will trigger r2 finish signal
     QObject::connect(r1, &EnginioReply::finished, replyCounter);
+    StopDelayingFunctor activateR2(r2);
+    QObject::connect(r1, &EnginioReply::finished, activateR2);
 
     QTRY_COMPARE(counter, 2);
 
@@ -816,12 +804,13 @@ void tst_EnginioModel::append()
         QCOMPARE(model.data(model.index(initialRowCount), EnginioModel::SyncedRole).value<bool>(), false);
 
         int counter = 0;
-        bool isR4NotFinished = true;
-        ReorderWaitForReply replyCounter(&counter, &isR4NotFinished, r4);
+        ReplyCounter replyCounter(&counter);
         QObject::connect(r3, &EnginioReply::finished, replyCounter);
         QObject::connect(r4, &EnginioReply::finished, replyCounter);
 
-        r3->setDelayFinishedSignalFunction(reorderDelayer);
+        r3->setDelayFinishedSignal(true);
+        StopDelayingFunctor activateR3(r3);
+        QObject::connect(r4, &EnginioReply::finished, activateR3);
 
         {
             int i = 0;
@@ -833,9 +822,8 @@ void tst_EnginioModel::append()
         }
         QCOMPARE(counter, 1);
         QVERIFY(r3->data().isEmpty());
-        reorderDelay = false;
         // at this point the first value was deleted but append is still not confirmed
-        QCOMPARE(reorderDelay, false);
+        QCOMPARE(r3->delayFinishedSignal(), false);
         QCOMPARE(model.rowCount(), initialRowCount); // one added and one removed
 
         for (int i = 0; i < model.rowCount() - 1; ++i) {

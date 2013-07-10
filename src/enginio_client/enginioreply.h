@@ -82,8 +82,7 @@ public:
 
     Q_SLOT void dumpDebugInfo() const;
 
-    typedef bool (*DelayFinishedSignalFunction)(EnginioReply*);
-    void setDelayFinishedSignalFunction(DelayFinishedSignalFunction function);
+    void setDelayFinishedSignal(bool delay);
     bool delayFinishedSignal() Q_REQUIRED_RESULT;
 Q_SIGNALS:
     void finished(EnginioReply *reply);
