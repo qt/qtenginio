@@ -85,6 +85,7 @@ private slots:
     void deleteTwiceTheSame();
     void updateAndDeleteReordered();
     void updateReordered();
+    void append();
 };
 
 void tst_EnginioModel::initTestCase()
@@ -104,6 +105,7 @@ void tst_EnginioModel::initTestCase()
 
     // The test operates on user data.
     EnginioTests::prepareTestUsersAndUserGroups(_backendId, _backendSecret);
+    EnginioTests::prepareTestObjectType(_backendName);
 }
 
 void tst_EnginioModel::cleanupTestCase()
@@ -713,7 +715,6 @@ void tst_EnginioModel::updateReordered()
     model.setEnginio(&client);
 
     QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
-    qDebug() << "orginal" << model.data(model.index(0)).value<QJsonValue>().toObject();
 
     int counter = 0;
     reorderDelay = true;
@@ -742,6 +743,123 @@ void tst_EnginioModel::updateReordered()
     QCOMPARE(model.data(model.index(0)).value<QJsonValue>().toObject(), r1->data());
 }
 
+void tst_EnginioModel::append()
+{
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType); // should be an empty set
+
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    EnginioModel model;
+    model.setQuery(query);
+
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+
+    {   // init the model
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setEnginio(&client);
+
+        QTRY_VERIFY(spy.count() > 0);
+    }
+    {
+        // add two items to an empy model
+        QCOMPARE(model.rowCount(), 0);
+        QJsonObject o1, o2;
+        o1.insert("name", QString::fromLatin1("o1"));
+        o1.insert("objectType", objectType);
+        o2.insert("name", QString::fromLatin1("o2"));
+        o2.insert("objectType", objectType);
+
+        EnginioReply *r1 = model.append(o1);
+        EnginioReply *r2 = model.append(o2);
+        QVERIFY(r1);
+        QVERIFY(r2);
+
+        QCOMPARE(model.rowCount(), 2);
+
+        // check data content
+        QCOMPARE(model.data(model.index(0)).value<QJsonValue>().toObject(), o1);
+        QCOMPARE(model.data(model.index(1)).value<QJsonValue>().toObject(), o2);
+
+        // check synced flag, the data is not synced yet
+        QCOMPARE(model.data(model.index(0), EnginioModel::SyncedRole).value<bool>(), false);
+        QCOMPARE(model.data(model.index(1), EnginioModel::SyncedRole).value<bool>(), false);
+
+        // check synced flag, the data should be in sync at some point
+        QTRY_COMPARE(model.data(model.index(0), EnginioModel::SyncedRole).value<bool>(), true);
+        QTRY_COMPARE(model.data(model.index(1), EnginioModel::SyncedRole).value<bool>(), true);
+    }
+    {
+        // add a new item and remove earlier the first item
+        QVERIFY(model.rowCount() > 0);
+        QJsonObject o3;
+        o3.insert("name", QString::fromLatin1("o3"));
+        o3.insert("objectType", objectType);
+
+        // check if everything is in sync
+        for (int i = 0; i < model.rowCount(); ++i)
+            QCOMPARE(model.data(model.index(i), EnginioModel::SyncedRole).value<bool>(), true);
+
+        const int initialRowCount = model.rowCount();
+        // the real test
+        EnginioReply *r3 = model.append(o3);
+        QVERIFY(r3);
+        QCOMPARE(model.data(model.index(initialRowCount), EnginioModel::SyncedRole).value<bool>(), false);
+
+        EnginioReply *r4 = model.remove(0);
+
+        QCOMPARE(model.data(model.index(0), EnginioModel::SyncedRole).value<bool>(), false);
+        QCOMPARE(model.data(model.index(initialRowCount), EnginioModel::SyncedRole).value<bool>(), false);
+
+        int counter = 0;
+        bool isR4NotFinished = true;
+        ReorderWaitForReply replyCounter(&counter, &isR4NotFinished, r4);
+        QObject::connect(r3, &EnginioReply::finished, replyCounter);
+        QObject::connect(r4, &EnginioReply::finished, replyCounter);
+
+        r3->setDelayFinishedSignalFunction(reorderDelayer);
+
+        {
+            int i = 0;
+            QTest::qWait(0);
+            while (counter != 1) {
+                QTest::qWait(50);
+                QVERIFY(++i < 100);
+            }
+        }
+        QCOMPARE(counter, 1);
+        QVERIFY(r3->data().isEmpty());
+        reorderDelay = false;
+        // at this point the first value was deleted but append is still not confirmed
+        QCOMPARE(reorderDelay, false);
+        QCOMPARE(model.rowCount(), initialRowCount); // one added and one removed
+
+        for (int i = 0; i < model.rowCount() - 1; ++i) {
+            QCOMPARE(model.data(model.index(i), EnginioModel::SyncedRole).value<bool>(), true);
+        }
+        {
+            QModelIndex idx = model.index(initialRowCount - 1);
+            QCOMPARE(model.data(idx, EnginioModel::SyncedRole).value<bool>(), false);
+            QCOMPARE(model.data(idx).value<QJsonValue>().toObject(), o3);
+        }
+
+        QTRY_COMPARE(counter, 2);
+        // everything should be done
+        QCOMPARE(model.rowCount(), initialRowCount);
+        QVERIFY(!r3->data().isEmpty());
+
+        // check if everything is in sync
+        for (int i = 0; i < model.rowCount(); ++i)
+            QCOMPARE(model.data(model.index(i), EnginioModel::SyncedRole).value<bool>(), true);
+
+        QModelIndex idx = model.index(initialRowCount - 1);
+        QCOMPARE(model.data(idx).value<QJsonValue>().toObject()["name"], o3["name"]);
+    }
+}
 
 QTEST_MAIN(tst_EnginioModel)
 #include "tst_enginiomodel.moc"

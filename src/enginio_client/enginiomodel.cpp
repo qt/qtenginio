@@ -45,7 +45,24 @@
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qjsonarray.h>
 #include <QtCore/qdatetime.h>
+#include <QtCore/quuid.h>
 
+struct EnginioModelPrivateAttachedData
+{
+    uint ref;
+    int row;
+};
+Q_DECLARE_TYPEINFO(EnginioModelPrivateAttachedData, Q_PRIMITIVE_TYPE);
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug dbg, const EnginioModelPrivateAttachedData &a)
+{
+    dbg.nospace() << "EnginioModelPrivateAttachedData(";
+    dbg.nospace() << a.ref << ", "<< a.row;
+    dbg.nospace() << ')';
+    return dbg.space();
+}
+#endif
 
 class EnginioModelPrivate {
     QJsonObject _query;
@@ -57,7 +74,10 @@ class EnginioModelPrivate {
     const static int FullModelReset;
     const static int IncrementalModelUpdate;
     mutable QMap<const EnginioReply*, QPair<int /*row*/, QJsonObject> > _dataChanged;
-    QSet<int> _rowsToSync;
+    typedef EnginioModelPrivateAttachedData AttachedData;
+    // TODO QHash is not the right structure, we need to index by id, row and we want to make
+    // bulk update of the data.
+    QHash<QString /* object id */, AttachedData> _attachedData;
     int _latestRequestedOffset;
     bool _canFetchMore;
 
@@ -166,17 +186,20 @@ public:
         QJsonObject object(value);
         object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
         EnginioReply *ereply = _enginio->create(object, _operation);
+        QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
+        object[EnginioString::id] = temporaryId;
         const int row = _data.count();
+        AttachedData data = {1, row};
         if (!row) { // the first item need to update roles
             q->beginResetModel();
-            _rowsToSync.insert(row);
+            _attachedData.insert(temporaryId, data);
             _data.append(value);
             syncRoles();
             _dataChanged.insert(ereply, qMakePair(row, object));
             q->endResetModel();
         } else {
             q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
-            _rowsToSync.insert(row);
+            _attachedData.insert(temporaryId, data);
             _data.append(value);
             _dataChanged.insert(ereply, qMakePair(row, object));
             q->endInsertRows();
@@ -188,6 +211,11 @@ public:
     {
         QJsonObject oldObject = _data.at(row).toObject();
         EnginioReply *ereply = _enginio->remove(oldObject, _operation);
+        QString id = oldObject[EnginioString::id].toString();// FIXME It may be empty, it happens if a not synced item is about to be removed
+        AttachedData &data = _attachedData[id];
+        ++data.ref;
+        data.row = row;
+        Q_ASSERT(_attachedData.value(id).ref > 0);
         _dataChanged.insert(ereply, qMakePair(row, oldObject));
         QVector<int> roles(1);
         roles.append(EnginioModel::SyncedRole);
@@ -251,27 +279,6 @@ public:
         }
     }
 
-    int findId(QString id, int rowHint) Q_REQUIRED_RESULT
-    {
-        Q_ASSERT(rowHint >= 0);
-
-        const int count = _data.count();
-        if (rowHint < count) {
-            QJsonValue hintId = _data[rowHint].toObject()[EnginioString::id];
-            if (hintId == id)
-                return rowHint;
-            if (id.isEmpty() && (hintId.isNull() || hintId.isUndefined()))
-                return rowHint;
-        }
-
-        // TODO optimize it, in most caseses we need to just check around rowHint
-        for (int i = count - 1; i >= 0; --i) {
-            if (_data[i].toObject()[EnginioString::id] == id)
-                return i;
-        }
-        return -1;
-    }
-
     void finishedRequest(const EnginioReply *response)
     {
         // We get all finished requests, check if we started this one
@@ -287,7 +294,7 @@ public:
         int row = requestInfo.first;
         if (row == FullModelReset) {
             q->beginResetModel();
-            _rowsToSync.clear();
+            _attachedData.clear();
             _data = response->data()[EnginioString::results].toArray();
             syncRoles();
             _canFetchMore = _canFetchMore && _data.count() && (_query[EnginioString::limit].toDouble() <= _data.count());
@@ -310,13 +317,18 @@ public:
             _canFetchMore = limit <= dataCount;
             q->endInsertRows();
         } else {
-            _rowsToSync.remove(row); // FIXME the row is may not be right
             QJsonObject newValue(response->data());
             QJsonObject oldValue = requestInfo.second;
+            QString oldId = oldValue[EnginioString::id].toString();
+
+            Q_ASSERT(_attachedData.contains(oldId));
+            AttachedData attachedData = _attachedData.take(oldId);
+            if (--attachedData.ref)
+                _attachedData.insert(oldId, attachedData);
 
             const bool removeOperation = newValue.isEmpty();
             // update the row number
-            row = findId(oldValue[EnginioString::id].toString(), row);
+            row = attachedData.row;
             if (row == -1) {
                 // The object is not in the cache, which means that it was deleted already
                 if (removeOperation)
@@ -338,6 +350,13 @@ public:
             if (removeOperation) {
                 q->beginRemoveRows(QModelIndex(), row, row);
                 _data.removeAt(row);
+                // we need to updates rows in _attachedData
+                QList<QString> keys = _attachedData.keys(); // TODO optimize it is almost O(n log(n))
+                foreach (const QString &key, keys) {
+                    AttachedData &data = _attachedData[key];
+                    if (data.row >= row)
+                        --data.row;
+                }
                 q->endRemoveRows();
             } else {
                 QJsonObject current = _data[row].toObject();
@@ -363,16 +382,20 @@ public:
     EnginioReply *setData(const int row, const QVariant &value, int role)
     {
         if (role > EnginioModel::SyncedRole) {
-            _rowsToSync.insert(row);
             const QString roleName(_roles.value(role));
             QJsonObject oldObject = _data.at(row).toObject();
+            QString id = oldObject[EnginioString::id].toString();
             QJsonObject deltaObject;
             QJsonObject newObject = oldObject;
             deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
-            deltaObject[EnginioString::id] = newObject[EnginioString::id];
+            deltaObject[EnginioString::id] = id;
             deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
             EnginioReply *ereply = _enginio->update(deltaObject, _operation);
             _dataChanged.insert(ereply, qMakePair(row, oldObject));
+            AttachedData &data = _attachedData[id];
+            ++data.ref;
+            data.row = row;
+            Q_ASSERT(_attachedData.contains(id) && _attachedData[id].ref > 0);
             _data.replace(row, newObject);
             emit q->dataChanged(q->index(row), q->index(row));
             return ereply;
@@ -430,9 +453,16 @@ public:
 
     QVariant data(unsigned row, int role) Q_REQUIRED_RESULT
     {
-
-        if (role == EnginioModel::SyncedRole)
-            return !_rowsToSync.contains(row);
+        if (role == EnginioModel::SyncedRole) {
+            // TODO optimize it
+            for (QHash<QString /* object id */, AttachedData>::const_iterator i = _attachedData.constBegin();
+                 i != _attachedData.constEnd();
+                 ++i) {
+                if (unsigned(i.value().row) == row)
+                    return false;
+            }
+            return true;
+        }
 
         if (role == Qt::DisplayRole)
             return _data.at(row);
