@@ -184,6 +184,25 @@ void tst_EnginioModel::enginio_property()
         QTest::ignoreMessage(QtWarningMsg, "EnginioModel::setProperty(): Enginio client is not set");
         QVERIFY(!model.setProperty(0, "blah", QVariant()));
     }
+    {
+        // check if initial set is not calling reset twice
+        EnginioClient client;
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+        EnginioModel model;
+        QSignalSpy spyAboutToReset(&model, SIGNAL(modelAboutToBeReset()));
+        QSignalSpy spyReset(&model, SIGNAL(modelReset()));
+        QJsonObject query;
+        query.insert("limit", 1);
+        model.setQuery(query);
+        model.setOperation(EnginioClient::UserOperation);
+        model.setEnginio(&client);
+
+        QTRY_COMPARE(spyAboutToReset.count(), 1);
+        QTRY_COMPARE(spyReset.count(), 1);
+    }
 }
 
 void tst_EnginioModel::query_property()
