@@ -605,7 +605,7 @@ void EnginioModel::setOperation(EnginioClient::Operation operation)
 EnginioReply *EnginioModel::append(const QJsonObject &value)
 {
     if (Q_UNLIKELY(!d->enginio())) {
-        qWarning() << "EnginioModel::append(): Enginio client is not set";
+        qWarning("EnginioModel::append(): Enginio client is not set");
         return 0;
     }
 
@@ -621,7 +621,7 @@ EnginioReply *EnginioModel::append(const QJsonObject &value)
 EnginioReply *EnginioModel::remove(int row)
 {
     if (Q_UNLIKELY(!d->enginio())) {
-        qWarning() << "EnginioModel::remove(): Enginio client is not set";
+        qWarning("EnginioModel::remove(): Enginio client is not set");
         return 0;
     }
 
@@ -647,7 +647,7 @@ EnginioReply *EnginioModel::remove(int row)
 EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
     if (Q_UNLIKELY(!d->enginio())) {
-        qWarning() << "EnginioModel::setProperty(): Enginio client is not set";
+        qWarning("EnginioModel::setProperty(): Enginio client is not set");
         return 0;
     }
 
