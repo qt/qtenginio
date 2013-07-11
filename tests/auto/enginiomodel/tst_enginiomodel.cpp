@@ -740,6 +740,7 @@ void tst_EnginioModel::updateReordered()
 
 void tst_EnginioModel::append()
 {
+    QString propertyName = "title";
     QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
     QJsonObject query;
     query.insert("objectType", objectType); // should be an empty set
@@ -764,9 +765,9 @@ void tst_EnginioModel::append()
         // add two items to an empy model
         QCOMPARE(model.rowCount(), 0);
         QJsonObject o1, o2;
-        o1.insert("name", QString::fromLatin1("o1"));
+        o1.insert(propertyName, QString::fromLatin1("o1"));
         o1.insert("objectType", objectType);
-        o2.insert("name", QString::fromLatin1("o2"));
+        o2.insert(propertyName, QString::fromLatin1("o2"));
         o2.insert("objectType", objectType);
 
         EnginioReply *r1 = model.append(o1);
@@ -792,7 +793,7 @@ void tst_EnginioModel::append()
         // add a new item and remove earlier the first item
         QVERIFY(model.rowCount() > 0);
         QJsonObject o3;
-        o3.insert("name", QString::fromLatin1("o3"));
+        o3.insert(propertyName, QString::fromLatin1("o3"));
         o3.insert("objectType", objectType);
 
         // check if everything is in sync
@@ -816,21 +817,11 @@ void tst_EnginioModel::append()
         QObject::connect(r4, &EnginioReply::finished, replyCounter);
 
         r3->setDelayFinishedSignal(true);
-        StopDelayingFunctor activateR3(r3);
-        QObject::connect(r4, &EnginioReply::finished, activateR3);
 
-        {
-            int i = 0;
-            QTest::qWait(0);
-            while (counter != 1) {
-                QTest::qWait(50);
-                QVERIFY(++i < 100);
-            }
-        }
-        QCOMPARE(counter, 1);
-        QVERIFY(r3->data().isEmpty());
+        QTRY_COMPARE(counter, 1);
+        QVERIFY(!r3->isFinished());
         // at this point the first value was deleted but append is still not confirmed
-        QCOMPARE(r3->delayFinishedSignal(), false);
+        QCOMPARE(r3->delayFinishedSignal(), true);
         QCOMPARE(model.rowCount(), initialRowCount); // one added and one removed
 
         for (int i = 0; i < model.rowCount() - 1; ++i) {
@@ -842,6 +833,8 @@ void tst_EnginioModel::append()
             QCOMPARE(model.data(idx).value<QJsonValue>().toObject(), o3);
         }
 
+        r3->setDelayFinishedSignal(false);
+        QVERIFY(!client.finishDelayedReplies());
         QTRY_COMPARE(counter, 2);
         // everything should be done
         QCOMPARE(model.rowCount(), initialRowCount);
@@ -852,7 +845,7 @@ void tst_EnginioModel::append()
             QCOMPARE(model.data(model.index(i), EnginioModel::SyncedRole).value<bool>(), true);
 
         QModelIndex idx = model.index(initialRowCount - 1);
-        QCOMPARE(model.data(idx).value<QJsonValue>().toObject()["name"], o3["name"]);
+        QCOMPARE(model.data(idx).value<QJsonValue>().toObject()[propertyName], o3[propertyName]);
     }
 }
 
