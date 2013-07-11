@@ -70,6 +70,7 @@ public:
         static QMetaMethod clientErrorSignal = QMetaMethod::fromSignal(&EnginioClient::error);
         static QMetaMethod replyFinishedSignal = QMetaMethod::fromSignal(&EnginioReply::finished);
 
+        // TODO it will not work because of: https://bugreports.qt-project.org/browse/QTBUG-32340
         bool isReplyFinishedConnected = q->isSignalConnected(replyFinishedSignal);
         bool isClientFinishedConnected = _client->isSignalConnected(clientFinishedSignal);
         bool isClientErrorConnected = _client->isSignalConnected(clientErrorSignal);
