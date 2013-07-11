@@ -248,13 +248,14 @@ QDebug operator<<(QDebug d, const EnginioReply *reply)
     d.nospace();
     d << "EnginioReply(" << hex << (void *) reply << dec;
 
-    if (reply->networkError() == 0) {
+    if (!reply->isError()) {
         d << " success data=" << reply->data();
     } else {
         d << " errorCode=" << reply->networkError() << " ";
         d << " errorString=" << reply->errorString() << " ";
         d << " errorData=" << reply->data() << " ";
     }
+    d << "backendStatus=" << reply->backendStatus();
     d << ")";
     return d.space();
 }
