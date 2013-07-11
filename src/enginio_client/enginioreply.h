@@ -93,8 +93,7 @@ Q_SIGNALS:
 
 protected:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
-    void emitFinished();
-    virtual void emitFinishedImpl();
+    virtual void emitFinished();
     QScopedPointer<EnginioReplyPrivate> d;
 
 private:

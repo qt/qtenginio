@@ -53,19 +53,17 @@ public:
     QNetworkReply *_nreply;
     mutable QJsonObject _data;
     bool _delay;
-    bool _isFinished;
     EnginioReplyPrivate(EnginioClientPrivate *p, QNetworkReply *reply)
         : _client(p)
         , _nreply(reply)
         , _delay(false)
-        , _isFinished(false)
     {
         Q_ASSERT(reply);
     }
 
     bool isFinished() const Q_REQUIRED_RESULT
     {
-        return _isFinished;
+        return _nreply->isFinished();
     }
 
     QNetworkReply::NetworkError errorCode() const Q_REQUIRED_RESULT

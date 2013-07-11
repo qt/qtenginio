@@ -58,6 +58,7 @@ EnginioFakeReply::EnginioFakeReply(EnginioClientPrivate *parent, QByteArray msg)
     setError(ContentNotFoundError, QString::fromUtf8(msg));
     setAttribute(QNetworkRequest::HttpStatusCodeAttribute, 400);
     QNetworkAccessManager *qnam = parent->networkManager();
+    setFinished(true);
     FinishedFunctor fin = {qnam, this};
     QObject::connect(this, &EnginioFakeReply::finished, fin);
     QMetaObject::invokeMethod(this, "finished", Qt::QueuedConnection);

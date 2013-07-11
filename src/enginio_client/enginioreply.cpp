@@ -146,18 +146,9 @@ QJsonObject EnginioReply::data() const
 /*!
   \internal
 */
-void EnginioReply::emitFinishedImpl()
-{
-    emit finished(this);
-}
-
-/*!
-  \internal
-*/
 void EnginioReply::emitFinished()
 {
-    d->_isFinished = true;
-    emitFinishedImpl();
+    emit finished(this);
 }
 
 void EnginioReply::setNetworkReply(QNetworkReply *reply)
