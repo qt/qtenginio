@@ -52,6 +52,16 @@ public:
     explicit EnginioModel(QObject *parent = 0);
     ~EnginioModel();
 
+    enum Roles {
+        InvalidRole = -1,
+        SyncedRole = Qt::UserRole + 1,
+        CreatedAtRole,
+        UpdatedAtRole,
+        IdRole,
+        ObjectTypeRole,
+        LastRole // the first fully dynamic role
+    };
+
     Q_PROPERTY(EnginioClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
     Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged)
     Q_PROPERTY(EnginioClient::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)

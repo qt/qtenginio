@@ -52,13 +52,20 @@ public:
     EnginioClientPrivate *_client;
     QNetworkReply *_nreply;
     mutable QJsonObject _data;
-    EnginioReply::DelayFinishedSignalFunction _delayFunction;
+    bool _delay;
+    bool _isFinished;
     EnginioReplyPrivate(EnginioClientPrivate *p, QNetworkReply *reply)
         : _client(p)
         , _nreply(reply)
-        , _delayFunction(0)
+        , _delay(false)
+        , _isFinished(false)
     {
         Q_ASSERT(reply);
+    }
+
+    bool isFinished() const Q_REQUIRED_RESULT
+    {
+        return _isFinished;
     }
 
     QNetworkReply::NetworkError errorCode() const Q_REQUIRED_RESULT

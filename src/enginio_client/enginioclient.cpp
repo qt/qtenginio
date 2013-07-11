@@ -241,7 +241,16 @@ void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
     }
 
     if (Q_UNLIKELY(_delayedReplies.count())) {
-        // search if we can trigger an old finished signal.
+        finishDelayedReplies();
+    }
+}
+
+bool EnginioClientPrivate::finishDelayedReplies()
+{
+    // search if we can trigger an old finished signal.
+    bool needToReevaluate = false;
+    do {
+        needToReevaluate = false;
         foreach (EnginioReply *reply, _delayedReplies) {
             if (!reply->delayFinishedSignal()) {
                 reply->dataChanged();
@@ -249,9 +258,12 @@ void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
                 q_ptr->finished(reply);
                 if (gEnableEnginioDebugInfo)
                     _requestData.remove(reply->d->_nreply); // FIXME it is ugly, and breaks encapsulation
+                _delayedReplies.remove(reply);
+                needToReevaluate = true;
             }
         }
-    }
+    } while (needToReevaluate);
+    return !_delayedReplies.isEmpty();
 }
 
 EnginioClientPrivate::~EnginioClientPrivate()
@@ -613,4 +625,15 @@ EnginioClient::AuthenticationState EnginioClient::authenticationState() const
 {
     Q_D(const EnginioClient);
     return d->authenticationState();
+}
+
+/*!
+  \internal
+  Tries to emit finished signal from all replies that used to be delayed.
+  \return false if all replies were finished, true otherwise.
+*/
+bool EnginioClient::finishDelayedReplies()
+{
+    Q_D(EnginioClient);
+    return d->finishDelayedReplies();
 }

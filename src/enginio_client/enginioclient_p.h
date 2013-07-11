@@ -383,6 +383,7 @@ public:
     void init();
 
     void replyFinished(QNetworkReply *nreply);
+    bool finishDelayedReplies();
 
     void setAuthenticationState(const EnginioClient::AuthenticationState state)
     {

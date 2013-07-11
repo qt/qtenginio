@@ -79,11 +79,11 @@ public:
     int backendStatus() const Q_REQUIRED_RESULT;
 
     bool isError() const Q_REQUIRED_RESULT;
+    bool isFinished() const Q_REQUIRED_RESULT;
 
     Q_SLOT void dumpDebugInfo() const;
 
-    typedef bool (*DelayFinishedSignalFunction)(EnginioReply*);
-    void setDelayFinishedSignalFunction(DelayFinishedSignalFunction function);
+    void setDelayFinishedSignal(bool delay);
     bool delayFinishedSignal() Q_REQUIRED_RESULT;
 Q_SIGNALS:
     void finished(EnginioReply *reply);
@@ -93,7 +93,8 @@ Q_SIGNALS:
 
 protected:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
-    virtual void emitFinished();
+    void emitFinished();
+    virtual void emitFinishedImpl();
     QScopedPointer<EnginioReplyPrivate> d;
 
 private:

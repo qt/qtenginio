@@ -45,7 +45,24 @@
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qjsonarray.h>
 #include <QtCore/qdatetime.h>
+#include <QtCore/quuid.h>
 
+struct EnginioModelPrivateAttachedData
+{
+    uint ref;
+    int row;
+};
+Q_DECLARE_TYPEINFO(EnginioModelPrivateAttachedData, Q_PRIMITIVE_TYPE);
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug dbg, const EnginioModelPrivateAttachedData &a)
+{
+    dbg.nospace() << "EnginioModelPrivateAttachedData(";
+    dbg.nospace() << a.ref << ", "<< a.row;
+    dbg.nospace() << ')';
+    return dbg.space();
+}
+#endif
 
 class EnginioModelPrivate {
     QJsonObject _query;
@@ -57,19 +74,13 @@ class EnginioModelPrivate {
     const static int FullModelReset;
     const static int IncrementalModelUpdate;
     mutable QMap<const EnginioReply*, QPair<int /*row*/, QJsonObject> > _dataChanged;
-    QSet<int> _rowsToSync;
+    typedef EnginioModelPrivateAttachedData AttachedData;
+    // TODO QHash is not the right structure, we need to index by id, row and we want to make
+    // bulk update of the data.
+    QHash<QString /* object id */, AttachedData> _attachedData;
     int _latestRequestedOffset;
     bool _canFetchMore;
 
-    enum {
-        InvalidRole = -1,
-        SyncedRole = Qt::UserRole + 1,
-        CreatedAtRole,
-        UpdatedAtRole,
-        IdRole,
-        ObjectTypeRole,
-        LastRole // the first fully dynamic role
-    };
     unsigned _rolesCounter;
     QHash<int, QString> _roles;
 
@@ -130,7 +141,7 @@ public:
         , q(q_ptr)
         , _latestRequestedOffset(0)
         , _canFetchMore(false)
-        , _rolesCounter(SyncedRole)
+        , _rolesCounter(EnginioModel::SyncedRole)
     {
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
@@ -161,8 +172,6 @@ public:
             _connections.append(QObject::connect(_enginio, &QObject::destroyed, EnginioDestroyed(this)));
             _connections.append(QObject::connect(_enginio, &EnginioClient::backendIdChanged, QueryChanged(this)));
             _connections.append(QObject::connect(_enginio, &EnginioClient::backendSecretChanged, QueryChanged(this)));
-            if (!_enginio->backendId().isEmpty() && !_enginio->backendSecret().isEmpty())
-                execute();
         }
         emit q->enginioChanged(_enginio);
     }
@@ -177,17 +186,20 @@ public:
         QJsonObject object(value);
         object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
         EnginioReply *ereply = _enginio->create(object, _operation);
+        QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
+        object[EnginioString::id] = temporaryId;
         const int row = _data.count();
+        AttachedData data = {1, row};
         if (!row) { // the first item need to update roles
             q->beginResetModel();
-            _rowsToSync.insert(row);
+            _attachedData.insert(temporaryId, data);
             _data.append(value);
             syncRoles();
             _dataChanged.insert(ereply, qMakePair(row, object));
             q->endResetModel();
         } else {
             q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
-            _rowsToSync.insert(row);
+            _attachedData.insert(temporaryId, data);
             _data.append(value);
             _dataChanged.insert(ereply, qMakePair(row, object));
             q->endInsertRows();
@@ -199,16 +211,21 @@ public:
     {
         QJsonObject oldObject = _data.at(row).toObject();
         EnginioReply *ereply = _enginio->remove(oldObject, _operation);
+        QString id = oldObject[EnginioString::id].toString();// FIXME It may be empty, it happens if a not synced item is about to be removed
+        AttachedData &data = _attachedData[id];
+        ++data.ref;
+        data.row = row;
+        Q_ASSERT(_attachedData.value(id).ref > 0);
         _dataChanged.insert(ereply, qMakePair(row, oldObject));
         QVector<int> roles(1);
-        roles.append(SyncedRole);
+        roles.append(EnginioModel::SyncedRole);
         emit q->dataChanged(q->index(row), q->index(row) , roles);
         return ereply;
     }
 
     EnginioReply *setValue(int row, const QString &role, const QVariant &value)
     {
-        int key = _roles.key(role, InvalidRole);
+        int key = _roles.key(role, EnginioModel::InvalidRole);
         return setData(row, value, key);
     }
 
@@ -262,27 +279,6 @@ public:
         }
     }
 
-    int findId(QString id, int rowHint) Q_REQUIRED_RESULT
-    {
-        Q_ASSERT(rowHint >= 0);
-
-        const int count = _data.count();
-        if (rowHint < count) {
-            QJsonValue hintId = _data[rowHint].toObject()[EnginioString::id];
-            if (hintId == id)
-                return rowHint;
-            if (id.isEmpty() && (hintId.isNull() || hintId.isUndefined()))
-                return rowHint;
-        }
-
-        // TODO optimize it, in most caseses we need to just check around rowHint
-        for (int i = count - 1; i >= 0; --i) {
-            if (_data[i].toObject()[EnginioString::id] == id)
-                return i;
-        }
-        return -1;
-    }
-
     void finishedRequest(const EnginioReply *response)
     {
         // We get all finished requests, check if we started this one
@@ -298,7 +294,7 @@ public:
         int row = requestInfo.first;
         if (row == FullModelReset) {
             q->beginResetModel();
-            _rowsToSync.clear();
+            _attachedData.clear();
             _data = response->data()[EnginioString::results].toArray();
             syncRoles();
             _canFetchMore = _canFetchMore && _data.count() && (_query[EnginioString::limit].toDouble() <= _data.count());
@@ -321,13 +317,18 @@ public:
             _canFetchMore = limit <= dataCount;
             q->endInsertRows();
         } else {
-            _rowsToSync.remove(row); // FIXME the row is may not be right
             QJsonObject newValue(response->data());
             QJsonObject oldValue = requestInfo.second;
+            QString oldId = oldValue[EnginioString::id].toString();
+
+            Q_ASSERT(_attachedData.contains(oldId));
+            AttachedData attachedData = _attachedData.take(oldId);
+            if (--attachedData.ref)
+                _attachedData.insert(oldId, attachedData);
 
             const bool removeOperation = newValue.isEmpty();
             // update the row number
-            row = findId(oldValue[EnginioString::id].toString(), row);
+            row = attachedData.row;
             if (row == -1) {
                 // The object is not in the cache, which means that it was deleted already
                 if (removeOperation)
@@ -349,6 +350,13 @@ public:
             if (removeOperation) {
                 q->beginRemoveRows(QModelIndex(), row, row);
                 _data.removeAt(row);
+                // we need to updates rows in _attachedData
+                QList<QString> keys = _attachedData.keys(); // TODO optimize it is almost O(n log(n))
+                foreach (const QString &key, keys) {
+                    AttachedData &data = _attachedData[key];
+                    if (data.row >= row)
+                        --data.row;
+                }
                 q->endRemoveRows();
             } else {
                 QJsonObject current = _data[row].toObject();
@@ -373,17 +381,21 @@ public:
 
     EnginioReply *setData(const int row, const QVariant &value, int role)
     {
-        if (role > SyncedRole) {
-            _rowsToSync.insert(row);
+        if (role > EnginioModel::SyncedRole) {
             const QString roleName(_roles.value(role));
             QJsonObject oldObject = _data.at(row).toObject();
+            QString id = oldObject[EnginioString::id].toString();
             QJsonObject deltaObject;
             QJsonObject newObject = oldObject;
             deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
-            deltaObject[EnginioString::id] = newObject[EnginioString::id];
+            deltaObject[EnginioString::id] = id;
             deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
             EnginioReply *ereply = _enginio->update(deltaObject, _operation);
             _dataChanged.insert(ereply, qMakePair(row, oldObject));
+            AttachedData &data = _attachedData[id];
+            ++data.ref;
+            data.row = row;
+            Q_ASSERT(_attachedData.contains(id) && _attachedData[id].ref > 0);
             _data.replace(row, newObject);
             emit q->dataChanged(q->index(row), q->index(row));
             return ereply;
@@ -400,12 +412,12 @@ public:
 
         if (!_roles.count()) {
             _roles.reserve(firstObject.count());
-            _roles[SyncedRole] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
-            _roles[CreatedAtRole] = EnginioString::createdAt;
-            _roles[UpdatedAtRole] = EnginioString::updatedAt;
-            _roles[IdRole] = EnginioString::id;
-            _roles[ObjectTypeRole] = EnginioString::objectType;
-            _rolesCounter = LastRole;
+            _roles[EnginioModel::SyncedRole] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
+            _roles[EnginioModel::CreatedAtRole] = EnginioString::createdAt;
+            _roles[EnginioModel::UpdatedAtRole] = EnginioString::updatedAt;
+            _roles[EnginioModel::IdRole] = EnginioString::id;
+            _roles[EnginioModel::ObjectTypeRole] = EnginioString::objectType;
+            _rolesCounter = EnginioModel::LastRole;
         }
 
         // estimate additional dynamic roles:
@@ -441,8 +453,16 @@ public:
 
     QVariant data(unsigned row, int role) Q_REQUIRED_RESULT
     {
-        if (role == SyncedRole)
-            return !_rowsToSync.contains(row);
+        if (role == EnginioModel::SyncedRole) {
+            // TODO optimize it
+            for (QHash<QString /* object id */, AttachedData>::const_iterator i = _attachedData.constBegin();
+                 i != _attachedData.constEnd();
+                 ++i) {
+                if (unsigned(i.value().row) == row)
+                    return false;
+            }
+            return true;
+        }
 
         if (role == Qt::DisplayRole)
             return _data.at(row);
@@ -524,6 +544,29 @@ EnginioModel::EnginioModel(QObject *parent)
 EnginioModel::~EnginioModel()
 {}
 
+/*!
+  \enum EnginioModel::Roles
+
+  EnginioModel defines roles which represent data used by every object
+  stored in the Enginio backend
+
+  \value CreatedAtRole \c When an item was created
+  \value UpdatedAtRole \c When an item was updated last time
+  \value IdRole \c What is the id of an item
+  \value ObjectTypeRole \c What is item type
+  \value SyncedRole \c Mark if an item is in sync with the backend
+  \omitvalue InvalidRole
+  \omitvalue LastRole
+
+  Additionally EnginioModel supports dynamic roles which are mapped
+  directly from recieved data. EnginioModel is mapping first item properties
+  to role names.
+
+  \note Some objects may not contain value for a static role, it may happen
+  for example when an item is not in sync with the backend.
+
+  \sa EnginioModel::roleNames()
+*/
 
 /*!
   \property EnginioModel::enginio
@@ -590,7 +633,7 @@ void EnginioModel::setOperation(EnginioClient::Operation operation)
 EnginioReply *EnginioModel::append(const QJsonObject &value)
 {
     if (Q_UNLIKELY(!d->enginio())) {
-        qWarning() << "EnginioModel::append(): Enginio client is not set";
+        qWarning("EnginioModel::append(): Enginio client is not set");
         return 0;
     }
 
@@ -606,7 +649,7 @@ EnginioReply *EnginioModel::append(const QJsonObject &value)
 EnginioReply *EnginioModel::remove(int row)
 {
     if (Q_UNLIKELY(!d->enginio())) {
-        qWarning() << "EnginioModel::remove(): Enginio client is not set";
+        qWarning("EnginioModel::remove(): Enginio client is not set");
         return 0;
     }
 
@@ -632,7 +675,7 @@ EnginioReply *EnginioModel::remove(int row)
 EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
     if (Q_UNLIKELY(!d->enginio())) {
-        qWarning() << "EnginioModel::setProperty(): Enginio client is not set";
+        qWarning("EnginioModel::setProperty(): Enginio client is not set");
         return 0;
     }
 

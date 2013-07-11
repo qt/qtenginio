@@ -70,6 +70,7 @@ public:
         static QMetaMethod clientErrorSignal = QMetaMethod::fromSignal(&EnginioClient::error);
         static QMetaMethod replyFinishedSignal = QMetaMethod::fromSignal(&EnginioReply::finished);
 
+        // TODO it will not work because of: https://bugreports.qt-project.org/browse/QTBUG-32340
         bool isReplyFinishedConnected = q->isSignalConnected(replyFinishedSignal);
         bool isClientFinishedConnected = _client->isSignalConnected(clientFinishedSignal);
         bool isClientErrorConnected = _client->isSignalConnected(clientErrorSignal);
@@ -110,7 +111,10 @@ QJSValue EnginioQmlReply::data() const
     return static_cast<const EnginioQmlReplyPrivate*>(d.data())->data();
 }
 
-void EnginioQmlReply::emitFinished()
+/*!
+  \internal
+*/
+void EnginioQmlReply::emitFinishedImpl()
 {
     static_cast<EnginioQmlReplyPrivate*>(d.data())->emitFinished();
 }
