@@ -326,23 +326,25 @@ public:
             if (--attachedData.ref)
                 _attachedData.insert(oldId, attachedData);
 
-            const bool removeOperation = newValue.isEmpty();
+            bool removeOperation = newValue.isEmpty();
             // update the row number
             row = attachedData.row;
-            if (row == -1) {
-                // The object is not in the cache, which means that it was deleted already
-                if (removeOperation)
-                    qWarning() << "The same row was removed twice, removed object was:"
-                               << QJsonDocument(oldValue).toJson();
-                else
-                    qWarning() << "Trying to update a removed object:\nOldValue: "
-                               << QJsonDocument(oldValue).toJson()
-                               << "\nNewValue: " << QJsonDocument(newValue).toJson();
-                return; // nothing to do
+            if (row == -1 || response->backendStatus() == 404) {
+                // The object was not found on the server, which means that it was deleted already
+                if (removeOperation || row == -1) {
+                    // Nothing to do, updating a removed object, that is not in the cache
+                    // or removing a removed object
+                    return;
+                }
+                // Updating a removed row. Change operation type to remove, so the cache can
+                // be in sync with the server again.
+                // TODO add a signal here so a developer can ask an user for a conflict
+                // resolution.
+                removeOperation = true;
             }
             Q_ASSERT(row >= 0 && row < _data.count());
 
-            if (response->networkError() != QNetworkReply::NoError) {
+            if (response->networkError() != QNetworkReply::NoError && response->backendStatus() != 404) {
                 _data.replace(row, oldValue); // FIXME do we have to do more here?
                 return;
             }
@@ -354,8 +356,10 @@ public:
                 QList<QString> keys = _attachedData.keys(); // TODO optimize it is almost O(n log(n))
                 foreach (const QString &key, keys) {
                     AttachedData &data = _attachedData[key];
-                    if (data.row >= row)
+                    if (data.row > row)
                         --data.row;
+                    else if (data.row == row)
+                        data.row = -1;
                 }
                 q->endRemoveRows();
             } else {
