@@ -107,9 +107,10 @@ public:
         operationNames[QNetworkAccessManager::CustomOperation] = "CUSTOM";
 
         QNetworkRequest request = _nreply->request();
-        qDebug() << "Request URL:" << request.url().toString(/*FormattingOptions*/ QUrl::None);
-        qDebug() << "Operation:" << operationNames[_nreply->operation()];
-        qDebug() << "HTTP return code:" << backendStatus();
+        qDebug() << "NetworkReply:" << _nreply;
+        qDebug() << "  Request URL:" << request.url().toString(/*FormattingOptions*/ QUrl::None);
+        qDebug() << "  Operation:" << operationNames[_nreply->operation()];
+        qDebug() << "  HTTP return code:" << backendStatus();
 
         QByteArray json = _client->_requestData.value(_nreply);
         if (!json.isEmpty())

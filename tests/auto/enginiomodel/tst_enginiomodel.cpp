@@ -88,6 +88,7 @@ private slots:
     void append();
     void removeExternallyRemovedObject();
     void setPropertyOnExternallyRemovedObject();
+    void createAndModify();
 private:
     template<class T>
     void externallyRemovedImpl();
@@ -926,6 +927,54 @@ struct ExternallyRemovedRemove
 void tst_EnginioModel::removeExternallyRemovedObject()
 {
     externallyRemovedImpl<ExternallyRemovedRemove>();
+}
+
+void tst_EnginioModel::createAndModify()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);;
+
+    QString propertyName = "title";
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+    query.insert("limit", 1);
+
+    EnginioModel model;
+    model.setQuery(query);
+    {   // init the model
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setEnginio(&client);
+        QTRY_VERIFY(spy.count() > 0);
+    }
+
+    QJsonObject o;
+    o.insert(propertyName, QString::fromLatin1("o"));
+    o.insert("objectType", objectType);
+
+    {
+        // create and immediatelly remove
+        const int initialRowCount = model.rowCount();
+        EnginioReply *r1 = model.append(o);
+        QVERIFY(!r1->isFinished());
+        QVERIFY(!r1->isError());
+
+        EnginioReply *r2 = model.remove(model.rowCount() - 1);
+        QVERIFY(!r2->isFinished());
+        QVERIFY(!r2->isError());
+        r2->setDelayFinishedSignal(true);
+
+        QTRY_VERIFY(r1->isFinished());
+        QModelIndex i = model.index(model.rowCount() - 1);
+        QCOMPARE(model.data(i, EnginioModel::SyncedRole).value<bool>(), false);
+        r2->setDelayFinishedSignal(false);
+
+        QTRY_VERIFY(r2->isFinished());
+        QCOMPARE(model.rowCount(), initialRowCount);
+        QVERIFY(!r2->isError());
+    }
 }
 
 QTEST_MAIN(tst_EnginioModel)

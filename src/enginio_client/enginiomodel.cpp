@@ -39,6 +39,7 @@
 #include "enginioreply.h"
 #include "enginioclient_p.h"
 #include "enginiofakereply_p.h"
+#include "enginiodummyreply_p.h"
 
 #include <QtCore/qobject.h>
 #include <QtCore/qvector.h>
@@ -51,6 +52,7 @@ struct EnginioModelPrivateAttachedData
 {
     uint ref;
     int row;
+    EnginioReply *createReply;
 };
 Q_DECLARE_TYPEINFO(EnginioModelPrivateAttachedData, Q_PRIMITIVE_TYPE);
 
@@ -72,6 +74,8 @@ class AttachedDataContainer: public QHash<QString /* object id */, EnginioModelP
     typedef QHash<QString /* object id */, AttachedData> Base;
 public:
     using Base::contains;
+    using Base::value;
+
     bool contains(int row) const
     {
         // TODO optimize it
@@ -84,6 +88,18 @@ public:
         return false;
     }
 
+    AttachedData value(int row) const
+    {
+        // TODO optimize it
+        for (Base::const_iterator i = constBegin();
+             i != constEnd();
+             ++i) {
+            if (i.value().row == row)
+                return i.value();
+        }
+        Q_UNREACHABLE();
+    }
+
     template<class Functor>
     void updateAllData(Functor &f) {
         // TODO optimize it is almost O(n log(n))
@@ -94,12 +110,26 @@ public:
         }
     }
 
-    void ref(const QString &id, int row)
+    AttachedData ref(const QString &id, int row)
     {
         AttachedData &data = (*this)[id];
         ++data.ref;
         Q_ASSERT(data.ref == 1 || data.row == row);
         data.row = row;
+        return data;
+    }
+
+    AttachedData ref(int row)
+    {
+        // TODO optimize it
+        Base::iterator i = begin();
+        for (; i != end(); ++i) {
+            if (i.value().row == row)
+                break;
+        }
+        AttachedData &data = *i;
+        ++data.ref;
+        return data;
     }
 
     AttachedData deref(const QString &id)
@@ -235,7 +265,7 @@ public:
         QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
         object[EnginioString::id] = temporaryId;
         const int row = _data.count();
-        AttachedData data = {1, row};
+        AttachedData data = {1, row, ereply};
         if (!row) { // the first item need to update roles
             q->beginResetModel();
             _attachedData.insert(temporaryId, data);
@@ -253,12 +283,69 @@ public:
         return ereply;
     }
 
+    struct SwapNetworkReplyForRemove
+    {
+        EnginioReply *_reply;
+        EnginioModelPrivate *_model;
+        QJsonObject _object;
+        QString _tmpId;
+
+        void operator ()(EnginioReply *finishedCreateReply)
+        {
+            Q_ASSERT(_reply);
+            if (finishedCreateReply->isError()) {
+                QByteArray msg = QByteArrayLiteral("Dependent create query failed, so object coudl not be removed");
+                EnginioClientPrivate *client = EnginioClientPrivate::get(_model->_enginio);
+                EnginioFakeReply *nreply = new EnginioFakeReply(client, constructErrorMessage(msg));
+                _reply->setNetworkReply(nreply);
+            } else {
+                QString id = finishedCreateReply->data()[EnginioString::id].toString();
+                Q_ASSERT(!id.isEmpty());
+                _object[EnginioString::id] = id;
+                const int row = _model->_attachedData.deref(_tmpId).row;
+                EnginioReply *ereply = _model->removeNow(row, _object, id);
+                QPair<int /*row*/, QJsonObject> data = _model->_dataChanged.take(ereply);
+                _model->_dataChanged.insert(_reply, data);
+                _reply->swapNetworkReply(ereply);
+                ereply->deleteLater();
+            }
+        }
+    };
+
     EnginioReply *remove(int row)
     {
         QJsonObject oldObject = _data.at(row).toObject();
+        QString id = oldObject[EnginioString::id].toString();
+        if (id.isEmpty())
+            return removeDelyed(row, oldObject);
+        return removeNow(row, oldObject, id);
+    }
+
+    EnginioReply *removeDelyed(int row, const QJsonObject &oldObject)
+    {
+        // We are about to remove a not synced new item. The item do not have id yet,
+        // so we can not make a request now, we need to wait for finished signal.
+        Q_ASSERT(_attachedData.contains(row));
+        Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
+        AttachedData data = _attachedData.ref(row);
+        EnginioReply *createReply = data.createReply;
+        Q_ASSERT(createReply);
+        Q_ASSERT(!createReply->isFinished());
+        QString tmpId = _dataChanged.value(createReply).second[EnginioString::id].toString();
+        Q_ASSERT(tmpId.startsWith(QString::fromLatin1("tmp")));
+        EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
+        EnginioDummyReply *nreply = new EnginioDummyReply(createReply);
+        EnginioReply *ereply = new EnginioReply(client, nreply);
+        SwapNetworkReplyForRemove swapNetworkReply = {ereply, this, oldObject, tmpId};
+        QObject::connect(createReply, &EnginioReply::finished, swapNetworkReply);
+        return ereply;
+    }
+
+    EnginioReply *removeNow(int row, const QJsonObject &oldObject, const QString &id)
+    {
+        Q_ASSERT(!id.isEmpty());
+        _attachedData.ref(id, row); // TODO if refcount is > 1 then do not emit dataChanged
         EnginioReply *ereply = _enginio->remove(oldObject, _operation);
-        QString id = oldObject[EnginioString::id].toString();// FIXME It may be empty, it happens if a not synced item is about to be removed
-        _attachedData.ref(id, row);
         _dataChanged.insert(ereply, qMakePair(row, oldObject));
         QVector<int> roles(1);
         roles.append(EnginioModel::SyncedRole);

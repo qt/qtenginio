@@ -165,6 +165,23 @@ void EnginioReply::setNetworkReply(QNetworkReply *reply)
     d->_client->registerReply(reply, this);
 }
 
+void EnginioReply::swapNetworkReply(EnginioReply *reply)
+{
+    // FIXME it is ugly
+    d->_client->_replyReplyMap.remove(d->_nreply);
+    reply->d->_client->_replyReplyMap.remove(reply->d->_nreply);
+
+    qSwap(d->_nreply, reply->d->_nreply);
+
+    d->_nreply->setParent(this);
+    reply->d->_nreply->setParent(this);
+
+    d->_data = reply->d->_data = QJsonObject();
+
+    d->_client->registerReply(d->_nreply, this);
+    reply->d->_client->registerReply(reply->d->_nreply, reply);
+}
+
 void EnginioReply::dumpDebugInfo() const
 {
     d->dumpDebugInfo();
