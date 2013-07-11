@@ -345,7 +345,8 @@ public:
             Q_ASSERT(row >= 0 && row < _data.count());
 
             if (response->networkError() != QNetworkReply::NoError && response->backendStatus() != 404) {
-                _data.replace(row, oldValue); // FIXME do we have to do more here?
+                _data.replace(row, oldValue);
+                emit q->dataChanged(q->index(row), q->index(row));
                 return;
             }
 
