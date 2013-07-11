@@ -158,7 +158,7 @@ void EnginioReply::setNetworkReply(QNetworkReply *reply)
     if (gEnableEnginioDebugInfo)
         d->_client->_requestData.remove(d->_nreply);
 
-    delete d->_nreply;
+    d->_nreply->deleteLater();
     d->_nreply = reply;
     reply->setParent(this);
     d->_data = QJsonObject();
