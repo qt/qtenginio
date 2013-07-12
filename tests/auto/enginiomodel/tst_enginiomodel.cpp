@@ -975,6 +975,30 @@ void tst_EnginioModel::createAndModify()
         QCOMPARE(model.rowCount(), initialRowCount);
         QVERIFY(!r2->isError());
     }
+    {
+        // create and immediatelly update
+        const int initialRowCount = model.rowCount();
+        EnginioReply *r1 = model.append(o);
+        QVERIFY(!r1->isFinished());
+        QVERIFY(!r1->isError());
+
+        EnginioReply *r2 = model.setProperty(model.rowCount() - 1, propertyName, QString::fromLatin1("newO"));
+        QVERIFY(!r2->isFinished());
+        QVERIFY(!r2->isError());
+        r2->setDelayFinishedSignal(true);
+
+        QTRY_VERIFY(r1->isFinished());
+        QModelIndex i = model.index(model.rowCount() - 1);
+        QCOMPARE(model.data(i, EnginioModel::SyncedRole).value<bool>(), false);
+        r2->setDelayFinishedSignal(false);
+
+        QTRY_VERIFY(r2->isFinished());
+        QCOMPARE(model.rowCount(), initialRowCount + 1);
+        QVERIFY(!r2->isError());
+        i = model.index(model.rowCount() - 1);
+        QCOMPARE(model.data(i).value<QJsonValue>().toObject()["title"].toString(), QString::fromLatin1("newO"));
+        QCOMPARE(model.data(i, EnginioModel::SyncedRole).value<bool>(), true);
+    }
 }
 
 QTEST_MAIN(tst_EnginioModel)
