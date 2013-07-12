@@ -514,28 +514,89 @@ public:
         }
     }
 
+    struct SwapNetworkReplyForSetData
+    {
+        EnginioReply *_reply;
+        EnginioModelPrivate *_model;
+        QJsonObject _object;
+        QString _tmpId;
+        QVariant _value;
+        int _role;
+
+        void operator ()(EnginioReply *finishedCreateReply)
+        {
+            Q_ASSERT(_reply);
+            if (finishedCreateReply->isError()) {
+                QByteArray msg = QByteArrayLiteral("Dependent create query failed, so object coudl not be updated");
+                EnginioClientPrivate *client = EnginioClientPrivate::get(_model->_enginio);
+                EnginioFakeReply *nreply = new EnginioFakeReply(client, constructErrorMessage(msg));
+                _reply->setNetworkReply(nreply);
+            } else {
+                QString id = finishedCreateReply->data()[EnginioString::id].toString();
+                Q_ASSERT(!id.isEmpty());
+                _object[EnginioString::id] = id;
+                const int row = _model->_attachedData.deref(_tmpId).row;
+                EnginioReply *ereply = _model->setDataNow(row, _value, _role, _object, id);
+                QPair<int /*row*/, QJsonObject> data = _model->_dataChanged.take(ereply);
+                _model->_dataChanged.insert(_reply, data);
+                _reply->swapNetworkReply(ereply);
+                ereply->deleteLater();
+            }
+        }
+    };
+
     EnginioReply *setData(const int row, const QVariant &value, int role)
     {
         if (role > EnginioModel::SyncedRole) {
-            const QString roleName(_roles.value(role));
             QJsonObject oldObject = _data.at(row).toObject();
             QString id = oldObject[EnginioString::id].toString();
-            QJsonObject deltaObject;
-            QJsonObject newObject = oldObject;
-            deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
-            deltaObject[EnginioString::id] = id;
-            deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
-            EnginioReply *ereply = _enginio->update(deltaObject, _operation);
-            _dataChanged.insert(ereply, qMakePair(row, oldObject));
-            _attachedData.ref(id, row);
-            Q_ASSERT(_attachedData.contains(id) && _attachedData[id].ref > 0);
-            _data.replace(row, newObject);
-            emit q->dataChanged(q->index(row), q->index(row));
-            return ereply;
+            if (id.isEmpty())
+                return setDataDelyed(row, value, role, oldObject);
+            return setDataNow(row, value, role, oldObject, id);
         }
         EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel: Trying to update an object with unknown role")));
         EnginioReply *ereply = new EnginioReply(client, nreply);
+        return ereply;
+    }
+
+    EnginioReply *setDataDelyed(int row, const QVariant &value, int role, const QJsonObject &oldObject)
+    {
+        // We are about to update a not synced new item. The item do not have id yet,
+        // so we can not make a request now, we need to wait for finished signal.
+        Q_ASSERT(_attachedData.contains(row));
+        Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
+        Q_ASSERT(role > EnginioModel::SyncedRole);
+        AttachedData data = _attachedData.ref(row);
+        EnginioReply *createReply = data.createReply;
+        Q_ASSERT(createReply);
+        Q_ASSERT(!createReply->isFinished());
+        QString tmpId = _dataChanged.value(createReply).second[EnginioString::id].toString();
+        Q_ASSERT(tmpId.startsWith(QString::fromLatin1("tmp")));
+        EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
+        EnginioDummyReply *nreply = new EnginioDummyReply(createReply);
+        EnginioReply *ereply = new EnginioReply(client, nreply);
+        SwapNetworkReplyForSetData swapNetworkReply = {ereply, this, oldObject, tmpId, value, role};
+        QObject::connect(createReply, &EnginioReply::finished, swapNetworkReply);
+        return ereply;
+    }
+
+    EnginioReply *setDataNow(const int row, const QVariant &value, int role, const QJsonObject &oldObject, const QString &id)
+    {
+        Q_ASSERT(!id.isEmpty());
+        Q_ASSERT(role > EnginioModel::SyncedRole);
+        const QString roleName(_roles.value(role));
+        QJsonObject deltaObject;
+        QJsonObject newObject = oldObject;
+        deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
+        deltaObject[EnginioString::id] = id;
+        deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
+        EnginioReply *ereply = _enginio->update(deltaObject, _operation);
+        _dataChanged.insert(ereply, qMakePair(row, oldObject));
+        _attachedData.ref(id, row);
+        Q_ASSERT(_attachedData.contains(id) && _attachedData[id].ref > 0);
+        _data.replace(row, newObject);
+        emit q->dataChanged(q->index(row), q->index(row));
         return ereply;
     }
 
