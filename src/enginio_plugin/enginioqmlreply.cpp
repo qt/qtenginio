@@ -114,7 +114,7 @@ QJSValue EnginioQmlReply::data() const
 /*!
   \internal
 */
-void EnginioQmlReply::emitFinishedImpl()
+void EnginioQmlReply::emitFinished()
 {
     static_cast<EnginioQmlReplyPrivate*>(d.data())->emitFinished();
 }

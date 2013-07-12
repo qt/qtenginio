@@ -86,6 +86,12 @@ private slots:
     void updateAndDeleteReordered();
     void updateReordered();
     void append();
+    void removeExternallyRemovedObject();
+    void setPropertyOnExternallyRemovedObject();
+    void createAndModify();
+private:
+    template<class T>
+    void externallyRemovedImpl();
 };
 
 void tst_EnginioModel::initTestCase()
@@ -589,34 +595,6 @@ void tst_EnginioModel::deletionReordered()
     QTRY_COMPARE(counter, 2);
 }
 
-struct MessageHandler
-{
-    MessageHandler(QString messageBegining)
-        : oldMsgHandler(qInstallMessageHandler(handler))
-    {
-        msgBegining = messageBegining;
-        ok = false;
-    }
-
-    ~MessageHandler()
-    {
-        qInstallMessageHandler(oldMsgHandler);
-    }
-
-    QtMessageHandler oldMsgHandler;
-
-    static void handler(QtMsgType type, const QMessageLogContext & /*ctxt*/, const QString &msg)
-    {
-        Q_UNUSED(type);
-        ok = msg.startsWith(msgBegining);
-        QVERIFY2(ok, (QString::fromLatin1("Message is not started correctly: '") + msg + '\'').toLatin1().constData());
-    }
-    static QString msgBegining;
-    static bool ok;
-};
-bool MessageHandler::ok;
-QString MessageHandler::msgBegining;
-
 void tst_EnginioModel::deleteTwiceTheSame()
 {
     QJsonObject query = QJsonDocument::fromJson("{\"limit\":1}").object();
@@ -646,13 +624,16 @@ void tst_EnginioModel::deleteTwiceTheSame()
     QObject::connect(r1, &EnginioReply::finished, replyCounter);
     QObject::connect(r2, &EnginioReply::finished, replyCounter);
 
-    MessageHandler handler("The same row was removed twice, removed object was: ");
     QTRY_COMPARE(counter, 2);
 
-    // That is flaky sometimes server send us two positive message about deletion and
-    // sometimes one positive and one 404. In the first case we expect model to handle
-    // that gently with a warning.
-    QVERIFY(MessageHandler::ok || r1->backendStatus() == 404 || r2->backendStatus() == 404);
+    // Sometimes server send us two positive message about deletion and
+    // sometimes one positive and one 404.
+    QVERIFY((r1->backendStatus() == 404 && !r2->isError())
+            || (r2->backendStatus() == 404 && !r1->isError())
+            || (!r1->isError() && !r2->isError()));
+    // Check if the model is in sync with the backend, only one item should
+    // be removed.
+    QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()) - 1);
 }
 
 
@@ -685,13 +666,16 @@ void tst_EnginioModel::updateAndDeleteReordered()
     QObject::connect(r1, &EnginioReply::finished, replyCounter);
     QObject::connect(r2, &EnginioReply::finished, replyCounter);
 
-    MessageHandler handler("Trying to update a removed object:");
     QTRY_COMPARE(counter, 2);
 
-    // That is flaky sometimes server send us two positive message and
-    // sometimes one positive and one 404. In the first case we expect model to handle
-    // that gently with a warning.
-    QVERIFY(MessageHandler::ok || r1->backendStatus() == 404 || r2->backendStatus() == 404);
+    // Sometimes server send us two positive message and
+    // sometimes one positive and one 404.
+    QVERIFY((r1->backendStatus() == 404 && !r2->isError())
+            || (r2->backendStatus() == 404 && !r1->isError())
+            || (!r1->isError() && !r2->isError()));
+    // Check if the model is in sync with the backend, one item should
+    // be removed.
+    QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()) - 1);
 }
 
 void tst_EnginioModel::updateReordered()
@@ -819,6 +803,7 @@ void tst_EnginioModel::append()
         r3->setDelayFinishedSignal(true);
 
         QTRY_COMPARE(counter, 1);
+        QVERIFY(r4->isFinished());
         QVERIFY(!r3->isFinished());
         // at this point the first value was deleted but append is still not confirmed
         QCOMPARE(r3->delayFinishedSignal(), true);
@@ -838,7 +823,8 @@ void tst_EnginioModel::append()
         QTRY_COMPARE(counter, 2);
         // everything should be done
         QCOMPARE(model.rowCount(), initialRowCount);
-        QVERIFY(!r3->data().isEmpty());
+        QVERIFY(r4->isFinished());
+        QVERIFY(r3->isFinished());
 
         // check if everything is in sync
         for (int i = 0; i < model.rowCount(); ++i)
@@ -846,6 +832,148 @@ void tst_EnginioModel::append()
 
         QModelIndex idx = model.index(initialRowCount - 1);
         QCOMPARE(model.data(idx).value<QJsonValue>().toObject()[propertyName], o3[propertyName]);
+    }
+}
+
+template<class T>
+void tst_EnginioModel::externallyRemovedImpl()
+{
+    T operation;
+    // Remove an item from model which was removed earlier from server
+    QString propertyName = operation.propertyName();
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+    query.insert("limit", 1);
+
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    {
+        QJsonObject o;
+        o.insert(propertyName, QString::fromLatin1("IWillBeRemoved"));
+        o.insert("objectType", objectType);
+        EnginioReply *r = client.create(o);
+        QTRY_VERIFY(r->isFinished());
+        QVERIFY(!r->isError());
+    }
+
+    EnginioModel model;
+    model.setQuery(query);
+
+    {   // init the model
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setEnginio(&client);
+
+        QTRY_VERIFY(spy.count() > 0);
+        QVERIFY(model.rowCount());
+    }
+    QModelIndex i = model.index(0);
+    QString id = model.data(i, EnginioModel::IdRole).value<QJsonValue>().toString();
+    QVERIFY(!id.isEmpty());
+
+    QJsonObject o;
+    o.insert("id", id);
+    o.insert("objectType", objectType);
+    EnginioReply *r1 = client.remove(o);
+    QTRY_VERIFY(r1->isFinished());
+
+    // the value was removed on the server side,
+    QCOMPARE(model.data(i, EnginioModel::IdRole).value<QJsonValue>().toString(), id);
+    // but is still in the model cache.
+
+    EnginioReply *r2 = operation(model, 0);
+
+    QTRY_VERIFY(r2->isFinished());
+    QVERIFY(r2->isError());
+    QCOMPARE(r2->backendStatus(), 404); // abviously item was not found on the server side
+
+    // Let's check if the model was updated
+    i = model.index(0);
+    QCOMPARE(model.rowCount(), 0);
+}
+
+struct ExternallyRemovedSetProperty
+{
+    EnginioReply *operator()(EnginioModel &model, int row) const
+    {
+        return model.setProperty(row, propertyName(), "areYouDeleted?");
+    }
+    QString propertyName() const
+    {
+        return "title";
+    }
+};
+
+void tst_EnginioModel::setPropertyOnExternallyRemovedObject()
+{
+    externallyRemovedImpl<ExternallyRemovedSetProperty>();
+}
+
+struct ExternallyRemovedRemove
+{
+    EnginioReply *operator()(EnginioModel &model, int row) const
+    {
+        return model.remove(row);
+    }
+    QString propertyName() const
+    {
+        return "title";
+    }
+};
+
+void tst_EnginioModel::removeExternallyRemovedObject()
+{
+    externallyRemovedImpl<ExternallyRemovedRemove>();
+}
+
+void tst_EnginioModel::createAndModify()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);;
+
+    QString propertyName = "title";
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+    query.insert("limit", 1);
+
+    EnginioModel model;
+    model.setQuery(query);
+    {   // init the model
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setEnginio(&client);
+        QTRY_VERIFY(spy.count() > 0);
+    }
+
+    QJsonObject o;
+    o.insert(propertyName, QString::fromLatin1("o"));
+    o.insert("objectType", objectType);
+
+    {
+        // create and immediatelly remove
+        const int initialRowCount = model.rowCount();
+        EnginioReply *r1 = model.append(o);
+        QVERIFY(!r1->isFinished());
+        QVERIFY(!r1->isError());
+
+        EnginioReply *r2 = model.remove(model.rowCount() - 1);
+        QVERIFY(!r2->isFinished());
+        QVERIFY(!r2->isError());
+        r2->setDelayFinishedSignal(true);
+
+        QTRY_VERIFY(r1->isFinished());
+        QModelIndex i = model.index(model.rowCount() - 1);
+        QCOMPARE(model.data(i, EnginioModel::SyncedRole).value<bool>(), false);
+        r2->setDelayFinishedSignal(false);
+
+        QTRY_VERIFY(r2->isFinished());
+        QCOMPARE(model.rowCount(), initialRowCount);
+        QVERIFY(!r2->isError());
     }
 }
 

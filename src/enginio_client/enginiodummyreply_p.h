@@ -35,59 +35,25 @@
 **
 ****************************************************************************/
 
-#include "enginiofakereply_p.h"
-#include "enginioclient_p.h"
-#include <QtCore/qmetaobject.h>
-#include <QtNetwork/qnetworkrequest.h>
+#ifndef ENGINIOWAITREPLY_H
+#define ENGINIOWAITREPLY_H
 
-struct FinishedFunctor
+#include "enginioclient_global.h"
+#include <QtNetwork/qnetworkreply.h>
+
+class EnginioClientPrivate;
+class EnginioReply;
+class ENGINIOCLIENT_EXPORT EnginioDummyReply : public QNetworkReply
 {
-    QNetworkAccessManager *_qnam;
-    EnginioFakeReply *_reply;
-    void operator ()()
-    {
-        _qnam->finished(_reply);
-    }
+    Q_OBJECT
+public:
+    explicit EnginioDummyReply(QObject *parent = 0);
+
+    virtual void abort() Q_DECL_OVERRIDE;
+    virtual bool isSequential() const Q_DECL_OVERRIDE;
+    virtual qint64 size() const Q_DECL_OVERRIDE;
+    virtual qint64 readData(char *dest, qint64 n) Q_DECL_OVERRIDE;
+    virtual qint64 writeData(const char *data, qint64 maxSize) Q_DECL_OVERRIDE;
 };
 
-EnginioFakeReply::EnginioFakeReply(EnginioClientPrivate *parent, QByteArray msg)
-    : QNetworkReply(parent->q_ptr)
-    , _msg(msg)
-{
-    QIODevice::open(QIODevice::ReadOnly | QIODevice::Unbuffered);
-    setError(ContentNotFoundError, QString::fromUtf8(msg));
-    setAttribute(QNetworkRequest::HttpStatusCodeAttribute, 400);
-    QNetworkAccessManager *qnam = parent->networkManager();
-    setFinished(true);
-    FinishedFunctor fin = {qnam, this};
-    QObject::connect(this, &EnginioFakeReply::finished, fin);
-    QMetaObject::invokeMethod(this, "finished", Qt::QueuedConnection);
-}
-
-void EnginioFakeReply::abort() {}
-
-bool EnginioFakeReply::isSequential() const
-{
-    return false;
-}
-
-qint64 EnginioFakeReply::size() const
-{
-    return _msg.size();
-}
-
-qint64 EnginioFakeReply::readData(char *dest, qint64 n)
-{
-    if (pos() > _msg.size())
-        return -1;
-    qint64 size = qMin(qint64(_msg.size() - pos()), n);
-    memcpy(dest, _msg.constData(), size);
-    return size;
-}
-
-qint64 EnginioFakeReply::writeData(const char *data, qint64 maxSize)
-{
-    Q_UNUSED(data);
-    Q_UNUSED(maxSize);
-    return -1;
-}
+#endif // ENGINIOWAITREPLY_H

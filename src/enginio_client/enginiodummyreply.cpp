@@ -35,57 +35,33 @@
 **
 ****************************************************************************/
 
-#include "enginiofakereply_p.h"
-#include "enginioclient_p.h"
-#include <QtCore/qmetaobject.h>
-#include <QtNetwork/qnetworkrequest.h>
+#include "enginiodummyreply_p.h"
 
-struct FinishedFunctor
+EnginioDummyReply::EnginioDummyReply(QObject *parent)
+    : QNetworkReply(parent)
 {
-    QNetworkAccessManager *_qnam;
-    EnginioFakeReply *_reply;
-    void operator ()()
-    {
-        _qnam->finished(_reply);
-    }
-};
-
-EnginioFakeReply::EnginioFakeReply(EnginioClientPrivate *parent, QByteArray msg)
-    : QNetworkReply(parent->q_ptr)
-    , _msg(msg)
-{
-    QIODevice::open(QIODevice::ReadOnly | QIODevice::Unbuffered);
-    setError(ContentNotFoundError, QString::fromUtf8(msg));
-    setAttribute(QNetworkRequest::HttpStatusCodeAttribute, 400);
-    QNetworkAccessManager *qnam = parent->networkManager();
-    setFinished(true);
-    FinishedFunctor fin = {qnam, this};
-    QObject::connect(this, &EnginioFakeReply::finished, fin);
-    QMetaObject::invokeMethod(this, "finished", Qt::QueuedConnection);
 }
 
-void EnginioFakeReply::abort() {}
+void EnginioDummyReply::abort() { Q_UNIMPLEMENTED(); }
 
-bool EnginioFakeReply::isSequential() const
+bool EnginioDummyReply::isSequential() const
 {
     return false;
 }
 
-qint64 EnginioFakeReply::size() const
+qint64 EnginioDummyReply::size() const
 {
-    return _msg.size();
+    return 0;
 }
 
-qint64 EnginioFakeReply::readData(char *dest, qint64 n)
+qint64 EnginioDummyReply::readData(char *dest, qint64 n)
 {
-    if (pos() > _msg.size())
-        return -1;
-    qint64 size = qMin(qint64(_msg.size() - pos()), n);
-    memcpy(dest, _msg.constData(), size);
-    return size;
+    Q_UNUSED(dest);
+    Q_UNUSED(n);
+    return 0;
 }
 
-qint64 EnginioFakeReply::writeData(const char *data, qint64 maxSize)
+qint64 EnginioDummyReply::writeData(const char *data, qint64 maxSize)
 {
     Q_UNUSED(data);
     Q_UNUSED(maxSize);

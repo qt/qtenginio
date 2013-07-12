@@ -53,19 +53,17 @@ public:
     QNetworkReply *_nreply;
     mutable QJsonObject _data;
     bool _delay;
-    bool _isFinished;
     EnginioReplyPrivate(EnginioClientPrivate *p, QNetworkReply *reply)
         : _client(p)
         , _nreply(reply)
         , _delay(false)
-        , _isFinished(false)
     {
         Q_ASSERT(reply);
     }
 
     bool isFinished() const Q_REQUIRED_RESULT
     {
-        return _isFinished;
+        return _nreply->isFinished();
     }
 
     QNetworkReply::NetworkError errorCode() const Q_REQUIRED_RESULT
@@ -109,9 +107,10 @@ public:
         operationNames[QNetworkAccessManager::CustomOperation] = "CUSTOM";
 
         QNetworkRequest request = _nreply->request();
-        qDebug() << "Request URL:" << request.url().toString(/*FormattingOptions*/ QUrl::None);
-        qDebug() << "Operation:" << operationNames[_nreply->operation()];
-        qDebug() << "HTTP return code:" << backendStatus();
+        qDebug() << "NetworkReply:" << _nreply;
+        qDebug() << "  Request URL:" << request.url().toString(/*FormattingOptions*/ QUrl::None);
+        qDebug() << "  Operation:" << operationNames[_nreply->operation()];
+        qDebug() << "  HTTP return code:" << backendStatus();
 
         QByteArray json = _client->_requestData.value(_nreply);
         if (!json.isEmpty())

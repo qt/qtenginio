@@ -85,6 +85,8 @@ public:
 
     void setDelayFinishedSignal(bool delay);
     bool delayFinishedSignal() Q_REQUIRED_RESULT;
+    void setNetworkReply(QNetworkReply *reply);
+    void swapNetworkReply(EnginioReply *reply);
 Q_SIGNALS:
     void finished(EnginioReply *reply);
     void dataChanged();
@@ -93,13 +95,11 @@ Q_SIGNALS:
 
 protected:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
-    void emitFinished();
-    virtual void emitFinishedImpl();
+    virtual void emitFinished();
     QScopedPointer<EnginioReplyPrivate> d;
 
 private:
     Q_DISABLE_COPY(EnginioReply)
-    void setNetworkReply(QNetworkReply *reply);
 
     friend class EnginioClient;
     friend class EnginioClientPrivate;
