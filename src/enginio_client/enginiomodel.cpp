@@ -283,31 +283,51 @@ public:
         return ereply;
     }
 
-    struct SwapNetworkReplyForRemove
+    struct SwapNetworkReplyBase
     {
         EnginioReply *_reply;
         EnginioModelPrivate *_model;
         QJsonObject _object;
         QString _tmpId;
 
+        void markAsError(QByteArray msg)
+        {
+            EnginioClientPrivate *client = EnginioClientPrivate::get(_model->_enginio);
+            EnginioFakeReply *nreply = new EnginioFakeReply(client, constructErrorMessage(msg));
+            _reply->setNetworkReply(nreply);
+        }
+
+        int getCurrentRow() { return _model->_attachedData.deref(_tmpId).row; }
+
+        QString getAndSetCurrentId(EnginioReply *finishedCreateReply)
+        {
+            QString id = finishedCreateReply->data()[EnginioString::id].toString();
+            Q_ASSERT(!id.isEmpty());
+            _object[EnginioString::id] = id;
+            return id;
+        }
+
+        void swapNetworkReply(EnginioReply *ereply)
+        {
+            QPair<int /*row*/, QJsonObject> data = _model->_dataChanged.take(ereply);
+            _model->_dataChanged.insert(_reply, data);
+            _reply->swapNetworkReply(ereply);
+            ereply->deleteLater();
+        }
+    };
+
+    struct SwapNetworkReplyForRemove
+    {
+        SwapNetworkReplyBase d;
         void operator ()(EnginioReply *finishedCreateReply)
         {
-            Q_ASSERT(_reply);
             if (finishedCreateReply->isError()) {
-                QByteArray msg = QByteArrayLiteral("Dependent create query failed, so object coudl not be removed");
-                EnginioClientPrivate *client = EnginioClientPrivate::get(_model->_enginio);
-                EnginioFakeReply *nreply = new EnginioFakeReply(client, constructErrorMessage(msg));
-                _reply->setNetworkReply(nreply);
+                d.markAsError(QByteArrayLiteral("Dependent create query failed, so object coudl not be removed"));
             } else {
-                QString id = finishedCreateReply->data()[EnginioString::id].toString();
-                Q_ASSERT(!id.isEmpty());
-                _object[EnginioString::id] = id;
-                const int row = _model->_attachedData.deref(_tmpId).row;
-                EnginioReply *ereply = _model->removeNow(row, _object, id);
-                QPair<int /*row*/, QJsonObject> data = _model->_dataChanged.take(ereply);
-                _model->_dataChanged.insert(_reply, data);
-                _reply->swapNetworkReply(ereply);
-                ereply->deleteLater();
+                const int row = d.getCurrentRow();
+                QString id = d.getAndSetCurrentId(finishedCreateReply);
+                EnginioReply *ereply = d._model->removeNow(row, d._object, id);
+                d.swapNetworkReply(ereply);
             }
         }
     };
@@ -325,18 +345,10 @@ public:
     {
         // We are about to remove a not synced new item. The item do not have id yet,
         // so we can not make a request now, we need to wait for finished signal.
-        Q_ASSERT(_attachedData.contains(row));
-        Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
-        AttachedData data = _attachedData.ref(row);
-        EnginioReply *createReply = data.createReply;
-        Q_ASSERT(createReply);
-        Q_ASSERT(!createReply->isFinished());
-        QString tmpId = _dataChanged.value(createReply).second[EnginioString::id].toString();
-        Q_ASSERT(tmpId.startsWith(QString::fromLatin1("tmp")));
-        EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
-        EnginioDummyReply *nreply = new EnginioDummyReply(createReply);
-        EnginioReply *ereply = new EnginioReply(client, nreply);
-        SwapNetworkReplyForRemove swapNetworkReply = {ereply, this, oldObject, tmpId};
+        EnginioReply *ereply, *createReply;
+        QString tmpId;
+        delayedOperation(row, oldObject, &ereply, &tmpId, &createReply);
+        SwapNetworkReplyForRemove swapNetworkReply = {{ereply, this, oldObject, tmpId}};
         QObject::connect(createReply, &EnginioReply::finished, swapNetworkReply);
         return ereply;
     }
@@ -516,31 +528,19 @@ public:
 
     struct SwapNetworkReplyForSetData
     {
-        EnginioReply *_reply;
-        EnginioModelPrivate *_model;
-        QJsonObject _object;
-        QString _tmpId;
+        SwapNetworkReplyBase d;
         QVariant _value;
         int _role;
 
         void operator ()(EnginioReply *finishedCreateReply)
         {
-            Q_ASSERT(_reply);
             if (finishedCreateReply->isError()) {
-                QByteArray msg = QByteArrayLiteral("Dependent create query failed, so object coudl not be updated");
-                EnginioClientPrivate *client = EnginioClientPrivate::get(_model->_enginio);
-                EnginioFakeReply *nreply = new EnginioFakeReply(client, constructErrorMessage(msg));
-                _reply->setNetworkReply(nreply);
+                d.markAsError(QByteArrayLiteral("Dependent create query failed, so object coudl not be updated"));
             } else {
-                QString id = finishedCreateReply->data()[EnginioString::id].toString();
-                Q_ASSERT(!id.isEmpty());
-                _object[EnginioString::id] = id;
-                const int row = _model->_attachedData.deref(_tmpId).row;
-                EnginioReply *ereply = _model->setDataNow(row, _value, _role, _object, id);
-                QPair<int /*row*/, QJsonObject> data = _model->_dataChanged.take(ereply);
-                _model->_dataChanged.insert(_reply, data);
-                _reply->swapNetworkReply(ereply);
-                ereply->deleteLater();
+                const int row = d.getCurrentRow();
+                QString id = d.getAndSetCurrentId(finishedCreateReply);
+                EnginioReply *ereply = d._model->setDataNow(row, _value, _role, d._object, id);
+                d.swapNetworkReply(ereply);
             }
         }
     };
@@ -560,23 +560,30 @@ public:
         return ereply;
     }
 
+    void delayedOperation(int row, const QJsonObject &oldObject, EnginioReply **newReply, QString *tmpId, EnginioReply **createReply)
+    {
+        Q_ASSERT(_attachedData.contains(row));
+        Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
+        AttachedData data = _attachedData.ref(row);
+        *createReply = data.createReply;
+        Q_ASSERT(*createReply);
+        Q_ASSERT(!(*createReply)->isFinished());
+        *tmpId = _dataChanged.value(*createReply).second[EnginioString::id].toString();
+        Q_ASSERT(tmpId->startsWith(QString::fromLatin1("tmp")));
+        EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
+        EnginioDummyReply *nreply = new EnginioDummyReply(*createReply);
+        *newReply = new EnginioReply(client, nreply);
+    }
+
     EnginioReply *setDataDelyed(int row, const QVariant &value, int role, const QJsonObject &oldObject)
     {
         // We are about to update a not synced new item. The item do not have id yet,
         // so we can not make a request now, we need to wait for finished signal.
-        Q_ASSERT(_attachedData.contains(row));
-        Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
         Q_ASSERT(role > EnginioModel::SyncedRole);
-        AttachedData data = _attachedData.ref(row);
-        EnginioReply *createReply = data.createReply;
-        Q_ASSERT(createReply);
-        Q_ASSERT(!createReply->isFinished());
-        QString tmpId = _dataChanged.value(createReply).second[EnginioString::id].toString();
-        Q_ASSERT(tmpId.startsWith(QString::fromLatin1("tmp")));
-        EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
-        EnginioDummyReply *nreply = new EnginioDummyReply(createReply);
-        EnginioReply *ereply = new EnginioReply(client, nreply);
-        SwapNetworkReplyForSetData swapNetworkReply = {ereply, this, oldObject, tmpId, value, role};
+        EnginioReply *ereply, *createReply;
+        QString tmpId;
+        delayedOperation(row, oldObject, &ereply, &tmpId, &createReply);
+        SwapNetworkReplyForSetData swapNetworkReply = {{ereply, this, oldObject, tmpId}, value, role};
         QObject::connect(createReply, &EnginioReply::finished, swapNetworkReply);
         return ereply;
     }
