@@ -159,10 +159,6 @@ void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
 void EnginioBackendConnection::protocolError(const char* message)
 {
     qWarning() << QLatin1Literal(message) << QStringLiteral("Closing socket.");
-    _protocolDecodeState = HandshakePending;
-    _applicationData.clear();
-    _payloadLength = 0;
-
     _tcpSocket->close();
 }
 
@@ -183,8 +179,12 @@ void EnginioBackendConnection::onSocketStateChanged(QAbstractSocket::SocketState
         // to be a regular GET request with an Upgrade offer.
         _tcpSocket->write(constructOpeningHandshake(_socketUrl));
         break;
-    case QAbstractSocket::UnconnectedState:
+    case QAbstractSocket::ClosingState:
         _protocolDecodeState = HandshakePending;
+        _applicationData.clear();
+        _payloadLength = 0;
+        break;
+    case QAbstractSocket::UnconnectedState:
         emit stateChanged(DisconnectedState);
         break;
     default:
@@ -250,7 +250,6 @@ void EnginioBackendConnection::onSocketReadyRead()
                 _isPayloadMasked = (data[1] & FIN);
                 _payloadLength = (data[1] & LEN);
 
-
                 // TODO:
                 // - Implement closing handshake
                 // - Handle client-to-server masking (possibly needed when data comes from
@@ -281,6 +280,29 @@ void EnginioBackendConnection::onSocketReadyRead()
         case PayloadDataPending: {
             if (static_cast<quint64>(_tcpSocket->bytesAvailable()) < _payloadLength)
                 return;
+
+            if (_protocolOpcode == ConnectionCloseOp) {
+                WebSocketCloseStatus closeStatus = UnknownCloseStatus;
+                if (_payloadLength >= DefaultHeaderLength) {
+                    char data[DefaultHeaderLength];
+                    if (_tcpSocket->read(data, DefaultHeaderLength) != DefaultHeaderLength)
+                        return protocolError("Reading connection close status failed!");
+
+                     closeStatus = static_cast<WebSocketCloseStatus>(qFromBigEndian<quint16>(reinterpret_cast<uchar*>(data)));
+
+                     // The body may contain UTF-8-encoded data with value /reason/,
+                     // the interpretation of this data is however not defined by the
+                     // specification. Further more the data is not guaranteed to be
+                     // human readable, thus it is safe for us to just discard the rest
+                     // of the message at this point.
+                }
+
+                qDebug() << "Connection closed by the server with status:" << closeStatus;
+
+                // TODO: Send closing frame to complete handshake.
+                _tcpSocket->close();
+                return;
+            }
 
             // TODO: Unmask the data here if _isPayloadMasked is true.
             _applicationData.append(_tcpSocket->read(_payloadLength));

@@ -43,6 +43,24 @@ class EnginioBackendConnection : public QObject
     void protocolError(const char* message);
 
 public:
+    enum WebSocketCloseStatus
+    {
+        UnknownCloseStatus = -1,
+        NormalCloseStatus = 1000,
+        GoingAwayCloseStatus = 1001,
+        ProtocolErrorCloseStatus = 1002,
+        UnsupportedDataTypeCloseStatus = 1003,
+        // 1004 Reserved. Not used.
+        // 1005 Missing status code. Not used.
+        // 1006 Abnormal disconnect. Not used.
+        InconsistentDataTypeCloseStatus = 1007,
+        PolicyViolationCloseStatus = 1008,
+        MessageTooBigCloseStatus = 1009,
+        MissingExtensionClientCloseStatus = 1010,
+        BadOperationServerCloseStatus = 1011
+        // 1015 TLS handshake failed. Not used.
+    };
+
     enum ConnectionState {
         DisconnectedState,
         ConnectingState,
