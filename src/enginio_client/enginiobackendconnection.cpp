@@ -14,12 +14,18 @@
 #include <QtNetwork/qtcpsocket.h>
 
 #define CRLF "\r\n"
+#define NIL 0x00
 #define FIN 0x80
+#define MSK 0x80
 #define OPC 0x0F
 #define LEN 0x7F
 
+#define DefaultHeaderLength         2
+#define NormalPayloadSize         126
+#define LargePayloadSize          127
+#define NormalPayloadSizeLimit 0xFFFF
+
 namespace {
-const qint64 DefaultHeaderLength = 2;
 
 const QString HttpResponseStatus(QStringLiteral("HTTP/1\\.1\\s([0-9]{3})\\s"));
 const QString SecWebSocketAcceptHeader(QStringLiteral("Sec-WebSocket-Accept:\\s(.{28})" CRLF));
@@ -54,6 +60,23 @@ const QString generateBase64EncodedUniqueKey()
     computeBase64EncodedSha1VerificationKey(secWebSocketKeyBase64);
 
     return secWebSocketKeyBase64;
+}
+
+QByteArray generateMaskingKey()
+{
+    // The masking key is a 32-bit value chosen at random by the client.
+    // Using the first 4 bytes of an encoded unique key should be sufficient.
+    QString key = generateBase64EncodedUniqueKey().left(4);
+    return key.toUtf8();
+}
+
+void maskData(QByteArray &data, const QByteArray &maskingKey )
+{
+    // Client-to-Server Masking.
+    // http://tools.ietf.org/html/rfc6455#section-5.3
+
+    for (int octet = 0; octet < data.size(); ++octet)
+        data[octet] = data[octet] ^ maskingKey[octet % maskingKey.size()];
 }
 
 int extractResponseStatus(QString responseString)
@@ -99,6 +122,41 @@ const QByteArray constructOpeningHandshake(const QUrl& url)
                        , generateBase64EncodedUniqueKey()
                        ).toUtf8();
 }
+
+const QByteArray constructFrameHeader(bool isFinalFragment
+                                      , int opcode
+                                      , quint64 payloadLength
+                                      , const QByteArray &maskingKey
+                                      )
+{
+    QByteArray frameHeader(DefaultHeaderLength, 0);
+
+    // FIN, x, x, x, Opcode
+    frameHeader[0] = frameHeader[0] | (isFinalFragment ? FIN : NIL) | opcode;
+
+    // Masking bit
+    frameHeader[1] = frameHeader[1] | MSK;
+
+    // Payload length. Small payload.
+    if (payloadLength < NormalPayloadSize)
+        frameHeader[1] = frameHeader[1] | payloadLength;
+    else {
+        if (payloadLength > NormalPayloadSizeLimit) {
+            qDebug() << "\t ERROR: Large payload not supported:" << payloadLength;
+            return QByteArray();
+        } else {
+            frameHeader[1] = frameHeader[1] | NormalPayloadSize;
+            quint16 lengthBigEndian = qToBigEndian<quint16>(payloadLength);
+            frameHeader.append(reinterpret_cast<char*>(&lengthBigEndian), DefaultHeaderLength);
+        }
+    }
+
+    // Masking-key
+    frameHeader.append(maskingKey);
+
+    return frameHeader;
+}
+
 } // namespace
 
 /*!
@@ -113,6 +171,7 @@ EnginioBackendConnection::EnginioBackendConnection(QObject *parent)
     : QObject(parent)
     , _protocolOpcode(ContinuationFrameOp)
     , _protocolDecodeState(HandshakePending)
+    , _sentCloseFrame(false)
     , _isFinalFragment(false)
     , _isPayloadMasked(false)
     , _payloadLength(0)
@@ -159,6 +218,7 @@ void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
 void EnginioBackendConnection::protocolError(const char* message)
 {
     qWarning() << QLatin1Literal(message) << QStringLiteral("Closing socket.");
+    close(ProtocolErrorCloseStatus);
     _tcpSocket->close();
 }
 
@@ -172,9 +232,9 @@ void EnginioBackendConnection::onSocketStateChanged(QAbstractSocket::SocketState
 {
     switch (socketState) {
     case QAbstractSocket::ConnectedState:
-        qDebug() << "## Initiating WebSocket handshake to:\n"
-                 << _socketUrl;
+        qDebug() << "\t -> Starting WebSocket handshake.";
         _protocolDecodeState = HandshakePending;
+        _sentCloseFrame = false;
         // The protocol handshake will appear to the HTTP server
         // to be a regular GET request with an Upgrade offer.
         _tcpSocket->write(constructOpeningHandshake(_socketUrl));
@@ -247,27 +307,24 @@ void EnginioBackendConnection::onSocketReadyRead()
                 // This is the initial frame header data.
                 _isFinalFragment = (data[0] & FIN);
                 _protocolOpcode = static_cast<WebSocketOpcode>(data[0] & OPC);
-                _isPayloadMasked = (data[1] & FIN);
+                _isPayloadMasked = (data[1] & MSK);
                 _payloadLength = (data[1] & LEN);
 
                 // TODO:
-                // - Implement closing handshake
-                // - Handle client-to-server masking (possibly needed when data comes from
-                //   another client e.g. client->server->client)
                 // - Handle large payload if we need it.
                 if (_isPayloadMasked)
-                    return protocolError("Masked payload not supported.");
+                    return protocolError("Invalid masked frame received from server.");
 
                 // Large payload.
-                if (_payloadLength == 127)
+                if (_payloadLength == LargePayloadSize)
                     return protocolError("Large payload not supported.");
 
                 // For data length 0-125 LEN is the payload length.
-                if (_payloadLength < 126)
+                if (_payloadLength < NormalPayloadSize)
                     _protocolDecodeState = PayloadDataPending;
 
             } else {
-                Q_ASSERT(_payloadLength == 126);
+                Q_ASSERT(_payloadLength == NormalPayloadSize);
                 // Normal sized payload: 2 bytes interpreted as the payload
                 // length expressed in network byte order (e.g. big endian).
                 _payloadLength = qFromBigEndian<quint16>(reinterpret_cast<uchar*>(data));
@@ -299,12 +356,17 @@ void EnginioBackendConnection::onSocketReadyRead()
 
                 qDebug() << "Connection closed by the server with status:" << closeStatus;
 
-                // TODO: Send closing frame to complete handshake.
+                QJsonObject data;
+                data["messageType"] = QStringLiteral("close");
+                data["status"] = closeStatus;
+                emit dataReceived(data);
+
+                close(closeStatus);
+
                 _tcpSocket->close();
                 return;
             }
 
-            // TODO: Unmask the data here if _isPayloadMasked is true.
             _applicationData.append(_tcpSocket->read(_payloadLength));
             _protocolDecodeState = FrameHeaderPending;
             _payloadLength = 0;
@@ -312,9 +374,11 @@ void EnginioBackendConnection::onSocketReadyRead()
             if (!_isFinalFragment)
                 break;
 
-            if (_protocolOpcode == TextFrameOp)
-                emit dataReceived(QJsonDocument::fromJson(_applicationData).object());
-            else {
+            if (_protocolOpcode == TextFrameOp) {
+                QJsonObject data = QJsonDocument::fromJson(_applicationData).object();
+                data["messageType"] = QStringLiteral("data");
+                emit dataReceived(data);
+            } else {
                 protocolError("WebSocketOpcode not yet supported");
                 qWarning() << "\t\t->" << _protocolOpcode;
             }
@@ -371,4 +435,26 @@ void EnginioBackendConnection::connectToBackend(const QByteArray &backendId
 
     emit stateChanged(ConnectingState);
     _client->customRequest(url, QByteArrayLiteral("GET"), data);
+}
+
+void EnginioBackendConnection::close(WebSocketCloseStatus closeStatus)
+{
+    if (_sentCloseFrame)
+        return;
+
+    qDebug() << "## Closing WebSocket connection.";
+
+    _sentCloseFrame = true;
+
+    QByteArray payload;
+    quint16 closeStatusBigEndian = qToBigEndian<quint16>(closeStatus);
+    payload.append(reinterpret_cast<char*>(&closeStatusBigEndian), DefaultHeaderLength);
+
+    QByteArray maskingKey = generateMaskingKey();
+    QByteArray message = constructFrameHeader(/*isFinalFragment*/ true, ConnectionCloseOp, payload.size(), maskingKey);
+    Q_ASSERT(!message.isEmpty());
+
+    maskData(payload, maskingKey);
+    message.append(payload);
+    _tcpSocket->write(message);
 }

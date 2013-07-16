@@ -31,6 +31,7 @@ class EnginioBackendConnection : public QObject
         PayloadDataPending
     } _protocolDecodeState;
 
+    bool _sentCloseFrame;
     bool _isFinalFragment;
     bool _isPayloadMasked;
     quint64 _payloadLength;
@@ -72,6 +73,9 @@ public:
     bool isConnected() { return _protocolDecodeState > HandshakePending; }
     void setServiceUrl(const QUrl& serviceUrl);
     void connectToBackend(const QByteArray &backendId, const QByteArray &backendSecret, const QJsonObject& messageFilter = QJsonObject());
+
+
+    void close(WebSocketCloseStatus closeStatus = NormalCloseStatus);
 
 signals:
     void stateChanged(ConnectionState state);

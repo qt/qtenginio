@@ -213,6 +213,32 @@ void tst_Notifications::populateWithData()
     }
 
     QTRY_COMPARE_WITH_TIMEOUT(notificationSpy.count(), createdObjectCount, 10000);
+
+    for (int i = 0; i < notificationSpy.count(); ++i)
+    {
+        QJsonObject message = notificationSpy[i][0].value<QJsonObject>();
+        QVERIFY(!message.isEmpty());
+        QVERIFY(message["messageType"].isString());
+        QVERIFY(message["messageType"].toString() == QStringLiteral("data"));
+        QVERIFY(message["event"].isString());
+        QVERIFY(message["event"].toString() == filter["event"].toString());
+    }
+
+    notificationSpy.clear();
+    EnginioBackendConnection::WebSocketCloseStatus closeStatus = EnginioBackendConnection::GoingAwayCloseStatus;
+    connection.close(closeStatus);
+    QTRY_VERIFY_WITH_TIMEOUT(!connection.isConnected(), 10000);
+    QCOMPARE(notificationSpy.count(), 1);
+
+    QJsonObject message = notificationSpy[0][0].value<QJsonObject>();
+
+    // We initiated the closing, so the server should send us
+    // closeStatus in the closing message.
+    QVERIFY(!message.isEmpty());
+    QVERIFY(message["messageType"].isString());
+    QVERIFY(message["messageType"].toString() == QStringLiteral("close"));
+    QVERIFY(message["status"].isDouble());
+    QVERIFY(message["status"].toDouble() == closeStatus);
 }
 
 void tst_Notifications::update_objects()
@@ -262,6 +288,32 @@ void tst_Notifications::update_objects()
     QCOMPARE(spyError.count(), 0);
 
     QTRY_COMPARE_WITH_TIMEOUT(notificationSpy.count(), array.count(), 10000);
+
+    for (int i = 0; i < notificationSpy.count(); ++i)
+    {
+        QJsonObject message = notificationSpy[i][0].value<QJsonObject>();
+        QVERIFY(!message.isEmpty());
+        QVERIFY(message["messageType"].isString());
+        QVERIFY(message["messageType"].toString() == QStringLiteral("data"));
+        QVERIFY(message["event"].isString());
+        QVERIFY(message["event"].toString() == filter["event"].toString());
+    }
+
+    notificationSpy.clear();
+    EnginioBackendConnection::WebSocketCloseStatus closeStatus = EnginioBackendConnection::GoingAwayCloseStatus;
+    connection.close(closeStatus);
+    QTRY_VERIFY_WITH_TIMEOUT(!connection.isConnected(), 10000);
+    QCOMPARE(notificationSpy.count(), 1);
+
+    QJsonObject message = notificationSpy[0][0].value<QJsonObject>();
+
+    // We initiated the closing, so the server should send us
+    // closeStatus in the closing message.
+    QVERIFY(!message.isEmpty());
+    QVERIFY(message["messageType"].isString());
+    QVERIFY(message["messageType"].toString() == QStringLiteral("close"));
+    QVERIFY(message["status"].isDouble());
+    QVERIFY(message["status"].toDouble() == closeStatus);
 }
 
 void tst_Notifications::remove_objects()
@@ -311,6 +363,32 @@ void tst_Notifications::remove_objects()
     QCOMPARE(spyError.count(), 0);
 
     QTRY_COMPARE_WITH_TIMEOUT(notificationSpy.count(), array.count(), 10000);
+
+    for (int i = 0; i < notificationSpy.count(); ++i)
+    {
+        QJsonObject message = notificationSpy[i][0].value<QJsonObject>();
+        QVERIFY(!message.isEmpty());
+        QVERIFY(message["messageType"].isString());
+        QVERIFY(message["messageType"].toString() == QStringLiteral("data"));
+        QVERIFY(message["event"].isString());
+        QVERIFY(message["event"].toString() == filter["event"].toString());
+    }
+
+    notificationSpy.clear();
+    EnginioBackendConnection::WebSocketCloseStatus closeStatus = EnginioBackendConnection::GoingAwayCloseStatus;
+    connection.close(closeStatus);
+    QTRY_VERIFY_WITH_TIMEOUT(!connection.isConnected(), 10000);
+    QCOMPARE(notificationSpy.count(), 1);
+
+    QJsonObject message = notificationSpy[0][0].value<QJsonObject>();
+
+    // We initiated the closing, so the server should send us
+    // closeStatus in the closing message.
+    QVERIFY(!message.isEmpty());
+    QVERIFY(message["messageType"].isString());
+    QVERIFY(message["messageType"].toString() == QStringLiteral("close"));
+    QVERIFY(message["status"].isDouble());
+    QVERIFY(message["status"].toDouble() == closeStatus);
 }
 
 QTEST_MAIN(tst_Notifications)
