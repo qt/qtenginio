@@ -200,7 +200,7 @@ void EnginioBackendConnection::onEnginioError(EnginioReply *reply)
 
 void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
 {
-    QJsonValue urlValue = reply->data()["expiringUrl"];
+    QJsonValue urlValue = reply->data()[EnginioString::expiringUrl];
 
     if (!urlValue.isString()) {
         qDebug() << "## Retrieving connection url failed.";
@@ -357,8 +357,8 @@ void EnginioBackendConnection::onSocketReadyRead()
                 qDebug() << "Connection closed by the server with status:" << closeStatus;
 
                 QJsonObject data;
-                data["messageType"] = QStringLiteral("close");
-                data["status"] = closeStatus;
+                data[EnginioString::messageType] = QStringLiteral("close");
+                data[EnginioString::status] = closeStatus;
                 emit dataReceived(data);
 
                 close(closeStatus);
@@ -376,7 +376,7 @@ void EnginioBackendConnection::onSocketReadyRead()
 
             if (_protocolOpcode == TextFrameOp) {
                 QJsonObject data = QJsonDocument::fromJson(_applicationData).object();
-                data["messageType"] = QStringLiteral("data");
+                data[EnginioString::messageType] = QStringLiteral("data");
                 emit dataReceived(data);
             } else {
                 protocolError("WebSocketOpcode not yet supported");
@@ -429,9 +429,9 @@ void EnginioBackendConnection::connectToBackend(const QByteArray &backendId
     url.setQuery(QString::fromUtf8(filter));
 
     QJsonObject headers;
-    headers["Accept"] = QStringLiteral("application/json");
+    headers[ QStringLiteral("Accept") ] = QStringLiteral("application/json");
     QJsonObject data;
-    data["headers"] = headers;
+    data[EnginioString::headers] = headers;
 
     emit stateChanged(ConnectingState);
     _client->customRequest(url, QByteArrayLiteral("GET"), data);

@@ -68,6 +68,8 @@
     F(count, "count")\
     F(createdAt, "createdAt")\
     F(empty, "empty")\
+    F(event, "event")\
+    F(expiringUrl, "expiringUrl")\
     F(file, "file")\
     F(fileName, "fileName")\
     F(files, "files")\
@@ -78,6 +80,7 @@
     F(limit, "limit")\
     F(members, "members")\
     F(message, "message")\
+    F(messageType, "messageType")\
     F(object, "object")\
     F(objectType, "objectType")\
     F(objectTypes, "objectTypes")\
