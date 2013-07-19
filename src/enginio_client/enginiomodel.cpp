@@ -100,13 +100,15 @@ public:
         Q_UNREACHABLE();
     }
 
-    template<class Functor>
-    void updateAllData(Functor &f) {
+    void updateAllDataAfterRow(const int row) {
         // TODO optimize it is almost O(n log(n))
         QList<QString> keys = this->keys();
         foreach (const QString &key, keys) {
             AttachedData &data = (*this)[key];
-            f(data);
+            if (data.row > row)
+                --data.row;
+            else if (data.row == row)
+                data.row = -1;
         }
     }
 
@@ -337,17 +339,18 @@ public:
         QJsonObject oldObject = _data.at(row).toObject();
         QString id = oldObject[EnginioString::id].toString();
         if (id.isEmpty())
-            return removeDelyed(row, oldObject);
+            return removeDelayed(row, oldObject);
         return removeNow(row, oldObject, id);
     }
 
-    EnginioReply *removeDelyed(int row, const QJsonObject &oldObject)
+    EnginioReply *removeDelayed(int row, const QJsonObject &oldObject)
     {
         // We are about to remove a not synced new item. The item do not have id yet,
         // so we can not make a request now, we need to wait for finished signal.
         EnginioReply *ereply, *createReply;
         QString tmpId;
-        delayedOperation(row, oldObject, &ereply, &tmpId, &createReply);
+        Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
+        delayedOperation(row, &ereply, &tmpId, &createReply);
         SwapNetworkReplyForRemove swapNetworkReply = {{ereply, this, oldObject, tmpId}};
         QObject::connect(createReply, &EnginioReply::finished, swapNetworkReply);
         return ereply;
@@ -493,17 +496,7 @@ public:
                 q->beginRemoveRows(QModelIndex(), row, row);
                 _data.removeAt(row);
                 // we need to updates rows in _attachedData
-                struct
-                {
-                    int row;
-                    void operator() (AttachedData &data) {
-                        if (data.row > row)
-                            --data.row;
-                        else if (data.row == row)
-                            data.row = -1;
-                    }
-                } updateRows = {row};
-                _attachedData.updateAllData(updateRows);
+                _attachedData.updateAllDataAfterRow(row);
                 q->endRemoveRows();
             } else {
                 QJsonObject current = _data[row].toObject();
@@ -560,10 +553,9 @@ public:
         return ereply;
     }
 
-    void delayedOperation(int row, const QJsonObject &oldObject, EnginioReply **newReply, QString *tmpId, EnginioReply **createReply)
+    void delayedOperation(int row, EnginioReply **newReply, QString *tmpId, EnginioReply **createReply)
     {
         Q_ASSERT(_attachedData.contains(row));
-        Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
         AttachedData data = _attachedData.ref(row);
         *createReply = data.createReply;
         Q_ASSERT(*createReply);
@@ -582,7 +574,8 @@ public:
         Q_ASSERT(role > EnginioModel::SyncedRole);
         EnginioReply *ereply, *createReply;
         QString tmpId;
-        delayedOperation(row, oldObject, &ereply, &tmpId, &createReply);
+        Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
+        delayedOperation(row, &ereply, &tmpId, &createReply);
         SwapNetworkReplyForSetData swapNetworkReply = {{ereply, this, oldObject, tmpId}, value, role};
         QObject::connect(createReply, &EnginioReply::finished, swapNetworkReply);
         return ereply;
