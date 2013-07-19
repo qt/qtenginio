@@ -100,13 +100,15 @@ public:
         Q_UNREACHABLE();
     }
 
-    template<class Functor>
-    void updateAllData(Functor &f) {
+    void updateAllDataAfterRow(const int row) {
         // TODO optimize it is almost O(n log(n))
         QList<QString> keys = this->keys();
         foreach (const QString &key, keys) {
             AttachedData &data = (*this)[key];
-            f(data);
+            if (data.row > row)
+                --data.row;
+            else if (data.row == row)
+                data.row = -1;
         }
     }
 
@@ -493,17 +495,7 @@ public:
                 q->beginRemoveRows(QModelIndex(), row, row);
                 _data.removeAt(row);
                 // we need to updates rows in _attachedData
-                struct
-                {
-                    int row;
-                    void operator() (AttachedData &data) {
-                        if (data.row > row)
-                            --data.row;
-                        else if (data.row == row)
-                            data.row = -1;
-                    }
-                } updateRows = {row};
-                _attachedData.updateAllData(updateRows);
+                _attachedData.updateAllDataAfterRow(row);
                 q->endRemoveRows();
             } else {
                 QJsonObject current = _data[row].toObject();
