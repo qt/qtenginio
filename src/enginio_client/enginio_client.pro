@@ -21,7 +21,8 @@ SOURCES += \
     enginiomodel.cpp \
     enginioidentity.cpp \
     enginiofakereply.cpp \
-    enginiodummyreply.cpp
+    enginiodummyreply.cpp \
+    enginiostring.cpp
 
 HEADERS += \
     chunkdevice_p.h \
@@ -35,5 +36,6 @@ HEADERS += \
     enginioobjectadaptor_p.h \
     enginioreply_p.h \
     enginiofakereply_p.h \
-    enginiodummyreply_p.h
+    enginiodummyreply_p.h \
+    enginiostring_p.h
 
