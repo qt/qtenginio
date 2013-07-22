@@ -111,9 +111,6 @@ void tst_Files::fileUploadDownload_data()
 void tst_Files::fileUploadDownload()
 {
     QFETCH(int, chunkSize);
-    qDebug() << chunkSize;
-
-    int replyCount = 0;
 
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
@@ -126,7 +123,6 @@ void tst_Files::fileUploadDownload()
         clientPrivate->_uploadChunkSize = chunkSize;
     }
 
-    QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     //![upload-create-object]
@@ -136,14 +132,11 @@ void tst_Files::fileUploadDownload()
     const EnginioReply* createReply = client.create(obj);
     //![upload-create-object]
     QVERIFY(createReply);
-    ++replyCount;
-    QTRY_COMPARE(spy.count(), replyCount);
+    QTRY_VERIFY(createReply->isFinished());
     QCOMPARE(spyError.count(), 0);
 
-    const EnginioReply *responseObjectCreation = spy[0][0].value<EnginioReply*>();
-    QCOMPARE(responseObjectCreation, createReply);
-    QCOMPARE(responseObjectCreation->networkError(), QNetworkReply::NoError);
-    QJsonObject data = responseObjectCreation->data();
+    QCOMPARE(createReply->networkError(), QNetworkReply::NoError);
+    QJsonObject data = createReply->data();
     QVERIFY(!data.isEmpty());
     QCOMPARE(data["title"], obj["title"]);
     QCOMPARE(data["objectType"], obj["objectType"]);
@@ -157,116 +150,104 @@ void tst_Files::fileUploadDownload()
 
     // Attach file to the object
     {
-    //![upload]
-    QJsonObject object;
-    object["id"] = id;
-    object["objectType"] = QString::fromUtf8("objects.%1").arg(EnginioTests::CUSTOM_OBJECT1);
-    object["propertyName"] = QStringLiteral("fileAttachment");
+        //![upload]
+        QJsonObject object;
+        object["id"] = id;
+        object["objectType"] = QString::fromUtf8("objects.%1").arg(EnginioTests::CUSTOM_OBJECT1);
+        object["propertyName"] = QStringLiteral("fileAttachment");
 
-    QJsonObject fileObject;
-    fileObject[QStringLiteral("fileName")] = fileName;
+        QJsonObject fileObject;
+        fileObject[QStringLiteral("fileName")] = fileName;
 
-    QJsonObject uploadJson;
-    uploadJson[QStringLiteral("targetFileProperty")] = object;
-    uploadJson[QStringLiteral("file")] = fileObject;
-    const EnginioReply* responseUpload = client.uploadFile(uploadJson, QUrl(filePath));
-    //![upload]
+        QJsonObject uploadJson;
+        uploadJson[QStringLiteral("targetFileProperty")] = object;
+        uploadJson[QStringLiteral("file")] = fileObject;
+        const EnginioReply *responseUpload = client.uploadFile(uploadJson, QUrl(filePath));
+        //![upload]
+        QVERIFY(responseUpload);
 
-    QSignalSpy progressSpy(responseUpload, SIGNAL(progress(qint64,qint64)));
-    QVERIFY(responseUpload);
-    ++replyCount;
-    QTRY_COMPARE(spy.count(), replyCount);
-    QCOMPARE(spyError.count(), 0);
-    fileId = responseUpload->data().value(QStringLiteral("id")).toString();
-    QVERIFY(progressSpy.count() > 1);
+        QSignalSpy progressSpy(responseUpload, SIGNAL(progress(qint64,qint64)));
+        QTRY_VERIFY(responseUpload->isFinished());
+        QCOMPARE(spyError.count(), 0);
+        fileId = responseUpload->data().value(QStringLiteral("id")).toString();
+        QVERIFY(progressSpy.count() > 1);
     }
 
     // Query including files
     {
-    QJsonObject obj2;
-    obj2 = QJsonDocument::fromJson(
-                "{\"include\": {\"fileAttachment\": {}},"
-                 "\"objectType\": \"objects." + EnginioTests::CUSTOM_OBJECT1.toUtf8() + "\","
-                 "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
+        QJsonObject obj2;
+        obj2 = QJsonDocument::fromJson(
+                    "{\"include\": {\"fileAttachment\": {}},"
+                    "\"objectType\": \"objects." + EnginioTests::CUSTOM_OBJECT1.toUtf8() + "\","
+                    "\"query\": {\"id\": \"" + id.toUtf8() + "\"}}").object();
 
-    const EnginioReply *reply = client.query(obj2);
-    QVERIFY(reply);
+        const EnginioReply *reply = client.query(obj2);
+        QVERIFY(reply);
+        QTRY_VERIFY(reply->isFinished());
+        QCOMPARE(spyError.count(), 0);
+        data = reply->data();
+        QVERIFY(data["results"].isArray());
+        QVERIFY(data["results"].toArray().first().toObject()["fileAttachment"].isObject());
+        QVERIFY(!data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString().isEmpty());
+        QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileName"].toString(), fileName);
 
-    ++replyCount;
-    QTRY_COMPARE(spy.count(), replyCount);
-    QCOMPARE(spyError.count(), 0);
-    const EnginioReply *responseQuery = spy[2][0].value<EnginioReply*>();
-    data = responseQuery->data();
-    QVERIFY(data["results"].isArray());
-    QVERIFY(data["results"].toArray().first().toObject()["fileAttachment"].isObject());
-    QVERIFY(!data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString().isEmpty());
-    QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileName"].toString(), fileName);
-
-    QFile file(filePath);
-    double fileSize = (double) file.size();
-    QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileSize"].toDouble(), fileSize);
-    QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["id"].toString(), fileId);
+        QFile file(filePath);
+        double fileSize = (double) file.size();
+        QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileSize"].toDouble(), fileSize);
+        QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["id"].toString(), fileId);
     }
 
     // Download
     {
-    //![download]
-    QJsonObject object;
-    object["id"] = fileId; // ID of an existing object with attached file
+        //![download]
+        QJsonObject object;
+        object["id"] = fileId; // ID of an existing object with attached file
 
-    const EnginioReply* replyDownload = client.downloadFile(object);
-    //![download]
+        const EnginioReply *replyDownload = client.downloadFile(object);
+        //![download]
 
-    QVERIFY(replyDownload);
-    ++replyCount;
-    QTRY_COMPARE(spy.count(), replyCount);
-    QCOMPARE(spyError.count(), 0);
-    const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
-    QJsonObject downloadData = responseDownload->data();
+        QVERIFY(replyDownload);
+        QTRY_VERIFY(replyDownload->isFinished());
+        QCOMPARE(spyError.count(), 0);
+        QJsonObject downloadData = replyDownload->data();
 
-    QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
-    QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
-    QNetworkAccessManager nam;
-    QNetworkRequest req;
-    req.setUrl(QUrl(downloadData["expiringUrl"].toString()));
-    QNetworkReply *reply = nam.get(req);
-    QVERIFY(reply);
-    QSignalSpy downloadSpy(reply, SIGNAL(finished()));
-    QTRY_COMPARE(downloadSpy.count(), 1);
-    QByteArray imageData = reply->readAll();
-    QImage img = QImage::fromData(imageData);
-    qDebug() << "full size:" << imageData.size();
-    QCOMPARE(img.size(), QSize(181, 54));
+        QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
+        QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
+        QNetworkRequest req;
+        req.setUrl(QUrl(downloadData["expiringUrl"].toString()));
+        QNetworkReply *reply = client.networkManager()->get(req);
+        QVERIFY(reply);
+        QSignalSpy downloadSpy(reply, SIGNAL(finished()));
+        QTRY_COMPARE(downloadSpy.count(), 1);
+        QByteArray imageData = reply->readAll();
+        QImage img = QImage::fromData(imageData);
+        QCOMPARE(img.size(), QSize(181, 54));
     }
-
 
     // View/Query the file details
     {
-    QJsonObject fileObject;
-    fileObject.insert("id", fileId);
-    EnginioReply *fileInfo = client.query(fileObject, EnginioClient::FileOperation);
-    QVERIFY(fileInfo);
-    ++replyCount;
-    QTRY_COMPARE(spy.count(), replyCount);
-    QCOMPARE(spyError.count(), 0);
-    QCOMPARE(fileInfo->data()["fileName"].toString(), fileName);
-    QFile file(filePath);
-    QCOMPARE(fileInfo->data()["fileSize"].toDouble(), (double)file.size());
-    QVERIFY(fileInfo->data()["variants"].toObject().contains("thumbnail"));
-    QString thumbnailStatus = fileInfo->data()["variants"].toObject()["thumbnail"].toObject()["status"].toString();
-    int count = 0;
-    while (thumbnailStatus == "processing" && ++count < 10) {
-        QTest::qWait(1000);
-        fileInfo = client.query(fileObject, EnginioClient::FileOperation);
+        QJsonObject fileObject;
+        fileObject.insert("id", fileId);
+        EnginioReply *fileInfo = client.query(fileObject, EnginioClient::FileOperation);
         QVERIFY(fileInfo);
-        ++replyCount;
-        QTRY_COMPARE(spy.count(), replyCount);
+        QTRY_VERIFY(fileInfo->isFinished());
         QCOMPARE(spyError.count(), 0);
-        thumbnailStatus = fileInfo->data()["variants"].toObject()["thumbnail"].toObject()["status"].toString();
+        QCOMPARE(fileInfo->data()["fileName"].toString(), fileName);
+        QFile file(filePath);
+        QCOMPARE(fileInfo->data()["fileSize"].toDouble(), (double)file.size());
+        QVERIFY(fileInfo->data()["variants"].toObject().contains("thumbnail"));
+        QString thumbnailStatus = fileInfo->data()["variants"].toObject()["thumbnail"].toObject()["status"].toString();
+        int count = 0;
+        while (thumbnailStatus == "processing" && ++count < 20) {
+            QTest::qWait(1000);
+            fileInfo = client.query(fileObject, EnginioClient::FileOperation);
+            QVERIFY(fileInfo);
+            QTRY_VERIFY(fileInfo->isFinished());
+            QCOMPARE(spyError.count(), 0);
+            thumbnailStatus = fileInfo->data()["variants"].toObject()["thumbnail"].toObject()["status"].toString();
+        }
+        QCOMPARE(thumbnailStatus, EnginioString::complete);
     }
-    QCOMPARE(thumbnailStatus, EnginioString::complete);
-    }
-
 
     // Download thumbnail
 // Needs an image processor on the server
@@ -278,34 +259,29 @@ void tst_Files::fileUploadDownload()
 }
 */
     {
-    QJsonObject object;
-    object["id"] = fileId; // ID of an existing object with attached file
-    object[EnginioString::variant] = QStringLiteral("thumbnail");
+        QJsonObject object;
+        object["id"] = fileId; // ID of an existing object with attached file
+        object[EnginioString::variant] = QStringLiteral("thumbnail");
 
-    const EnginioReply* replyDownload = client.downloadFile(object);
+        const EnginioReply* replyDownload = client.downloadFile(object);
 
-    QVERIFY(replyDownload);
-    ++replyCount;
-    QTRY_COMPARE(spy.count(), replyCount);
-    QCOMPARE(spyError.count(), 0);
-    const EnginioReply *responseDownload = spy[3][0].value<EnginioReply*>();
-    QJsonObject downloadData = responseDownload->data();
+        QVERIFY(replyDownload);
+        QTRY_VERIFY(replyDownload->isFinished());
+        QCOMPARE(spyError.count(), 0);
+        QJsonObject downloadData = replyDownload->data();
 
-    QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
-    QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
+        QVERIFY(!downloadData["expiringUrl"].toString().isEmpty());
+        QVERIFY(!downloadData["expiresAt"].toString().isEmpty());
 
-    QNetworkAccessManager nam;
-    QNetworkRequest req;
-    req.setUrl(QUrl(downloadData["expiringUrl"].toString()));
-    QNetworkReply *reply = nam.get(req);
-    QVERIFY(reply);
-    QSignalSpy downloadSpy(reply, SIGNAL(finished()));
-    QTRY_COMPARE(downloadSpy.count(), 1);
-    QByteArray imageData = reply->readAll();
-    QImage img = QImage::fromData(imageData);
-    qDebug() << img.size();
-    QEXPECT_FAIL("", "The server returns the original image instead of thumbnail", Continue);
-    QCOMPARE(img.size(), QSize(20, 20));
+        QNetworkRequest req;
+        req.setUrl(QUrl(downloadData["expiringUrl"].toString()));
+        QNetworkReply *reply = client.networkManager()->get(req);
+        QVERIFY(reply);
+        QSignalSpy downloadSpy(reply, SIGNAL(finished()));
+        QTRY_COMPARE(downloadSpy.count(), 1);
+        QByteArray imageData = reply->readAll();
+        QImage img = QImage::fromData(imageData);
+        QCOMPARE(img.size(), QSize(20, 20));
     }
 }
 
