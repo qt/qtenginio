@@ -15,6 +15,7 @@ MODULE = enginio
 load(qt_module)
 
 SOURCES += \
+    enginiobackendconnection.cpp \
     enginioclient.cpp \
     enginioreply.cpp \
     enginiomodel.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
 
 HEADERS += \
     chunkdevice_p.h \
+    enginiobackendconnection_p.h \
     enginioclient.h\
     enginioclient_global.h \
     enginioclient_p.h \
