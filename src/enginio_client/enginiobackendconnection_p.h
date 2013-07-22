@@ -78,12 +78,14 @@ public:
 
 
     void close(WebSocketCloseStatus closeStatus = NormalCloseStatus);
+    void ping();
 
     static const QByteArray generateBase64EncodedUniqueKey();
 
 signals:
     void stateChanged(ConnectionState state);
     void dataReceived(QJsonObject data);
+    void pong();
 
 private slots:
     void onEnginioError(EnginioReply *);

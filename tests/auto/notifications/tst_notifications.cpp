@@ -166,6 +166,10 @@ void tst_Notifications::populateWithData()
     connection.connectToBackend(_backendId, _backendSecret, filter);
     QTRY_VERIFY(connection.isConnected());
 
+    QSignalSpy pongSpy(&connection, SIGNAL(pong()));
+    connection.ping();
+    QTRY_VERIFY(pongSpy.count());
+
     qDebug("Populating backend with data");
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -269,6 +273,10 @@ void tst_Notifications::update_objects()
     connection.connectToBackend(_backendId, _backendSecret, filter);
     QTRY_VERIFY(connection.isConnected());
 
+    QSignalSpy pongSpy(&connection, SIGNAL(pong()));
+    connection.ping();
+    QTRY_VERIFY(pongSpy.count());
+
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
@@ -343,6 +351,10 @@ void tst_Notifications::remove_objects()
     filter["event"] = QStringLiteral("delete");
     connection.connectToBackend(_backendId, _backendSecret, filter);
     QTRY_VERIFY(connection.isConnected());
+
+    QSignalSpy pongSpy(&connection, SIGNAL(pong()));
+    connection.ping();
+    QTRY_VERIFY(pongSpy.count());
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));

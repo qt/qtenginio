@@ -406,11 +406,28 @@ void EnginioBackendConnection::onSocketReadyRead()
             if (!_isFinalFragment)
                 break;
 
-            if (_protocolOpcode == TextFrameOp) {
+            switch (_protocolOpcode) {
+            case TextFrameOp: {
                 QJsonObject data = QJsonDocument::fromJson(_applicationData).object();
                 data[EnginioString::messageType] = QStringLiteral("data");
                 emit dataReceived(data);
-            } else {
+                break;
+            }
+            case PingOp:{
+                // We must send back identical application data as found in the message.
+                QByteArray payload = _applicationData;
+                QByteArray maskingKey = generateMaskingKey();
+                QByteArray message = constructFrameHeader(/*isFinalFragment*/ true, PongOp, payload.size(), maskingKey);
+                Q_ASSERT(!message.isEmpty());
+                maskData(payload, maskingKey);
+                message.append(payload);
+                _tcpSocket->write(message);
+                break;
+            }
+            case PongOp:
+                emit pong();
+                break;
+            default:
                 protocolError("WebSocketOpcode not yet supported.", UnsupportedDataTypeCloseStatus);
                 qWarning() << "\t\t->" << _protocolOpcode;
             }
@@ -488,5 +505,23 @@ void EnginioBackendConnection::close(WebSocketCloseStatus closeStatus)
 
     maskData(payload, maskingKey);
     message.append(payload);
+    _tcpSocket->write(message);
+}
+
+void EnginioBackendConnection::ping()
+{
+    if (_sentCloseFrame)
+        return;
+
+    // The WebSocket server should accept ping frames without payload according to
+    // the specification, but ours does not, so let's add a dummy payload.
+    QByteArray dummy;
+    dummy.append(QStringLiteral("Ping.").toUtf8());
+    QByteArray maskingKey = generateMaskingKey();
+    QByteArray message = constructFrameHeader(/*isFinalFragment*/ true, PingOp, dummy.size(), maskingKey);
+    Q_ASSERT(!message.isEmpty());
+
+    maskData(dummy, maskingKey);
+    message.append(dummy);
     _tcpSocket->write(message);
 }
