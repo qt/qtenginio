@@ -14,16 +14,16 @@
 #include <QtNetwork/qtcpsocket.h>
 
 #define CRLF "\r\n"
-#define NIL 0x00
-#define FIN 0x80
-#define MSK 0x80
-#define OPC 0x0F
-#define LEN 0x7F
+const static int NIL = 0x00;
+const static int FIN = 0x80;
+const static int MSK = 0x80;
+const static int OPC = 0x0F;
+const static int LEN = 0x7F;
 
-#define DefaultHeaderLength         2
-#define NormalPayloadSize         126
-#define LargePayloadSize          127
-#define NormalPayloadSizeLimit 0xFFFF
+const static quint64 DefaultHeaderLength = 2;
+const static quint64 NormalPayloadSize = 126;
+const static quint64 LargePayloadSize = 127;
+const static quint64 NormalPayloadSizeLimit = 0xFFFF;
 
 namespace {
 
@@ -290,11 +290,11 @@ void EnginioBackendConnection::onSocketReadyRead()
         } // Fall-through.
 
         case FrameHeaderPending: {
-            if (_tcpSocket->bytesAvailable() < DefaultHeaderLength)
+            if (quint64(_tcpSocket->bytesAvailable()) < DefaultHeaderLength)
                 return;
 
             char data[DefaultHeaderLength];
-            if (_tcpSocket->read(data, DefaultHeaderLength) != DefaultHeaderLength)
+            if (quint64(_tcpSocket->read(data, DefaultHeaderLength)) != DefaultHeaderLength)
                 return protocolError("Reading header failed!");
 
             if (!_payloadLength) {
@@ -336,7 +336,7 @@ void EnginioBackendConnection::onSocketReadyRead()
                 WebSocketCloseStatus closeStatus = UnknownCloseStatus;
                 if (_payloadLength >= DefaultHeaderLength) {
                     char data[DefaultHeaderLength];
-                    if (_tcpSocket->read(data, DefaultHeaderLength) != DefaultHeaderLength)
+                    if (quint64(_tcpSocket->read(data, DefaultHeaderLength)) != DefaultHeaderLength)
                         return protocolError("Reading connection close status failed!");
 
                      closeStatus = static_cast<WebSocketCloseStatus>(qFromBigEndian<quint16>(reinterpret_cast<uchar*>(data)));
