@@ -2,6 +2,7 @@
 #define ENGINIOBACKENDCONNECTION_P_H
 
 #include <QtCore/qjsonobject.h>
+#include <QtCore/qstringlist.h>
 #include <QtCore/qurl.h>
 #include <QtNetwork/qabstractsocket.h>
 
@@ -40,6 +41,7 @@ class ENGINIOCLIENT_EXPORT EnginioBackendConnection : public QObject
     QByteArray _applicationData;
 
     QUrl _socketUrl;
+    QStringList _handshakeReplyLines;
     QTcpSocket *_tcpSocket;
     EnginioClient* _client;
 

@@ -273,7 +273,16 @@ void EnginioBackendConnection::onSocketReadyRead()
     while (_tcpSocket->bytesAvailable()) {
         switch (_protocolDecodeState) {
         case HandshakePending: {
-            QString response = QString::fromUtf8(_tcpSocket->readAll());
+            // The response is closed by a CRLF line on its own.
+            while (_handshakeReplyLines.isEmpty() || _handshakeReplyLines.last() != QStringLiteral(CRLF)) {
+                if (!_tcpSocket->canReadLine())
+                    return;
+
+                _handshakeReplyLines.append(QString::fromUtf8(_tcpSocket->readLine()));
+            }
+
+            QString response = _handshakeReplyLines.join(QString());
+            _handshakeReplyLines.clear();
 
             int statusCode = extractResponseStatus(response);
             QString secWebSocketAccept = extractResponseHeader(SecWebSocketAcceptHeader, response, /* ignoreCase */ false);
