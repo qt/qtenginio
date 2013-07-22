@@ -56,6 +56,12 @@
     QCOMPARE(response->networkError(), QNetworkReply::NoError);\
     QVERIFY(response->backendStatus() >= 200 && response->backendStatus() < 300);
 
+namespace EnginioTests {
+    // FIXME: As soon as this functionality is deployed to the production server
+    // this test has to be changed to use EnginioTests::TESTAPP_STAGING_URL.
+    const QString TESTAPP_STAGING_URL(QStringLiteral("https://staging.engin.io"));
+}
+
 class tst_Notifications: public QObject
 {
     Q_OBJECT
@@ -116,8 +122,13 @@ void tst_Notifications::createObjectSchema()
 
 void tst_Notifications::initTestCase()
 {
-    if (EnginioTests::TESTAPP_URL.isEmpty())
-        QFAIL("Needed environment variable ENGINIO_API_URL is not set!");
+    // FIXME: Enable as soon as this can be run on the production server.
+    // if (EnginioTests::TESTAPP_STAGING_URL.isEmpty())
+    //    QFAIL("Needed environment variable ENGINIO_API_URL is not set!");
+
+    qDebug() << "Running test against" << EnginioTests::TESTAPP_STAGING_URL;
+
+    _backendManager.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
 
     _backendName = QStringLiteral("Notifications") + QString::number(QDateTime::currentMSecsSinceEpoch());
     QVERIFY(_backendManager.createBackend(_backendName));
@@ -144,11 +155,11 @@ void tst_Notifications::populateWithData()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
     client.setBackendSecret(_backendSecret);
-    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
 
     EnginioBackendConnection connection;
     QSignalSpy notificationSpy(&connection, SIGNAL(dataReceived(QJsonObject)));
-    connection.setServiceUrl(EnginioTests::TESTAPP_URL);
+    connection.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
 
     QJsonObject filter;
     filter["event"] = QStringLiteral("create");
@@ -247,11 +258,11 @@ void tst_Notifications::update_objects()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
     client.setBackendSecret(_backendSecret);
-    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
 
     EnginioBackendConnection connection;
     QSignalSpy notificationSpy(&connection, SIGNAL(dataReceived(QJsonObject)));
-    connection.setServiceUrl(EnginioTests::TESTAPP_URL);
+    connection.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
 
     QJsonObject filter;
     filter["event"] = QStringLiteral("update");
@@ -322,11 +333,11 @@ void tst_Notifications::remove_objects()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
     client.setBackendSecret(_backendSecret);
-    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
 
     EnginioBackendConnection connection;
     QSignalSpy notificationSpy(&connection, SIGNAL(dataReceived(QJsonObject)));
-    connection.setServiceUrl(EnginioTests::TESTAPP_URL);
+    connection.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
 
     QJsonObject filter;
     filter["event"] = QStringLiteral("delete");

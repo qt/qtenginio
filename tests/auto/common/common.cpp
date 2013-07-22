@@ -78,6 +78,11 @@ void EnginioBackendManager::finished(EnginioReply *reply)
     _responseData = reply->data();
 }
 
+void EnginioBackendManager::setServiceUrl(const QUrl &serviceUrl)
+{
+    _url = serviceUrl;
+}
+
 void EnginioBackendManager::error(EnginioReply *reply)
 {
     Q_ASSERT(reply);
