@@ -80,7 +80,13 @@ void EnginioBackendManager::finished(EnginioReply *reply)
 
 void EnginioBackendManager::setServiceUrl(const QUrl &serviceUrl)
 {
-    _url = serviceUrl;
+    if (_url != serviceUrl) {
+        _url = serviceUrl;
+
+        // Re-authenticate.
+        if (!authenticate())
+            qDebug("ERROR: Session authentication failed!");
+    }
 }
 
 void EnginioBackendManager::error(EnginioReply *reply)
