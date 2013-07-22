@@ -44,6 +44,7 @@
 #include "enginiofakereply_p.h"
 #include "enginioidentity.h"
 #include "enginioobjectadaptor_p.h"
+#include "enginiostring_p.h"
 
 #include <QNetworkAccessManager>
 #include <QPointer>
@@ -58,62 +59,6 @@
 #include <QtCore/qjsonarray.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/qlinkedlist.h>
-
-#define FOR_EACH_ENGINIO_STRING(F)\
-    F(_synced, "_synced")\
-    F(access, "access")\
-    F(apiEnginIo, "https://api.engin.io")\
-    F(authIdentity, "auth/identity")\
-    F(complete, "complete")\
-    F(count, "count")\
-    F(createdAt, "createdAt")\
-    F(empty, "empty")\
-    F(event, "event")\
-    F(expiringUrl, "expiringUrl")\
-    F(file, "file")\
-    F(fileName, "fileName")\
-    F(files, "files")\
-    F(headers, "headers")\
-    F(id, "id")\
-    F(include, "include")\
-    F(incomplete, "incomplete")\
-    F(limit, "limit")\
-    F(members, "members")\
-    F(message, "message")\
-    F(messageType, "messageType")\
-    F(object, "object")\
-    F(objectType, "objectType")\
-    F(objectTypes, "objectTypes")\
-    F(offset, "offset")\
-    F(pageSize, "pageSize")\
-    F(password, "password")\
-    F(payload, "payload")\
-    F(propertyName, "propertyName")\
-    F(query, "query")\
-    F(results, "results")\
-    F(search, "search")\
-    F(session, "session")\
-    F(sessionToken, "sessionToken")\
-    F(sort, "sort")\
-    F(status, "status")\
-    F(targetFileProperty, "targetFileProperty")\
-    F(updatedAt, "updatedAt")\
-    F(url, "url")\
-    F(usergroups, "usergroups")\
-    F(username, "username")\
-    F(users, "users")\
-    F(variant, "variant")\
-
-
-struct ENGINIOCLIENT_EXPORT EnginioString
-{
-#define DECLARE_ENGINIO_STRING(Name, String)\
-    static const QString Name;
-
-    FOR_EACH_ENGINIO_STRING(DECLARE_ENGINIO_STRING)
-#undef DECLARE_ENGINIO_STRING
-};
-
 
 #define CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, Flags) \
     {\

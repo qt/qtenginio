@@ -163,13 +163,6 @@
 
 ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
 
-#define DEFINE_ENGINIO_STRING(Name, String)\
-    const QString EnginioString::Name = QStringLiteral(String);
-
-FOR_EACH_ENGINIO_STRING(DEFINE_ENGINIO_STRING)
-
-#undef DEFINE_ENGINIO_STRING
-
 EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
     q_ptr(client),
     _identity(),
