@@ -21,6 +21,7 @@ const static int OPC = 0x0F;
 const static int LEN = 0x7F;
 
 const static quint64 DefaultHeaderLength = 2;
+const static quint64 MaskingKeyLength = 4;
 const static quint64 NormalPayloadSize = 126;
 const static quint64 LargePayloadSize = 127;
 const static quint64 NormalPayloadSizeLimit = 0xFFFF;
@@ -45,7 +46,12 @@ void computeBase64EncodedSha1VerificationKey(const QByteArray &base64Key)
 QByteArray generateMaskingKey()
 {
     // The masking key is a 32-bit value chosen at random by the client.
-    QByteArray key = QUuid::createUuid().toRfc4122().left(4);
+    QByteArray uuid = QUuid::createUuid().toRfc4122();
+    QByteArray key = uuid.left(MaskingKeyLength);
+    for (int octet = MaskingKeyLength; octet < uuid.size(); ++octet) {
+        int index = octet % key.size();
+        key[index] = key[index] ^ uuid[octet];
+    }
     return key;
 }
 
@@ -60,7 +66,7 @@ void maskData(QByteArray &data, const QByteArray &maskingKey )
 
 int extractResponseStatus(QString responseString)
 {
-    static const QRegularExpression re(HttpResponseStatus);
+    const QRegularExpression re(HttpResponseStatus);
     QRegularExpressionMatch match = re.match(responseString);
     return match.captured(1).toInt();
 }
