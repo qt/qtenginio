@@ -5,10 +5,12 @@
 #include <QtCore/qurl.h>
 #include <QtNetwork/qabstractsocket.h>
 
+#include "enginioclient_global.h"
+
 class EnginioClient;
 class EnginioReply;
 class QTcpSocket;
-class EnginioBackendConnection : public QObject
+class ENGINIOCLIENT_EXPORT EnginioBackendConnection : public QObject
 {
     Q_OBJECT
 
