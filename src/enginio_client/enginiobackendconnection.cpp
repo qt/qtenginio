@@ -16,15 +16,17 @@
 #define CRLF "\r\n"
 const static int NIL = 0x00;
 const static int FIN = 0x80;
+const static int MSB = 0x80;
 const static int MSK = 0x80;
 const static int OPC = 0x0F;
 const static int LEN = 0x7F;
 
 const static quint64 DefaultHeaderLength = 2;
+const static quint64 LargePayloadHeaderLength = 8;
 const static quint64 MaskingKeyLength = 4;
-const static quint64 NormalPayloadSize = 126;
-const static quint64 LargePayloadSize = 127;
-const static quint64 NormalPayloadSizeLimit = 0xFFFF;
+const static quint64 NormalPayloadMarker = 126;
+const static quint64 LargePayloadMarker = 127;
+const static quint64 NormalPayloadLengthLimit = 0xFFFF;
 
 namespace {
 
@@ -126,14 +128,22 @@ const QByteArray constructFrameHeader(bool isFinalFragment
     frameHeader[1] = frameHeader[1] | MSK;
 
     // Payload length. Small payload.
-    if (payloadLength < NormalPayloadSize)
+    if (payloadLength < NormalPayloadMarker)
         frameHeader[1] = frameHeader[1] | payloadLength;
     else {
-        if (payloadLength > NormalPayloadSizeLimit) {
-            qDebug() << "\t ERROR: Large payload not supported:" << payloadLength;
-            return QByteArray();
+        if (payloadLength > NormalPayloadLengthLimit) {
+            frameHeader[1] = frameHeader[1] | LargePayloadMarker;
+            quint64 lengthBigEndian = qToBigEndian<quint64>(payloadLength);
+            QByteArray lengthBytesBigEndian(reinterpret_cast<char*>(&lengthBigEndian), LargePayloadHeaderLength);
+
+            if (lengthBytesBigEndian[0] & MSB) {
+                qDebug() << "\t ERROR: Payload too large!" << payloadLength;
+                return QByteArray();
+            }
+
+            frameHeader.append(lengthBytesBigEndian);
         } else {
-            frameHeader[1] = frameHeader[1] | NormalPayloadSize;
+            frameHeader[1] = frameHeader[1] | NormalPayloadMarker;
             quint16 lengthBigEndian = qToBigEndian<quint16>(payloadLength);
             frameHeader.append(reinterpret_cast<char*>(&lengthBigEndian), DefaultHeaderLength);
         }
@@ -215,10 +225,10 @@ void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
     reply->deleteLater();
 }
 
-void EnginioBackendConnection::protocolError(const char* message)
+void EnginioBackendConnection::protocolError(const char* message, WebSocketCloseStatus status)
 {
     qWarning() << QLatin1Literal(message) << QStringLiteral("Closing socket.");
-    close(ProtocolErrorCloseStatus);
+    close(status);
     _tcpSocket->close();
 }
 
@@ -308,6 +318,25 @@ void EnginioBackendConnection::onSocketReadyRead()
             if (quint64(_tcpSocket->bytesAvailable()) < DefaultHeaderLength)
                 return;
 
+            // Large payload.
+            if (_payloadLength == LargePayloadMarker) {
+                if (quint64(_tcpSocket->bytesAvailable()) < LargePayloadHeaderLength)
+                    return;
+
+                char data[LargePayloadHeaderLength];
+                if (quint64(_tcpSocket->read(data, LargePayloadHeaderLength)) != LargePayloadHeaderLength)
+                    return protocolError("Reading large payload length failed!");
+
+                if (data[0] & MSB)
+                    return protocolError("The most significant bit of a large payload length must be 0!", MessageTooBigCloseStatus);
+
+                // 8 bytes interpreted as a 64-bit unsigned integer
+                _payloadLength = qFromBigEndian<quint64>(reinterpret_cast<uchar*>(data));
+                _protocolDecodeState = PayloadDataPending;
+
+                break;
+            }
+
             char data[DefaultHeaderLength];
             if (quint64(_tcpSocket->read(data, DefaultHeaderLength)) != DefaultHeaderLength)
                 return protocolError("Reading header failed!");
@@ -319,21 +348,15 @@ void EnginioBackendConnection::onSocketReadyRead()
                 _isPayloadMasked = (data[1] & MSK);
                 _payloadLength = (data[1] & LEN);
 
-                // TODO:
-                // - Handle large payload if we need it.
                 if (_isPayloadMasked)
                     return protocolError("Invalid masked frame received from server.");
 
-                // Large payload.
-                if (_payloadLength == LargePayloadSize)
-                    return protocolError("Large payload not supported.");
-
                 // For data length 0-125 LEN is the payload length.
-                if (_payloadLength < NormalPayloadSize)
+                if (_payloadLength < NormalPayloadMarker)
                     _protocolDecodeState = PayloadDataPending;
 
             } else {
-                Q_ASSERT(_payloadLength == NormalPayloadSize);
+                Q_ASSERT(_payloadLength == NormalPayloadMarker);
                 // Normal sized payload: 2 bytes interpreted as the payload
                 // length expressed in network byte order (e.g. big endian).
                 _payloadLength = qFromBigEndian<quint16>(reinterpret_cast<uchar*>(data));
@@ -388,7 +411,7 @@ void EnginioBackendConnection::onSocketReadyRead()
                 data[EnginioString::messageType] = QStringLiteral("data");
                 emit dataReceived(data);
             } else {
-                protocolError("WebSocketOpcode not yet supported");
+                protocolError("WebSocketOpcode not yet supported.", UnsupportedDataTypeCloseStatus);
                 qWarning() << "\t\t->" << _protocolOpcode;
             }
 

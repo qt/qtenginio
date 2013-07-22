@@ -45,8 +45,6 @@ class ENGINIOCLIENT_EXPORT EnginioBackendConnection : public QObject
     QTcpSocket *_tcpSocket;
     EnginioClient* _client;
 
-    void protocolError(const char* message);
-
 public:
     enum WebSocketCloseStatus
     {
@@ -93,6 +91,9 @@ private slots:
     void onSocketStateChanged(QAbstractSocket::SocketState);
     void onSocketConnectionError(QAbstractSocket::SocketError);
     void onSocketReadyRead();
+
+private:
+    void protocolError(const char* message, WebSocketCloseStatus status = ProtocolErrorCloseStatus);
 };
 
 #endif // ENGINIOBACKENDCONNECTION_P_H
