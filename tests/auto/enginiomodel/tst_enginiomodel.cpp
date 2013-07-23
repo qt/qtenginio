@@ -972,8 +972,8 @@ void tst_EnginioModel::createAndModify()
         r2->setDelayFinishedSignal(false);
 
         QTRY_VERIFY(r2->isFinished());
-        QCOMPARE(model.rowCount(), initialRowCount);
         QVERIFY(!r2->isError());
+        QTRY_COMPARE(model.rowCount(), initialRowCount);
     }
     {
         // create and immediatelly update
