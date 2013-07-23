@@ -41,7 +41,7 @@ class ENGINIOCLIENT_EXPORT EnginioBackendConnection : public QObject
     QByteArray _applicationData;
 
     QUrl _socketUrl;
-    QStringList _handshakeReplyLines;
+    QByteArray _handshakeReply;
     QTcpSocket *_tcpSocket;
 
 public:
