@@ -197,6 +197,12 @@ const QByteArray EnginioBackendConnection::generateBase64EncodedUniqueKey()
 
 void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
 {
+    struct ReplyScope {
+        EnginioReply *_reply;
+        ReplyScope(EnginioReply *r) : _reply(r) { }
+        ~ReplyScope() { _reply->deleteLater(); }
+    } scope(reply);
+
     if (reply->isError()) {
         qDebug() << "\n\n### EnginioBackendConnection ERROR";
         qDebug() << reply->errorString();
@@ -216,8 +222,6 @@ void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
 
     _socketUrl = QUrl(urlValue.toString());
     _tcpSocket->connectToHost(_socketUrl.host(), _socketUrl.port(8080));
-
-    reply->deleteLater();
 }
 
 void EnginioBackendConnection::protocolError(const char* message, WebSocketCloseStatus status)
