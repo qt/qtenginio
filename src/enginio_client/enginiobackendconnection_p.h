@@ -2,6 +2,7 @@
 #define ENGINIOBACKENDCONNECTION_P_H
 
 #include <QtCore/qjsonobject.h>
+#include <QtCore/qstringlist.h>
 #include <QtCore/qurl.h>
 #include <QtNetwork/qabstractsocket.h>
 
@@ -40,10 +41,8 @@ class ENGINIOCLIENT_EXPORT EnginioBackendConnection : public QObject
     QByteArray _applicationData;
 
     QUrl _socketUrl;
+    QStringList _handshakeReplyLines;
     QTcpSocket *_tcpSocket;
-    EnginioClient* _client;
-
-    void protocolError(const char* message);
 
 public:
     enum WebSocketCloseStatus
@@ -73,24 +72,27 @@ public:
     explicit EnginioBackendConnection(QObject *parent = 0);
 
     bool isConnected() { return _protocolDecodeState > HandshakePending; }
-    void setServiceUrl(const QUrl& serviceUrl);
-    void connectToBackend(const QByteArray &backendId, const QByteArray &backendSecret, const QJsonObject& messageFilter = QJsonObject());
+    void connectToBackend(EnginioClient *client, const QJsonObject& messageFilter = QJsonObject());
 
 
     void close(WebSocketCloseStatus closeStatus = NormalCloseStatus);
+    void ping();
 
     static const QByteArray generateBase64EncodedUniqueKey();
 
 signals:
     void stateChanged(ConnectionState state);
     void dataReceived(QJsonObject data);
+    void pong();
 
 private slots:
-    void onEnginioError(EnginioReply *);
     void onEnginioFinished(EnginioReply *);
     void onSocketStateChanged(QAbstractSocket::SocketState);
     void onSocketConnectionError(QAbstractSocket::SocketError);
     void onSocketReadyRead();
+
+private:
+    void protocolError(const char* message, WebSocketCloseStatus status = ProtocolErrorCloseStatus);
 };
 
 #endif // ENGINIOBACKENDCONNECTION_P_H

@@ -16,14 +16,17 @@
 #define CRLF "\r\n"
 const static int NIL = 0x00;
 const static int FIN = 0x80;
+const static int MSB = 0x80;
 const static int MSK = 0x80;
 const static int OPC = 0x0F;
 const static int LEN = 0x7F;
 
 const static quint64 DefaultHeaderLength = 2;
-const static quint64 NormalPayloadSize = 126;
-const static quint64 LargePayloadSize = 127;
-const static quint64 NormalPayloadSizeLimit = 0xFFFF;
+const static quint64 LargePayloadHeaderLength = 8;
+const static quint64 MaskingKeyLength = 4;
+const static quint64 NormalPayloadMarker = 126;
+const static quint64 LargePayloadMarker = 127;
+const static quint64 NormalPayloadLengthLimit = 0xFFFF;
 
 namespace {
 
@@ -45,7 +48,12 @@ void computeBase64EncodedSha1VerificationKey(const QByteArray &base64Key)
 QByteArray generateMaskingKey()
 {
     // The masking key is a 32-bit value chosen at random by the client.
-    QByteArray key = QUuid::createUuid().toRfc4122().left(4);
+    QByteArray uuid = QUuid::createUuid().toRfc4122();
+    QByteArray key = uuid.left(MaskingKeyLength);
+    for (int octet = MaskingKeyLength; octet < uuid.size(); ++octet) {
+        int index = octet % key.size();
+        key[index] = key[index] ^ uuid[octet];
+    }
     return key;
 }
 
@@ -60,7 +68,7 @@ void maskData(QByteArray &data, const QByteArray &maskingKey )
 
 int extractResponseStatus(QString responseString)
 {
-    static const QRegularExpression re(HttpResponseStatus);
+    const QRegularExpression re(HttpResponseStatus);
     QRegularExpressionMatch match = re.match(responseString);
     return match.captured(1).toInt();
 }
@@ -120,14 +128,22 @@ const QByteArray constructFrameHeader(bool isFinalFragment
     frameHeader[1] = frameHeader[1] | MSK;
 
     // Payload length. Small payload.
-    if (payloadLength < NormalPayloadSize)
+    if (payloadLength < NormalPayloadMarker)
         frameHeader[1] = frameHeader[1] | payloadLength;
     else {
-        if (payloadLength > NormalPayloadSizeLimit) {
-            qDebug() << "\t ERROR: Large payload not supported:" << payloadLength;
-            return QByteArray();
+        if (payloadLength > NormalPayloadLengthLimit) {
+            frameHeader[1] = frameHeader[1] | LargePayloadMarker;
+            quint64 lengthBigEndian = qToBigEndian<quint64>(payloadLength);
+            QByteArray lengthBytesBigEndian(reinterpret_cast<char*>(&lengthBigEndian), LargePayloadHeaderLength);
+
+            if (lengthBytesBigEndian[0] & MSB) {
+                qDebug() << "\t ERROR: Payload too large!" << payloadLength;
+                return QByteArray();
+            }
+
+            frameHeader.append(lengthBytesBigEndian);
         } else {
-            frameHeader[1] = frameHeader[1] | NormalPayloadSize;
+            frameHeader[1] = frameHeader[1] | NormalPayloadMarker;
             quint16 lengthBigEndian = qToBigEndian<quint16>(payloadLength);
             frameHeader.append(reinterpret_cast<char*>(&lengthBigEndian), DefaultHeaderLength);
         }
@@ -158,13 +174,9 @@ EnginioBackendConnection::EnginioBackendConnection(QObject *parent)
     , _isPayloadMasked(false)
     , _payloadLength(0)
     , _tcpSocket(new QTcpSocket(this))
-    , _client(new EnginioClient(this))
 {
     _tcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
     _tcpSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
-
-    QObject::connect(_client, SIGNAL(error(EnginioReply*)), this, SLOT(onEnginioError(EnginioReply*)));
-    QObject::connect(_client, SIGNAL(finished(EnginioReply*)), this, SLOT(onEnginioFinished(EnginioReply*)));
 
     QObject::connect(_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketConnectionError(QAbstractSocket::SocketError)));
     QObject::connect(_tcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onSocketStateChanged(QAbstractSocket::SocketState)));
@@ -183,17 +195,16 @@ const QByteArray EnginioBackendConnection::generateBase64EncodedUniqueKey()
     return QUuid::createUuid().toRfc4122().toBase64();
 }
 
-void EnginioBackendConnection::onEnginioError(EnginioReply *reply)
-{
-    Q_ASSERT(reply);
-    qDebug() << "\n\n### EnginioBackendConnection ERROR";
-    qDebug() << reply->errorString();
-    reply->dumpDebugInfo();
-    qDebug() << "\n###\n";
-}
-
 void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
 {
+    if (reply->isError()) {
+        qDebug() << "\n\n### EnginioBackendConnection ERROR";
+        qDebug() << reply->errorString();
+        reply->dumpDebugInfo();
+        qDebug() << "\n###\n";
+        return;
+    }
+
     QJsonValue urlValue = reply->data()[EnginioString::expiringUrl];
 
     if (!urlValue.isString()) {
@@ -209,10 +220,10 @@ void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
     reply->deleteLater();
 }
 
-void EnginioBackendConnection::protocolError(const char* message)
+void EnginioBackendConnection::protocolError(const char* message, WebSocketCloseStatus status)
 {
     qWarning() << QLatin1Literal(message) << QStringLiteral("Closing socket.");
-    close(ProtocolErrorCloseStatus);
+    close(status);
     _tcpSocket->close();
 }
 
@@ -273,7 +284,16 @@ void EnginioBackendConnection::onSocketReadyRead()
     while (_tcpSocket->bytesAvailable()) {
         switch (_protocolDecodeState) {
         case HandshakePending: {
-            QString response = QString::fromUtf8(_tcpSocket->readAll());
+            // The response is closed by a CRLF line on its own.
+            while (_handshakeReplyLines.isEmpty() || _handshakeReplyLines.last() != QStringLiteral(CRLF)) {
+                if (!_tcpSocket->canReadLine())
+                    return;
+
+                _handshakeReplyLines.append(QString::fromUtf8(_tcpSocket->readLine()));
+            }
+
+            QString response = _handshakeReplyLines.join(QString());
+            _handshakeReplyLines.clear();
 
             int statusCode = extractResponseStatus(response);
             QString secWebSocketAccept = extractResponseHeader(SecWebSocketAcceptHeader, response, /* ignoreCase */ false);
@@ -293,6 +313,25 @@ void EnginioBackendConnection::onSocketReadyRead()
             if (quint64(_tcpSocket->bytesAvailable()) < DefaultHeaderLength)
                 return;
 
+            // Large payload.
+            if (_payloadLength == LargePayloadMarker) {
+                if (quint64(_tcpSocket->bytesAvailable()) < LargePayloadHeaderLength)
+                    return;
+
+                char data[LargePayloadHeaderLength];
+                if (quint64(_tcpSocket->read(data, LargePayloadHeaderLength)) != LargePayloadHeaderLength)
+                    return protocolError("Reading large payload length failed!");
+
+                if (data[0] & MSB)
+                    return protocolError("The most significant bit of a large payload length must be 0!", MessageTooBigCloseStatus);
+
+                // 8 bytes interpreted as a 64-bit unsigned integer
+                _payloadLength = qFromBigEndian<quint64>(reinterpret_cast<uchar*>(data));
+                _protocolDecodeState = PayloadDataPending;
+
+                break;
+            }
+
             char data[DefaultHeaderLength];
             if (quint64(_tcpSocket->read(data, DefaultHeaderLength)) != DefaultHeaderLength)
                 return protocolError("Reading header failed!");
@@ -304,21 +343,15 @@ void EnginioBackendConnection::onSocketReadyRead()
                 _isPayloadMasked = (data[1] & MSK);
                 _payloadLength = (data[1] & LEN);
 
-                // TODO:
-                // - Handle large payload if we need it.
                 if (_isPayloadMasked)
                     return protocolError("Invalid masked frame received from server.");
 
-                // Large payload.
-                if (_payloadLength == LargePayloadSize)
-                    return protocolError("Large payload not supported.");
-
                 // For data length 0-125 LEN is the payload length.
-                if (_payloadLength < NormalPayloadSize)
+                if (_payloadLength < NormalPayloadMarker)
                     _protocolDecodeState = PayloadDataPending;
 
             } else {
-                Q_ASSERT(_payloadLength == NormalPayloadSize);
+                Q_ASSERT(_payloadLength == NormalPayloadMarker);
                 // Normal sized payload: 2 bytes interpreted as the payload
                 // length expressed in network byte order (e.g. big endian).
                 _payloadLength = qFromBigEndian<quint16>(reinterpret_cast<uchar*>(data));
@@ -368,12 +401,29 @@ void EnginioBackendConnection::onSocketReadyRead()
             if (!_isFinalFragment)
                 break;
 
-            if (_protocolOpcode == TextFrameOp) {
+            switch (_protocolOpcode) {
+            case TextFrameOp: {
                 QJsonObject data = QJsonDocument::fromJson(_applicationData).object();
                 data[EnginioString::messageType] = QStringLiteral("data");
                 emit dataReceived(data);
-            } else {
-                protocolError("WebSocketOpcode not yet supported");
+                break;
+            }
+            case PingOp:{
+                // We must send back identical application data as found in the message.
+                QByteArray payload = _applicationData;
+                QByteArray maskingKey = generateMaskingKey();
+                QByteArray message = constructFrameHeader(/*isFinalFragment*/ true, PongOp, payload.size(), maskingKey);
+                Q_ASSERT(!message.isEmpty());
+                maskData(payload, maskingKey);
+                message.append(payload);
+                _tcpSocket->write(message);
+                break;
+            }
+            case PongOp:
+                emit pong();
+                break;
+            default:
+                protocolError("WebSocketOpcode not yet supported.", UnsupportedDataTypeCloseStatus);
                 qWarning() << "\t\t->" << _protocolOpcode;
             }
 
@@ -385,20 +435,15 @@ void EnginioBackendConnection::onSocketReadyRead()
     }
 }
 
-void EnginioBackendConnection::setServiceUrl(const QUrl &serviceUrl)
-{
-    _client->setServiceUrl(serviceUrl);
-}
-
 /*!
-    \brief Establish a stateful connection to the backend specified by
-    \a backendId and \a backendSecret.
+    \brief Establish a stateful connection to the backend specified by EnginioClient
+    \a client. Note that the client already has to be set up (e.g. backendId and backendSecret has to be valid).
     Optionally, to let the server only send specific messages of interest,
     a \a messageFilter can be provided with the following json scheme:
 
     {
         "data": {
-            objectType: 'objects.todos'
+            "objectType": "objects.todos"
         },
         "event": "create"
     }
@@ -408,14 +453,14 @@ void EnginioBackendConnection::setServiceUrl(const QUrl &serviceUrl)
     \internal
 */
 
-void EnginioBackendConnection::connectToBackend(const QByteArray &backendId
-                                                , const QByteArray &backendSecret
-                                                , const QJsonObject &messageFilter)
+void EnginioBackendConnection::connectToBackend(EnginioClient* client, const QJsonObject &messageFilter)
 {
+    Q_ASSERT(client);
+    Q_ASSERT(!client->backendId().isEmpty());
+    Q_ASSERT(!client->backendSecret().isEmpty());
+
     qDebug() << "## Requesting WebSocket url.";
-    _client->setBackendId(backendId);
-    _client->setBackendSecret(backendSecret);
-    QUrl url(_client->serviceUrl());
+    QUrl url(client->serviceUrl());
     url.setPath(QStringLiteral("/v1/stream_url"));
 
     QByteArray filter = QJsonDocument(messageFilter).toJson(QJsonDocument::Compact);
@@ -428,7 +473,8 @@ void EnginioBackendConnection::connectToBackend(const QByteArray &backendId
     data[EnginioString::headers] = headers;
 
     emit stateChanged(ConnectingState);
-    _client->customRequest(url, QByteArrayLiteral("GET"), data);
+    EnginioReply *reply = client->customRequest(url, QByteArrayLiteral("GET"), data);
+    QObject::connect(reply, SIGNAL(finished(EnginioReply*)), this, SLOT(onEnginioFinished(EnginioReply*)));
 }
 
 void EnginioBackendConnection::close(WebSocketCloseStatus closeStatus)
@@ -450,5 +496,23 @@ void EnginioBackendConnection::close(WebSocketCloseStatus closeStatus)
 
     maskData(payload, maskingKey);
     message.append(payload);
+    _tcpSocket->write(message);
+}
+
+void EnginioBackendConnection::ping()
+{
+    if (_sentCloseFrame)
+        return;
+
+    // The WebSocket server should accept ping frames without payload according to
+    // the specification, but ours does not, so let's add a dummy payload.
+    QByteArray dummy;
+    dummy.append(QStringLiteral("Ping.").toUtf8());
+    QByteArray maskingKey = generateMaskingKey();
+    QByteArray message = constructFrameHeader(/*isFinalFragment*/ true, PingOp, dummy.size(), maskingKey);
+    Q_ASSERT(!message.isEmpty());
+
+    maskData(dummy, maskingKey);
+    message.append(dummy);
     _tcpSocket->write(message);
 }
