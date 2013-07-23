@@ -13,7 +13,7 @@
 #include <QtCore/quuid.h>
 #include <QtNetwork/qtcpsocket.h>
 
-#define CRLF "\r\n"
+#define CRLF QLatin1String("\r\n")
 const static int NIL = 0x00;
 const static int FIN = 0x80;
 const static int MSB = 0x80;
@@ -31,9 +31,9 @@ const static quint64 NormalPayloadLengthLimit = 0xFFFF;
 namespace {
 
 const QString HttpResponseStatus(QStringLiteral("HTTP/1\\.1\\s([0-9]{3})\\s"));
-const QString SecWebSocketAcceptHeader(QStringLiteral("Sec-WebSocket-Accept:\\s(.{28})" CRLF));
-const QString UpgradeHeader(QStringLiteral("Upgrade:\\s(.+)" CRLF));
-const QString ConnectionHeader(QStringLiteral("Connection:\\s(.+)" CRLF));
+const QString SecWebSocketAcceptHeader(QStringLiteral("Sec-WebSocket-Accept:\\s(.{28})") % CRLF);
+const QString UpgradeHeader(QStringLiteral("Upgrade:\\s(.+)") % CRLF);
+const QString ConnectionHeader(QStringLiteral("Connection:\\s(.+)") % CRLF);
 
 QString gBase64EncodedSha1VerificationKey;
 
@@ -86,17 +86,6 @@ const QString extractResponseHeader(QString pattern, QString responseString, boo
 
 const QByteArray constructOpeningHandshake(const QUrl& url)
 {
-    const QString host = url.host(QUrl::FullyEncoded) % QChar::fromLatin1(':') % QString::number(url.port(8080));
-    const QString resourceUri = url.path(QUrl::FullyEncoded) % QChar::fromLatin1('?') % url.query(QUrl::FullyEncoded);
-    const QString request = QStringLiteral("GET %1 HTTP/1.1" CRLF
-                                            "Host: %2" CRLF
-                                            "Upgrade: websocket" CRLF
-                                            "Connection: upgrade" CRLF
-                                            "Sec-WebSocket-Key: %3" CRLF
-                                            "Sec-WebSocket-Version: 13" CRLF
-                                            CRLF
-                                            );
-
     // http://tools.ietf.org/html/rfc6455#section-4.1 §2./ 7.
     // The request must include a header field with the name
     // Sec-WebSocket-Key. The value of this header field must be a
@@ -107,10 +96,18 @@ const QByteArray constructOpeningHandshake(const QUrl& url)
     const QByteArray secWebSocketKeyBase64 = EnginioBackendConnection::generateBase64EncodedUniqueKey();
     computeBase64EncodedSha1VerificationKey(secWebSocketKeyBase64);
 
-    return request.arg(resourceUri
-                       , host
-                       , QString::fromUtf8(secWebSocketKeyBase64)
-                       ).toUtf8();
+    const QString request =  QLatin1String("GET ") % url.path(QUrl::FullyEncoded) % QChar::fromLatin1('?')
+                                % url.query(QUrl::FullyEncoded) % QLatin1String(" HTTP/1.1") % CRLF %
+
+                             QLatin1String("Host: ") % url.host(QUrl::FullyEncoded) % QChar::fromLatin1(':')
+                                % QString::number(url.port(8080)) % CRLF %
+
+                             QLatin1String("Upgrade: websocket") % CRLF %
+                             QLatin1String("Connection: upgrade") % CRLF %
+                             QLatin1String("Sec-WebSocket-Key: ") % QString::fromUtf8(secWebSocketKeyBase64) % CRLF %
+                             QLatin1String("Sec-WebSocket-Version: 13") % CRLF % CRLF;
+
+    return request.toUtf8();
 }
 
 const QByteArray constructFrameHeader(bool isFinalFragment
@@ -285,7 +282,7 @@ void EnginioBackendConnection::onSocketReadyRead()
         switch (_protocolDecodeState) {
         case HandshakePending: {
             // The response is closed by a CRLF line on its own.
-            while (_handshakeReplyLines.isEmpty() || _handshakeReplyLines.last() != QStringLiteral(CRLF)) {
+            while (_handshakeReplyLines.isEmpty() || _handshakeReplyLines.last() != CRLF) {
                 if (!_tcpSocket->canReadLine())
                     return;
 

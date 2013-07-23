@@ -122,10 +122,6 @@ void tst_Notifications::createObjectSchema()
 
 void tst_Notifications::initTestCase()
 {
-    // FIXME: Enable as soon as this can be run on the production server.
-    // if (EnginioTests::TESTAPP_STAGING_URL.isEmpty())
-    //    QFAIL("Needed environment variable ENGINIO_API_URL is not set!");
-
     qDebug() << "Running test against" << EnginioTests::TESTAPP_STAGING_URL;
 
     _backendManager.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
