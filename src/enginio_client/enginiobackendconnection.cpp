@@ -86,9 +86,9 @@ const QString extractResponseHeader(QString pattern, QString responseString, boo
 
 const QByteArray constructOpeningHandshake(const QUrl& url)
 {
-    static QString host = QStringLiteral("%1:%2");
-    static QString resourceUri = QStringLiteral("%1?%2");
-    static QString request = QStringLiteral("GET %1 HTTP/1.1" CRLF
+    const QString host = url.host(QUrl::FullyEncoded) % QChar::fromLatin1(':') % QString::number(url.port(8080));
+    const QString resourceUri = url.path(QUrl::FullyEncoded) % QChar::fromLatin1('?') % url.query(QUrl::FullyEncoded);
+    const QString request = QStringLiteral("GET %1 HTTP/1.1" CRLF
                                             "Host: %2" CRLF
                                             "Upgrade: websocket" CRLF
                                             "Connection: upgrade" CRLF
@@ -107,8 +107,8 @@ const QByteArray constructOpeningHandshake(const QUrl& url)
     const QByteArray secWebSocketKeyBase64 = EnginioBackendConnection::generateBase64EncodedUniqueKey();
     computeBase64EncodedSha1VerificationKey(secWebSocketKeyBase64);
 
-    return request.arg(resourceUri.arg(url.path(QUrl::FullyEncoded), url.query(QUrl::FullyEncoded))
-                       , host.arg(url.host(QUrl::FullyEncoded), QString::number(url.port(8080)))
+    return request.arg(resourceUri
+                       , host
                        , QString::fromUtf8(secWebSocketKeyBase64)
                        ).toUtf8();
 }
