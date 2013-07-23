@@ -3,6 +3,7 @@
 #include "enginioclient_p.h"
 #include "enginioreply.h"
 
+#include <QtCore/QTimerEvent>
 #include <QtCore/qbytearray.h>
 #include <QtCore/qcryptographichash.h>
 #include <QtCore/QtEndian>
@@ -21,6 +22,8 @@ const static int MSK = 0x80;
 const static int OPC = 0x0F;
 const static int LEN = 0x7F;
 
+const static int ThirtySeconds = 30000;
+const static int TwoMinutes = 120000;
 const static quint64 DefaultHeaderLength = 2;
 const static quint64 LargePayloadHeaderLength = 8;
 const static quint64 MaskingKeyLength = 4;
@@ -224,6 +227,25 @@ void EnginioBackendConnection::protocolError(const char* message, WebSocketClose
     _tcpSocket->close();
 }
 
+void EnginioBackendConnection::timerEvent(QTimerEvent *event)
+{
+
+    if (event->timerId() == _keepAliveTimer.timerId()) {
+        _pingTimeoutTimer.start(ThirtySeconds, this);
+        ping();
+        return;
+    }
+
+    if (event->timerId() == _pingTimeoutTimer.timerId()) {
+        _pingTimeoutTimer.stop();
+        close();
+        emit timeOut();
+        return;
+    }
+
+    QObject::timerEvent(event);
+}
+
 void EnginioBackendConnection::onSocketConnectionError(QAbstractSocket::SocketError error)
 {
     protocolError("Socket connection error.");
@@ -307,6 +329,7 @@ void EnginioBackendConnection::onSocketReadyRead()
                     )
                 return protocolError("Handshake failed!");
 
+            _keepAliveTimer.start(TwoMinutes, this);
             _protocolDecodeState = FrameHeaderPending;
             emit stateChanged(ConnectedState);
         } // Fall-through.
@@ -396,6 +419,9 @@ void EnginioBackendConnection::onSocketReadyRead()
                 return;
             }
 
+            // We received data from the server so restart the timer.
+            _keepAliveTimer.start(TwoMinutes, this);
+
             _applicationData.append(_tcpSocket->read(_payloadLength));
             _protocolDecodeState = FrameHeaderPending;
             _payloadLength = 0;
@@ -422,6 +448,7 @@ void EnginioBackendConnection::onSocketReadyRead()
                 break;
             }
             case PongOp:
+                _pingTimeoutTimer.stop();
                 emit pong();
                 break;
             default:
@@ -487,6 +514,7 @@ void EnginioBackendConnection::close(WebSocketCloseStatus closeStatus)
     qDebug() << "## Closing WebSocket connection.";
 
     _sentCloseFrame = true;
+    _keepAliveTimer.stop();
 
     QByteArray payload;
     quint16 closeStatusBigEndian = qToBigEndian<quint16>(closeStatus);

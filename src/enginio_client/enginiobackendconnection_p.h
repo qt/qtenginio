@@ -1,6 +1,7 @@
 #ifndef ENGINIOBACKENDCONNECTION_P_H
 #define ENGINIOBACKENDCONNECTION_P_H
 
+#include <QtCore/qbasictimer.h>
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qstringlist.h>
 #include <QtCore/qurl.h>
@@ -43,6 +44,8 @@ class ENGINIOCLIENT_EXPORT EnginioBackendConnection : public QObject
     QUrl _socketUrl;
     QByteArray _handshakeReply;
     QTcpSocket *_tcpSocket;
+    QBasicTimer _keepAliveTimer;
+    QBasicTimer _pingTimeoutTimer;
 
 public:
     enum WebSocketCloseStatus
@@ -83,6 +86,7 @@ public:
 signals:
     void stateChanged(ConnectionState state);
     void dataReceived(QJsonObject data);
+    void timeOut();
     void pong();
 
 private slots:
@@ -92,6 +96,7 @@ private slots:
     void onSocketReadyRead();
 
 private:
+    void timerEvent(QTimerEvent *event);
     void protocolError(const char* message, WebSocketCloseStatus status = ProtocolErrorCloseStatus);
 };
 
