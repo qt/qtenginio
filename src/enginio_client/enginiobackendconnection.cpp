@@ -174,13 +174,9 @@ EnginioBackendConnection::EnginioBackendConnection(QObject *parent)
     , _isPayloadMasked(false)
     , _payloadLength(0)
     , _tcpSocket(new QTcpSocket(this))
-    , _client(new EnginioClient(this))
 {
     _tcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
     _tcpSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
-
-    QObject::connect(_client, SIGNAL(error(EnginioReply*)), this, SLOT(onEnginioError(EnginioReply*)));
-    QObject::connect(_client, SIGNAL(finished(EnginioReply*)), this, SLOT(onEnginioFinished(EnginioReply*)));
 
     QObject::connect(_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketConnectionError(QAbstractSocket::SocketError)));
     QObject::connect(_tcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onSocketStateChanged(QAbstractSocket::SocketState)));
@@ -199,17 +195,16 @@ const QByteArray EnginioBackendConnection::generateBase64EncodedUniqueKey()
     return QUuid::createUuid().toRfc4122().toBase64();
 }
 
-void EnginioBackendConnection::onEnginioError(EnginioReply *reply)
-{
-    Q_ASSERT(reply);
-    qDebug() << "\n\n### EnginioBackendConnection ERROR";
-    qDebug() << reply->errorString();
-    reply->dumpDebugInfo();
-    qDebug() << "\n###\n";
-}
-
 void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
 {
+    if (reply->isError()) {
+        qDebug() << "\n\n### EnginioBackendConnection ERROR";
+        qDebug() << reply->errorString();
+        reply->dumpDebugInfo();
+        qDebug() << "\n###\n";
+        return;
+    }
+
     QJsonValue urlValue = reply->data()[EnginioString::expiringUrl];
 
     if (!urlValue.isString()) {
@@ -440,20 +435,15 @@ void EnginioBackendConnection::onSocketReadyRead()
     }
 }
 
-void EnginioBackendConnection::setServiceUrl(const QUrl &serviceUrl)
-{
-    _client->setServiceUrl(serviceUrl);
-}
-
 /*!
-    \brief Establish a stateful connection to the backend specified by
-    \a backendId and \a backendSecret.
+    \brief Establish a stateful connection to the backend specified by EnginioClient
+    \a client. Note that the client already has to be set up (e.g. backendId and backendSecret has to be valid).
     Optionally, to let the server only send specific messages of interest,
     a \a messageFilter can be provided with the following json scheme:
 
     {
         "data": {
-            objectType: 'objects.todos'
+            "objectType": "objects.todos"
         },
         "event": "create"
     }
@@ -463,14 +453,14 @@ void EnginioBackendConnection::setServiceUrl(const QUrl &serviceUrl)
     \internal
 */
 
-void EnginioBackendConnection::connectToBackend(const QByteArray &backendId
-                                                , const QByteArray &backendSecret
-                                                , const QJsonObject &messageFilter)
+void EnginioBackendConnection::connectToBackend(EnginioClient* client, const QJsonObject &messageFilter)
 {
+    Q_ASSERT(client);
+    Q_ASSERT(!client->backendId().isEmpty());
+    Q_ASSERT(!client->backendSecret().isEmpty());
+
     qDebug() << "## Requesting WebSocket url.";
-    _client->setBackendId(backendId);
-    _client->setBackendSecret(backendSecret);
-    QUrl url(_client->serviceUrl());
+    QUrl url(client->serviceUrl());
     url.setPath(QStringLiteral("/v1/stream_url"));
 
     QByteArray filter = QJsonDocument(messageFilter).toJson(QJsonDocument::Compact);
@@ -483,7 +473,8 @@ void EnginioBackendConnection::connectToBackend(const QByteArray &backendId
     data[EnginioString::headers] = headers;
 
     emit stateChanged(ConnectingState);
-    _client->customRequest(url, QByteArrayLiteral("GET"), data);
+    EnginioReply *reply = client->customRequest(url, QByteArrayLiteral("GET"), data);
+    QObject::connect(reply, SIGNAL(finished(EnginioReply*)), this, SLOT(onEnginioFinished(EnginioReply*)));
 }
 
 void EnginioBackendConnection::close(WebSocketCloseStatus closeStatus)

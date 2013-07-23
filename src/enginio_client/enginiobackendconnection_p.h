@@ -43,7 +43,6 @@ class ENGINIOCLIENT_EXPORT EnginioBackendConnection : public QObject
     QUrl _socketUrl;
     QStringList _handshakeReplyLines;
     QTcpSocket *_tcpSocket;
-    EnginioClient* _client;
 
 public:
     enum WebSocketCloseStatus
@@ -73,8 +72,7 @@ public:
     explicit EnginioBackendConnection(QObject *parent = 0);
 
     bool isConnected() { return _protocolDecodeState > HandshakePending; }
-    void setServiceUrl(const QUrl& serviceUrl);
-    void connectToBackend(const QByteArray &backendId, const QByteArray &backendSecret, const QJsonObject& messageFilter = QJsonObject());
+    void connectToBackend(EnginioClient *client, const QJsonObject& messageFilter = QJsonObject());
 
 
     void close(WebSocketCloseStatus closeStatus = NormalCloseStatus);
@@ -88,7 +86,6 @@ signals:
     void pong();
 
 private slots:
-    void onEnginioError(EnginioReply *);
     void onEnginioFinished(EnginioReply *);
     void onSocketStateChanged(QAbstractSocket::SocketState);
     void onSocketConnectionError(QAbstractSocket::SocketError);
