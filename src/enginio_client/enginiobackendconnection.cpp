@@ -281,16 +281,21 @@ void EnginioBackendConnection::onSocketReadyRead()
     while (_tcpSocket->bytesAvailable()) {
         switch (_protocolDecodeState) {
         case HandshakePending: {
-            // The response is closed by a CRLF line on its own.
-            while (_handshakeReplyLines.isEmpty() || _handshakeReplyLines.last() != CRLF) {
-                if (!_tcpSocket->canReadLine())
+            // The response is closed by a CRLF line on its own (e.g. ends with two newlines).
+            while (_handshakeReply.isEmpty()
+                   || (!_handshakeReply.endsWith(QString(CRLF % CRLF).toUtf8())
+                   // According to documentation QIODevice::readLine replaces newline characters on
+                   // Windows with '\n', so just to be on the safe side:
+                   && !_handshakeReply.endsWith(QByteArrayLiteral("\n\n")))) {
+
+                if (!_tcpSocket->bytesAvailable())
                     return;
 
-                _handshakeReplyLines.append(QString::fromUtf8(_tcpSocket->readLine()));
+                _handshakeReply.append(_tcpSocket->readLine());
             }
 
-            QString response = _handshakeReplyLines.join(QString());
-            _handshakeReplyLines.clear();
+            QString response = QString::fromUtf8(_handshakeReply);
+            _handshakeReply.clear();
 
             int statusCode = extractResponseStatus(response);
             QString secWebSocketAccept = extractResponseHeader(SecWebSocketAcceptHeader, response, /* ignoreCase */ false);
