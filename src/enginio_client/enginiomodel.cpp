@@ -52,97 +52,136 @@ struct EnginioModelPrivateAttachedData
 {
     uint ref;
     int row;
+    QString id;
     EnginioReply *createReply;
+    EnginioModelPrivateAttachedData(int initRow = -1, const QString &initId = QString())
+        : ref()
+        , row(initRow)
+        , id(initId)
+        , createReply()
+    {}
 };
-Q_DECLARE_TYPEINFO(EnginioModelPrivateAttachedData, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(EnginioModelPrivateAttachedData, Q_MOVABLE_TYPE);
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug dbg, const EnginioModelPrivateAttachedData &a)
 {
-    dbg.nospace() << "EnginioModelPrivateAttachedData(";
-    dbg.nospace() << a.ref << ", "<< a.row;
+    dbg.nospace() << "EnginioModelPrivateAttachedData(ref:";
+    dbg.nospace() << a.ref << ", row: "<< a.row << ", synced: " << (a.ref == 0) << ", id: " << a.id;
     dbg.nospace() << ')';
     return dbg.space();
 }
 #endif
 
-class AttachedDataContainer: public QHash<QString /* object id */, EnginioModelPrivateAttachedData>
+class AttachedDataContainer
 {
-    // TODO QHash is not the right structure, we need to index by id, row and we want to make
-    // bulk update of the data.
+    typedef int Row;
+    typedef int StorageIndex;
+    typedef QString ObjectId;
     typedef EnginioModelPrivateAttachedData AttachedData;
-    typedef QHash<QString /* object id */, AttachedData> Base;
+
+    typedef QHash<Row, StorageIndex> RowIndex;
+    QHash<Row, StorageIndex> _rowIndex;
+
+    typedef QHash<ObjectId, StorageIndex> ObjectIdIndex;
+    QHash<ObjectId, StorageIndex> _objectIdIndex;
+
+    typedef QHash<StorageIndex, AttachedData> Storage;
+    QVector<AttachedData> _storage; // TODO replace by something smarter so we can use pointers instead of index.
+
+    const static int InvalidStorageIndex;
+
+    StorageIndex append(const AttachedData &data)
+    {
+        _storage.append(data);
+        StorageIndex idx = _storage.count() - 1;
+        _rowIndex.insert(data.row, idx);
+        _objectIdIndex.insert(data.id, idx);
+        return idx;
+    }
+
 public:
-    using Base::contains;
-    using Base::value;
-
-    bool contains(int row) const
+    bool isSynced(Row row) const
     {
-        // TODO optimize it
-        for (Base::const_iterator i = constBegin();
-             i != constEnd();
-             ++i) {
-            if (i.value().row == row)
-                return true;
-        }
-        return false;
+        return _storage[_rowIndex.value(row)].ref == 0;
     }
 
-    AttachedData value(int row) const
-    {
-        // TODO optimize it
-        for (Base::const_iterator i = constBegin();
-             i != constEnd();
-             ++i) {
-            if (i.value().row == row)
-                return i.value();
-        }
-        Q_UNREACHABLE();
-    }
-
-    void updateAllDataAfterRow(const int row) {
-        // TODO optimize it is almost O(n log(n))
-        QList<QString> keys = this->keys();
-        foreach (const QString &key, keys) {
-            AttachedData &data = (*this)[key];
+    void updateAllDataAfterRowRemoval(const int row) {
+        _rowIndex.clear();
+        _rowIndex.reserve(_storage.count());
+        for (StorageIndex i = 0; i < _storage.count() ; ++i) {
+            AttachedData &data = _storage[i];
             if (data.row > row)
                 --data.row;
             else if (data.row == row)
                 data.row = -1;
+            _rowIndex.insert(data.row, i);
         }
     }
 
-    AttachedData ref(const QString &id, int row)
+    AttachedData &ref(const ObjectId &id, Row row)
     {
-        AttachedData &data = (*this)[id];
+        StorageIndex idx = _objectIdIndex.value(id, InvalidStorageIndex);
+        if (idx == InvalidStorageIndex) {
+            AttachedData data(row, id);
+            idx = append(data);
+        }
+        AttachedData &data = _storage[idx];
         ++data.ref;
-        Q_ASSERT(data.ref == 1 || data.row == row);
+        Q_ASSERT(_storage[idx].ref == 1 || _storage[idx].row == row);
         data.row = row;
         return data;
     }
 
-    AttachedData ref(int row)
+    AttachedData &ref(Row row)
     {
-        // TODO optimize it
-        Base::iterator i = begin();
-        for (; i != end(); ++i) {
-            if (i.value().row == row)
-                break;
-        }
-        AttachedData &data = *i;
+        StorageIndex idx = _rowIndex.value(row, InvalidStorageIndex);
+        Q_ASSERT(idx != InvalidStorageIndex);
+        AttachedData &data = _storage[idx];
         ++data.ref;
         return data;
     }
 
-    AttachedData deref(const QString &id)
+    AttachedData &deref(const ObjectId &id)
     {
-        Q_ASSERT(contains(id));
-        AttachedData attachedData = take(id);
-        if (--attachedData.ref)
-            insert(id, attachedData);
+        StorageIndex idx = _objectIdIndex.value(id, InvalidStorageIndex);
+        Q_ASSERT(idx != InvalidStorageIndex);
+        AttachedData &attachedData = _storage[idx];
+        --attachedData.ref;
         return attachedData;
     }
+
+    void insert(const AttachedData &data)
+    {
+        _storage.append(data);
+        StorageIndex idx = _storage.count() - 1;
+        _rowIndex.insert(data.row, idx);
+        _objectIdIndex.insert(data.id, idx);
+    }
+
+    void initFromArray(const QJsonArray &array)
+    {
+        const int count = array.count();
+        _storage.clear();
+        _rowIndex.clear();
+        _objectIdIndex.clear();
+
+        _storage.reserve(count);
+        _rowIndex.reserve(count);
+        _objectIdIndex.reserve(count);
+
+        for (int row = 0; row < count; ++row) {
+            QString id = array[row].toObject()[EnginioString::id].toString();
+            Q_ASSERT(!id.isEmpty());
+            AttachedData data(row, id);
+            _storage.append(data);
+            _rowIndex.insert(row, row);
+            _objectIdIndex.insert(id, row);
+        }
+    }
 };
+
+const int AttachedDataContainer::InvalidStorageIndex = -1;
 
 class EnginioModelPrivate {
     QJsonObject _query;
@@ -267,17 +306,19 @@ public:
         QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
         object[EnginioString::id] = temporaryId;
         const int row = _data.count();
-        AttachedData data = {1, row, ereply};
+        AttachedData data(row, temporaryId);
+        data.ref = 1;
+        data.createReply = ereply;
         if (!row) { // the first item need to update roles
             q->beginResetModel();
-            _attachedData.insert(temporaryId, data);
+            _attachedData.insert(data);
             _data.append(value);
             syncRoles();
             _dataChanged.insert(ereply, qMakePair(row, object));
             q->endResetModel();
         } else {
             q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
-            _attachedData.insert(temporaryId, data);
+            _attachedData.insert(data);
             _data.append(value);
             _dataChanged.insert(ereply, qMakePair(row, object));
             q->endInsertRows();
@@ -439,8 +480,8 @@ public:
         int row = requestInfo.first;
         if (row == FullModelReset) {
             q->beginResetModel();
-            _attachedData.clear();
             _data = response->data()[EnginioString::results].toArray();
+            _attachedData.initFromArray(_data);
             syncRoles();
             _canFetchMore = _canFetchMore && _data.count() && (_query[EnginioString::limit].toDouble() <= _data.count());
             q->endResetModel();
@@ -496,7 +537,7 @@ public:
                 q->beginRemoveRows(QModelIndex(), row, row);
                 _data.removeAt(row);
                 // we need to updates rows in _attachedData
-                _attachedData.updateAllDataAfterRow(row);
+                _attachedData.updateAllDataAfterRowRemoval(row);
                 q->endRemoveRows();
             } else {
                 QJsonObject current = _data[row].toObject();
@@ -555,7 +596,7 @@ public:
 
     void delayedOperation(int row, EnginioReply **newReply, QString *tmpId, EnginioReply **createReply)
     {
-        Q_ASSERT(_attachedData.contains(row));
+        Q_ASSERT(!_attachedData.isSynced(row));
         AttachedData data = _attachedData.ref(row);
         *createReply = data.createReply;
         Q_ASSERT(*createReply);
@@ -594,7 +635,6 @@ public:
         EnginioReply *ereply = _enginio->update(deltaObject, _operation);
         _dataChanged.insert(ereply, qMakePair(row, oldObject));
         _attachedData.ref(id, row);
-        Q_ASSERT(_attachedData.contains(id) && _attachedData[id].ref > 0);
         _data.replace(row, newObject);
         emit q->dataChanged(q->index(row), q->index(row));
         return ereply;
@@ -648,7 +688,7 @@ public:
     QVariant data(unsigned row, int role) Q_REQUIRED_RESULT
     {
         if (role == EnginioModel::SyncedRole) {
-            return !_attachedData.contains(row);
+            return _attachedData.isSynced(row);
         }
 
         if (role == Qt::DisplayRole)
