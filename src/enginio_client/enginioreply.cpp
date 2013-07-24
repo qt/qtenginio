@@ -96,7 +96,6 @@ EnginioReply::EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, E
     , d(priv)
 {
     parent->registerReply(reply, this);
-    reply->setParent(this);
 }
 
 
@@ -160,7 +159,6 @@ void EnginioReply::setNetworkReply(QNetworkReply *reply)
 
     d->_nreply->deleteLater();
     d->_nreply = reply;
-    reply->setParent(this);
     d->_data = QJsonObject();
     d->_client->registerReply(reply, this);
 }
@@ -172,9 +170,6 @@ void EnginioReply::swapNetworkReply(EnginioReply *reply)
     reply->d->_client->_replyReplyMap.remove(reply->d->_nreply);
 
     qSwap(d->_nreply, reply->d->_nreply);
-
-    d->_nreply->setParent(this);
-    reply->d->_nreply->setParent(this);
 
     d->_data = reply->d->_data = QJsonObject();
 

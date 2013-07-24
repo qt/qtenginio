@@ -368,6 +368,7 @@ public:
 
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
     {
+        nreply->setParent(ereply);
         _replyReplyMap[nreply] = ereply;
     }
 
