@@ -31,9 +31,9 @@ const static quint64 NormalPayloadLengthLimit = 0xFFFF;
 namespace {
 
 const QString HttpResponseStatus(QStringLiteral("HTTP/1\\.1\\s([0-9]{3})\\s"));
-const QString SecWebSocketAcceptHeader(QStringLiteral("Sec-WebSocket-Accept:\\s(.{28})") % CRLF);
-const QString UpgradeHeader(QStringLiteral("Upgrade:\\s(.+)") % CRLF);
-const QString ConnectionHeader(QStringLiteral("Connection:\\s(.+)") % CRLF);
+const QString SecWebSocketAcceptHeader(QStringLiteral("Sec-WebSocket-Accept:\\s(.{28})\r\n"));
+const QString UpgradeHeader(QStringLiteral("Upgrade:\\s(.+)\r\n"));
+const QString ConnectionHeader(QStringLiteral("Connection:\\s(.+)\r\n"));
 
 QString gBase64EncodedSha1VerificationKey;
 

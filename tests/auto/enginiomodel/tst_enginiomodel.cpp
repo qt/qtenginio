@@ -788,6 +788,8 @@ void tst_EnginioModel::append()
         // the real test
         EnginioReply *r3 = model.append(o3);
         QVERIFY(r3);
+        QVERIFY(!r3->isFinished());
+        r3->setDelayFinishedSignal(true);
         QCOMPARE(model.data(model.index(initialRowCount), EnginioModel::SyncedRole).value<bool>(), false);
 
         EnginioReply *r4 = model.remove(0);
@@ -800,11 +802,8 @@ void tst_EnginioModel::append()
         QObject::connect(r3, &EnginioReply::finished, replyCounter);
         QObject::connect(r4, &EnginioReply::finished, replyCounter);
 
-        r3->setDelayFinishedSignal(true);
-
         QTRY_COMPARE(counter, 1);
         QVERIFY(r4->isFinished());
-        QVERIFY(!r3->isFinished());
         // at this point the first value was deleted but append is still not confirmed
         QCOMPARE(r3->delayFinishedSignal(), true);
         QCOMPARE(model.rowCount(), initialRowCount); // one added and one removed
@@ -972,8 +971,8 @@ void tst_EnginioModel::createAndModify()
         r2->setDelayFinishedSignal(false);
 
         QTRY_VERIFY(r2->isFinished());
-        QCOMPARE(model.rowCount(), initialRowCount);
         QVERIFY(!r2->isError());
+        QTRY_COMPARE(model.rowCount(), initialRowCount);
     }
     {
         // create and immediatelly update
