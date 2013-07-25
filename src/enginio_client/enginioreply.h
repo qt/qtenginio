@@ -67,7 +67,8 @@ public:
     Q_PROPERTY(ErrorTypes errorType READ errorType NOTIFY errorChanged)
     Q_PROPERTY(QNetworkReply::NetworkError networkError READ networkError NOTIFY errorChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
-    Q_PROPERTY(int backendStatus READ backendStatus NOTIFY errorChanged)
+    Q_PROPERTY(int backendStatus READ backendStatus NOTIFY finished)
+    Q_PROPERTY(QString requestId READ requestId CONSTANT)
 
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
     virtual ~EnginioReply();
@@ -76,6 +77,7 @@ public:
     ErrorTypes errorType() const Q_REQUIRED_RESULT;
     QNetworkReply::NetworkError networkError() const Q_REQUIRED_RESULT;
     QString errorString() const Q_REQUIRED_RESULT;
+    QString requestId() const Q_REQUIRED_RESULT;
     int backendStatus() const Q_REQUIRED_RESULT;
 
     bool isError() const Q_REQUIRED_RESULT;

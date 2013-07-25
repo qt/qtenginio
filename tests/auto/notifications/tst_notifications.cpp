@@ -170,6 +170,7 @@ void tst_Notifications::populateWithData()
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
     int iterations = 10;
     int createdObjectCount = 0;
+    QSet<QString> requestIds;
 
     {
         QJsonObject obj;
@@ -193,6 +194,15 @@ void tst_Notifications::populateWithData()
             QTRY_COMPARE_WITH_TIMEOUT(spy.count(), iterations, 10000);
             QCOMPARE(spyError.count(), 0);
             createdObjectCount += iterations;
+
+            for (int i = 0; i < spy.count(); ++i)
+            {
+                EnginioReply *ereply = spy[i][0].value<EnginioReply*>();
+                QVERIFY(!ereply->requestId().isEmpty());
+                QString apiRequestId = ereply->requestId();
+                QVERIFY(!requestIds.contains(apiRequestId));
+                requestIds.insert(apiRequestId);
+            }
         }
 
         spy.clear();
@@ -219,6 +229,15 @@ void tst_Notifications::populateWithData()
             QTRY_COMPARE_WITH_TIMEOUT(spy.count(), iterations, 10000);
             QCOMPARE(spyError.count(), 0);
             createdObjectCount += iterations;
+
+            for (int i = 0; i < spy.count(); ++i)
+            {
+                EnginioReply *ereply = spy[i][0].value<EnginioReply*>();
+                QVERIFY(!ereply->requestId().isEmpty());
+                QString apiRequestId = ereply->requestId();
+                QVERIFY(!requestIds.contains(apiRequestId));
+                requestIds.insert(apiRequestId);
+            }
         }
     }
 
@@ -232,6 +251,12 @@ void tst_Notifications::populateWithData()
         QVERIFY(message["messageType"].toString() == QStringLiteral("data"));
         QVERIFY(message["event"].isString());
         QVERIFY(message["event"].toString() == filter["event"].toString());
+
+        QVERIFY(message["origin"].isObject());
+        QJsonObject origin = message["origin"].toObject();
+        QVERIFY(origin["apiRequestId"].isString());
+        QString apiRequestId = origin["apiRequestId"].toString();
+        QVERIFY(requestIds.contains(apiRequestId));
     }
 
     notificationSpy.clear();
@@ -289,6 +314,8 @@ void tst_Notifications::update_objects()
     QVERIFY(!data.isEmpty());
     QJsonArray array = data["results"].toArray();
 
+    spy.clear();
+
     foreach (const QJsonValue value, array)
     {
         QVERIFY(value.isObject());
@@ -297,8 +324,19 @@ void tst_Notifications::update_objects()
         client.update(obj);
     }
 
-    QTRY_COMPARE(spy.count(), array.count() + 1);
+    QTRY_COMPARE(spy.count(), array.count());
     QCOMPARE(spyError.count(), 0);
+
+    QSet<QString> requestIds;
+
+    for (int i = 0; i < spy.count(); ++i)
+    {
+        EnginioReply *ereply = spy[i][0].value<EnginioReply*>();
+        QVERIFY(!ereply->requestId().isEmpty());
+        QString apiRequestId = ereply->requestId();
+        QVERIFY(!requestIds.contains(apiRequestId));
+        requestIds.insert(apiRequestId);
+    }
 
     QTRY_COMPARE_WITH_TIMEOUT(notificationSpy.count(), array.count(), 10000);
 
@@ -310,6 +348,12 @@ void tst_Notifications::update_objects()
         QVERIFY(message["messageType"].toString() == QStringLiteral("data"));
         QVERIFY(message["event"].isString());
         QVERIFY(message["event"].toString() == filter["event"].toString());
+
+        QVERIFY(message["origin"].isObject());
+        QJsonObject origin = message["origin"].toObject();
+        QVERIFY(origin["apiRequestId"].isString());
+        QString apiRequestId = origin["apiRequestId"].toString();
+        QVERIFY(requestIds.contains(apiRequestId));
     }
 
     notificationSpy.clear();
@@ -367,6 +411,8 @@ void tst_Notifications::remove_objects()
     QVERIFY(!data.isEmpty());
     QJsonArray array = data["results"].toArray();
 
+    spy.clear();
+
     foreach (const QJsonValue value, array)
     {
         QVERIFY(value.isObject());
@@ -375,8 +421,19 @@ void tst_Notifications::remove_objects()
         client.remove(query);
     }
 
-    QTRY_COMPARE(spy.count(), array.count() + 1);
+    QTRY_COMPARE(spy.count(), array.count());
     QCOMPARE(spyError.count(), 0);
+
+    QSet<QString> requestIds;
+
+    for (int i = 0; i < spy.count(); ++i)
+    {
+        EnginioReply *ereply = spy[i][0].value<EnginioReply*>();
+        QVERIFY(!ereply->requestId().isEmpty());
+        QString apiRequestId = ereply->requestId();
+        QVERIFY(!requestIds.contains(apiRequestId));
+        requestIds.insert(apiRequestId);
+    }
 
     QTRY_COMPARE_WITH_TIMEOUT(notificationSpy.count(), array.count(), 10000);
 
@@ -388,6 +445,12 @@ void tst_Notifications::remove_objects()
         QVERIFY(message["messageType"].toString() == QStringLiteral("data"));
         QVERIFY(message["event"].isString());
         QVERIFY(message["event"].toString() == filter["event"].toString());
+
+        QVERIFY(message["origin"].isObject());
+        QJsonObject origin = message["origin"].toObject();
+        QVERIFY(origin["apiRequestId"].isString());
+        QString apiRequestId = origin["apiRequestId"].toString();
+        QVERIFY(requestIds.contains(apiRequestId));
     }
 
     notificationSpy.clear();
