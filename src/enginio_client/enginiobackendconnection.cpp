@@ -48,6 +48,11 @@ void computeBase64EncodedSha1VerificationKey(const QByteArray &base64Key)
     gBase64EncodedSha1VerificationKey = QString::fromUtf8(QCryptographicHash::hash(webSocketMagicString, QCryptographicHash::Sha1).toBase64());
 }
 
+const QByteArray generateBase64EncodedUniqueKey()
+{
+    return QUuid::createUuid().toRfc4122().toBase64();
+}
+
 QByteArray generateMaskingKey()
 {
     // The masking key is a 32-bit value chosen at random by the client.
@@ -96,7 +101,7 @@ const QByteArray constructOpeningHandshake(const QUrl& url)
     // been base64-encoded.
     // The nonce must be selected randomly for each connection.
 
-    const QByteArray secWebSocketKeyBase64 = EnginioBackendConnection::generateBase64EncodedUniqueKey();
+    const QByteArray secWebSocketKeyBase64 = generateBase64EncodedUniqueKey();
     computeBase64EncodedSha1VerificationKey(secWebSocketKeyBase64);
 
     const QString request =  QLatin1String("GET ") % url.path(QUrl::FullyEncoded) % QChar::fromLatin1('?')
@@ -181,18 +186,6 @@ EnginioBackendConnection::EnginioBackendConnection(QObject *parent)
     QObject::connect(_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketConnectionError(QAbstractSocket::SocketError)));
     QObject::connect(_tcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onSocketStateChanged(QAbstractSocket::SocketState)));
     QObject::connect(_tcpSocket, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
-}
-
-/*!
-    \brief Generates a unique key useful for identification purposes.
-
-    \return 24-byte base64 encoded nonce created from a 16-byte binary UUID
-    \internal
-*/
-
-const QByteArray EnginioBackendConnection::generateBase64EncodedUniqueKey()
-{
-    return QUuid::createUuid().toRfc4122().toBase64();
 }
 
 void EnginioBackendConnection::onEnginioFinished(EnginioReply *reply)
