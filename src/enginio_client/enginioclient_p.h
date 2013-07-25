@@ -506,30 +506,30 @@ public:
         ObjectAdaptor<T> o(object);
         o.remove(EnginioString::objectType);
         o.remove(EnginioString::id);
+        QNetworkReply *reply = 0;
+        QByteArray data;
 #if QT_VERSION < QT_VERSION_CHECK(5, 2, 0)
-        if (operation == EnginioClient::ObjectAclOperation) {
-            QByteArray data = o.toJson();
+        if (operation != EnginioClient::ObjectAclOperation)
+            reply = networkManager()->deleteResource(req);
+        else {
+            data = o.toJson();
             QBuffer *buffer = new QBuffer();
             buffer->setData(data);
             buffer->open(QIODevice::ReadOnly);
-            QNetworkReply *reply = networkManager()->sendCustomRequest(req, QByteArrayLiteral("DELETE"), buffer);
+            reply = networkManager()->sendCustomRequest(req, QByteArrayLiteral("DELETE"), buffer);
             buffer->setParent(reply);
-
-            if (gEnableEnginioDebugInfo)
-                _requestData.insert(reply, data);
-
-            return reply;
         }
-        return networkManager()->deleteResource(req);
 #else
-        QByteArray data = o.toJson();
-        QNetworkReply *reply = networkManager()->deleteResource(req, data);
+        data = o.toJson();
+        reply = networkManager()->deleteResource(req, data);
+#endif
 
-        if (gEnableEnginioDebugInfo)
+        Q_ASSERT(reply);
+
+        if (gEnableEnginioDebugInfo && !data.isEmpty())
             _requestData.insert(reply, data);
 
         return reply;
-#endif
     }
 
     template<class T>
