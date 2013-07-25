@@ -59,6 +59,7 @@
 #include <QtCore/qjsonarray.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/qlinkedlist.h>
+#include <QtCore/quuid.h>
 
 #define CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, Flags) \
     {\
@@ -86,6 +87,25 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 {
     enum PathOptions { Default, IncludeIdInPath = 1};
 
+    QNetworkRequest prepareRequest(const QUrl &url)
+    {
+        QByteArray requestId = QUuid::createUuid().toByteArray();
+
+        // Remove unneeded pretty-formatting.
+        // before: "{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}"
+        // after:  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        requestId.chop(1);      // }
+        requestId.remove(0, 1); // {
+        requestId.remove(23, 1);
+        requestId.remove(18, 1);
+        requestId.remove(13, 1);
+        requestId.remove(8, 1);
+
+        QNetworkRequest req(_request);
+        req.setUrl(url);
+        req.setRawHeader(EnginioString::XRequestId, requestId);
+        return req;
+    }
 
     template<class T>
     static bool getPath(const T &object, int operation, QString *path, QByteArray *errorMsg, PathOptions flags = Default)
@@ -406,8 +426,7 @@ public:
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH(url, object, AuthenticationOperation);
 
-        QNetworkRequest req(_request);
-        req.setUrl(url);
+        QNetworkRequest req = prepareRequest(url);
         QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
         QNetworkReply *reply = networkManager()->post(req, data);
 
@@ -422,8 +441,7 @@ public:
         Q_ASSERT(!url.isEmpty());
         Q_ASSERT(!httpOperation.isEmpty());
 
-        QNetworkRequest req(_request);
-        req.setUrl(url);
+        QNetworkRequest req = prepareRequest(url);
 
         if (data[EnginioString::headers].isObject()) {
             QJsonObject headers = data[EnginioString::headers].toObject();
@@ -464,8 +482,7 @@ public:
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
 
-        QNetworkRequest req(_request);
-        req.setUrl(url);
+        QNetworkRequest req = prepareRequest(url);
 
         // TODO FIXME we need to remove "id" and "objectType" because of an internal server error.
         // It failes at least for ACL but maybe for others too.
@@ -493,8 +510,7 @@ public:
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
 
-        QNetworkRequest req(_request);
-        req.setUrl(url);
+        QNetworkRequest req = prepareRequest(url);
 
         // TODO FIXME we need to remove "id" and "objectType" because of an internal server error.
         // It failes at least for ACL but maybe for others too.
@@ -506,30 +522,30 @@ public:
         ObjectAdaptor<T> o(object);
         o.remove(EnginioString::objectType);
         o.remove(EnginioString::id);
+        QNetworkReply *reply = 0;
+        QByteArray data;
 #if QT_VERSION < QT_VERSION_CHECK(5, 2, 0)
-        if (operation == EnginioClient::ObjectAclOperation) {
-            QByteArray data = o.toJson();
+        if (operation != EnginioClient::ObjectAclOperation)
+            reply = networkManager()->deleteResource(req);
+        else {
+            data = o.toJson();
             QBuffer *buffer = new QBuffer();
             buffer->setData(data);
             buffer->open(QIODevice::ReadOnly);
-            QNetworkReply *reply = networkManager()->sendCustomRequest(req, QByteArrayLiteral("DELETE"), buffer);
+            reply = networkManager()->sendCustomRequest(req, QByteArrayLiteral("DELETE"), buffer);
             buffer->setParent(reply);
-
-            if (gEnableEnginioDebugInfo)
-                _requestData.insert(reply, data);
-
-            return reply;
         }
-        return networkManager()->deleteResource(req);
 #else
-        QByteArray data = o.toJson();
-        QNetworkReply *reply = networkManager()->deleteResource(req, data);
+        data = o.toJson();
+        reply = networkManager()->deleteResource(req, data);
+#endif
 
-        if (gEnableEnginioDebugInfo)
+        Q_ASSERT(reply);
+
+        if (gEnableEnginioDebugInfo && !data.isEmpty())
             _requestData.insert(reply, data);
 
         return reply;
-#endif
     }
 
     template<class T>
@@ -538,8 +554,7 @@ public:
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH(url, object, operation);
 
-        QNetworkRequest req(_request);
-        req.setUrl(url);
+        QNetworkRequest req = prepareRequest(url);
 
         QByteArray data = object.toJson();
 
@@ -597,8 +612,7 @@ public:
         }
         url.setQuery(urlQuery);
 
-        QNetworkRequest req(_request);
-        req.setUrl(url);
+        QNetworkRequest req = prepareRequest(url);
 
         return networkManager()->get(req);
     }
@@ -615,8 +629,7 @@ public:
             url.setQuery(query);
         }
 
-        QNetworkRequest req(_request);
-        req.setUrl(url);
+        QNetworkRequest req = prepareRequest(url);
 
         QNetworkReply *reply = networkManager()->get(req);
         return reply;
@@ -713,9 +726,8 @@ private:
         QUrl serviceUrl = _serviceUrl;
         CHECK_AND_SET_PATH(serviceUrl, QJsonObject(), FileOperation);
 
-        QNetworkRequest req(_request);
+        QNetworkRequest req = prepareRequest(serviceUrl);
         req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray());
-        req.setUrl(serviceUrl);
 
         QHttpMultiPart *multiPart = createHttpMultiPart(object, device, mimeType);
         QNetworkReply *reply = networkManager()->post(req, multiPart);
@@ -760,8 +772,7 @@ private:
         QUrl serviceUrl = _serviceUrl;
         CHECK_AND_SET_PATH(serviceUrl, QJsonObject(), FileOperation);
 
-        QNetworkRequest req(_request);
-        req.setUrl(serviceUrl);
+        QNetworkRequest req = prepareRequest(serviceUrl);
 
         QNetworkReply *reply = networkManager()->post(req, object.toJson());
         _chunkedUploads.insert(reply, qMakePair(device, static_cast<qint64>(0)));
@@ -780,8 +791,7 @@ private:
             serviceUrl.setPath(path);
         }
 
-        QNetworkRequest req(_request);
-        req.setUrl(serviceUrl);
+        QNetworkRequest req = prepareRequest(serviceUrl);
         req.setHeader(QNetworkRequest::ContentTypeHeader,
                       QByteArrayLiteral("application/octet-stream"));
 

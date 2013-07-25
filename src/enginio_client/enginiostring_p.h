@@ -94,6 +94,8 @@ struct ENGINIOCLIENT_EXPORT EnginioString
 
     FOR_EACH_ENGINIO_STRING(DECLARE_ENGINIO_STRING)
 #undef DECLARE_ENGINIO_STRING
+
+    static const QByteArray XRequestId;
 };
 
 

@@ -76,6 +76,11 @@ public:
         return _nreply->attribute(QNetworkRequest::HttpStatusCodeAttribute).value<int>();
     }
 
+    QString requestId() const Q_REQUIRED_RESULT
+    {
+        return QString::fromUtf8(_nreply->request().rawHeader(EnginioString::XRequestId));
+    }
+
     QString errorString() const Q_REQUIRED_RESULT
     {
         return _nreply->errorString();
