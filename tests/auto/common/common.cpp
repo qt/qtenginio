@@ -376,6 +376,11 @@ bool prepareTestObjectType(const QString &backendName)
 {
     QJsonObject schema;
     schema["name"] = CUSTOM_OBJECT1;
+
+    QJsonObject settings;
+    settings["websocket"] = true;
+    schema["settings"] = settings;
+
     QJsonObject testCase;
     testCase["name"] = QStringLiteral("testCase");
     testCase["type"] = QStringLiteral("string");

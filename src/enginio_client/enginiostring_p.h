@@ -45,10 +45,13 @@
     F(_synced, "_synced")\
     F(access, "access")\
     F(apiEnginIo, "https://api.engin.io")\
+    F(apiRequestId, "apiRequestId")\
     F(authIdentity, "auth/identity")\
     F(complete, "complete")\
     F(count, "count")\
+    F(create, "create")\
     F(createdAt, "createdAt")\
+    F(data, "data")\
     F(empty, "empty")\
     F(event, "event")\
     F(expiringUrl, "expiringUrl")\
@@ -67,6 +70,7 @@
     F(objectType, "objectType")\
     F(objectTypes, "objectTypes")\
     F(offset, "offset")\
+    F(origin, "origin")\
     F(pageSize, "pageSize")\
     F(password, "password")\
     F(payload, "payload")\
@@ -79,6 +83,7 @@
     F(sort, "sort")\
     F(status, "status")\
     F(targetFileProperty, "targetFileProperty")\
+    F(update, "update")\
     F(updatedAt, "updatedAt")\
     F(url, "url")\
     F(usergroups, "usergroups")\

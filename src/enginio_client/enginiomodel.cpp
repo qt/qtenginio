@@ -40,6 +40,7 @@
 #include "enginioclient_p.h"
 #include "enginiofakereply_p.h"
 #include "enginiodummyreply_p.h"
+#include "enginiobackendconnection_p.h"
 
 #include <QtCore/qobject.h>
 #include <QtCore/qvector.h>
@@ -101,6 +102,18 @@ class AttachedDataContainer
     }
 
 public:
+    bool contains(const ObjectId &id) const
+    {
+        return _objectIdIndex.contains(id);
+    }
+
+    Row row(const ObjectId &id) const
+    {
+        Q_ASSERT(contains(id));
+        StorageIndex idx = _objectIdIndex.value(id, InvalidStorageIndex);
+        return _storage[idx].row;
+    }
+
     bool isSynced(Row row) const
     {
         return _storage[_rowIndex.value(row)].ref == 0;
@@ -183,6 +196,44 @@ public:
 
 const int AttachedDataContainer::InvalidStorageIndex = -1;
 
+namespace {
+template<class T>
+struct TwoRefSet: protected QHash<T, signed char>
+{
+    typedef QHash<T, signed char> Base;
+    void insert(const T &key)
+    {
+        Base::operator [](key) += 2;
+    }
+    void remove(const T &key)
+    {
+        typename Base::iterator::reference value = Base::operator [](key);
+        Q_ASSERT(value);
+        if (--value <= 0)
+            Base::remove(key);
+    }
+    using Base::isEmpty;
+    using Base::contains;
+    using Base::count;
+
+#ifndef QT_NO_DEBUG_STREAM
+    template<class B>
+    friend QDebug operator<<(QDebug dbg, const TwoRefSet<B> &a);
+#endif
+};
+
+#ifndef QT_NO_DEBUG_STREAM
+template<class T>
+QDebug operator<<(QDebug dbg, const TwoRefSet<T> &a)
+{
+    dbg.nospace() << "TwoRefSet(";
+    dbg.nospace() << static_cast<typename TwoRefSet<T>::Base>(a);
+    dbg.nospace() << ')';
+    return dbg.space();
+}
+#endif
+} // anonymous namespace
+
 class EnginioModelPrivate {
     QJsonObject _query;
     EnginioClient *_enginio;
@@ -202,6 +253,8 @@ class EnginioModelPrivate {
     QHash<int, QString> _roles;
 
     QJsonArray _data; // TODO replace by a sparse array, and add laziness
+    EnginioBackendConnection *_notifications;
+    TwoRefSet<QString> _ownRequests;
 
     class EnginioDestroyed
     {
@@ -248,7 +301,22 @@ class EnginioModelPrivate {
         {
             model->execute();
         }
+    };
 
+    class NotificationReceived
+    {
+        EnginioModelPrivate *model;
+    public:
+        NotificationReceived(EnginioModelPrivate *m)
+            : model(m)
+        {
+            Q_ASSERT(m);
+        }
+
+        void operator ()(QJsonObject data)
+        {
+            model->receivedNotification(data);
+        }
     };
 
 public:
@@ -259,6 +327,7 @@ public:
         , _latestRequestedOffset(0)
         , _canFetchMore(false)
         , _rolesCounter(EnginioModel::SyncedRole)
+        , _notifications()
     {
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
@@ -267,8 +336,102 @@ public:
 
     ~EnginioModelPrivate()
     {
+        if (_notifications && qintptr(_notifications) != -1)
+            _notifications->close();
         foreach (const QMetaObject::Connection &connection, _connections)
             QObject::disconnect(connection);
+
+        if (!_ownRequests.isEmpty() && qintptr(_notifications) != -1)
+            qDebug() << "own unfinished requests(" << _ownRequests.count() << "):" << _ownRequests;
+    }
+
+    void disableNotifications()
+    {
+        if (_notifications && qintptr(_notifications) != -1)
+            delete _notifications;
+        _notifications = (EnginioBackendConnection*)-1;
+    }
+
+    void receivedNotification(QJsonObject data)
+    {
+        const QJsonObject origin = data[EnginioString::origin].toObject();
+        const QString requestId = origin[EnginioString::apiRequestId].toString();
+        if (_ownRequests.contains(requestId)) {
+            // ignore own requests, we will handle them in finished signal handler
+            // TODO it woudl be better to handle them in the faster way
+            // it should not matter how we got confirmation
+            _ownRequests.remove(requestId);
+            return;
+        }
+        QJsonObject object = data[EnginioString::data].toObject();
+        QString event = data[EnginioString::event].toString();
+        if (event == EnginioString::create) {
+            receivedCreateNotification(object);
+        } else if (event == EnginioString::update) {
+            receivedUpdateNotification(object);
+        } else {
+            receivedRemoveNotification(object);
+        }
+        qDebug() << Q_FUNC_INFO << data;
+    }
+
+    void receivedRemoveNotification(const QJsonObject &object, int rowHint = -1)
+    {
+        int row = rowHint;
+        if (rowHint == -1) {
+            QString id = object[EnginioString::id].toString();
+            if (Q_UNLIKELY(!_attachedData.contains(id))) {
+                // removing not existing object
+                return;
+            }
+            row = _attachedData.row(id);
+        }
+        q->beginRemoveRows(QModelIndex(), row, row);
+        _data.removeAt(row);
+        // we need to updates rows in _attachedData
+        _attachedData.updateAllDataAfterRowRemoval(row);
+        q->endRemoveRows();
+    }
+
+    void receivedUpdateNotification(const QJsonObject &object, const QString &idHint = QString(), int row = -1)
+    {
+        // update an existing object
+        if (row == -1) {
+            QString id = idHint.isEmpty() ? object[EnginioString::id].toString() : idHint;
+            Q_ASSERT(_attachedData.contains(id));
+            row = _attachedData.row(id);
+        }
+
+        QJsonObject current = _data[row].toObject();
+        QDateTime currentUpdateAt = QDateTime::fromString(current[EnginioString::updatedAt].toString(), Qt::ISODate);
+        QDateTime newUpdateAt = QDateTime::fromString(object[EnginioString::updatedAt].toString(), Qt::ISODate);
+        if (newUpdateAt < currentUpdateAt) {
+            // we already have a newer version
+            return;
+        }
+        if (_data.count() == 1) {
+            q->beginResetModel();
+            _data.replace(row, object);
+            syncRoles();
+            q->endResetModel();
+        } else {
+            _data.replace(row, object);
+            emit q->dataChanged(q->index(row), q->index(row));
+        }
+    }
+
+    void receivedCreateNotification(const QJsonObject &object)
+    {
+        // create a new object
+        QString id = object[EnginioString::id].toString();
+        Q_ASSERT(!_attachedData.contains(id));
+        AttachedData data;
+        data.row = _data.count();
+        data.id = id;
+        q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
+        _attachedData.insert(data);
+        _data.append(object);
+        q->endInsertRows();
     }
 
     EnginioClient *enginio() const Q_REQUIRED_RESULT
@@ -303,6 +466,7 @@ public:
         QJsonObject object(value);
         object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
         EnginioReply *ereply = _enginio->create(object, _operation);
+        _ownRequests.insert(ereply->requestId());
         QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
         object[EnginioString::id] = temporaryId;
         const int row = _data.count();
@@ -402,6 +566,7 @@ public:
         Q_ASSERT(!id.isEmpty());
         _attachedData.ref(id, row); // TODO if refcount is > 1 then do not emit dataChanged
         EnginioReply *ereply = _enginio->remove(oldObject, _operation);
+        _ownRequests.insert(ereply->requestId());
         _dataChanged.insert(ereply, qMakePair(row, oldObject));
         QVector<int> roles(1);
         roles.append(EnginioModel::SyncedRole);
@@ -457,6 +622,19 @@ public:
         if (!_enginio || _enginio->backendId().isEmpty() || _enginio->backendSecret().isEmpty())
             return;
         if (!_query.isEmpty()) {
+            if (qintptr(_notifications) != -1) {
+                if (_notifications)
+                    delete _notifications;
+                // setup notifications
+                QJsonObject filter;
+                QJsonObject objectType;
+                objectType.insert(EnginioString::objectType, _query[EnginioString::objectType]);
+                filter.insert(EnginioString::data, objectType);
+                _notifications = new EnginioBackendConnection(q);
+                _notifications->connectToBackend(_enginio, filter);
+                QObject::connect(_notifications, &EnginioBackendConnection::dataReceived, NotificationReceived(this));
+            }
+            // send full query
             const EnginioReply *ereply = _enginio->query(_query, _operation);
             if (_canFetchMore)
                 _latestRequestedOffset = _query[EnginioString::limit].toDouble();
@@ -503,6 +681,7 @@ public:
             _canFetchMore = limit <= dataCount;
             q->endInsertRows();
         } else {
+            _ownRequests.remove(response->requestId());
             QJsonObject newValue(response->data());
             QJsonObject oldValue = requestInfo.second;
             QString oldId = oldValue[EnginioString::id].toString();
@@ -534,28 +713,11 @@ public:
             }
 
             if (removeOperation) {
-                q->beginRemoveRows(QModelIndex(), row, row);
-                _data.removeAt(row);
-                // we need to updates rows in _attachedData
-                _attachedData.updateAllDataAfterRowRemoval(row);
-                q->endRemoveRows();
+                receivedRemoveNotification(oldValue, row);
             } else {
-                QJsonObject current = _data[row].toObject();
-                QDateTime currentUpdateAt = QDateTime::fromString(current[EnginioString::updatedAt].toString(), Qt::ISODate);
-                QDateTime newUpdateAt = QDateTime::fromString(newValue[EnginioString::updatedAt].toString(), Qt::ISODate);
-                if (newUpdateAt < currentUpdateAt) {
-                    // we already have a newer version
-                    return;
-                }
-                if (_data.count() == 1) {
-                    q->beginResetModel();
-                    _data.replace(row, newValue);
-                    syncRoles();
-                    q->endResetModel();
-                } else {
-                    _data.replace(row, newValue);
-                    emit q->dataChanged(q->index(row), q->index(row));
-                }
+                // create and update goes through the same code path because
+                // the model already have a dummy item.
+                receivedUpdateNotification(newValue, oldId, row);
             }
         }
     }
@@ -633,6 +795,7 @@ public:
         deltaObject[EnginioString::id] = id;
         deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
         EnginioReply *ereply = _enginio->update(deltaObject, _operation);
+        _ownRequests.insert(ereply->requestId());
         _dataChanged.insert(ereply, qMakePair(row, oldObject));
         _attachedData.ref(id, row);
         _data.replace(row, newObject);
@@ -971,6 +1134,15 @@ bool EnginioModel::setData(const QModelIndex &index, const QVariant &value, int 
 QHash<int, QByteArray> EnginioModel::roleNames() const
 {
     return d->roleNames();
+}
+
+/*!
+    \internal
+    Allows to disable notifications for autotests.
+*/
+void EnginioModel::disableNotifications()
+{
+    d->disableNotifications();
 }
 
 /*!

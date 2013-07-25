@@ -89,6 +89,8 @@ private slots:
     void removeExternallyRemovedObject();
     void setPropertyOnExternallyRemovedObject();
     void createAndModify();
+    void externalNotification();
+    void createUpdateRemoveWithNotification();
 private:
     template<class T>
     void externallyRemovedImpl();
@@ -562,6 +564,7 @@ void tst_EnginioModel::deletionReordered()
     QJsonObject query = QJsonDocument::fromJson("{\"limit\":2}").object();
     QVERIFY(!query.isEmpty());
     EnginioModel model;
+    model.disableNotifications();
     model.setQuery(query);
     model.setOperation(EnginioClient::UserOperation);
 
@@ -600,6 +603,7 @@ void tst_EnginioModel::deleteTwiceTheSame()
     QJsonObject query = QJsonDocument::fromJson("{\"limit\":1}").object();
     QVERIFY(!query.isEmpty());
     EnginioModel model;
+    model.disableNotifications();
     model.setQuery(query);
     model.setOperation(EnginioClient::UserOperation);
 
@@ -642,6 +646,7 @@ void tst_EnginioModel::updateAndDeleteReordered()
     QJsonObject query = QJsonDocument::fromJson("{\"limit\":1}").object();
     QVERIFY(!query.isEmpty());
     EnginioModel model;
+    model.disableNotifications();
     model.setQuery(query);
     model.setOperation(EnginioClient::UserOperation);
 
@@ -683,6 +688,7 @@ void tst_EnginioModel::updateReordered()
     QJsonObject query = QJsonDocument::fromJson("{\"limit\":1}").object();
     QVERIFY(!query.isEmpty());
     EnginioModel model;
+    model.disableNotifications();
     model.setQuery(query);
     model.setOperation(EnginioClient::UserOperation);
 
@@ -735,6 +741,7 @@ void tst_EnginioModel::append()
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioModel model;
+    model.disableNotifications();
     model.setQuery(query);
 
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
@@ -860,6 +867,7 @@ void tst_EnginioModel::externallyRemovedImpl()
     }
 
     EnginioModel model;
+    model.disableNotifications();
     model.setQuery(query);
 
     {   // init the model
@@ -942,6 +950,7 @@ void tst_EnginioModel::createAndModify()
     query.insert("limit", 1);
 
     EnginioModel model;
+    model.disableNotifications();
     model.setQuery(query);
     {   // init the model
         QSignalSpy spy(&model, SIGNAL(modelReset()));
@@ -998,6 +1007,174 @@ void tst_EnginioModel::createAndModify()
         QCOMPARE(model.data(i).value<QJsonValue>().toObject()["title"].toString(), QString::fromLatin1("newO"));
         QCOMPARE(model.data(i, EnginioModel::SyncedRole).value<bool>(), true);
     }
+}
+
+int externalNotificationFindHelper(EnginioModel &model, const QString propertyName, const QJsonObject &o)
+{
+    for (int idx = 0; idx < model.rowCount(); ++idx) {
+        QModelIndex i = model.index(idx);
+        if (model.data(i).toJsonValue().toObject()[propertyName].toString()
+                == o[propertyName].toString()) {
+            return idx;
+        }
+    }
+    return -1;
+}
+
+void tst_EnginioModel::externalNotification()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString propertyName = "title";
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+
+    EnginioModel model;
+    model.setQuery(query);
+    {   // init the model
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setEnginio(&client);
+        QTRY_VERIFY(spy.count() > 0);
+    }
+
+    QJsonObject o;
+    o.insert(propertyName, QString::fromLatin1("externalNotification"));
+    o.insert("objectType", objectType);
+    {
+        // insert a new object
+        //TODO should we wait for the websocket?
+        const int initialRowCount = model.rowCount();
+
+        EnginioReply *r = client.create(o);
+        QTRY_VERIFY(r->isFinished());
+        QVERIFY(!r->isError());
+        o = r->data();
+        QTRY_COMPARE(model.rowCount(), initialRowCount + 1);
+        QVERIFY(externalNotificationFindHelper(model, propertyName, o) != -1);
+    }
+    {
+        // modify an object
+        o.insert(propertyName, QString::fromLatin1("externalNotification_modified"));
+        EnginioReply *r = client.update(o);
+        QTRY_VERIFY(r->isFinished());
+
+        QVERIFY(!r->isError());
+
+        int idx;
+        for (idx = 0; idx < model.rowCount(); ++idx) {
+            QModelIndex i = model.index(idx);
+            if (model.data(i).toJsonValue().toObject()[propertyName].toString()
+                    == o[propertyName].toString()) {
+                break;
+            }
+        }
+        QTRY_VERIFY(externalNotificationFindHelper(model, propertyName, o) != -1);
+    }
+    {
+        // remove an object
+        const int initialRowCount = model.rowCount();
+
+        EnginioReply *r = client.remove(o);
+        QTRY_VERIFY(r->isFinished());
+        QTRY_COMPARE(model.rowCount(), initialRowCount - 1);
+
+        int idx;
+        for (idx = 0; idx < model.rowCount(); ++idx) {
+            QModelIndex i = model.index(idx);
+            if (model.data(i).toJsonValue().toObject()[propertyName].toString()
+                    == o[propertyName].toString()) {
+                break;
+            }
+        }
+        QTRY_VERIFY(externalNotificationFindHelper(model, propertyName, o) == -1);
+    }
+}
+
+void tst_EnginioModel::createUpdateRemoveWithNotification()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString propertyName = "title";
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+
+    EnginioModel model;
+    model.setQuery(query);
+    {   // init the model
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setEnginio(&client);
+        QTRY_VERIFY(spy.count() > 0);
+    }
+
+    const int repliesCount = 12;
+    const int initialCount = model.rowCount();
+    QJsonObject o;
+    o.insert("objectType", objectType);
+
+    QVector<EnginioReply *> replies;
+    replies.reserve(repliesCount);
+    for (int i = 0; i < replies.capacity(); ++i) {
+        o.insert(propertyName, QString::fromLatin1("withNotification") + QString::number(i));
+        replies << model.append(o);
+    }
+
+    // wait for responses first, then for rowCount
+    // so if the test is broken rowCount would be bigger then replies.count()
+    foreach (EnginioReply *reply, replies) {
+        QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 10000);
+        QVERIFY(!reply->isError());
+    }
+    QTRY_COMPARE(model.rowCount(), initialCount + repliesCount);
+
+
+    // lets try to update our objects
+    replies.resize(0);
+    for (int i = 0; i < model.rowCount(); ++i) {
+        QModelIndex idx = model.index(i);
+        QJsonObject o = model.data(idx).toJsonValue().toObject();
+        if (o[propertyName].toString().startsWith("withNotification")) {
+            replies << model.setProperty(i, propertyName, QString::fromLatin1("withNotification_mod"));
+        }
+    }
+    QVERIFY(replies.count() == repliesCount);
+    foreach (EnginioReply *reply, replies) {
+        QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 10000);
+        QVERIFY(!reply->isError());
+    }
+    QTRY_COMPARE(model.rowCount(), initialCount + repliesCount);
+    int counter = 0;
+    for (int i = 0; i < model.rowCount(); ++i) {
+        QModelIndex idx = model.index(i);
+        QJsonObject o = model.data(idx).toJsonValue().toObject();
+        if (o[propertyName].toString().startsWith("withNotification_mod")) {
+            counter++;
+        }
+    }
+    QCOMPARE(counter, repliesCount);
+
+    // lets remove our objects
+    replies.resize(0);
+    for (int i = 0; i < model.rowCount(); ++i) {
+        QModelIndex idx = model.index(i);
+        QJsonObject o = model.data(idx).toJsonValue().toObject();
+        if (o[propertyName].toString().startsWith("withNotification")) {
+            replies << model.remove(i);
+        }
+    }
+    QCOMPARE(replies.count(), repliesCount);
+    foreach (EnginioReply *reply, replies) {
+        QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 10000);
+        QVERIFY(!reply->isError());
+    }
+    QTRY_COMPARE(model.rowCount(), initialCount);
 }
 
 QTEST_MAIN(tst_EnginioModel)

@@ -90,6 +90,7 @@ public:
 
     virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
+    void disableNotifications();
 Q_SIGNALS:
     void operationChanged(const EnginioClient::Operation operation);
     void queryChanged(const QJsonObject query);
