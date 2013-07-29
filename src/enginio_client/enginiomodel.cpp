@@ -406,7 +406,7 @@ public:
             receivedCreateNotification(object);
         } else if (event == EnginioString::update) {
             receivedUpdateNotification(object);
-        } else {
+        } else if (event == EnginioString::_delete) {
             receivedRemoveNotification(object);
         }
     }

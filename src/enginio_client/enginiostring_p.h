@@ -43,6 +43,7 @@
 
 #define FOR_EACH_ENGINIO_STRING(F)\
     F(_synced, "_synced")\
+    F(_delete, "delete")\
     F(access, "access")\
     F(apiEnginIo, "https://api.engin.io")\
     F(apiRequestId, "apiRequestId")\
