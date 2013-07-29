@@ -253,7 +253,65 @@ class EnginioModelPrivate {
     QHash<int, QString> _roles;
 
     QJsonArray _data; // TODO replace by a sparse array, and add laziness
-    EnginioBackendConnection *_notifications;
+
+    class NotificationObject {
+        // connection object it can be:
+        // - null if not yet created
+        // - -1 if notifications where disabled with EnginioModel::disableNotifications()
+        // - valid pointer to connection object
+        EnginioBackendConnection *_connection;
+
+        struct NotificationReceived
+        {
+            EnginioModelPrivate *model;
+
+            void operator ()(QJsonObject data)
+            {
+                model->receivedNotification(data);
+            }
+        };
+        void removeConnection()
+        {
+            if (*this) {
+                _connection->close();
+                delete _connection;
+            }
+        }
+
+    public:
+        NotificationObject()
+            : _connection()
+        {}
+
+        ~NotificationObject()
+        {
+            removeConnection();
+        }
+
+        operator EnginioBackendConnection*()
+        {
+            return qintptr(_connection) != -1 ? _connection : 0;
+        }
+
+        void disable()
+        {
+            removeConnection();
+            _connection = (EnginioBackendConnection*)-1;
+        }
+
+        void connectToBackend(EnginioModelPrivate *model, EnginioClient *enginio, const QJsonObject &filter)
+        {
+            if (qintptr(_connection) == -1)
+                return;
+            Q_ASSERT(model && enginio);
+            removeConnection(); // TODO reuse the connecton object
+            _connection = new EnginioBackendConnection;
+            NotificationReceived receiver = { model };
+            QObject::connect(_connection, &EnginioBackendConnection::dataReceived, receiver);
+            _connection->connectToBackend(enginio, filter);
+        }
+    } _notifications;
+
     TwoRefSet<QString> _ownRequests;
 
     class EnginioDestroyed
@@ -303,22 +361,6 @@ class EnginioModelPrivate {
         }
     };
 
-    class NotificationReceived
-    {
-        EnginioModelPrivate *model;
-    public:
-        NotificationReceived(EnginioModelPrivate *m)
-            : model(m)
-        {
-            Q_ASSERT(m);
-        }
-
-        void operator ()(QJsonObject data)
-        {
-            model->receivedNotification(data);
-        }
-    };
-
 public:
     EnginioModelPrivate(EnginioModel *q_ptr)
         : _enginio(0)
@@ -327,7 +369,6 @@ public:
         , _latestRequestedOffset(0)
         , _canFetchMore(false)
         , _rolesCounter(EnginioModel::SyncedRole)
-        , _notifications()
     {
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
@@ -336,20 +377,16 @@ public:
 
     ~EnginioModelPrivate()
     {
-        if (_notifications && qintptr(_notifications) != -1)
-            _notifications->close();
         foreach (const QMetaObject::Connection &connection, _connections)
             QObject::disconnect(connection);
 
-        if (!_ownRequests.isEmpty() && qintptr(_notifications) != -1)
+        if (!_ownRequests.isEmpty() && _notifications)
             qDebug() << "own unfinished requests(" << _ownRequests.count() << "):" << _ownRequests;
     }
 
     void disableNotifications()
     {
-        if (_notifications && qintptr(_notifications) != -1)
-            delete _notifications;
-        _notifications = (EnginioBackendConnection*)-1;
+        _notifications.disable();
     }
 
     void receivedNotification(QJsonObject data)
@@ -372,7 +409,6 @@ public:
         } else {
             receivedRemoveNotification(object);
         }
-        qDebug() << Q_FUNC_INFO << data;
     }
 
     void receivedRemoveNotification(const QJsonObject &object, int rowHint = -1)
@@ -622,18 +658,13 @@ public:
         if (!_enginio || _enginio->backendId().isEmpty() || _enginio->backendSecret().isEmpty())
             return;
         if (!_query.isEmpty()) {
-            if (qintptr(_notifications) != -1) {
-                if (_notifications)
-                    delete _notifications;
-                // setup notifications
-                QJsonObject filter;
-                QJsonObject objectType;
-                objectType.insert(EnginioString::objectType, _query[EnginioString::objectType]);
-                filter.insert(EnginioString::data, objectType);
-                _notifications = new EnginioBackendConnection(q);
-                _notifications->connectToBackend(_enginio, filter);
-                QObject::connect(_notifications, &EnginioBackendConnection::dataReceived, NotificationReceived(this));
-            }
+            // setup notifications
+            QJsonObject filter;
+            QJsonObject objectType;
+            objectType.insert(EnginioString::objectType, _query[EnginioString::objectType]);
+            filter.insert(EnginioString::data, objectType);
+            _notifications.connectToBackend(this, _enginio, filter);
+
             // send full query
             const EnginioReply *ereply = _enginio->query(_query, _operation);
             if (_canFetchMore)
