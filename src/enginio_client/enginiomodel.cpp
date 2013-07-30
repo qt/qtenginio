@@ -160,7 +160,9 @@ public:
         StorageIndex idx = _objectIdIndex.value(id, InvalidStorageIndex);
         Q_ASSERT(idx != InvalidStorageIndex);
         AttachedData &attachedData = _storage[idx];
-        --attachedData.ref;
+        if (!--attachedData.ref && id[0] == 't') {
+            // TODO it is last ref to a tmp id we should remove it
+        }
         return attachedData;
     }
 
