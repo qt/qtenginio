@@ -351,6 +351,16 @@ class EnginioModelPrivate {
         }
     };
 
+    struct FinishedRemoveRequest
+    {
+        EnginioModelPrivate *model;
+        const QString id;
+        void operator ()(const EnginioReply *reply)
+        {
+            model->finishedRemoveRequest(reply, id);
+        }
+    };
+
     class QueryChanged
     {
         EnginioModelPrivate *model;
@@ -580,6 +590,8 @@ public:
             } else {
                 const int row = d.getCurrentRow();
                 QString id = d.getAndSetCurrentId(finishedCreateReply);
+                FinishedRemoveRequest finishedRequest = { d._model, id };
+                QObject::connect(d._reply, &EnginioReply::finished, finishedRequest);
                 EnginioReply *ereply = d._model->removeNow(row, d._object, id);
                 d.swapNetworkReply(ereply);
             }
@@ -613,6 +625,8 @@ public:
         Q_ASSERT(!id.isEmpty());
         _attachedData.ref(id, row); // TODO if refcount is > 1 then do not emit dataChanged
         EnginioReply *ereply = _enginio->remove(oldObject, _operation);
+        FinishedRemoveRequest finishedRequest = { this, id };
+        QObject::connect(ereply, &EnginioReply::finished, finishedRequest);
         _ownRequests.insert(ereply->requestId());
         _dataChanged.insert(ereply, qMakePair(row, oldObject));
         QVector<int> roles(1);
@@ -685,6 +699,23 @@ public:
         }
     }
 
+    void finishedRemoveRequest(const EnginioReply *response, const QString &id)
+    {
+        _ownRequests.remove(response->requestId());
+
+        AttachedData &data = _attachedData.deref(id);
+        int row = data.row;
+        if (row == DeletedRow || (response->networkError() != QNetworkReply::NoError && response->backendStatus() != 404)) {
+            if (!data.ref) {
+                // The item was not removed, because of an error. We assume that the
+                // item is in sync
+                emit q->dataChanged(q->index(row), q->index(row));
+            }
+            return;
+        }
+        receivedRemoveNotification(_data[row].toObject(), row);
+    }
+
     void finishedRequest(const EnginioReply *response)
     {
         // We get all finished requests, check if we started this one
@@ -723,14 +754,16 @@ public:
             _canFetchMore = limit <= dataCount;
             q->endInsertRows();
         } else {
-            _ownRequests.remove(response->requestId());
             QJsonObject newValue(response->data());
+            bool removeOperation = newValue.isEmpty();
+            if (removeOperation)
+                return;
+            _ownRequests.remove(response->requestId());
             QJsonObject oldValue = requestInfo.second;
             QString oldId = oldValue[EnginioString::id].toString();
 
             AttachedData attachedData = _attachedData.deref(oldId);
 
-            bool removeOperation = newValue.isEmpty();
             // update the row number
             row = attachedData.row;
             if (row == DeletedRow || response->backendStatus() == 404) {
