@@ -248,7 +248,6 @@ class EnginioModelPrivate {
     QVector<QMetaObject::Connection> _connections;
 
     const static int IncrementalModelUpdate;
-    mutable QMap<const EnginioReply*, QPair<int /*row*/, QJsonObject> > _dataChanged;
     typedef EnginioModelPrivateAttachedData AttachedData;
     AttachedDataContainer _attachedData;
     int _latestRequestedOffset;
@@ -559,13 +558,11 @@ public:
             _attachedData.insert(data);
             _data.append(value);
             syncRoles();
-            _dataChanged.insert(ereply, qMakePair(row, object));
             q->endResetModel();
         } else {
             q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
             _attachedData.insert(data);
             _data.append(value);
-            _dataChanged.insert(ereply, qMakePair(row, object));
             q->endInsertRows();
         }
         return ereply;
@@ -597,8 +594,6 @@ public:
 
         void swapNetworkReply(EnginioReply *ereply)
         {
-            QPair<int /*row*/, QJsonObject> data = _model->_dataChanged.take(ereply);
-            _model->_dataChanged.insert(_reply, data);
             _reply->swapNetworkReply(ereply);
             ereply->deleteLater();
         }
@@ -652,7 +647,6 @@ public:
         FinishedRemoveRequest finishedRequest = { this, id };
         QObject::connect(ereply, &EnginioReply::finished, finishedRequest);
         _ownRequests.insert(ereply->requestId());
-        _dataChanged.insert(ereply, qMakePair(row, oldObject));
         QVector<int> roles(1);
         roles.append(EnginioModel::SyncedRole);
         emit q->dataChanged(q->index(row), q->index(row) , roles);
@@ -867,8 +861,8 @@ public:
         AttachedData data = _attachedData.ref(row);
         *createReply = data.createReply;
         Q_ASSERT(*createReply);
-        *tmpId = _dataChanged.value(*createReply).second[EnginioString::id].toString();
-        Q_ASSERT(tmpId->startsWith(QString::fromLatin1("tmp")));
+        *tmpId = data.id;
+        Q_ASSERT(tmpId->startsWith('t'));
         EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
         EnginioDummyReply *nreply = new EnginioDummyReply(*createReply);
         *newReply = new EnginioReply(client, nreply);
@@ -902,7 +896,6 @@ public:
         FinishedUpdateRequest finished = { this, id, oldObject };
         QObject::connect(ereply, &EnginioReply::finished, finished);
         _ownRequests.insert(ereply->requestId());
-        _dataChanged.insert(ereply, qMakePair(row, oldObject));
         _attachedData.ref(id, row);
         _data.replace(row, newObject);
         emit q->dataChanged(q->index(row), q->index(row));
@@ -998,7 +991,6 @@ public:
         QObject::connect(ereply, &EnginioReply::finished, ereply, &EnginioReply::deleteLater);
         FinishedIncrementalUpdateRequest finishedRequest = { this, query };
         QObject::connect(ereply, &EnginioReply::finished, finishedRequest);
-        _dataChanged.insert(ereply, qMakePair(IncrementalModelUpdate, query));
     }
 };
 
