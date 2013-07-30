@@ -361,6 +361,17 @@ class EnginioModelPrivate {
         }
     };
 
+    struct FinishedUpdateRequest
+    {
+        EnginioModelPrivate *model;
+        const QString id;
+        const QJsonObject oldValue;
+        void operator ()(const EnginioReply *reply)
+        {
+            model->finishedUpdateRequest(reply, id, oldValue);
+        }
+    };
+
     class QueryChanged
     {
         EnginioModelPrivate *model;
@@ -716,6 +727,37 @@ public:
         receivedRemoveNotification(_data[row].toObject(), row);
     }
 
+    void finishedUpdateRequest(const EnginioReply *reply, const QString &id, const QJsonObject &oldValue)
+    {
+        _ownRequests.remove(reply->requestId());
+
+        AttachedData &data = _attachedData.deref(id);
+        int row = data.row;
+        if (row == DeletedRow) {
+            // We tried to update something that we already deleted
+            // everything should be handled
+            return;
+        }
+        if (reply->networkError() != QNetworkReply::NoError) {
+            if (reply->backendStatus() == 404) {
+                // We tried to update something that got deleted in between, probably on
+                // the server side. Changing operation type to remove, so the cache
+                // can be in sync with the server again.
+
+                // TODO add a signal here so a developer can ask an user for a conflict
+                // resolution.
+                receivedRemoveNotification(_data[row].toObject(), row);
+            } else {
+                // Try to rollback the change.
+                // TODO it is not perfect https://github.com/enginio/enginio-qt/issues/200
+                _data.replace(row, oldValue);
+                emit q->dataChanged(q->index(row), q->index(row));
+            }
+            return;
+        }
+        receivedUpdateNotification(reply->data(), id, row);
+    }
+
     void finishedRequest(const EnginioReply *response)
     {
         // We get all finished requests, check if we started this one
@@ -756,11 +798,13 @@ public:
         } else {
             QJsonObject newValue(response->data());
             bool removeOperation = newValue.isEmpty();
-            if (removeOperation)
-                return;
-            _ownRequests.remove(response->requestId());
             QJsonObject oldValue = requestInfo.second;
             QString oldId = oldValue[EnginioString::id].toString();
+            if (removeOperation)
+                return;
+            if (!oldId.startsWith('t'))
+                return; //update
+            _ownRequests.remove(response->requestId());
 
             AttachedData attachedData = _attachedData.deref(oldId);
 
@@ -810,6 +854,8 @@ public:
             } else {
                 const int row = d.getCurrentRow();
                 QString id = d.getAndSetCurrentId(finishedCreateReply);
+                FinishedUpdateRequest finished = { d._model, id, d._object };
+                QObject::connect(d._reply, &EnginioReply::finished, finished);
                 EnginioReply *ereply = d._model->setDataNow(row, _value, _role, d._object, id);
                 d.swapNetworkReply(ereply);
             }
@@ -869,6 +915,8 @@ public:
         deltaObject[EnginioString::id] = id;
         deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
         EnginioReply *ereply = _enginio->update(deltaObject, _operation);
+        FinishedUpdateRequest finished = { this, id, oldObject };
+        QObject::connect(ereply, &EnginioReply::finished, finished);
         _ownRequests.insert(ereply->requestId());
         _dataChanged.insert(ereply, qMakePair(row, oldObject));
         _attachedData.ref(id, row);
