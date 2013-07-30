@@ -49,13 +49,17 @@
 #include <QtCore/qdatetime.h>
 #include <QtCore/quuid.h>
 
+enum {
+    DeletedRow = -3,
+    NoHintRow = -4
+};
 struct EnginioModelPrivateAttachedData
 {
     uint ref;
     int row;
     QString id;
     EnginioReply *createReply;
-    EnginioModelPrivateAttachedData(int initRow = -1, const QString &initId = QString())
+    EnginioModelPrivateAttachedData(int initRow = DeletedRow, const QString &initId = QString())
         : ref()
         , row(initRow)
         , id(initId)
@@ -127,7 +131,7 @@ public:
             if (data.row > row)
                 --data.row;
             else if (data.row == row)
-                data.row = -1;
+                data.row = DeletedRow;
             _rowIndex.insert(data.row, i);
         }
     }
@@ -413,10 +417,10 @@ public:
         }
     }
 
-    void receivedRemoveNotification(const QJsonObject &object, int rowHint = -1)
+    void receivedRemoveNotification(const QJsonObject &object, int rowHint = NoHintRow)
     {
         int row = rowHint;
-        if (rowHint == -1) {
+        if (rowHint == NoHintRow) {
             QString id = object[EnginioString::id].toString();
             if (Q_UNLIKELY(!_attachedData.contains(id))) {
                 // removing not existing object
@@ -431,10 +435,10 @@ public:
         q->endRemoveRows();
     }
 
-    void receivedUpdateNotification(const QJsonObject &object, const QString &idHint = QString(), int row = -1)
+    void receivedUpdateNotification(const QJsonObject &object, const QString &idHint = QString(), int row = NoHintRow)
     {
         // update an existing object
-        if (row == -1) {
+        if (row == NoHintRow) {
             QString id = idHint.isEmpty() ? object[EnginioString::id].toString() : idHint;
             Q_ASSERT(_attachedData.contains(id));
             row = _attachedData.row(id);
@@ -724,9 +728,9 @@ public:
             bool removeOperation = newValue.isEmpty();
             // update the row number
             row = attachedData.row;
-            if (row == -1 || response->backendStatus() == 404) {
+            if (row == DeletedRow || response->backendStatus() == 404) {
                 // The object was not found on the server, which means that it was deleted already
-                if (removeOperation || row == -1) {
+                if (removeOperation || row == DeletedRow) {
                     // Nothing to do, updating a removed object, that is not in the cache
                     // or removing a removed object
                     return;
