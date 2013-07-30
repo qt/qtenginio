@@ -428,6 +428,9 @@ public:
             }
             row = _attachedData.row(id);
         }
+        if (Q_UNLIKELY(row == DeletedRow))
+            return;
+
         q->beginRemoveRows(QModelIndex(), row, row);
         _data.removeAt(row);
         // we need to updates rows in _attachedData
@@ -443,6 +446,8 @@ public:
             Q_ASSERT(_attachedData.contains(id));
             row = _attachedData.row(id);
         }
+        if (Q_UNLIKELY(row == DeletedRow))
+            return;
 
         QJsonObject current = _data[row].toObject();
         QDateTime currentUpdateAt = QDateTime::fromString(current[EnginioString::updatedAt].toString(), Qt::ISODate);
