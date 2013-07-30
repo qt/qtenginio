@@ -372,6 +372,16 @@ class EnginioModelPrivate {
         }
     };
 
+    struct FinishedCreateRequest
+    {
+        EnginioModelPrivate *model;
+        const QString tmpId;
+        void operator ()(const EnginioReply *reply)
+        {
+            model->finishedCreateRequest(reply, tmpId);
+        }
+    };
+
     class QueryChanged
     {
         EnginioModelPrivate *model;
@@ -532,10 +542,12 @@ public:
     EnginioReply *append(const QJsonObject &value)
     {
         QJsonObject object(value);
+        QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
         object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
         EnginioReply *ereply = _enginio->create(object, _operation);
+        FinishedCreateRequest finishedRequest = { this, temporaryId };
+        QObject::connect(ereply, &EnginioReply::finished, finishedRequest);
         _ownRequests.insert(ereply->requestId());
-        QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
         object[EnginioString::id] = temporaryId;
         const int row = _data.count();
         AttachedData data(row, temporaryId);
@@ -710,6 +722,30 @@ public:
         }
     }
 
+    void finishedCreateRequest(const EnginioReply *reply, const QString &tmpId)
+    {
+        _ownRequests.remove(reply->requestId());
+
+        AttachedData &data = _attachedData.deref(tmpId);
+        int row = data.row;
+        if (reply->networkError() != QNetworkReply::NoError) {
+            // We tried to create something and we failed, we need to remove tmp
+            // item
+
+            // TODO add a signal here so a developer can ask an user for a conflict
+            // resolution.
+            receivedRemoveNotification(_data[row].toObject(), row);
+            return;
+        }
+        // create and update goes through the same code path because
+        // the model already have a dummy item.
+        const QJsonObject object = reply->data();
+        const QString newId = object[EnginioString::id].toString();
+        AttachedData newData(row, newId);
+        _attachedData.insert(newData);
+        receivedUpdateNotification(object, tmpId, row);
+    }
+
     void finishedRemoveRequest(const EnginioReply *response, const QString &id)
     {
         _ownRequests.remove(response->requestId());
@@ -795,49 +831,6 @@ public:
 
             _canFetchMore = limit <= dataCount;
             q->endInsertRows();
-        } else {
-            QJsonObject newValue(response->data());
-            bool removeOperation = newValue.isEmpty();
-            QJsonObject oldValue = requestInfo.second;
-            QString oldId = oldValue[EnginioString::id].toString();
-            if (removeOperation)
-                return;
-            if (!oldId.startsWith('t'))
-                return; //update
-            _ownRequests.remove(response->requestId());
-
-            AttachedData attachedData = _attachedData.deref(oldId);
-
-            // update the row number
-            row = attachedData.row;
-            if (row == DeletedRow || response->backendStatus() == 404) {
-                // The object was not found on the server, which means that it was deleted already
-                if (removeOperation || row == DeletedRow) {
-                    // Nothing to do, updating a removed object, that is not in the cache
-                    // or removing a removed object
-                    return;
-                }
-                // Updating a removed row. Change operation type to remove, so the cache can
-                // be in sync with the server again.
-                // TODO add a signal here so a developer can ask an user for a conflict
-                // resolution.
-                removeOperation = true;
-            }
-            Q_ASSERT(row >= 0 && row < _data.count());
-
-            if (response->networkError() != QNetworkReply::NoError && response->backendStatus() != 404) {
-                _data.replace(row, oldValue);
-                emit q->dataChanged(q->index(row), q->index(row));
-                return;
-            }
-
-            if (removeOperation) {
-                receivedRemoveNotification(oldValue, row);
-            } else {
-                // create and update goes through the same code path because
-                // the model already have a dummy item.
-                receivedUpdateNotification(newValue, oldId, row);
-            }
         }
     }
 
