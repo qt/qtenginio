@@ -86,10 +86,10 @@ class AttachedDataContainer
     typedef EnginioModelPrivateAttachedData AttachedData;
 
     typedef QHash<Row, StorageIndex> RowIndex;
-    QHash<Row, StorageIndex> _rowIndex;
+    RowIndex _rowIndex;
 
     typedef QHash<ObjectId, StorageIndex> ObjectIdIndex;
-    QHash<ObjectId, StorageIndex> _objectIdIndex;
+    ObjectIdIndex _objectIdIndex;
 
     typedef QHash<StorageIndex, AttachedData> Storage;
     QVector<AttachedData> _storage; // TODO replace by something smarter so we can use pointers instead of index.
