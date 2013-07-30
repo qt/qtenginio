@@ -837,7 +837,6 @@ public:
         AttachedData data = _attachedData.ref(row);
         *createReply = data.createReply;
         Q_ASSERT(*createReply);
-        Q_ASSERT(!(*createReply)->isFinished());
         *tmpId = _dataChanged.value(*createReply).second[EnginioString::id].toString();
         Q_ASSERT(tmpId->startsWith(QString::fromLatin1("tmp")));
         EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
