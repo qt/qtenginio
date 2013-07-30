@@ -247,7 +247,6 @@ class EnginioModelPrivate {
     EnginioModel *q;
     QVector<QMetaObject::Connection> _connections;
 
-    const static int FullModelReset;
     const static int IncrementalModelUpdate;
     mutable QMap<const EnginioReply*, QPair<int /*row*/, QJsonObject> > _dataChanged;
     typedef EnginioModelPrivateAttachedData AttachedData;
@@ -379,6 +378,15 @@ class EnginioModelPrivate {
         void operator ()(const EnginioReply *reply)
         {
             model->finishedCreateRequest(reply, tmpId);
+        }
+    };
+
+    struct FinishedFullQueryRequest
+    {
+        EnginioModelPrivate *model;
+        void operator ()(const EnginioReply *reply)
+        {
+            model->finishedFullQueryRequest(reply);
         }
     };
 
@@ -717,9 +725,20 @@ public:
             const EnginioReply *ereply = _enginio->query(_query, _operation);
             if (_canFetchMore)
                 _latestRequestedOffset = _query[EnginioString::limit].toDouble();
+            FinishedFullQueryRequest finshedRequest = { this };
+            QObject::connect(ereply, &EnginioReply::finished, finshedRequest);
             QObject::connect(ereply, &EnginioReply::finished, ereply, &EnginioReply::deleteLater);
-            _dataChanged.insert(ereply, qMakePair(FullModelReset, QJsonObject()));
         }
+    }
+
+    void finishedFullQueryRequest(const EnginioReply *reply)
+    {
+        q->beginResetModel();
+        _data = reply->data()[EnginioString::results].toArray();
+        _attachedData.initFromArray(_data);
+        syncRoles();
+        _canFetchMore = _canFetchMore && _data.count() && (_query[EnginioString::limit].toDouble() <= _data.count());
+        q->endResetModel();
     }
 
     void finishedCreateRequest(const EnginioReply *reply, const QString &tmpId)
@@ -807,14 +826,7 @@ public:
 
         QPair<int, QJsonObject> requestInfo = _dataChanged.take(response);
         int row = requestInfo.first;
-        if (row == FullModelReset) {
-            q->beginResetModel();
-            _data = response->data()[EnginioString::results].toArray();
-            _attachedData.initFromArray(_data);
-            syncRoles();
-            _canFetchMore = _canFetchMore && _data.count() && (_query[EnginioString::limit].toDouble() <= _data.count());
-            q->endResetModel();
-        } else if (row == IncrementalModelUpdate) {
+        if (row == IncrementalModelUpdate) {
             Q_ASSERT(_canFetchMore);
             QJsonArray data(response->data()[EnginioString::results].toArray());
             QJsonObject query(requestInfo.second);
@@ -1009,7 +1021,6 @@ public:
     }
 };
 
-const int EnginioModelPrivate::FullModelReset = -1;
 const int EnginioModelPrivate::IncrementalModelUpdate = -2;
 
 
