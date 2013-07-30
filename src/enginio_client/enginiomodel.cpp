@@ -334,22 +334,6 @@ class EnginioModelPrivate {
         }
     };
 
-    class FinishedRequest
-    {
-        EnginioModelPrivate *model;
-    public:
-        FinishedRequest(EnginioModelPrivate *m)
-            : model(m)
-        {
-            Q_ASSERT(m);
-        }
-
-        void operator ()(const EnginioReply *response)
-        {
-            model->finishedRequest(response);
-        }
-    };
-
     struct FinishedRemoveRequest
     {
         EnginioModelPrivate *model;
@@ -387,6 +371,16 @@ class EnginioModelPrivate {
         void operator ()(const EnginioReply *reply)
         {
             model->finishedFullQueryRequest(reply);
+        }
+    };
+
+    struct FinishedIncrementalUpdateRequest
+    {
+        EnginioModelPrivate *model;
+        const QJsonObject query;
+        void operator ()(const EnginioReply *reply)
+        {
+            model->finishedIncrementalUpdateRequest(reply, query);
         }
     };
 
@@ -534,7 +528,6 @@ public:
         }
         _enginio = const_cast<EnginioClient*>(enginio);
         if (_enginio) {
-            _connections.append(QObject::connect(_enginio, &EnginioClient::finished, FinishedRequest(this)));
             _connections.append(QObject::connect(_enginio, &QObject::destroyed, EnginioDestroyed(this)));
             _connections.append(QObject::connect(_enginio, &EnginioClient::backendIdChanged, QueryChanged(this)));
             _connections.append(QObject::connect(_enginio, &EnginioClient::backendSecretChanged, QueryChanged(this)));
@@ -731,6 +724,25 @@ public:
         }
     }
 
+    void finishedIncrementalUpdateRequest(const EnginioReply *reply, const QJsonObject &query)
+    {
+        Q_ASSERT(_canFetchMore);
+        QJsonArray data(reply->data()[EnginioString::results].toArray());
+        int offset = query[EnginioString::offset].toDouble();
+        int limit = query[EnginioString::limit].toDouble();
+        int dataCount = data.count();
+
+        int startingOffset = qMax(offset, _data.count());
+
+        q->beginInsertRows(QModelIndex(), startingOffset, startingOffset + dataCount -1);
+        for (int i = 0; i < dataCount; ++i) {
+            _data.append(data[i]);
+        }
+
+        _canFetchMore = limit <= dataCount;
+        q->endInsertRows();
+    }
+
     void finishedFullQueryRequest(const EnginioReply *reply)
     {
         q->beginResetModel();
@@ -811,39 +823,6 @@ public:
             return;
         }
         receivedUpdateNotification(reply->data(), id, row);
-    }
-
-    void finishedRequest(const EnginioReply *response)
-    {
-        // We get all finished requests, check if we started this one
-        if (!_dataChanged.contains(response))
-            return;
-
-        // ### TODO proper error handling
-        // this kind of response happens when the backend id/secret is missing
-        if (!response->data()[EnginioString::message].isNull())
-            qWarning() << "Enginio: " << response->data()[EnginioString::message].toString();
-
-        QPair<int, QJsonObject> requestInfo = _dataChanged.take(response);
-        int row = requestInfo.first;
-        if (row == IncrementalModelUpdate) {
-            Q_ASSERT(_canFetchMore);
-            QJsonArray data(response->data()[EnginioString::results].toArray());
-            QJsonObject query(requestInfo.second);
-            int offset = query[EnginioString::offset].toDouble();
-            int limit = query[EnginioString::limit].toDouble();
-            int dataCount = data.count();
-
-            int startingOffset = qMax(offset, _data.count());
-
-            q->beginInsertRows(QModelIndex(), startingOffset, startingOffset + dataCount -1);
-            for (int i = 0; i < dataCount; ++i) {
-                _data.append(data[i]);
-            }
-
-            _canFetchMore = limit <= dataCount;
-            q->endInsertRows();
-        }
     }
 
     struct SwapNetworkReplyForSetData
@@ -1017,6 +996,8 @@ public:
         _latestRequestedOffset += limit;
         EnginioReply *ereply = _enginio->query(query, _operation);
         QObject::connect(ereply, &EnginioReply::finished, ereply, &EnginioReply::deleteLater);
+        FinishedIncrementalUpdateRequest finishedRequest = { this, query };
+        QObject::connect(ereply, &EnginioReply::finished, finishedRequest);
         _dataChanged.insert(ereply, qMakePair(IncrementalModelUpdate, query));
     }
 };

@@ -487,14 +487,14 @@ void tst_EnginioModel::multpleConnections()
         QCOMPARE(model.counter["operationChanged"], 0);
         QCOMPARE(model.counter["queryChanged"], 0);
         QCOMPARE(model.counter["enginioChanged"], 0);
+        QCOMPARE(client1.counter["finished"], 0);
+        QCOMPARE(client2.counter["finished"], 0);
 
         // All of them are acctually disconnected but disconnectNotify is not called, it is
         // a known bug in Qt.
-        QCOMPARE(client1.counter["finished"], 20);
         QCOMPARE(client1.counter["backendIdChanged"], 20);
         QCOMPARE(client1.counter["backendSecretChanged"], 20);
         QCOMPARE(client1.counter["destroyed"], 20);
-        QCOMPARE(client2.counter["finished"], 20);
         QCOMPARE(client2.counter["backendIdChanged"], 20);
         QCOMPARE(client2.counter["backendSecretChanged"], 20);
         QCOMPARE(client2.counter["destroyed"], 20);
