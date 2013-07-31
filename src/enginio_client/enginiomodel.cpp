@@ -51,8 +51,10 @@
 
 enum {
     DeletedRow = -3,
-    NoHintRow = -4
+    NoHintRow = -4,
+    InvalidRow = NoHintRow
 };
+
 struct EnginioModelPrivateAttachedData
 {
     uint ref;
@@ -83,6 +85,7 @@ class AttachedDataContainer
     typedef int Row;
     typedef int StorageIndex;
     typedef QString ObjectId;
+    typedef QString RequestId;
     typedef EnginioModelPrivateAttachedData AttachedData;
 
     typedef QHash<Row, StorageIndex> RowIndex;
@@ -90,6 +93,9 @@ class AttachedDataContainer
 
     typedef QHash<ObjectId, StorageIndex> ObjectIdIndex;
     ObjectIdIndex _objectIdIndex;
+
+    typedef QHash<RequestId, QPair<int /*ref*/, StorageIndex> > RequestIdIndex;
+    RequestIdIndex _requestIdIndex;
 
     typedef QHash<StorageIndex, AttachedData> Storage;
     QVector<AttachedData> _storage; // TODO replace by something smarter so we can use pointers instead of index.
@@ -111,11 +117,17 @@ public:
         return _objectIdIndex.contains(id);
     }
 
-    Row row(const ObjectId &id) const
+    Row rowFromObjectId(const ObjectId &id) const
     {
         Q_ASSERT(contains(id));
         StorageIndex idx = _objectIdIndex.value(id, InvalidStorageIndex);
-        return _storage[idx].row;
+        return idx == InvalidStorageIndex ? InvalidRow : _storage[idx].row;
+    }
+
+    Row rowFromRequestId(const RequestId &id) const
+    {
+        StorageIndex idx = _requestIdIndex.value(id, qMakePair(0, InvalidStorageIndex)).second;
+        return idx == InvalidStorageIndex ? InvalidRow : _storage[idx].row;
     }
 
     bool isSynced(Row row) const
@@ -178,6 +190,31 @@ public:
         _objectIdIndex.insert(data.id, idx);
     }
 
+    void insertRequestId(const RequestId &id, Row row)
+    {
+        StorageIndex idx = _rowIndex.value(row, InvalidStorageIndex);
+        Q_ASSERT(idx != InvalidStorageIndex);
+        _requestIdIndex.insert(id, qMakePair(2, idx));
+    }
+
+    /*!
+      \interal
+      returns true if the request was already handled
+    */
+    bool markRequestIdAsHandled(const RequestId &id)
+    {
+        typename RequestIdIndex::iterator::reference value = _requestIdIndex[id];
+        if (value.first) {
+            if (--value.first <= 0) {
+                _requestIdIndex.remove(id);
+                return true;
+            }
+        } else {
+            _requestIdIndex.remove(id);
+        }
+        return false;
+    }
+
     void initFromArray(const QJsonArray &array)
     {
         const int count = array.count();
@@ -200,45 +237,7 @@ public:
     }
 };
 
-const int AttachedDataContainer::InvalidStorageIndex = -1;
-
-namespace {
-template<class T>
-struct TwoRefSet: protected QHash<T, signed char>
-{
-    typedef QHash<T, signed char> Base;
-    void insert(const T &key)
-    {
-        Base::operator [](key) += 2;
-    }
-    void remove(const T &key)
-    {
-        typename Base::iterator::reference value = Base::operator [](key);
-        Q_ASSERT(value);
-        if (--value <= 0)
-            Base::remove(key);
-    }
-    using Base::isEmpty;
-    using Base::contains;
-    using Base::count;
-
-#ifndef QT_NO_DEBUG_STREAM
-    template<class B>
-    friend QDebug operator<<(QDebug dbg, const TwoRefSet<B> &a);
-#endif
-};
-
-#ifndef QT_NO_DEBUG_STREAM
-template<class T>
-QDebug operator<<(QDebug dbg, const TwoRefSet<T> &a)
-{
-    dbg.nospace() << "TwoRefSet(";
-    dbg.nospace() << static_cast<typename TwoRefSet<T>::Base>(a);
-    dbg.nospace() << ')';
-    return dbg.space();
-}
-#endif
-} // anonymous namespace
+const int AttachedDataContainer::InvalidStorageIndex = InvalidRow;
 
 class EnginioModelPrivate {
     QJsonObject _query;
@@ -315,8 +314,6 @@ class EnginioModelPrivate {
             _connection->connectToBackend(enginio, filter);
         }
     } _notifications;
-
-    TwoRefSet<QString> _ownRequests;
 
     class EnginioDestroyed
     {
@@ -417,9 +414,6 @@ public:
     {
         foreach (const QMetaObject::Connection &connection, _connections)
             QObject::disconnect(connection);
-
-        if (!_ownRequests.isEmpty() && _notifications)
-            qDebug() << "own unfinished requests(" << _ownRequests.count() << "):" << _ownRequests;
     }
 
     void disableNotifications()
@@ -431,21 +425,21 @@ public:
     {
         const QJsonObject origin = data[EnginioString::origin].toObject();
         const QString requestId = origin[EnginioString::apiRequestId].toString();
-        if (_ownRequests.contains(requestId)) {
-            // ignore own requests, we will handle them in finished signal handler
-            // TODO it woudl be better to handle them in the faster way
-            // it should not matter how we got confirmation
-            _ownRequests.remove(requestId);
-            return;
-        }
+        if (_attachedData.markRequestIdAsHandled(requestId))
+            return; // request was handled
+
         QJsonObject object = data[EnginioString::data].toObject();
         QString event = data[EnginioString::event].toString();
-        if (event == EnginioString::create) {
-            receivedCreateNotification(object);
-        } else if (event == EnginioString::update) {
+        if (event == EnginioString::update) {
             receivedUpdateNotification(object);
         } else if (event == EnginioString::_delete) {
             receivedRemoveNotification(object);
+        } else  if (event == EnginioString::create) {
+            const int rowHint = _attachedData.rowFromRequestId(requestId);
+            if (rowHint != NoHintRow)
+                receivedUpdateNotification(object, QString(), rowHint);
+            else
+                receivedCreateNotification(object);
         }
     }
 
@@ -458,7 +452,7 @@ public:
                 // removing not existing object
                 return;
             }
-            row = _attachedData.row(id);
+            row = _attachedData.rowFromObjectId(id);
         }
         if (Q_UNLIKELY(row == DeletedRow))
             return;
@@ -476,10 +470,11 @@ public:
         if (row == NoHintRow) {
             QString id = idHint.isEmpty() ? object[EnginioString::id].toString() : idHint;
             Q_ASSERT(_attachedData.contains(id));
-            row = _attachedData.row(id);
+            row = _attachedData.rowFromObjectId(id);
         }
         if (Q_UNLIKELY(row == DeletedRow))
             return;
+        Q_ASSERT(row >= 0);
 
         QJsonObject current = _data[row].toObject();
         QDateTime currentUpdateAt = QDateTime::fromString(current[EnginioString::updatedAt].toString(), Qt::ISODate);
@@ -487,6 +482,14 @@ public:
         if (newUpdateAt < currentUpdateAt) {
             // we already have a newer version
             return;
+        }
+        if (_data[row].toObject()[EnginioString::id].toString().isEmpty()) {
+            // Create and update may go through the same code path because
+            // the model already have a dummy item. No id means that it
+            // is a dummy item.
+            const QString newId = object[EnginioString::id].toString();
+            AttachedData newData(row, newId);
+            _attachedData.insert(newData);
         }
         if (_data.count() == 1) {
             q->beginResetModel();
@@ -547,7 +550,6 @@ public:
         EnginioReply *ereply = _enginio->create(object, _operation);
         FinishedCreateRequest finishedRequest = { this, temporaryId };
         QObject::connect(ereply, &EnginioReply::finished, finishedRequest);
-        _ownRequests.insert(ereply->requestId());
         object[EnginioString::id] = temporaryId;
         const int row = _data.count();
         AttachedData data(row, temporaryId);
@@ -565,6 +567,7 @@ public:
             _data.append(value);
             q->endInsertRows();
         }
+        _attachedData.insertRequestId(ereply->requestId(), row);
         return ereply;
     }
 
@@ -646,7 +649,7 @@ public:
         EnginioReply *ereply = _enginio->remove(oldObject, _operation);
         FinishedRemoveRequest finishedRequest = { this, id };
         QObject::connect(ereply, &EnginioReply::finished, finishedRequest);
-        _ownRequests.insert(ereply->requestId());
+        _attachedData.insertRequestId(ereply->requestId(), row);
         QVector<int> roles(1);
         roles.append(EnginioModel::SyncedRole);
         emit q->dataChanged(q->index(row), q->index(row) , roles);
@@ -749,9 +752,11 @@ public:
 
     void finishedCreateRequest(const EnginioReply *reply, const QString &tmpId)
     {
-        _ownRequests.remove(reply->requestId());
-
         AttachedData &data = _attachedData.deref(tmpId);
+
+        if (_attachedData.markRequestIdAsHandled(reply->requestId()))
+            return; // request was handled
+
         int row = data.row;
         if (reply->networkError() != QNetworkReply::NoError) {
             // We tried to create something and we failed, we need to remove tmp
@@ -762,20 +767,18 @@ public:
             receivedRemoveNotification(_data[row].toObject(), row);
             return;
         }
-        // create and update goes through the same code path because
-        // the model already have a dummy item.
+
         const QJsonObject object = reply->data();
-        const QString newId = object[EnginioString::id].toString();
-        AttachedData newData(row, newId);
-        _attachedData.insert(newData);
         receivedUpdateNotification(object, tmpId, row);
     }
 
     void finishedRemoveRequest(const EnginioReply *response, const QString &id)
     {
-        _ownRequests.remove(response->requestId());
-
         AttachedData &data = _attachedData.deref(id);
+
+        if (_attachedData.markRequestIdAsHandled(response->requestId()))
+            return; // request was handled
+
         int row = data.row;
         if (row == DeletedRow || (response->networkError() != QNetworkReply::NoError && response->backendStatus() != 404)) {
             if (!data.ref) {
@@ -790,9 +793,11 @@ public:
 
     void finishedUpdateRequest(const EnginioReply *reply, const QString &id, const QJsonObject &oldValue)
     {
-        _ownRequests.remove(reply->requestId());
-
         AttachedData &data = _attachedData.deref(id);
+
+        if (_attachedData.markRequestIdAsHandled(reply->requestId()))
+            return; // request was handled
+
         int row = data.row;
         if (row == DeletedRow) {
             // We tried to update something that we already deleted
@@ -895,9 +900,9 @@ public:
         EnginioReply *ereply = _enginio->update(deltaObject, _operation);
         FinishedUpdateRequest finished = { this, id, oldObject };
         QObject::connect(ereply, &EnginioReply::finished, finished);
-        _ownRequests.insert(ereply->requestId());
         _attachedData.ref(id, row);
         _data.replace(row, newObject);
+        _attachedData.insertRequestId(ereply->requestId(), row);
         emit q->dataChanged(q->index(row), q->index(row));
         return ereply;
     }
