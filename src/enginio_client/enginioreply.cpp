@@ -138,6 +138,10 @@ QString EnginioReply::errorString() const
   the origin of notifications.
   \internal
 */
+
+/*!
+  \internal
+*/
 QString EnginioReply::requestId() const
 {
     return d->requestId();
@@ -162,6 +166,9 @@ void EnginioReply::emitFinished()
     emit finished(this);
 }
 
+/*!
+  \internal
+*/
 void EnginioReply::setNetworkReply(QNetworkReply *reply)
 {
     d->_client->_replyReplyMap.remove(d->_nreply);
@@ -175,6 +182,9 @@ void EnginioReply::setNetworkReply(QNetworkReply *reply)
     d->_client->registerReply(reply, this);
 }
 
+/*!
+  \internal
+*/
 void EnginioReply::swapNetworkReply(EnginioReply *reply)
 {
     // FIXME it is ugly
