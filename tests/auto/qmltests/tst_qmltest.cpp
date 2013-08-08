@@ -54,7 +54,11 @@ int main(int argc, char** argv)
     const QString appPath = QGuiApplication::applicationDirPath();
     // This allows starting the test without previously defining QML2_IMPORT_PATH.
     QDir qmlImportDir(appPath);
+#if defined(Q_OS_WIN)
+    qmlImportDir.cd("../../../../qml");
+#else
     qmlImportDir.cd("../../../qml");
+#endif
     QByteArray canonicalImportPath = qmlImportDir.canonicalPath().toUtf8();
     qputenv("QML2_IMPORT_PATH", canonicalImportPath);
 
