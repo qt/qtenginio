@@ -283,23 +283,6 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         }
     };
 
-    class AuthenticationStateTrackerIdentFunctor
-    {
-        EnginioClientPrivate *_enginio;
-    public:
-        AuthenticationStateTrackerIdentFunctor(EnginioClientPrivate *enginio)
-            : _enginio(enginio)
-        {}
-
-        void operator()(const EnginioIdentity *identity) const
-        {
-            if (identity)
-                _enginio->setAuthenticationState(EnginioClient::Authenticating);
-            // else we could call _enginio->setAuthenticationState(EnginioClient::NotAuthenticated);
-            // but sessionTerminated signal should do the trick anyway
-        }
-    };
-
 public:
     enum Operation {
         // Do not forget to keep in sync with EnginioClient::Operation!
@@ -429,6 +412,8 @@ public:
         QNetworkRequest req = prepareRequest(url);
         QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
         QNetworkReply *reply = networkManager()->post(req, data);
+
+        setAuthenticationState(EnginioClient::Authenticating);
 
         if (gEnableEnginioDebugInfo)
             _requestData.insert(reply, data);

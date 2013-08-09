@@ -97,6 +97,7 @@ private slots:
     void query_usersgroupmembers_count();
     void query_usersgroupmembers_sort();
     void identity();
+    void identity_changing();
     void identity_invalid();
     void identity_afterLogout();
     void backendFakeReply();
@@ -1171,7 +1172,7 @@ void tst_EnginioClient::identity()
         }
 
         QCOMPARE(spyError.count(), 0);
-        QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
+        QCOMPARE(client.authenticationState(), EnginioClient::NotAuthenticated);
 
         client.setBackendId(_backendId); // trigger authentication process
 
@@ -1185,6 +1186,7 @@ void tst_EnginioClient::identity()
         // check if EnginoClient is properly detached from identity in destructor.
         EnginioClient *client = new EnginioClient;
         client->setServiceUrl(EnginioTests::TESTAPP_URL);
+        client->setBackendId(_backendId);
         client->setBackendSecret(_backendSecret);
 
         EnginioBasicAuthentication identity;
@@ -1202,11 +1204,78 @@ void tst_EnginioClient::identity()
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendSecret(_backendSecret);
+        client.setBackendId(_backendId);
         {
             EnginioBasicAuthentication identity;
             client.setIdentity(&identity);
         }
         QVERIFY(!client.identity());
+    }
+}
+
+void tst_EnginioClient::identity_changing()
+{
+    {   // check if login is triggered on passowrd change
+        EnginioClient client;
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
+
+        EnginioBasicAuthentication identity;
+        identity.setUser("logintest");
+        client.setIdentity(&identity);
+        QTRY_COMPARE(client.authenticationState(), EnginioClient::AuthenticationFailure);
+
+        identity.setPassword("logintest");
+        QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
+
+        QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
+    }
+    {   // check if login is triggered on user change
+        EnginioClient client;
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
+
+        EnginioBasicAuthentication identity;
+        identity.setUser("logintest");
+        identity.setPassword("logintest");
+        client.setIdentity(&identity);
+
+        QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
+
+        identity.setUser("invalid");
+        QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
+        QTRY_COMPARE(client.authenticationState(), EnginioClient::AuthenticationFailure);
+
+        identity.setPassword("invalid");
+        QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
+        QTRY_COMPARE(client.authenticationState(), EnginioClient::AuthenticationFailure);
+    }
+    {   // check races when identity flickers fast.
+        EnginioClient client;
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
+
+        QSignalSpy spy(&client, SIGNAL(sessionAuthenticated(EnginioReply*)));
+        EnginioBasicAuthentication identity;
+        client.setIdentity(&identity);
+        QTRY_COMPARE(client.authenticationState(), EnginioClient::AuthenticationFailure);
+
+        for (int i = 0; i < 8; ++i) {
+            identity.setUser("logintest1");
+            identity.setPassword("logintest1");
+            identity.setUser("logintest2");
+            identity.setPassword("logintest2");
+        }
+        identity.setUser("logintest");
+        identity.setPassword("logintest");
+        QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
+
+        QTRY_COMPARE_WITH_TIMEOUT(client.authenticationState(), EnginioClient::Authenticated, 20000);
+        QJsonObject data = spy.last().last().value<EnginioReply*>()->data();
+        QCOMPARE(data["user"].toObject()["username"].toString(), QString::fromLatin1("logintest"));
     }
 }
 
@@ -1272,6 +1341,28 @@ void tst_EnginioClient::identity_invalid()
 
         QVERIFY(spy[1][0].value<EnginioReply*>()->data() != identityReplyData);
         QCOMPARE(client.authenticationState(), EnginioClient::Authenticated);
+    }
+    {
+        // wrong backend id and secret plus invalid password
+        EnginioClient client;
+        client.setBackendId("deadbeef");
+        client.setBackendSecret("deadbeef");
+        EnginioBasicAuthentication identity;
+        identity.setUser("invalidLogin");
+        identity.setPassword("invalidPassword");
+        client.setIdentity(&identity);
+        QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
+        QTRY_COMPARE(client.authenticationState(), EnginioClient::AuthenticationFailure);
+    }
+    {
+        // missing empty user name and pass
+        EnginioClient client;
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
+        EnginioBasicAuthentication identity;
+        client.setIdentity(&identity);
+        QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
+        QTRY_COMPARE(client.authenticationState(), EnginioClient::AuthenticationFailure);
     }
 }
 

@@ -65,9 +65,22 @@ EnginioIdentity::EnginioIdentity(QObject *parent) :
 {
 }
 
+struct DisconnectConnection
+{
+    QMetaObject::Connection _connection;
+
+    DisconnectConnection(const QMetaObject::Connection& connection)
+        : _connection(connection)
+    {}
+
+    void operator ()() const
+    {
+        QObject::disconnect(_connection);
+    }
+};
+
 class EnginioBasicAuthenticationPrivate
 {
-public:
     class SessionSetterFunctor
     {
         EnginioClientPrivate *_enginio;
@@ -90,12 +103,44 @@ public:
         }
     };
 
+    EnginioBasicAuthentication *q_ptr;
+    QPointer<QNetworkReply> _reply;
+    QMetaObject::Connection _replyFinished;
+    QMetaObject::Connection _enginioDestroyed;
+
+public:
+    QString _user;
+    QString _pass;
+
     EnginioBasicAuthenticationPrivate(EnginioBasicAuthentication *q)
         : q_ptr(q)
     {}
-    EnginioBasicAuthentication *q_ptr;
-    QString _user;
-    QString _pass;
+
+    ~EnginioBasicAuthenticationPrivate()
+    {
+        cleanupConnections();
+    }
+
+    void cleanupConnections()
+    {
+        if (_reply) {
+            QObject::disconnect(_replyFinished);
+            QObject::disconnect(_enginioDestroyed);
+            QObject::connect(_reply.data(), &QNetworkReply::finished, _reply.data(), &QNetworkReply::deleteLater);
+        }
+    }
+
+    void prepareSessionToken(EnginioClientPrivate *enginio)
+    {
+        cleanupConnections();
+
+        QJsonObject data;
+        data[EnginioString::username] = _user;
+        data[EnginioString::password] = _pass;
+        _reply = enginio->identify(data);
+        _replyFinished = QObject::connect(_reply.data(), &QNetworkReply::finished, SessionSetterFunctor(enginio, _reply.data()));
+        _enginioDestroyed = QObject::connect(enginio->q_ptr, &EnginioClient::destroyed, DisconnectConnection(_replyFinished));
+    }
 };
 
 /*!
@@ -161,20 +206,6 @@ void EnginioBasicAuthentication::setPassword(const QString &password)
     emit userChanged(password);
 }
 
-struct DisconnectConnection
-{
-    QMetaObject::Connection _connection;
-
-    DisconnectConnection(const QMetaObject::Connection& connection)
-        : _connection(connection)
-    {}
-
-    void operator ()() const
-    {
-        QObject::disconnect(_connection);
-    }
-};
-
 /*!
   \internal
 */
@@ -183,11 +214,6 @@ void EnginioBasicAuthentication::prepareSessionToken(EnginioClientPrivate *engin
     Q_ASSERT(enginio);
     Q_ASSERT(enginio->identity());
 
-    QJsonObject data;
-    data[EnginioString::username] = d_ptr->_user;
-    data[EnginioString::password] = d_ptr->_pass;
-    QNetworkReply *reply = enginio->identify(data);
-    QMetaObject::Connection requestFinished = QObject::connect(reply, &QNetworkReply::finished, EnginioBasicAuthenticationPrivate::SessionSetterFunctor(enginio, reply));
-    QObject::connect(enginio->q_ptr, &EnginioClient::destroyed, DisconnectConnection(requestFinished));
+    d_ptr->prepareSessionToken(enginio);
 }
 
