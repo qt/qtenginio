@@ -18,7 +18,7 @@
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Enginio needs to install some files next to your Qt installation.
-Please select the folder of the Qt 5 version you would like to use with Enginio.</string>
+Please select qmake (in the bin directory of your Qt installation) of the Qt 5 version you would like to use with Enginio.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

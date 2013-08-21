@@ -53,7 +53,7 @@ checkQmakePath = function()
     try {
         qtpath = component.userInterface("QtSelectionPage").qmakePathLineEdit.text;
         if (installer.fileExists(qtpath)) {
-            if (installer.fileExists(qtpath + "/bin/qmake.exe") || installer.fileExists(qtpath + "/bin/qmake")) {
+            if (installer.fileExists(qtpath)) {
                 component.userInterface("QtSelectionPage").complete = true;
                 return;
             }
@@ -68,12 +68,12 @@ showFileDialog = function()
 {
     try {
         if (installer.value("os") == "win") {
-            path = QFileDialog.getExistingDirectory("Select Qt path (the directory containing bin\\qmake.exe)", "c:\\qt\\");
+            path = QFileDialog.getOpenFileName("Select qmake.exe (in the bin directory of your Qt installation)", "c:\\qt\\", "qmake (qmake.exe)");
             path = path.replace(/\//g, "\\");
             component.userInterface("QtSelectionPage").qmakePathLineEdit.text = path;
         } else {
             // FIXME on linux the prefixes might be different (bin/lib etc in different places)
-            path = QFileDialog.getExistingDirectory("Select qt path", "");
+            path = QFileDialog.getOpenFileName("Select qmake (in the bin directory of your Qt installation)", "", "qmake (qmake)");
             component.userInterface("QtSelectionPage").qmakePathLineEdit.text = path;
         }
     } catch (e) {
@@ -84,7 +84,10 @@ showFileDialog = function()
 Component.prototype.createOperationsForArchive = function(archive)
 {
     if (component.name === "com.digia.enginio") {
-        component.addOperation("Extract", archive, component.userInterface("QtSelectionPage").qmakePathLineEdit.text);
+        path = component.userInterface("QtSelectionPage").qmakePathLineEdit.text;
+        // remove bin/qmake* from path
+        path = path.replace(/bin.*/, "");
+        component.addOperation("Extract", archive, path);
     } else {
         component.addOperation("Extract", archive, "@TargetDir@");
     }
