@@ -28,6 +28,8 @@ binarycreator = "binarycreator"
 # visual studio
 #setEnv = "c:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Bin\\SetEnv.Cmd"
 
+# should be extracted from .qmake.conf
+VERSION = "unknown_version"
 
 # Build Enginio
 
@@ -99,8 +101,14 @@ for package in packages:
 # src/enginio_plugin
 headerPath = "dist/packages/com.digia.enginio/data/include/Enginio/"
 
-#FIXME FIXME FIXME version string
-privateHeaderPath = headerPath + "0.5.0/Enginio/private"
+import fileinput
+for line in fileinput.input(".qmake.conf"):
+    if line.startswith("MODULE_VERSION"):
+        import re
+        VERSION = re.search(r'[0-9.]+', line).group(0)
+
+
+privateHeaderPath = headerPath + VERSION + "/Enginio/private"
 import glob
 allHeaders = glob.glob("src/*/*.h")
 for header in allHeaders:
@@ -124,6 +132,6 @@ os.mkdir(modulesPath)
 shutil.copyfile("build/mkspecs/modules-inst/qt_lib_enginio.pri", modulesPath + "/qt_lib_enginio.pri")
 
 
-subprocess.check_call([binarycreator, "-c", "config" + os.sep + "config.xml", "-p", "packages", "EnginioInstaller"])
+subprocess.check_call([binarycreator, "-c", "config" + os.sep + "config.xml", "-p", "packages", "EnginioInstaller_" + VERSION])
 
 print("Installer created.")
