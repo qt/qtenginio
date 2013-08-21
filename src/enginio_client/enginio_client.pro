@@ -3,15 +3,6 @@ QT += network
 DEFINES += ENGINIOCLIENT_LIBRARY
 MODULE = enginio
 
-!sharedlib {
-    win32: CONFIG -= build_all
-    else {
-        CONFIG -= debug_and_release
-        CONFIG += staticlib
-    }
-}
-
-
 load(qt_module)
 
 SOURCES += \
