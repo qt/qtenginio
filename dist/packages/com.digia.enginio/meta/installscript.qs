@@ -87,7 +87,7 @@ Component.prototype.createOperationsForArchive = function(archive)
         path = component.userInterface("QtSelectionPage").qmakePathLineEdit.text;
         // remove bin/qmake* from path
         path = path.replace(/bin.*/, "");
-        component.addOperation("Extract", archive, path);
+        component.addElevatedOperation("Extract", archive, path);
     } else {
         component.addOperation("Extract", archive, "@TargetDir@");
     }
