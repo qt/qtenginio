@@ -12,19 +12,8 @@ Client library for accessing Enginio service from Qt and QML code.
   * Windows: http://www.perl.org/get.html
 
 # Build & Install
-* Two build configurations provided: *standalone static library config* and *shared library config* 
-* Both configurations can install the Enginio Library as Qt5 module
-
-1. Standalone static library config 
-    * The default build config for Enginio Library
-    * Produces a static library on Linux and Mac
-    * `qmake && make` - Builds the library to local target under the source folder   
- * `make install` - Installs the static library as a globally available Qt5 module 
-
-
-2. Shared library config
-	* `qmake CONFIG+=sharedlib && make install`
-	* Produces shared library and installs it as a globally available Qt5 module
+    * `qmake && make install`
+    * Produces shared library and installs it as a globally available Qt5 module
 
 # Usage
 * In C++ applications 
@@ -34,12 +23,13 @@ Client library for accessing Enginio service from Qt and QML code.
     * Import Enginio components with `import Enginio 1.0`
 
 # Contributing
-* Fork the repository on [GitHub](https://github.com/enginio/enginio-qt)
-* Create a [feature branch](http://nvie.com/posts/a-successful-git-branching-model/) (i.e. create a branch which is named like `my-cool-feature`)
-* Implement the new feature and automated tests for it
-* Make sure all tests pass
-* Submit a pull request that includes only your feature branch
-
+* Contributing to the Enginio Qt Library works the same way as contributing to any other Qt module
+    * See [Qt Contribution Guidelines](http://qt-project.org/wiki/Qt-Contribution-Guidelines)
+    * Clone the repository from ssh://codereview.qt-project.org/qt/qtenginio.git
+    * Implement the new feature and automated tests for it
+    * Make sure all tests pass
+    * Push your change for review to [Gerrit](http://qt-project.org/wiki/Gerrit-Introduction)
+    * Add reviewers (You can find e-mail addresses in git log and git blame)
 
 # Copyright
 Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
