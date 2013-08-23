@@ -25,6 +25,11 @@ HEADERS += \
 
 QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 
+macx|win32 {
+    DESTDIR = ../../qml/$${TARGET.module_name}
+    TARGET = $$TARGET$$qtPlatformTargetSuffix()
+}
+
 copy2build.input = QMLDIRFILE
 copy2build.output = ../../qml/$${TARGET.module_name}/qmldir
 !contains(TEMPLATE_PREFIX, vc):copy2build.variable_out = PRE_TARGETDEPS
