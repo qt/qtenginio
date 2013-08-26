@@ -1,6 +1,6 @@
 include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
 
-project = enginio-qt
+project = qtenginio
 description = Client library for accessing Enginio service from Qt and QML code
 url = http://engin.io
 
@@ -24,7 +24,7 @@ depends += qtcore qtgui qtwidgets qtdoc qtdeclarative
 
 qhp.projects            = Enginio
 
-qhp.Enginio.file                = enginio-qt.qhp
+qhp.Enginio.file                = qtenginio.qhp
 qhp.Enginio.namespace           = io.engin.$QT_VERSION
 qhp.Enginio.virtualFolder       = enginio
 qhp.Enginio.indexTitle          = Enginio Overview
