@@ -87,7 +87,12 @@ Component.prototype.createOperationsForArchive = function(archive)
         path = component.userInterface("QtSelectionPage").qmakePathLineEdit.text;
         // remove bin/qmake* from path
         path = path.replace(/bin.*/, "");
-        component.addElevatedOperation("Extract", archive, path);
+        if (installer.value("os") === "mac") {
+            // On Mac the privilege elevation is automatic.
+            component.addOperation("Extract", archive, path);
+        } else {
+            component.addElevatedOperation("Extract", archive, path);
+        }
     } else {
         component.addOperation("Extract", archive, "@TargetDir@");
     }
