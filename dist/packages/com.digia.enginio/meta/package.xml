@@ -18,4 +18,5 @@
 	<UserInterfaces>
          <UserInterface>qtselection.ui</UserInterface>
      </UserInterfaces>
+     <RequiresAdminRights>true</RequiresAdminRights>
 </Package>
