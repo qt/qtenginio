@@ -132,6 +132,6 @@ os.mkdir(modulesPath)
 shutil.copyfile("build/mkspecs/modules-inst/qt_lib_enginio.pri", modulesPath + "/qt_lib_enginio.pri")
 
 
-subprocess.check_call([binarycreator, "-c", "config" + os.sep + "config.xml", "-p", "packages", "EnginioInstaller_" + VERSION])
+subprocess.check_call([binarycreator, "--offline-only", "-c", "config" + os.sep + "config.xml", "-p", "packages", "EnginioInstaller_" + VERSION])
 
 print("Installer created.")
