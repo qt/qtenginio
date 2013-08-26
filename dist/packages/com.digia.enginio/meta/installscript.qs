@@ -73,7 +73,7 @@ showFileDialog = function()
             component.userInterface("QtSelectionPage").qmakePathLineEdit.text = path;
         } else {
             // FIXME on linux the prefixes might be different (bin/lib etc in different places)
-            path = QFileDialog.getOpenFileName("Select qmake (in the bin directory of your Qt installation)", "", "qmake (qmake)");
+            path = QFileDialog.getOpenFileName("Select qmake (in the bin directory of your Qt installation)", "", "qmake (*qmake)");
             component.userInterface("QtSelectionPage").qmakePathLineEdit.text = path;
         }
     } catch (e) {
