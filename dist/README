@@ -6,7 +6,7 @@ It is recommended to use the official Qt sdk packages (http://qt-project.org/dow
 Linux:
 qtbase, qttools, qtscript
 
-./configure -nomake examples -nomake tests -static -release -opensource -confirm-license -prefix `pwd`/../qt-install -qt-libpng -qt-libjpeg -qt-zlib -no-cups -no-icu
+./configure -nomake examples -nomake tests -static -release -opensource -confirm-license -prefix `pwd`/../qt-install -qt-libpng -qt-libjpeg -qt-zlib -no-cups -no-icu -qt-sql-sqlite -no-c++11
 
 actually install all of them!
 
