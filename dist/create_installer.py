@@ -16,6 +16,7 @@ import sys
 
 # Qt
 qmake = "qmake"
+qmake_spec = subprocess.check_output([qmake, "-query", "QMAKE_SPEC"]).strip()
 
 make = "make"
 if sys.platform == "win32":
@@ -131,7 +132,10 @@ os.mkdir("packages/com.digia.enginio/data/mkspecs")
 os.mkdir(modulesPath)
 shutil.copyfile("build/mkspecs/modules-inst/qt_lib_enginio.pri", modulesPath + "/qt_lib_enginio.pri")
 
+pkgname = "QtEnginioInstaller_" + VERSION + '-' + qmake_spec
+subprocess.check_call([binarycreator, "--offline-only", "-c", "config" + os.sep + "config.xml", "-p", "packages", pkgname])
 
-subprocess.check_call([binarycreator, "--offline-only", "-c", "config" + os.sep + "config.xml", "-p", "packages", "EnginioInstaller_" + VERSION])
+if sys.platform == "darwin":
+    subprocess.check_call(["hdiutil", "create", pkgname + ".dmg", "-srcfolder", pkgname + ".app"])
 
 print("Installer created.")
