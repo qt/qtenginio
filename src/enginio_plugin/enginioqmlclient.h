@@ -52,13 +52,6 @@ class EnginioQmlClient : public EnginioClient
 public:
     EnginioQmlClient(QObject *parent = 0);
 
-    using EnginioClient::query;
-    using EnginioClient::create;
-    using EnginioClient::update;
-    using EnginioClient::remove;
-    using EnginioClient::downloadFile;
-    using EnginioClient::uploadFile;
-
     Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
