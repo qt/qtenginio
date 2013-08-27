@@ -198,7 +198,7 @@ public:
     }
 
     /*!
-      \interal
+      \internal
       returns true if the request was already handled
     */
     bool markRequestIdAsHandled(const RequestId &id)
