@@ -43,66 +43,21 @@
 #define ENGINIOCLIENT_H
 
 #include "enginioclient_global.h"
-#include <QObject>
-#include <QtCore/qscopedpointer.h>
-#include <QtCore/qtypeinfo.h>
-#include <QtCore/qmetatype.h>
+#include "enginioclientbase.h"
 #include <QtCore/qjsonobject.h>
-#include <QtCore/qurl.h>
-#include <QtNetwork/qnetworkaccessmanager.h>
 
 QT_BEGIN_NAMESPACE
 
-class EnginioClientPrivate;
+class QNetworkAccessManager;
+class QNetworkReply;
 class EnginioReply;
-class EnginioIdentity;
 
-QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager)
-QT_FORWARD_DECLARE_CLASS(QNetworkReply)
-
-class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
+class ENGINIOCLIENT_EXPORT EnginioClient : public EnginioClientBase
 {
     Q_OBJECT
 public:
-    enum AuthenticationState {
-        NotAuthenticated,
-        Authenticating,
-        Authenticated,
-        AuthenticationFailure
-    };
-    Q_ENUMS(AuthenticationState)
-
-    enum Operation {
-        // Do not forget to keep in sync with EnginioClientPrivate::Operation!
-        ObjectOperation,
-        ObjectAclOperation,
-        UserOperation,
-        UsergroupOperation,
-        UsergroupMembersOperation,
-        FileOperation
-    };
-    Q_ENUMS(Operation)
-
     explicit EnginioClient(QObject *parent = 0);
     ~EnginioClient();
-
-    Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
-    Q_PROPERTY(QByteArray backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged FINAL)
-    Q_PROPERTY(QUrl serviceUrl READ serviceUrl WRITE setServiceUrl NOTIFY serviceUrlChanged FINAL)
-    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
-    Q_PROPERTY(AuthenticationState authenticationState READ authenticationState NOTIFY authenticationStateChanged FINAL)
-
-    QByteArray backendId() const Q_REQUIRED_RESULT;
-    void setBackendId(const QByteArray &backendId);
-    QByteArray backendSecret() const Q_REQUIRED_RESULT;
-    void setBackendSecret(const QByteArray &backendSecret);
-    EnginioIdentity *identity() const Q_REQUIRED_RESULT;
-    void setIdentity(EnginioIdentity *identity);
-    AuthenticationState authenticationState() const Q_REQUIRED_RESULT;
-
-    QUrl serviceUrl() const Q_REQUIRED_RESULT;
-    void setServiceUrl(const QUrl &serviceUrl);
-    QNetworkAccessManager *networkManager() const Q_REQUIRED_RESULT;
 
     Q_INVOKABLE EnginioReply *customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data = QJsonObject());
     Q_INVOKABLE EnginioReply *search(const QJsonObject &query);
@@ -114,33 +69,17 @@ public:
     Q_INVOKABLE EnginioReply *uploadFile(const QJsonObject &associatedObject, const QUrl &file);
     Q_INVOKABLE EnginioReply *downloadFile(const QJsonObject &object);
 
-    bool finishDelayedReplies();
 Q_SIGNALS:
     void sessionAuthenticated(EnginioReply *reply) const;
     void sessionAuthenticationError(EnginioReply *reply) const;
     void sessionTerminated() const;
-    void backendIdChanged(const QByteArray &backendId);
-    void backendSecretChanged(const QByteArray &backendSecret);
-    void serviceUrlChanged(const QUrl& url);
-    void authenticationStateChanged(const AuthenticationState state);
-    void identityChanged(const EnginioIdentity *identity);
     void finished(EnginioReply *reply);
     void error(EnginioReply *reply);
 
 protected:
-    QScopedPointer<EnginioClientPrivate> d_ptr;
-
     EnginioClient(QObject *parent, EnginioClientPrivate *d);
-    Q_DECLARE_PRIVATE(EnginioClient)
-private:
-    Q_DISABLE_COPY(EnginioClient)
 };
 
-Q_DECLARE_TYPEINFO(EnginioClient::Operation, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(EnginioClient::AuthenticationState, Q_PRIMITIVE_TYPE);
-
 QT_END_NAMESPACE
-Q_DECLARE_METATYPE(EnginioClient::Operation);
-Q_DECLARE_METATYPE(EnginioClient::AuthenticationState);
 
 #endif // ENGINIOCLIENT_H

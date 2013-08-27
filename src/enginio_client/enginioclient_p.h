@@ -292,9 +292,9 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
     class AuthenticationStateTrackerFunctor
     {
         EnginioClientPrivate *_enginio;
-        EnginioClient::AuthenticationState _state;
+        EnginioClientBase::AuthenticationState _state;
     public:
-        AuthenticationStateTrackerFunctor(EnginioClientPrivate *enginio, EnginioClient::AuthenticationState state = EnginioClient::NotAuthenticated)
+        AuthenticationStateTrackerFunctor(EnginioClientPrivate *enginio, EnginioClientBase::AuthenticationState state = EnginioClient::NotAuthenticated)
             : _enginio(enginio)
             , _state(state)
         {}
@@ -307,13 +307,13 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
 public:
     enum Operation {
-        // Do not forget to keep in sync with EnginioClient::Operation!
-        ObjectOperation = EnginioClient::ObjectOperation,
-        ObjectAclOperation = EnginioClient::ObjectAclOperation,
-        UserOperation = EnginioClient::UserOperation,
-        UsergroupOperation = EnginioClient::UsergroupOperation,
-        UsergroupMemberOperation = EnginioClient::UsergroupMembersOperation,
-        FileOperation = EnginioClient::FileOperation,
+        // Do not forget to keep in sync with EnginioClientBase::Operation!
+        ObjectOperation = EnginioClientBase::ObjectOperation,
+        ObjectAclOperation = EnginioClientBase::ObjectAclOperation,
+        UserOperation = EnginioClientBase::UserOperation,
+        UsergroupOperation = EnginioClientBase::UsergroupOperation,
+        UsergroupMemberOperation = EnginioClientBase::UsergroupMembersOperation,
+        FileOperation = EnginioClientBase::FileOperation,
 
         // private
         AuthenticationOperation,
@@ -349,7 +349,7 @@ public:
     QMap<QNetworkReply*, QPair<QIODevice*, qint64> > _chunkedUploads;
     qint64 _uploadChunkSize;
     QJsonObject _identityToken;
-    EnginioClient::AuthenticationState _authenticationState;
+    EnginioClientBase::AuthenticationState _authenticationState;
 
     QSet<EnginioReply*> _delayedReplies; // Used only for testing
 
@@ -358,7 +358,7 @@ public:
     void replyFinished(QNetworkReply *nreply);
     bool finishDelayedReplies();
 
-    void setAuthenticationState(const EnginioClient::AuthenticationState state)
+    void setAuthenticationState(const EnginioClientBase::AuthenticationState state)
     {
         if (_authenticationState == state)
             return;
@@ -366,7 +366,7 @@ public:
         emit q_ptr->authenticationStateChanged(state);
     }
 
-    EnginioClient::AuthenticationState authenticationState() const Q_REQUIRED_RESULT
+    EnginioClientBase::AuthenticationState authenticationState() const Q_REQUIRED_RESULT
     {
         return _authenticationState;
     }
@@ -416,9 +416,9 @@ public:
         CallPrepareSessionToken callPrepareSessionToken(this, identity);
         if (_backendId.isEmpty() || _backendSecret.isEmpty()) {
             if (_backendId.isEmpty())
-                _identityConnections.append(QObject::connect(q_ptr, &EnginioClient::backendIdChanged, callPrepareSessionToken));
+                _identityConnections.append(QObject::connect(q_ptr, &EnginioClientBase::backendIdChanged, callPrepareSessionToken));
             if (_backendSecret.isEmpty())
-                _identityConnections.append(QObject::connect(q_ptr, &EnginioClient::backendSecretChanged, callPrepareSessionToken));
+                _identityConnections.append(QObject::connect(q_ptr, &EnginioClientBase::backendSecretChanged, callPrepareSessionToken));
         } else
             identity->prepareSessionToken(this);
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::dataChanged, callPrepareSessionToken));
@@ -435,7 +435,7 @@ public:
         QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
         QNetworkReply *reply = networkManager()->post(req, data);
 
-        setAuthenticationState(EnginioClient::Authenticating);
+        setAuthenticationState(EnginioClientBase::Authenticating);
 
         if (gEnableEnginioDebugInfo)
             _requestData.insert(reply, data);
@@ -484,7 +484,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *update(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
+    QNetworkReply *update(const ObjectAdaptor<T> &object, const EnginioClientBase::Operation operation)
     {
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
@@ -502,7 +502,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *remove(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
+    QNetworkReply *remove(const ObjectAdaptor<T> &object, const EnginioClientBase::Operation operation)
     {
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
@@ -512,7 +512,7 @@ public:
         QNetworkReply *reply = 0;
         QByteArray data;
 #if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
-        if (operation != EnginioClient::ObjectAclOperation)
+        if (operation != EnginioClientBase::ObjectAclOperation)
             reply = networkManager()->deleteResource(req);
         else {
             data = dataPropertyName.isEmpty() ? object.toJson() : object[dataPropertyName].toJson();
@@ -537,7 +537,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *create(const ObjectAdaptor<T> &object, const EnginioClient::Operation operation)
+    QNetworkReply *create(const ObjectAdaptor<T> &object, const EnginioClientBase::Operation operation)
     {
         QUrl url(_serviceUrl);
 

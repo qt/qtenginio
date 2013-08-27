@@ -339,7 +339,7 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
         QJsonObject query;
         query["username"] = QStringLiteral("logintest") + (i ? QString::number(i) : "");
         obj["query"] = query;
-        client.query(obj, EnginioClient::UserOperation);
+        client.query(obj, EnginioClientBase::UserOperation);
         ++spyCount;
     }
 
@@ -364,7 +364,7 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
             query["username"] = identity;
             query["password"] = identity;
             query["email"] = identity + "@email.com";
-            client.create(query, EnginioClient::UserOperation);
+            client.create(query, EnginioClientBase::UserOperation);
             ++spyCount;
         }
     }
@@ -382,7 +382,7 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
         QJsonObject query;
         query["name"] = "usergroup" + (i ? QString::number(i) : "");
         obj["query"] = query;
-        client.query(obj, EnginioClient::UsergroupOperation);
+        client.query(obj, EnginioClientBase::UsergroupOperation);
         ++spyCount;
     }
 
@@ -405,7 +405,7 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
         if (!data.count()) {
             QJsonObject query;
             query["name"] = groupName;
-            client.create(query, EnginioClient::UsergroupOperation);
+            client.create(query, EnginioClientBase::UsergroupOperation);
             ++spyCount;
         }
     }

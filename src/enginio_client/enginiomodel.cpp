@@ -543,8 +543,8 @@ public:
         _enginio = const_cast<EnginioClient*>(enginio);
         if (_enginio) {
             _clientConnections.append(QObject::connect(_enginio, &QObject::destroyed, EnginioDestroyed(this)));
-            _clientConnections.append(QObject::connect(_enginio, &EnginioClient::backendIdChanged, QueryChanged(this)));
-            _clientConnections.append(QObject::connect(_enginio, &EnginioClient::backendSecretChanged, QueryChanged(this)));
+            _clientConnections.append(QObject::connect(_enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
+            _clientConnections.append(QObject::connect(_enginio, &EnginioClientBase::backendSecretChanged, QueryChanged(this)));
         }
         emit q->enginioChanged(_enginio);
     }
@@ -703,15 +703,15 @@ public:
         emit q->queryChanged(query);
     }
 
-    EnginioClient::Operation operation() const Q_REQUIRED_RESULT
+    EnginioClientBase::Operation operation() const Q_REQUIRED_RESULT
     {
         return _operation;
     }
 
     void setOperation(const int operation)
     {
-        Q_ASSERT_X(operation >= EnginioClient::ObjectOperation, "setOperation", "Invalid operation specified.");
-        _operation = static_cast<EnginioClient::Operation>(operation);
+        Q_ASSERT_X(operation >= EnginioClientBase::ObjectOperation, "setOperation", "Invalid operation specified.");
+        _operation = static_cast<EnginioClientBase::Operation>(operation);
         emit q->operationChanged(_operation);
     }
 
@@ -1164,15 +1164,15 @@ void EnginioModel::setQuery(const QJsonObject &query)
 /*!
   \property EnginioModel::operation
   \brief The operation type of the query
-  \sa EnginioClient::Operation, query()
+  \sa EnginioClientBase::Operation, query()
   \return returns the Operation
 */
-EnginioClient::Operation EnginioModel::operation() const
+EnginioClientBase::Operation EnginioModel::operation() const
 {
     return d->operation();
 }
 
-void EnginioModel::setOperation(EnginioClient::Operation operation)
+void EnginioModel::setOperation(EnginioClientBase::Operation operation)
 {
     if (operation == d->operation())
         return;

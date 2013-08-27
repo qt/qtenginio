@@ -82,7 +82,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty EnginioClient::Operation Enginio1::EnginioModel::operation
+  \qmlproperty EnginioClientBase::Operation Enginio1::EnginioModel::operation
   The operation used for the \l query.
 */
 

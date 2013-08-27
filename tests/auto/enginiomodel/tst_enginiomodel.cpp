@@ -250,7 +250,7 @@ void tst_EnginioModel::query_property()
 void tst_EnginioModel::operation_property()
 {
     EnginioModel model;
-    QSignalSpy spy(&model, SIGNAL(operationChanged(EnginioClient::Operation)));
+    QSignalSpy spy(&model, SIGNAL(operationChanged(EnginioClientBase::Operation)));
 
     // check initial value
     QCOMPARE(model.operation(), EnginioClient::ObjectOperation);
@@ -258,7 +258,7 @@ void tst_EnginioModel::operation_property()
     model.setOperation(EnginioClient::UserOperation);
     QCOMPARE(model.operation(), EnginioClient::UserOperation);
     QTRY_COMPARE(spy.count(), 1);
-    QCOMPARE(spy[0][0].value<EnginioClient::Operation>(), EnginioClient::UserOperation);
+    QCOMPARE(spy[0][0].value<EnginioClientBase::Operation>(), EnginioClientBase::UserOperation);
 
     // try to set the same operation again, it should not emit the signal
     model.setOperation(EnginioClient::UserOperation);
@@ -269,7 +269,7 @@ void tst_EnginioModel::operation_property()
     model.setOperation(EnginioClient::UsergroupOperation);
     QTRY_COMPARE(spy.count(), 2);
     QCOMPARE(model.operation(), EnginioClient::UsergroupOperation);
-    QCOMPARE(spy[1][0].value<EnginioClient::Operation>(), EnginioClient::UsergroupOperation);
+    QCOMPARE(spy[1][0].value<EnginioClientBase::Operation>(), EnginioClientBase::UsergroupOperation);
 }
 
 void tst_EnginioModel::roleNames()

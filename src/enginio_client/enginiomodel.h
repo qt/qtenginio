@@ -71,7 +71,7 @@ public:
 
     Q_PROPERTY(EnginioClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
     Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged)
-    Q_PROPERTY(EnginioClient::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
+    Q_PROPERTY(EnginioClientBase::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
 
     // TODO: that is a pretty silly name
     EnginioClient *enginio() const Q_REQUIRED_RESULT;
@@ -80,8 +80,8 @@ public:
     QJsonObject query() Q_REQUIRED_RESULT;
     void setQuery(const QJsonObject &query);
 
-    EnginioClient::Operation operation() const Q_REQUIRED_RESULT;
-    void setOperation(EnginioClient::Operation operation);
+    EnginioClientBase::Operation operation() const Q_REQUIRED_RESULT;
+    void setOperation(EnginioClientBase::Operation operation);
 
     virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
@@ -99,7 +99,7 @@ public:
 
     void disableNotifications();
 Q_SIGNALS:
-    void operationChanged(const EnginioClient::Operation operation);
+    void operationChanged(const EnginioClientBase::Operation operation);
     void queryChanged(const QJsonObject query);
     void enginioChanged(EnginioClient *enginio);
 
