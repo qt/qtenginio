@@ -203,7 +203,7 @@ public:
     */
     bool markRequestIdAsHandled(const RequestId &id)
     {
-        typename RequestIdIndex::iterator::reference value = _requestIdIndex[id];
+        RequestIdIndex::iterator::reference value = _requestIdIndex[id];
         if (value.first) {
             if (--value.first <= 0) {
                 _requestIdIndex.remove(id);
