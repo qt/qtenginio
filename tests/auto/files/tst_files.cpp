@@ -187,14 +187,18 @@ void tst_Files::fileUploadDownload()
         QCOMPARE(spyError.count(), 0);
         data = reply->data();
         QVERIFY(data["results"].isArray());
-        QVERIFY(data["results"].toArray().first().toObject()["fileAttachment"].isObject());
-        QVERIFY(!data["results"].toArray().first().toObject()["fileAttachment"].toObject()["url"].toString().isEmpty());
-        QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileName"].toString(), fileName);
+        QJsonArray results = data["results"].toArray();
+        QCOMPARE(results.count(), 1);
+        QJsonObject resultObject = results.first().toObject();
+        QVERIFY(!resultObject.isEmpty());
+        QVERIFY(resultObject["fileAttachment"].isObject());
+        QVERIFY(!resultObject["fileAttachment"].toObject()["url"].toString().isEmpty());
+        QCOMPARE(resultObject["fileAttachment"].toObject()["fileName"].toString(), fileName);
 
         QFile file(filePath);
         double fileSize = (double) file.size();
-        QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["fileSize"].toDouble(), fileSize);
-        QCOMPARE(data["results"].toArray().first().toObject()["fileAttachment"].toObject()["id"].toString(), fileId);
+        QCOMPARE(resultObject["fileAttachment"].toObject()["fileSize"].toDouble(), fileSize);
+        QCOMPARE(resultObject["fileAttachment"].toObject()["id"].toString(), fileId);
     }
 
     // Download
