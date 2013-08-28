@@ -289,6 +289,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         }
     };
 
+protected:
     class AuthenticationStateTrackerFunctor
     {
         EnginioClientPrivate *_enginio;
@@ -325,13 +326,13 @@ public:
 
     Q_ENUMS(Operation)
 
-    EnginioClientPrivate(EnginioClient *client = 0);
+    EnginioClientPrivate(EnginioClientBase *client = 0);
     virtual ~EnginioClientPrivate();
     static EnginioClientPrivate* get(EnginioClient *client) { return client->d_func(); }
     static const EnginioClientPrivate* get(const EnginioClient *client) { return client->d_func(); }
 
 
-    EnginioClient *q_ptr;
+    EnginioClientBase *q_ptr;
     QByteArray _backendId;
     QByteArray _backendSecret;
     EnginioIdentity *_identity;
@@ -353,7 +354,7 @@ public:
 
     QSet<EnginioReply*> _delayedReplies; // Used only for testing
 
-    void init();
+    virtual void init();
 
     void replyFinished(QNetworkReply *nreply);
     bool finishDelayedReplies();
@@ -386,9 +387,9 @@ public:
 
         _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
         if (sessionToken.isEmpty())
-            emit q_ptr->sessionTerminated();
+            emitSessionTerminated();
         else
-            emit q_ptr->sessionAuthenticated(reply);
+            emitSessionAuthenticated(reply);
     }
 
     void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
@@ -710,6 +711,12 @@ public:
         EnginioClientPrivate *_client;
         QNetworkReply *_reply;
     };
+
+    virtual void emitSessionTerminated() const;
+    virtual void emitSessionAuthenticated(EnginioReply *reply) const;
+    virtual void emitSessionAuthenticationError(EnginioReply *reply) const;
+    virtual void emitFinished(EnginioReply *reply) const;
+    virtual void emitError(EnginioReply *reply) const;
 
 private:
 

@@ -166,7 +166,7 @@ QT_BEGIN_NAMESPACE
 */
 
 EnginioQmlClient::EnginioQmlClient(QObject *parent)
-    : EnginioClient(parent, new EnginioQmlClientPrivate(this))
+    : EnginioClientBase(parent, new EnginioQmlClientPrivate(this))
 {
     Q_D(EnginioQmlClient);
     d->init();
@@ -174,9 +174,21 @@ EnginioQmlClient::EnginioQmlClient(QObject *parent)
 
 void EnginioQmlClientPrivate::init()
 {
-    EnginioClientPrivate::init();
     qRegisterMetaType<EnginioQmlClient*>();
     qRegisterMetaType<EnginioQmlReply*>();
+    QObject::connect(static_cast<EnginioQmlClient*>(q_ptr), &EnginioQmlClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
+    QObject::connect(static_cast<EnginioQmlClient*>(q_ptr), &EnginioQmlClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientBase::Authenticated));
+    QObject::connect(static_cast<EnginioQmlClient*>(q_ptr), &EnginioQmlClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientBase::AuthenticationFailure));
+}
+
+EnginioQmlReply *EnginioQmlClient::search(const QJSValue &query)
+{
+    Q_D(EnginioQmlClient);
+
+    ObjectAdaptor<QJSValue> o(query, d);
+    QNetworkReply *nreply = d_ptr->query<QJSValue>(o, EnginioClientPrivate::SearchOperation);
+    EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
+    return ereply;
 }
 
 EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation operation)
@@ -279,6 +291,31 @@ void EnginioQmlClientPrivate::_setEngine()
     _parse = engine->evaluate("JSON.parse");
     Q_ASSERT(_stringify.isCallable());
     Q_ASSERT(_parse.isCallable());
+}
+
+void EnginioQmlClientPrivate::emitSessionTerminated() const
+{
+    emit static_cast<EnginioQmlClient*>(q_ptr)->sessionTerminated();
+}
+
+void EnginioQmlClientPrivate::emitSessionAuthenticated(EnginioReply *reply) const
+{
+    emit static_cast<EnginioQmlClient*>(q_ptr)->sessionAuthenticated(reply);
+}
+
+void EnginioQmlClientPrivate::emitSessionAuthenticationError(EnginioReply *reply) const
+{
+    emit static_cast<EnginioQmlClient*>(q_ptr)->sessionAuthenticationError(reply);
+}
+
+void EnginioQmlClientPrivate::emitFinished(EnginioReply *reply) const
+{
+    emit static_cast<EnginioQmlClient*>(q_ptr)->finished(reply);
+}
+
+void EnginioQmlClientPrivate::emitError(EnginioReply *reply) const
+{
+    emit static_cast<EnginioQmlClient*>(q_ptr)->error(reply);
 }
 
 QT_END_NAMESPACE

@@ -100,7 +100,7 @@ class EnginioBasicAuthenticationPrivate
         {
             EnginioReply *ereply = new EnginioReply(_enginio, _reply);
             if (_reply->error() != QNetworkReply::NoError) {
-                emit _enginio->q_ptr->sessionAuthenticationError(ereply);
+                emit _enginio->emitSessionAuthenticationError(ereply);
                 // TODO does ereply leak? Yes potentially. We need to think about the ownership
             } else {
                 _enginio->setIdentityToken(ereply);

@@ -173,7 +173,7 @@ QT_BEGIN_NAMESPACE
 
 ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
 
-EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
+EnginioClientPrivate::EnginioClientPrivate(EnginioClientBase *client) :
     q_ptr(client),
     _identity(),
     _serviceUrl(EnginioString::apiEnginIo),
@@ -189,9 +189,9 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClient *client) :
 
 void EnginioClientPrivate::init()
 {
-    QObject::connect(q_ptr, &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
-    QObject::connect(q_ptr, &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientBase::Authenticated));
-    QObject::connect(q_ptr, &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientBase::AuthenticationFailure));
+    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
+    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientBase::Authenticated));
+    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientBase::AuthenticationFailure));
 }
 
 void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
@@ -204,7 +204,7 @@ void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
     if (nreply->error() != QNetworkReply::NoError) {
         QPair<QIODevice *, qint64> deviceState = _chunkedUploads.take(nreply);
         delete deviceState.first;
-        emit q_ptr->error(ereply);
+        emit emitError(ereply);
         emit ereply->errorChanged();
     }
 
@@ -231,7 +231,7 @@ void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
     } else {
         ereply->dataChanged();
         ereply->emitFinished();
-        q_ptr->finished(ereply);
+        emitFinished(ereply);
         if (gEnableEnginioDebugInfo)
             _requestData.remove(nreply);
     }
@@ -251,7 +251,7 @@ bool EnginioClientPrivate::finishDelayedReplies()
             if (!reply->delayFinishedSignal()) {
                 reply->dataChanged();
                 reply->emitFinished();
-                q_ptr->finished(reply);
+                emitFinished(reply);
                 if (gEnableEnginioDebugInfo)
                     _requestData.remove(reply->d->_nreply); // FIXME it is ugly, and breaks encapsulation
                 _delayedReplies.remove(reply);
@@ -279,14 +279,6 @@ EnginioClient::EnginioClient(QObject *parent)
 {
     Q_D(EnginioClient);
     d->init();
-}
-
-/*!
- * \internal
- */
-EnginioClient::EnginioClient(QObject *parent, EnginioClientPrivate *d)
-    : EnginioClientBase(parent, d)
-{
 }
 
 /*!
@@ -677,5 +669,30 @@ EnginioClientBase::EnginioClientBase(QObject *parent, EnginioClientPrivate *d)
 
 EnginioClientBase::~EnginioClientBase()
 {}
+
+void EnginioClientPrivate::emitSessionTerminated() const
+{
+    emit static_cast<EnginioClient*>(q_ptr)->sessionTerminated();
+}
+
+void EnginioClientPrivate::emitSessionAuthenticated(EnginioReply *reply) const
+{
+    emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticated(reply);
+}
+
+void EnginioClientPrivate::emitSessionAuthenticationError(EnginioReply *reply) const
+{
+    emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticationError(reply);
+}
+
+void EnginioClientPrivate::emitFinished(EnginioReply *reply) const
+{
+    emit static_cast<EnginioClient*>(q_ptr)->finished(reply);
+}
+
+void EnginioClientPrivate::emitError(EnginioReply *reply) const
+{
+    emit static_cast<EnginioClient*>(q_ptr)->error(reply);
+}
 
 QT_END_NAMESPACE

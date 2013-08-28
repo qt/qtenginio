@@ -55,12 +55,17 @@ class EnginioQmlClientPrivate : public EnginioClientPrivate
     QJSValue _stringify;
     QJSValue _parse;
 public:
-    EnginioQmlClientPrivate(EnginioClient *client)
+    EnginioQmlClientPrivate(EnginioClientBase *client)
         : EnginioClientPrivate(client)
         , _engine(0)
     {}
 
-    void init();
+    virtual void init();
+    virtual void emitSessionTerminated() const;
+    virtual void emitSessionAuthenticated(EnginioReply *reply) const;
+    virtual void emitSessionAuthenticationError(EnginioReply *reply) const;
+    virtual void emitFinished(EnginioReply *reply) const;
+    virtual void emitError(EnginioReply *reply) const;
 
     inline QJSEngine *jsengine()
     {

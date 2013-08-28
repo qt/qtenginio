@@ -42,28 +42,37 @@
 #ifndef ENGINIOQMLCLIENT_H
 #define ENGINIOQMLCLIENT_H
 
-#include <Enginio/enginioclient.h>
+#include <Enginio/enginioclientbase.h>
 #include "enginioqmlreply.h"
 #include <QtQml/qjsvalue.h>
-#include <QQmlParserStatus>
 
 QT_BEGIN_NAMESPACE
 
 class EnginioQmlClientPrivate;
-class EnginioQmlClient : public EnginioClient
+class EnginioQmlClient : public EnginioClientBase
 {
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlClient)
 
+    Q_ENUMS(EnginioClientBase::Operation); // TODO remove me QTBUG-33577
+    Q_ENUMS(EnginioClientBase::AuthenticationState); // TODO remove me QTBUG-33577
 public:
     EnginioQmlClient(QObject *parent = 0);
 
+    Q_INVOKABLE EnginioQmlReply *search(const QJSValue &query);
     Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *downloadFile(const QJSValue &object);
     Q_INVOKABLE EnginioQmlReply *uploadFile(const QJSValue &object, const QUrl &url);
+
+Q_SIGNALS:
+    void sessionAuthenticated(EnginioReply *reply) const;
+    void sessionAuthenticationError(EnginioReply *reply) const;
+    void sessionTerminated() const;
+    void finished(EnginioReply *reply);
+    void error(EnginioReply *reply);
 
 private:
     Q_DECLARE_PRIVATE(EnginioQmlClient);

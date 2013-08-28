@@ -55,6 +55,9 @@ class EnginioReply;
 class ENGINIOCLIENT_EXPORT EnginioClient : public EnginioClientBase
 {
     Q_OBJECT
+
+    Q_ENUMS(EnginioClientBase::Operation); // TODO remove me QTBUG-33577
+    Q_ENUMS(EnginioClientBase::AuthenticationState); // TODO remove me QTBUG-33577
 public:
     explicit EnginioClient(QObject *parent = 0);
     ~EnginioClient();
@@ -75,9 +78,6 @@ Q_SIGNALS:
     void sessionTerminated() const;
     void finished(EnginioReply *reply);
     void error(EnginioReply *reply);
-
-protected:
-    EnginioClient(QObject *parent, EnginioClientPrivate *d);
 };
 
 QT_END_NAMESPACE

@@ -41,6 +41,7 @@
 
 #include "enginioqmlreply.h"
 #include "enginioqmlclient_p.h"
+#include "enginioqmlclient.h"
 #include <Enginio/private/enginioreply_p.h>
 #include <QtQml/qjsvalue.h>
 #include <QtQml/qqmlengine.h>
@@ -108,9 +109,9 @@ public:
         //    the connection is done from QML, so we transfer reply ownership to it. C++
         //    developers needs to take care of such situation and addapt.
 
-        static QMetaMethod clientFinishedSignal = QMetaMethod::fromSignal(&EnginioClient::finished);
-        static QMetaMethod clientErrorSignal = QMetaMethod::fromSignal(&EnginioClient::error);
-        static QMetaMethod replyFinishedSignal = QMetaMethod::fromSignal(&EnginioReply::finished);
+        static QMetaMethod clientFinishedSignal = QMetaMethod::fromSignal(&EnginioQmlClient::finished);
+        static QMetaMethod clientErrorSignal = QMetaMethod::fromSignal(&EnginioQmlClient::error);
+        static QMetaMethod replyFinishedSignal = QMetaMethod::fromSignal(&EnginioQmlReply::finished);
 
         // TODO it will not work because of: https://bugreports.qt-project.org/browse/QTBUG-32340
         bool isReplyFinishedConnected = q->isSignalConnected(replyFinishedSignal);
