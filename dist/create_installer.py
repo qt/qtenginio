@@ -13,6 +13,7 @@ import os
 import shutil
 import subprocess
 import sys
+import glob
 
 # Qt
 qmake = "qmake"
@@ -66,6 +67,14 @@ if sys.platform == "win32": # bug with jom subtargets
 else:
     subprocess.check_call([make, "docs"])
 
+
+# on Windows dlls are built in the lib dir but need to be in bin
+if sys.platform == "win32":
+    os.mkdir("bin")
+    alldlls = glob.glob("lib/*.dll")
+    for dll in alldlls:
+        os.rename(dll, "bin" + dll[3:])
+
 # Copy files around
 os.chdir("../..")
 
@@ -74,7 +83,10 @@ packages = {
     "com.digia.enginioExamples": ["examples",],
     "com.digia.enginioDocumentation": ["doc/qtenginio",],
     "com.digia.enginioSources": ["src",],
-    }
+}
+if sys.platform == "win32":
+    packages["com.digia.enginio"].append("bin")
+
 
 print("Creating installer...")
 
@@ -110,7 +122,6 @@ for line in fileinput.input(".qmake.conf"):
 
 
 privateHeaderPath = headerPath + VERSION + "/Enginio/private"
-import glob
 allHeaders = glob.glob("src/*/*.h")
 for header in allHeaders:
     fileName = header[header.rindex(os.sep):]
@@ -123,7 +134,6 @@ for header in allHeaders:
 
 
 os.chdir("dist")
-
 
 
 # the Module .pri file is special - take the one from mkspecs/modules_inst
