@@ -97,3 +97,14 @@ Component.prototype.createOperationsForArchive = function(archive)
         component.addOperation("Extract", archive, "@TargetDir@");
     }
 }
+
+Component.prototype.createOperations = function()
+{
+    component.createOperations();
+
+    if (installer.value("os") === "win") {
+        component.addOperation("CreateShortcut", "@TargetDir@/examples/examples.pro", "@StartMenuDir@/Enignio Examples.lnk",
+            "workingDirectory=@TargetDir@", "iconPath=%SystemRoot%/system32/SHELL32.dll",
+            "iconId=2");
+    }
+}
