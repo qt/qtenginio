@@ -70,9 +70,9 @@ else:
 os.chdir("../..")
 
 packages = {
-    "com.digia.enginio": ["include", "lib", "qml", ], #"doc/enginio-qt.qch", ],
+    "com.digia.enginio": ["include", "lib", "qml", "doc/qtenginio.qch", ],
     "com.digia.enginioExamples": ["examples",],
-    #"com.digia.enginioDocumentation": ["doc/enginio-qt",],
+    "com.digia.enginioDocumentation": ["doc/qtenginio",],
     "com.digia.enginioSources": ["src",],
     }
 
