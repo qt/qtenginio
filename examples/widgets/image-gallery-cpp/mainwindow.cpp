@@ -110,16 +110,16 @@ void MainWindow::beginUpload(EnginioReply *reply)
     QString objectId = reply->data().value("id").toString();
 
     QJsonObject object;
-    object["id"] = objectId;
-    object.insert("objectType", QString("objects.image"));
-    object["propertyName"] = QStringLiteral("file");
+    object.insert("id", objectId);
+    object.insert("objectType", QStringLiteral("objects.image"));
+    object.insert("propertyName", QStringLiteral("file"));
 
     QJsonObject fileObject;
-    fileObject[QStringLiteral("fileName")] = path;
+    fileObject.insert(QStringLiteral("fileName"), path);
 
     QJsonObject uploadJson;
-    uploadJson[QStringLiteral("targetFileProperty")] = object;
-    uploadJson[QStringLiteral("file")] = fileObject;
+    uploadJson.insert(QStringLiteral("targetFileProperty"), object);
+    uploadJson.insert(QStringLiteral("file"), fileObject);
 
     EnginioReply *upload = m_client->uploadFile(uploadJson, QUrl::fromUserInput(path));
     connect(upload, SIGNAL(finished(EnginioReply*)), upload, SLOT(deleteLater()));
