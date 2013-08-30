@@ -40,7 +40,6 @@ private:
     QListView *m_view;
     QPushButton *m_uploadButton;
     QFileDialog *m_fileDialog;
-    QMap<EnginioReply*, QString> m_uploads;
 };
 
 #endif // MAINWINDOW_H

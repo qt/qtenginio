@@ -100,13 +100,12 @@ void MainWindow::fileSelected(const QString &filePath)
     object.insert("localPath", filePath);
     EnginioReply *reply = m_model->append(object);
     connect(reply, SIGNAL(finished(EnginioReply*)), this, SLOT(beginUpload(EnginioReply*)));
-    m_uploads.insert(reply, filePath);
 }
 
 void MainWindow::beginUpload(EnginioReply *reply)
 {
     reply->deleteLater();
-    QString path = m_uploads.take(reply);
+    QString path = reply->data().value("localPath").toString();
     QString objectId = reply->data().value("id").toString();
 
     QJsonObject object;
