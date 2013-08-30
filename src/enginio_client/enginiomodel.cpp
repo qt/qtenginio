@@ -405,6 +405,7 @@ public:
         , _canFetchMore(false)
         , _rolesCounter(EnginioModel::SyncedRole)
     {
+        disableNotifications();
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::enginioChanged, QueryChanged(this));
