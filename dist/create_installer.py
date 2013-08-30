@@ -78,7 +78,7 @@ if sys.platform == "win32":
 # on Linux so files need their rpath adjusted
 if sys.platform.startswith("linux"):
     subprocess.check_call(["chrpath", "-r '$ORIGIN/'", "lib/libEnginio.so"])
-    subprocess.check_call(["chrpath", "-r '$ORIGIN/../../lib/'", "qml/Enginio/libenginioplugin.so"])
+    subprocess.check_call(["chrpath", "-r '$ORIGIN/../../lib'", "qml/Enginio/libenginioplugin.so"])
 
 
 
