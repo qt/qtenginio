@@ -122,10 +122,5 @@ void MainWindow::beginUpload(EnginioReply *reply)
     uploadJson[QStringLiteral("file")] = fileObject;
 
     EnginioReply *upload = m_client->uploadFile(uploadJson, QUrl::fromUserInput(path));
-    connect(upload, SIGNAL(finished(EnginioReply*)), this, SLOT(uploadFinished(EnginioReply*)));
-}
-
-void MainWindow::uploadFinished(EnginioReply *reply)
-{
-    reply->deleteLater();
+    connect(upload, SIGNAL(finished(EnginioReply*)), upload, SLOT(deleteLater()));
 }

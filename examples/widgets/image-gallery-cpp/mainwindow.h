@@ -28,7 +28,6 @@ private slots:
     void error(EnginioReply *error);
     void beginUpload(EnginioReply *reply);
     void fileSelected(const QString &file);
-    void uploadFinished(EnginioReply *reply);
 
 private:
     // The Enginio client object used in all enginio operations
