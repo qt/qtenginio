@@ -107,4 +107,15 @@ Component.prototype.createOperations = function()
             "workingDirectory=@TargetDir@", "iconPath=%SystemRoot%/system32/SHELL32.dll",
             "iconId=2");
     }
+    if (installer.value("os") === "mac") {
+        try {
+            // patch Qt binaries
+            var script = path + "patcher.py";
+            print(script)
+            component.addOperation("Execute", "{0}", "/usr/bin/python", script);
+            component.addOperation("Execute", "{0}", "/bin/rm", script);
+        } catch( e ) {
+            print( e );
+        }
+    }
 }

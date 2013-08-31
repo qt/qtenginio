@@ -18,6 +18,8 @@ import glob
 # Qt
 qmake = "qmake"
 qmake_spec = subprocess.check_output([qmake, "-query", "QMAKE_SPEC"]).strip()
+qt_install_prefix = subprocess.check_output([qmake, "-query", "QT_INSTALL_PREFIX"]).strip()
+qt_install_placeholder = "<__QT__INSTALL__PREFIX__>"
 
 make = "make"
 if sys.platform == "win32":
@@ -81,6 +83,50 @@ if sys.platform.startswith("linux"):
     subprocess.check_call(["chrpath", "-r", "$ORIGIN/../../lib", "qml/Enginio/libenginioplugin.so"])
 
 
+if sys.platform == "darwin":
+    otool = "otool"
+    install_name_tool = "install_name_tool"
+    cwd = os.getcwd()
+    print(cwd)
+    install_path = subprocess.check_output([otool, "-D", "lib/Enginio.framework/Enginio"]).split().pop()
+    rpath = install_path.replace(qt_install_prefix, qt_install_placeholder)
+    plugin_lib = "qml/Enginio/libenginioplugin.dylib"
+    plugin_debug_lib = "qml/Enginio/libenginioplugin_debug.dylib"
+    enginio_lib = install_path.replace(qt_install_prefix, '.')
+    subprocess.check_call([install_name_tool, "-id", rpath, enginio_lib])
+    subprocess.check_call([install_name_tool, "-id", rpath + "_debug", enginio_lib + "_debug"])
+    rpath_libs = subprocess.check_output([otool, "-L", enginio_lib]).strip().split('\n')
+    rpath_libs.extend(subprocess.check_output([otool, "-L", plugin_lib]).strip().split('\n'))
+    rpath_libs.extend(subprocess.check_output([otool, "-L", plugin_debug_lib]).strip().split('\n'))
+
+    seen = set()
+    for line in rpath_libs:
+        lib = line.split()[0].strip()
+        if lib not in seen and lib.startswith(qt_install_prefix):
+            print("# " + lib)
+            subprocess.check_call([install_name_tool, "-change", lib, lib.replace(qt_install_prefix, qt_install_placeholder), enginio_lib])
+            subprocess.check_call([install_name_tool, "-change", lib, lib.replace(qt_install_prefix, qt_install_placeholder), enginio_lib + "_debug"])
+            subprocess.check_call([install_name_tool, "-change", lib, lib.replace(qt_install_prefix, qt_install_placeholder), plugin_lib])
+            subprocess.check_call([install_name_tool, "-change", lib, lib.replace(qt_install_prefix, qt_install_placeholder), plugin_debug_lib])
+        seen.add(lib)
+
+    filenames = ['mkspecs/modules-inst/qt_lib_enginio.pri', 'lib/Enginio.framework/Enginio_debug.prl', 'lib/Enginio.framework/Enginio.prl', 'lib/Enginio.la', 'lib/Enginio_debug.la']
+
+    for f in filenames:
+        with open(f, "r+") as f_handle:
+            lines = f_handle.readlines()
+            f_handle.seek(0)
+            f_handle.truncate()
+            for line in lines:
+                modline = line
+                if qt_install_prefix in line:
+                    modline = line.replace(qt_install_prefix, qt_install_placeholder)
+                f_handle.write(modline)
+    os.chdir("..")
+    patcher_dest = "packages/com.digia.enginio/data/patcher.py"
+    os.mkdir(os.path.dirname(patcher_dest))
+    shutil.copyfile("patcher.py", patcher_dest)
+    os.chdir(cwd)
 
 # Copy files around
 os.chdir("../..")
