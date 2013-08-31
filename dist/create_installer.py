@@ -52,7 +52,7 @@ os.chdir("build")
 #process.stdin.write("exit\n")
 #process.communicate()
 
-subprocess.check_call([qmake, "../.."])
+subprocess.check_call([qmake, "CONFIG+=silent", "../.."])
 print("Compiling Enginio...")
 
 try:
@@ -60,7 +60,7 @@ try:
 except ImportError:
     DEVNULL = open(os.devnull, 'wb')
 
-subprocess.check_call([make,], stdout=DEVNULL)
+subprocess.check_call([make])
 
 if sys.platform == "win32": # bug with jom subtargets
     subprocess.check_call(["nmake", "docs"])
