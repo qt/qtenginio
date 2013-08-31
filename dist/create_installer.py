@@ -99,9 +99,10 @@ print("Creating installer...")
 
 for package in packages:
     for path in packages[package]:
-        sourcePath = path
+        sourcePath = "dist/build/" + path
         if not os.path.exists(sourcePath):
-            sourcePath = "dist/build/" + path
+            # Find examples/
+            sourcePath = path
         if not os.path.exists(sourcePath):
             print("ERROR: Could not find path '" + path + "' in source or build directory.")
             exit(1)
@@ -114,7 +115,7 @@ for package in packages:
             os.mkdir(os.path.dirname(dest))
             shutil.copyfile(sourcePath, dest)
         else:
-            shutil.copytree(sourcePath, dest)
+            shutil.copytree(sourcePath, dest, symlinks=True)
 
 # copy the real headers
 # src/enginio_client
