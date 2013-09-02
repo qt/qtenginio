@@ -46,7 +46,7 @@ void ImageObject::downloadFinished()
     m_image.loadFromData(imageData);
     emit imageChanged(m_object.value("id").toString());
 
-    delete m_reply;
+    m_reply->deleteLater();
     m_reply = 0;
 }
 
