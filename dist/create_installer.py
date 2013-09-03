@@ -17,8 +17,8 @@ import glob
 
 # Qt
 qmake = "qmake"
-qmake_spec = subprocess.check_output([qmake, "-query", "QMAKE_SPEC"]).strip()
-qt_install_prefix = subprocess.check_output([qmake, "-query", "QT_INSTALL_PREFIX"]).strip()
+qmake_spec = subprocess.check_output([qmake, "-query", "QMAKE_SPEC"]).strip().decode('utf-8')
+qt_install_prefix = subprocess.check_output([qmake, "-query", "QT_INSTALL_PREFIX"]).strip().decode('utf-8')
 qt_install_placeholder = "<__QT__INSTALL__PREFIX__>"
 
 make = "make"
