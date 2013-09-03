@@ -485,7 +485,6 @@ void EnginioBackendConnection::connectToBackend(EnginioClient* client, const QJs
     Q_ASSERT(!client->backendId().isEmpty());
     Q_ASSERT(!client->backendSecret().isEmpty());
 
-    qDebug() << "## Requesting WebSocket url.";
     QUrl url(client->serviceUrl());
     url.setPath(QStringLiteral("/v1/stream_url"));
 
@@ -507,8 +506,6 @@ void EnginioBackendConnection::close(WebSocketCloseStatus closeStatus)
 {
     if (_sentCloseFrame)
         return;
-
-    qDebug() << "## Closing WebSocket connection.";
 
     _sentCloseFrame = true;
     _keepAliveTimer.stop();
