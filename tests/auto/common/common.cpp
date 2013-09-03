@@ -104,7 +104,7 @@ bool EnginioBackendManager::synchronousRequest(const QByteArray &httpOperation, 
     QSignalSpy errorSpy(&_client, SIGNAL(error(EnginioReply *)));
     _responseData = QJsonObject();
     _client.customRequest(_url, httpOperation, data);
-    return finishedSpy.wait(10000) && !errorSpy.count();
+    return finishedSpy.wait(30000) && !errorSpy.count();
 }
 
 bool EnginioBackendManager::authenticate()
