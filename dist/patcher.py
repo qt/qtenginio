@@ -14,7 +14,7 @@ import shutil
 import subprocess
 import sys
 
-script_path = os.path.dirname(sys.argv[0])
+script_path = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(script_path)
 qmake = "bin/qmake"
 otool = "otool"
@@ -24,8 +24,33 @@ cwd = os.getcwd()
 print(cwd)
 
 qt_install_placeholder = "<__QT__INSTALL__PREFIX__>"
+qt_install_prefix = subprocess.check_output([qmake, "-query", "QT_INSTALL_PREFIX"]).strip().decode('utf-8')
 
-qt_install_prefix = subprocess.check_output([qmake, "-query", "QT_INSTALL_PREFIX"]).strip()
+if sys.platform == "darwin" or sys.platform.startswith("linux"):
+    filenames = ['mkspecs/modules/qt_lib_enginio.pri',
+                 'lib/Enginio.framework/Enginio_debug.prl',
+                 'lib/Enginio.framework/Enginio.prl',
+                 'lib/libEnginio.prl',
+                 'lib/pkgconfig/Enginio.pc',
+                 'lib/libEnginio.la',
+                 'lib/Enginio.la',
+                 'lib/Enginio_debug.la']
+
+    for f in filenames:
+        if os.path.exists(f):
+            with open(f, "r+") as f_handle:
+                lines = f_handle.readlines()
+                f_handle.seek(0)
+                f_handle.truncate()
+                for line in lines:
+                    modline = line
+                    if qt_install_placeholder in line:
+                        modline = line.replace(qt_install_placeholder, qt_install_prefix)
+                    f_handle.write(modline)
+
+if not sys.platform == "darwin":
+    exit(0)
+
 plugin_lib = "qml/Enginio/libenginioplugin.dylib"
 plugin_debug_lib = "qml/Enginio/libenginioplugin_debug.dylib"
 
@@ -50,19 +75,6 @@ for line in rpath_libs:
         subprocess.check_call([install_name_tool, "-change", lib, lib.replace(qt_install_placeholder, qt_install_prefix), plugin_lib])
         subprocess.check_call([install_name_tool, "-change", lib, lib.replace(qt_install_placeholder, qt_install_prefix), plugin_debug_lib])
     seen.add(lib)
-
-filenames = ['mkspecs/modules/qt_lib_enginio.pri', 'lib/Enginio.framework/Enginio_debug.prl', 'lib/Enginio.framework/Enginio.prl', 'lib/Enginio.la', 'lib/Enginio_debug.la']
-
-for f in filenames:
-    with open(f, "r+") as f_handle:
-        lines = f_handle.readlines()
-        f_handle.seek(0)
-        f_handle.truncate()
-        for line in lines:
-            modline = line
-            if qt_install_placeholder in line:
-                modline = line.replace(qt_install_placeholder, qt_install_prefix)
-            f_handle.write(modline)
 
 os.chdir(cwd)
 

@@ -82,11 +82,11 @@ if sys.platform.startswith("linux"):
     subprocess.check_call(["chrpath", "-r", "$ORIGIN", "lib/libEnginio.so"])
     subprocess.check_call(["chrpath", "-r", "$ORIGIN/../../lib", "qml/Enginio/libenginioplugin.so"])
 
+cwd = os.getcwd()
 
 if sys.platform == "darwin":
     otool = "otool"
     install_name_tool = "install_name_tool"
-    cwd = os.getcwd()
     print(cwd)
     install_path = subprocess.check_output([otool, "-D", "lib/Enginio.framework/Enginio"]).split().pop()
     rpath = install_path.replace(qt_install_prefix, qt_install_placeholder)
@@ -110,23 +110,34 @@ if sys.platform == "darwin":
             subprocess.check_call([install_name_tool, "-change", lib, lib.replace(qt_install_prefix, qt_install_placeholder), plugin_debug_lib])
         seen.add(lib)
 
-    filenames = ['mkspecs/modules-inst/qt_lib_enginio.pri', 'lib/Enginio.framework/Enginio_debug.prl', 'lib/Enginio.framework/Enginio.prl', 'lib/Enginio.la', 'lib/Enginio_debug.la']
+if sys.platform == "darwin" or sys.platform.startswith("linux"):
+    filenames = ['mkspecs/modules-inst/qt_lib_enginio.pri',
+                 'lib/Enginio.framework/Enginio_debug.prl',
+                 'lib/Enginio.framework/Enginio.prl',
+                 'lib/libEnginio.prl',
+                 'lib/pkgconfig/Enginio.pc',
+                 'lib/libEnginio.la',
+                 'lib/Enginio.la',
+                 'lib/Enginio_debug.la']
 
     for f in filenames:
-        with open(f, "r+") as f_handle:
-            lines = f_handle.readlines()
-            f_handle.seek(0)
-            f_handle.truncate()
-            for line in lines:
-                modline = line
-                if qt_install_prefix in line:
-                    modline = line.replace(qt_install_prefix, qt_install_placeholder)
-                f_handle.write(modline)
+        if os.path.exists(f):
+            with open(f, "r+") as f_handle:
+                lines = f_handle.readlines()
+                f_handle.seek(0)
+                f_handle.truncate()
+                for line in lines:
+                    modline = line
+                    if qt_install_prefix in line:
+                        modline = line.replace(qt_install_prefix, qt_install_placeholder)
+                    f_handle.write(modline)
+
     os.chdir("..")
     patcher_dest = "packages/com.digia.enginio/data/patcher.py"
     os.mkdir(os.path.dirname(patcher_dest))
     shutil.copyfile("patcher.py", patcher_dest)
-    os.chdir(cwd)
+
+os.chdir(cwd)
 
 # Copy files around
 os.chdir("../..")
