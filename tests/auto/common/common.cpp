@@ -315,7 +315,8 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
     QJsonObject obj;
     int spyCount = spy.count();
 
-    for (int i = 0; i < 5; ++i) {
+    const int UserCount = 8;
+    for (int i = 0; i < UserCount; ++i) {
         QJsonObject query;
         query["username"] = QStringLiteral("logintest") + (i ? QString::number(i) : "");
         obj["query"] = query;
@@ -323,10 +324,10 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
         ++spyCount;
     }
 
-    QTRY_COMPARE(spy.count(), spyCount);
+    QTRY_COMPARE_WITH_TIMEOUT(spy.count(), spyCount, 15000);
     QCOMPARE(spyError.count(), 0);
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < UserCount; ++i) {
         EnginioReply *reply = spy[i][0].value<EnginioReply*>();
         QVERIFY(reply);
         QVERIFY(!reply->data().isEmpty());
@@ -346,11 +347,10 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
             query["email"] = identity + "@email.com";
             client.create(query, EnginioClient::UserOperation);
             ++spyCount;
-            qDebug() << "Creating " << query;
         }
     }
 
-    QTRY_COMPARE(spy.count(), spyCount);
+    QTRY_COMPARE_WITH_TIMEOUT(spy.count(), spyCount, 15000);
     QCOMPARE(spyError.count(), 0);
 
 
@@ -358,7 +358,8 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
     spy.clear();
     spyCount = 0;
 
-    for (int i = 0; i < 5; ++i) {
+    const int UserGroupCount = 8;
+    for (int i = 0; i < UserGroupCount; ++i) {
         QJsonObject query;
         query["name"] = "usergroup" + (i ? QString::number(i) : "");
         obj["query"] = query;
@@ -366,10 +367,10 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
         ++spyCount;
     }
 
-    QTRY_COMPARE(spy.count(), spyCount);
+    QTRY_COMPARE_WITH_TIMEOUT(spy.count(), spyCount, 15000);
     QCOMPARE(spyError.count(), 0);
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < UserGroupCount; ++i) {
         EnginioReply *reply = spy[i][0].value<EnginioReply*>();
         QVERIFY(reply);
         QVERIFY(!reply->data().isEmpty());
@@ -387,11 +388,10 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
             query["name"] = groupName;
             client.create(query, EnginioClient::UsergroupOperation);
             ++spyCount;
-            qDebug() << "Creating " << query;
         }
     }
 
-    QTRY_COMPARE(spy.count(), spyCount);
+    QTRY_COMPARE_WITH_TIMEOUT(spy.count(), spyCount, 15000);
     QCOMPARE(spyError.count(), 0);
 }
 
