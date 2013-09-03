@@ -150,6 +150,15 @@ packages = {
 }
 if sys.platform == "win32":
     packages["com.digia.enginio"].append("bin")
+    package_xml = "dist/packages/com.digia.enginio/meta/package.xml"
+    with open(package_xml, "r+") as xml:
+        lines = xml.readlines()
+        xml.seek(0)
+        xml.truncate()
+        for line in lines:
+            if "</Package>" in line:
+                xml.write("<RequiresAdminRights>true</RequiresAdminRights>\n")
+            xml.write(line)
 
 
 print("Creating installer...")
