@@ -82,6 +82,7 @@
     F(session, "session")\
     F(sessionToken, "sessionToken")\
     F(sort, "sort")\
+    F(stagingEnginIo, "https://staging.engin.io")\
     F(status, "status")\
     F(targetFileProperty, "targetFileProperty")\
     F(update, "update")\

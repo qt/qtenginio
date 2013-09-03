@@ -1025,6 +1025,7 @@ void tst_EnginioModel::externalNotification()
 {
     if (EnginioTests::TESTAPP_URL != "https://staging.engin.io")
         QSKIP("The test depands on notifications, which are enabled only in staging environment");
+
     EnginioClient client;
     client.setBackendId(_backendId);
     client.setBackendSecret(_backendSecret);

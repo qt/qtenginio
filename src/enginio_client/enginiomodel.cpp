@@ -307,6 +307,8 @@ class EnginioModelPrivate {
             if (qintptr(_connection) == -1)
                 return;
             Q_ASSERT(model && enginio);
+            if (enginio->serviceUrl() != EnginioString::stagingEnginIo)
+                return;  // TODO it allows to use notification only on staging
             removeConnection(); // TODO reuse the connecton object
             _connection = new EnginioBackendConnection;
             NotificationReceived receiver = { model };
@@ -405,7 +407,6 @@ public:
         , _canFetchMore(false)
         , _rolesCounter(EnginioModel::SyncedRole)
     {
-        disableNotifications();
         QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::operationChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModel::enginioChanged, QueryChanged(this));
