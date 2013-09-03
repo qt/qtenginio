@@ -214,6 +214,7 @@ void EnginioReply::dumpDebugInfo() const
 void EnginioReply::setDelayFinishedSignal(bool delay)
 {
     d->_delay = delay;
+    d->_client->finishDelayedReplies();
 }
 
 /*!

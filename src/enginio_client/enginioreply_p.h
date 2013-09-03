@@ -63,7 +63,7 @@ public:
 
     bool isFinished() const Q_REQUIRED_RESULT
     {
-        return _nreply->isFinished();
+        return _nreply->isFinished() && Q_LIKELY(!_delay);
     }
 
     QNetworkReply::NetworkError errorCode() const Q_REQUIRED_RESULT
