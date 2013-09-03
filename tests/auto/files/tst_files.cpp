@@ -167,7 +167,7 @@ void tst_Files::fileUploadDownload()
         QVERIFY(responseUpload);
 
         QSignalSpy progressSpy(responseUpload, SIGNAL(progress(qint64,qint64)));
-        QTRY_VERIFY(responseUpload->isFinished());
+        QTRY_VERIFY_WITH_TIMEOUT(responseUpload->isFinished(), 30000);
         QCOMPARE(spyError.count(), 0);
         fileId = responseUpload->data().value(QStringLiteral("id")).toString();
         QVERIFY(progressSpy.count() > 1);
