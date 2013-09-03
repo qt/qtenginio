@@ -49,6 +49,27 @@ static const QByteArray getRequest = QByteArrayLiteral("GET");
 static const QByteArray postRequest = QByteArrayLiteral("POST");
 static const QByteArray deleteRequest = QByteArrayLiteral("DELETE");
 
+struct PrintAllErrors
+{
+    QSignalSpy *_spy;
+    PrintAllErrors(QSignalSpy *spy)
+        : _spy(spy)
+    {
+        Q_ASSERT(spy);
+    }
+
+    ~PrintAllErrors()
+    {
+        if (!_spy->isEmpty()) {
+            qDebug() << "SignalSpy caught errors:";
+            for (int i = 0; i < _spy->count(); ++i) {
+                EnginioReply *reply = _spy->at(i).first().value<EnginioReply*>();
+                reply->dumpDebugInfo();
+            }
+        }
+    }
+};
+
 EnginioBackendManager::EnginioBackendManager(QObject *parent)
     : QObject(parent)
     , _email(qgetenv("ENGINIO_EMAIL_ADDRESS"))
@@ -102,6 +123,7 @@ bool EnginioBackendManager::synchronousRequest(const QByteArray &httpOperation, 
 {
     QSignalSpy finishedSpy(&_client, SIGNAL(finished(EnginioReply *)));
     QSignalSpy errorSpy(&_client, SIGNAL(error(EnginioReply *)));
+    PrintAllErrors printErrors(&errorSpy);
     _responseData = QJsonObject();
     _client.customRequest(_url, httpOperation, data);
     return finishedSpy.wait(30000) && !errorSpy.count();
@@ -288,6 +310,7 @@ void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
+    PrintAllErrors printErrors(&spyError);
 
     QJsonObject obj;
     int spyCount = spy.count();
