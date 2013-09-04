@@ -1,5 +1,16 @@
 # Enginio Qt Library Changelog
-## 0.5.0
+## 0.6.0
+* Improved documentation
+* Improved stability in many "edge cases"
+* Examples within Enginio are not dependent on hard-coded backend anymore
+* Clearer and more precise error messages
+* Client library has been moved under the Qt-Project umbrella
+* Groundwork laid for coming websocket support
+* New binary installers for Windows, Mac and Linux
+* Renamed EnginioAuthentication to EnginioBasicAuthentication (Qt API change)
+* EnginioModel defined an enums with default roles (Qt API change)
+
+## 0.5.0 (July 5th 2013)
 * New more Qt-like API, based on QNetworkAccessManager design
 * QJS and QJson based API
 * New classes:
