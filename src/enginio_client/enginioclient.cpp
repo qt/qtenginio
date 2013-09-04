@@ -107,7 +107,7 @@
 
   Enginio provides convenient user management.
   The authentication state reflects whether the current user is authenticated.
-  \sa AuthenticationState
+  \sa AuthenticationState EnginioClient::identity() EnginioBasicAuthentication
 */
 
 /*!
@@ -116,7 +116,7 @@
 
   The \a reply contains the details about the login.
 
-  \sa sessionAuthenticationError(), EnginioReply
+  \sa sessionAuthenticationError(), EnginioReply, EnginioBasicAuthentication
 */
 
 /*!
@@ -124,12 +124,13 @@
   \brief Emitted when a user login fails.
 
   The \a reply contains the details about why the login failed.
-  \sa sessionAuthenticated(), EnginioReply
+  \sa sessionAuthenticated(), EnginioReply EnginioClient::identity() EnginioBasicAuthentication
 */
 
 /*!
   \fn EnginioClient::sessionTerminated() const
   \brief Emitted when a user logs out.
+  \sa EnginioClient::identity() EnginioBasicAuthentication
 */
 
 /*!
@@ -517,7 +518,7 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
 /*!
   \property EnginioClient::identity
   Represents a user.
-  \sa EnginioIdentity
+  \sa EnginioIdentity EnginioBasicAuthentication
 */
 EnginioIdentity *EnginioClient::identity() const
 {
