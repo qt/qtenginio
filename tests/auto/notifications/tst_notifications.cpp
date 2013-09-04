@@ -50,12 +50,6 @@
 
 #include "../common/common.h"
 
-#define CHECK_NO_ERROR(response) \
-    QVERIFY(!response->isError()); \
-    QCOMPARE(response->errorType(), EnginioReply::NoError);\
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);\
-    QVERIFY(response->backendStatus() >= 200 && response->backendStatus() < 300);
-
 namespace EnginioTests {
     // FIXME: As soon as this functionality is deployed to the production server
     // this test has to be changed to use EnginioTests::TESTAPP_STAGING_URL.

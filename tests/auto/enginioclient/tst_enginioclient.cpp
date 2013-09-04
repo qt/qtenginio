@@ -48,13 +48,6 @@
 
 #include "../common/common.h"
 
-#define CHECK_NO_ERROR(response) \
-    QVERIFY(response->isFinished()); \
-    QVERIFY(!response->isError()); \
-    QCOMPARE(response->errorType(), EnginioReply::NoError);\
-    QCOMPARE(response->networkError(), QNetworkReply::NoError);\
-    QVERIFY(response->backendStatus() >= 200 && response->backendStatus() < 300);
-
 class tst_EnginioClient: public QObject
 {
     Q_OBJECT

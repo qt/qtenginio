@@ -17,6 +17,14 @@
 #define QTRY_VERIFY(Test) QTRY_VERIFY_WITH_TIMEOUT(Test, 15000)
 #define QTRY_COMPARE(Test1, Test2) QTRY_COMPARE_WITH_TIMEOUT(Test1, Test2, 15000)
 
+#define CHECK_NO_ERROR(response) \
+    QVERIFY(response->isFinished()); \
+    QVERIFY(!response->isError()); \
+    QCOMPARE(response->errorType(), EnginioReply::NoError);\
+    QCOMPARE(response->networkError(), QNetworkReply::NoError);\
+    QVERIFY(response->backendStatus() >= 200 && response->backendStatus() < 300);
+
+
 class EnginioReply;
 
 namespace EnginioTests
