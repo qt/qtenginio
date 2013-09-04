@@ -688,15 +688,17 @@ public:
 
         void operator ()(qint64 progress, qint64 total)
         {
+            if (!progress || !total) // TODO sometimes we get garbage as progress, it seems like a bug of Qt or Enginio web engine
+                return;
             EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
-            qint64 p = progress;
-            qint64 t = total;
             if (_client->_chunkedUploads.contains(_reply)) {
                 QPair<QIODevice*, qint64> chunkData = _client->_chunkedUploads.value(_reply);
-                t = chunkData.first->size();
-                p += chunkData.second;
+                total = chunkData.first->size();
+                progress += chunkData.second;
+                if (progress > total)  // TODO assert?!
+                    return;
             }
-            emit ereply->progress(p, t);
+            emit ereply->progress(progress, total);
         }
     private:
         EnginioClientPrivate *_client;

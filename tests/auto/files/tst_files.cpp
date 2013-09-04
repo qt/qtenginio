@@ -170,7 +170,7 @@ void tst_Files::fileUploadDownload()
         QTRY_VERIFY_WITH_TIMEOUT(responseUpload->isFinished(), 30000);
         QCOMPARE(spyError.count(), 0);
         fileId = responseUpload->data().value(QStringLiteral("id")).toString();
-        QVERIFY(progressSpy.count() > 1);
+        QVERIFY(progressSpy.count() >= 1);
     }
 
     // Query including files
