@@ -379,10 +379,11 @@ void EnginioClient::setServiceUrl(const QUrl &serviceUrl)
 }
 
 /*!
- * \brief Get the QNetworkAccessManager used by the Enginio library.
- *
- * Note that it will be deleted with the client object.
- */
+  \brief Get the QNetworkAccessManager used by the Enginio library.
+
+  \note that this QNetworkAccessManager may be shared with other EnginioClient instances
+  and it is owned by them.
+*/
 QNetworkAccessManager * EnginioClient::networkManager() const
 {
     Q_D(const EnginioClient);
