@@ -509,7 +509,7 @@ public:
         o.remove(EnginioString::id);
         QNetworkReply *reply = 0;
         QByteArray data;
-#if QT_VERSION < QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
         if (operation != EnginioClient::ObjectAclOperation)
             reply = networkManager()->deleteResource(req);
         else {
@@ -521,6 +521,7 @@ public:
             buffer->setParent(reply);
         }
 #else
+        // TODO enable me https://codereview.qt-project.org/#change,56920
         data = o.toJson();
         reply = networkManager()->deleteResource(req, data);
 #endif
