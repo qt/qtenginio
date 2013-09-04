@@ -151,6 +151,15 @@ public:
 
   This class can authenticate a user by verifying the user's login and password.
   The user has to exist in the backend already.
+
+  To authenticate an instance of EnginioClient called \a client such code may be used:
+  \code
+    EnginioBasicAuthentication identity;
+    identity.setUser(_user);
+    identity.setPassword(_user);
+
+    client.setIdentity(&identity);
+  \endcode
 */
 
 /*!
