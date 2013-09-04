@@ -39,26 +39,28 @@
     For this example to work the Enginio backend needs to be set up.
 
     Go to the Enginio Dashboard and create a new backend with `Image Gallery` template.
-    Create a new object type "objects.image" (on the Object Types page).
 
-    Add two properties to the image object:
-    name:"name", type: "String" and name: "file", type: "Ref" with target "files".
+    The template will construct a new custom backend by executing steps:
+    \list
+        \li Create a new object type "objects.image" (on the Object Types page).
 
-    Add a file processor by clicking the "file" property.
-    Choose "Image processor" and in "Variants" enter:
-    \code
-    {
-        "thumbnail": { "crop":"100x100" }
-    }
-    \endcode
-    This JSON snippet will trigger the server to generate thumbnails for all uploaded images.
-    In the image gallery the thumbnails will be used in the list view, the full image will be shown
-    when the thumbnail is clicked.
+        Add two properties to the image object:
+        name:"name", type: "String" and name: "file", type: "Ref" with target "files".
 
-    \note do not forget to save the changes to the Enginio backend.
+        \li Add a file processor by clicking the "file" property.
+        Choose "Image processor" and in "Variants" enter:
+        \code
+        {
+            "thumbnail": { "crop":"100x100" }
+        }
+        \endcode
+        This JSON snippet triggers the server to generate thumbnails for all uploaded images.
+        In the image gallery the thumbnails will be used in the list view, the full image will be shown
+        when the thumbnail is clicked.
+    \endlist
 
     Copy the backend Id and backend Secret from the Enginio dashboard.
-    They need to be filled into the `config.js` file included in the example.
+    They need to be filled into the example when it is first time executed.
 
     \section1 The example code
 
