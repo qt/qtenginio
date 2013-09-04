@@ -1021,7 +1021,7 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
 
   Sorting is done server side, as soon as data is changed locally it will be invalid.
 
-  \note that the EnginioClient does not emit the finished and error signals for the model.
+  \note that the EnginioClient does emit the finished and error signals for the model.
 
   For the QML version of this class see \l {Enginio1::EnginioModel}{EnginioModel (QML)}
 */
