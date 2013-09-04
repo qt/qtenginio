@@ -147,19 +147,14 @@ You can use Enginio with an existing installation of Qt 5.1 or later or get Qt p
 \section1 Install Enginio Qt library
 
 \list
-  \li  Download the latest library release from Enginio dashboard.
+  \li  Download the latest library release for your platform from Enginio dashboard.
 
        Go to Enginio Dashboard ⇒ Open Dashboard left menu ⇒ Create backend
         ⇒ Give some meaningful name for backend ⇒ Create
-        ⇒ See ’Libraries box’ in backend home view
-        ⇒ Select ’Qt/QML’ library from drop-down ⇒ Click Download
-  \li  Extract the zip package
-  \li  Build and install Enginio as Qt5 module
-  \endlist
-      \code
-            qmake
-            make install // or nmake or mingw32-make
-      \endcode
+        ⇒ See ’Qt Installers and Examples’ in backend home view
+        ⇒ Select your platform from drop-down ⇒ Click Download
+  \li  Execute downloaded binary installer and follow instructions
+\endlist
 */
 
 /*!
