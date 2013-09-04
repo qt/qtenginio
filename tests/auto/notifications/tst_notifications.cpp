@@ -50,12 +50,6 @@
 
 #include "../common/common.h"
 
-namespace EnginioTests {
-    // FIXME: As soon as this functionality is deployed to the production server
-    // this test has to be changed to use EnginioTests::TESTAPP_STAGING_URL.
-    const QString TESTAPP_STAGING_URL(QStringLiteral("https://staging.engin.io"));
-}
-
 class tst_Notifications: public QObject
 {
     Q_OBJECT
@@ -116,9 +110,10 @@ void tst_Notifications::createObjectSchema()
 
 void tst_Notifications::initTestCase()
 {
-    qDebug() << "Running test against" << EnginioTests::TESTAPP_STAGING_URL;
+    if (EnginioTests::TESTAPP_URL != QStringLiteral("https://staging.engin.io"))
+        QSKIP("Notification tests can be executed anly against staging");
 
-    _backendManager.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
+    _backendManager.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     _backendName = QStringLiteral("Notifications") + QString::number(QDateTime::currentMSecsSinceEpoch());
     QVERIFY(_backendManager.createBackend(_backendName));
@@ -136,6 +131,8 @@ void tst_Notifications::initTestCase()
 
 void tst_Notifications::cleanupTestCase()
 {
+    if (EnginioTests::TESTAPP_URL != QStringLiteral("https://staging.engin.io"))
+        QSKIP("Notification tests can be executed anly against staging");
     QVERIFY(_backendManager.removeBackend(_backendName));
 }
 
@@ -145,7 +142,7 @@ void tst_Notifications::populateWithData()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
     client.setBackendSecret(_backendSecret);
-    client.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioBackendConnection connection;
     QSignalSpy notificationSpy(&connection, SIGNAL(dataReceived(QJsonObject)));
@@ -276,7 +273,7 @@ void tst_Notifications::update_objects()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
     client.setBackendSecret(_backendSecret);
-    client.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioBackendConnection connection;
     QSignalSpy notificationSpy(&connection, SIGNAL(dataReceived(QJsonObject)));
@@ -373,7 +370,7 @@ void tst_Notifications::remove_objects()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
     client.setBackendSecret(_backendSecret);
-    client.setServiceUrl(EnginioTests::TESTAPP_STAGING_URL);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioBackendConnection connection;
     QSignalSpy notificationSpy(&connection, SIGNAL(dataReceived(QJsonObject)));
