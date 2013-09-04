@@ -160,6 +160,9 @@ public:
 
     client.setIdentity(&identity);
   \endcode
+  \sa EnginioClient::authenticationState() EnginioClient::identity() EnginioClient::sessionAuthenticated()
+  \sa EnginioClient::sessionAuthenticationError() EnginioClient::sessionTerminated()
+
 */
 
 /*!
