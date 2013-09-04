@@ -261,7 +261,7 @@ Create the object in the Enginio database by calling \l{EnginioClient::create()}
     client->create(city);
     connect(client, SIGNAL(finished(EnginioReply*)), this, SLOT(uploadFinished(EnginioReply*)));
 \endcode
-Note that execute() method performs the actual asynchronous network communication.
+Note that \l{EnginioClient::create()}{create()} method performs the actual asynchronous network communication.
 You need to wait for its completion by connecting to the \l{EnginioClient::finished()}{finished} and \l{EnginioClient::error()}{error} signals.
 
 Now you can \l{Checking stored objects in the Dashboard}{check the Enginio dashboard} for the newly created object.
