@@ -1,9 +1,7 @@
 TEMPLATE = app
 
-SOURCES += tst_qmltest.cpp \
-           ../common/common.cpp
-
-HEADERS += ../common/common.h
+include(../common/common.pri)
+SOURCES += tst_qmltest.cpp
 
 TARGET = tst_qmltests
 

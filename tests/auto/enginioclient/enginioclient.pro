@@ -9,8 +9,6 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += \
-    tst_enginioclient.cpp \
-    ../common/common.cpp
+include(../common/common.pri)
 
-HEADERS += ../common/common.h
+SOURCES += tst_enginioclient.cpp

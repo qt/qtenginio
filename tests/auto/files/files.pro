@@ -7,10 +7,8 @@ TARGET = tst_files
 CONFIG   += console testcase
 CONFIG   -= app_bundle
 
+include(../common/common.pri)
+
 TEMPLATE = app
 
-SOURCES += \
-    tst_files.cpp \
-    ../common/common.cpp
-
-HEADERS += ../common/common.h
+SOURCES += tst_files.cpp
