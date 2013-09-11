@@ -46,7 +46,6 @@ const QString showAgainKey = QStringLiteral("showAgain");
 
 QPair<QByteArray, QByteArray> backendIdAndSecret(const QString &exampleName)
 {
-    QSettings *settings;
 
     QString fileName = QStringLiteral("EnginioExamples.conf");
     for (int i = 0; i < 4; ++i) {
@@ -57,11 +56,9 @@ QPair<QByteArray, QByteArray> backendIdAndSecret(const QString &exampleName)
 
     QFileInfo settingsFile = QFileInfo(fileName);
 
-    if (settingsFile.exists()) {
-        settings = new QSettings(settingsFile.absoluteFilePath(), QSettings::IniFormat);
-    } else {
-        settings = new QSettings("com.digia", "EnginioExamples");
-    }
+    QScopedPointer<QSettings> settings(settingsFile.exists()
+        ? new QSettings(settingsFile.absoluteFilePath(), QSettings::IniFormat)
+        : new QSettings("com.digia", "EnginioExamples"));
 
     settings->beginGroup(exampleName);
     QByteArray id = settings->value(backendIdKey).toByteArray();
@@ -87,7 +84,6 @@ QPair<QByteArray, QByteArray> backendIdAndSecret(const QString &exampleName)
 
     settings->endGroup();
     settings->sync();
-    delete settings;
 
     return qMakePair(id, secret);
 }
