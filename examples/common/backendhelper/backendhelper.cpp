@@ -69,6 +69,7 @@ QPair<QByteArray, QByteArray> backendIdAndSecret(const QString &exampleName)
         Ui::Dialog dialog;
         QDialog d;
         dialog.setupUi(&d);
+        dialog.exampleName->setText(exampleName);
         dialog.backendId->setText(id);
         dialog.backendSecret->setText(secret);
 
