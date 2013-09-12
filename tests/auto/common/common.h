@@ -18,6 +18,10 @@
 #define QTRY_COMPARE(Test1, Test2) QTRY_COMPARE_WITH_TIMEOUT(Test1, Test2, 15000)
 
 #define CHECK_NO_ERROR(response) \
+    if (!response->isFinished()) {\
+        QTRY_VERIFY(response->isFinished()); \
+        QVERIFY2(false, "response->isFinished() returned false, but waiting helped, probably it is a test case problem");\
+    } \
     QVERIFY(response->isFinished()); \
     QVERIFY(!response->isError()); \
     QCOMPARE(response->errorType(), EnginioReply::NoError);\
