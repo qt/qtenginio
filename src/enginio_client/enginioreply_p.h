@@ -119,7 +119,7 @@ public:
 
         QByteArray json = _client->_requestData.value(_nreply);
         if (!json.isEmpty()) {
-            if (request.url().toString(QUrl::None).endsWith("account/auth/identity"))
+            if (request.url().toString(QUrl::None).endsWith(QString::fromUtf8("account/auth/identity")))
                 qDebug() << "Request Data hidden because it contains password";
             else
                 qDebug() << "Request Data:" << json;
