@@ -133,6 +133,7 @@ void tst_Files::fileUploadDownload()
     //![upload-create-object]
     QVERIFY(createReply);
     QTRY_VERIFY(createReply->isFinished());
+    CHECK_NO_ERROR(createReply);
     QCOMPARE(spyError.count(), 0);
 
     QCOMPARE(createReply->networkError(), QNetworkReply::NoError);
@@ -168,6 +169,7 @@ void tst_Files::fileUploadDownload()
 
         QSignalSpy progressSpy(responseUpload, SIGNAL(progress(qint64,qint64)));
         QTRY_VERIFY_WITH_TIMEOUT(responseUpload->isFinished(), 30000);
+        CHECK_NO_ERROR(responseUpload);
         QCOMPARE(spyError.count(), 0);
         fileId = responseUpload->data().value(QStringLiteral("id")).toString();
         QVERIFY(progressSpy.count() >= 1);
@@ -184,6 +186,7 @@ void tst_Files::fileUploadDownload()
         const EnginioReply *reply = client.query(obj2);
         QVERIFY(reply);
         QTRY_VERIFY(reply->isFinished());
+        CHECK_NO_ERROR(reply);
         QCOMPARE(spyError.count(), 0);
         data = reply->data();
         QVERIFY(data["results"].isArray());
@@ -212,6 +215,7 @@ void tst_Files::fileUploadDownload()
 
         QVERIFY(replyDownload);
         QTRY_VERIFY(replyDownload->isFinished());
+        CHECK_NO_ERROR(replyDownload);
         QCOMPARE(spyError.count(), 0);
         QJsonObject downloadData = replyDownload->data();
 
@@ -235,6 +239,7 @@ void tst_Files::fileUploadDownload()
         EnginioReply *fileInfo = client.query(fileObject, EnginioClient::FileOperation);
         QVERIFY(fileInfo);
         QTRY_VERIFY(fileInfo->isFinished());
+        CHECK_NO_ERROR(fileInfo);
         QCOMPARE(spyError.count(), 0);
         QCOMPARE(fileInfo->data()["fileName"].toString(), fileName);
         QFile file(filePath);
@@ -247,6 +252,7 @@ void tst_Files::fileUploadDownload()
             fileInfo = client.query(fileObject, EnginioClient::FileOperation);
             QVERIFY(fileInfo);
             QTRY_VERIFY(fileInfo->isFinished());
+            CHECK_NO_ERROR(fileInfo);
             QCOMPARE(spyError.count(), 0);
             thumbnailStatus = fileInfo->data()["variants"].toObject()["thumbnail"].toObject()["status"].toString();
         }
@@ -271,6 +277,7 @@ void tst_Files::fileUploadDownload()
 
         QVERIFY(replyDownload);
         QTRY_VERIFY(replyDownload->isFinished());
+        CHECK_NO_ERROR(replyDownload);
         QCOMPARE(spyError.count(), 0);
         QJsonObject downloadData = replyDownload->data();
 

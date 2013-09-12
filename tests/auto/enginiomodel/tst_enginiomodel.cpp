@@ -811,6 +811,7 @@ void tst_EnginioModel::append()
 
         QTRY_COMPARE(counter, 1);
         QVERIFY(r4->isFinished());
+        CHECK_NO_ERROR(r4);
         // at this point the first value was deleted but append is still not confirmed
         QCOMPARE(r3->delayFinishedSignal(), true);
         QCOMPARE(model.rowCount(), initialRowCount); // one added and one removed
@@ -830,7 +831,9 @@ void tst_EnginioModel::append()
         // everything should be done
         QCOMPARE(model.rowCount(), initialRowCount);
         QVERIFY(r4->isFinished());
+        CHECK_NO_ERROR(r4);
         QVERIFY(r3->isFinished());
+        CHECK_NO_ERROR(r3);
 
         // check if everything is in sync
         for (int i = 0; i < model.rowCount(); ++i)
@@ -863,7 +866,7 @@ void tst_EnginioModel::externallyRemovedImpl()
         o.insert("objectType", objectType);
         EnginioReply *r = client.create(o);
         QTRY_VERIFY(r->isFinished());
-        QVERIFY(!r->isError());
+        CHECK_NO_ERROR(r);
     }
 
     EnginioModel model;
@@ -980,7 +983,7 @@ void tst_EnginioModel::createAndModify()
         r2->setDelayFinishedSignal(false);
 
         QTRY_VERIFY(r2->isFinished());
-        QVERIFY(!r2->isError());
+        CHECK_NO_ERROR(r2);
         QTRY_COMPARE(model.rowCount(), initialRowCount);
     }
     {
@@ -1054,7 +1057,7 @@ void tst_EnginioModel::externalNotification()
 
         EnginioReply *r = client.create(o);
         QTRY_VERIFY(r->isFinished());
-        QVERIFY(!r->isError());
+        CHECK_NO_ERROR(r);
         o = r->data();
         QTRY_COMPARE(model.rowCount(), initialRowCount + 1);
         QVERIFY(externalNotificationFindHelper(model, propertyName, o) != -1);
@@ -1064,8 +1067,7 @@ void tst_EnginioModel::externalNotification()
         o.insert(propertyName, QString::fromLatin1("externalNotification_modified"));
         EnginioReply *r = client.update(o);
         QTRY_VERIFY(r->isFinished());
-
-        QVERIFY(!r->isError());
+        CHECK_NO_ERROR(r);
 
         int idx;
         for (idx = 0; idx < model.rowCount(); ++idx) {
@@ -1133,7 +1135,7 @@ void tst_EnginioModel::createUpdateRemoveWithNotification()
     // so if the test is broken rowCount would be bigger then replies.count()
     foreach (EnginioReply *reply, replies) {
         QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 10000);
-        QVERIFY(!reply->isError());
+        CHECK_NO_ERROR(reply);
     }
     QTRY_COMPARE(model.rowCount(), initialCount + repliesCount);
 
@@ -1150,7 +1152,7 @@ void tst_EnginioModel::createUpdateRemoveWithNotification()
     QVERIFY(replies.count() == repliesCount);
     foreach (EnginioReply *reply, replies) {
         QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 10000);
-        QVERIFY(!reply->isError());
+        CHECK_NO_ERROR(reply);
     }
     QTRY_COMPARE(model.rowCount(), initialCount + repliesCount);
     int counter = 0;
@@ -1175,7 +1177,7 @@ void tst_EnginioModel::createUpdateRemoveWithNotification()
     QCOMPARE(replies.count(), repliesCount);
     foreach (EnginioReply *reply, replies) {
         QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 10000);
-        QVERIFY(!reply->isError());
+        CHECK_NO_ERROR(reply);
     }
     QTRY_COMPARE(model.rowCount(), initialCount);
 }

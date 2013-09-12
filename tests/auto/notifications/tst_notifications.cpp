@@ -168,7 +168,7 @@ void tst_Notifications::populateWithData()
         obj["objectType"] = QString::fromUtf8("objects.").append(EnginioTests::CUSTOM_OBJECT1);
         EnginioReply *reply = client.query(obj);
         QTRY_VERIFY(reply->isFinished());
-        QVERIFY(!reply->isError());
+        CHECK_NO_ERROR(reply);
         QVERIFY2(!reply->data().isEmpty(), "Empty data in EnginioReply.");
         QVERIFY2(!reply->data()["results"].isUndefined(), "Undefined results array in EnginioReply data.");
         bool create = reply->data()["results"].toArray().isEmpty();
@@ -203,7 +203,7 @@ void tst_Notifications::populateWithData()
         obj["objectType"] = QString::fromUtf8("objects.").append(EnginioTests::CUSTOM_OBJECT2);
         EnginioReply *reply = client.query(obj);
         QTRY_VERIFY(reply->isFinished());
-        QVERIFY(!reply->isError());
+        CHECK_NO_ERROR(reply);
         QVERIFY2(!reply->data().isEmpty(), "Empty data in EnginioReply.");
         QVERIFY2(!reply->data()["results"].isUndefined(), "Undefined results array in EnginioReply data.");
         bool create = reply->data()["results"].toArray().isEmpty();
@@ -296,7 +296,7 @@ void tst_Notifications::update_objects()
     QVERIFY(reply);
 
     QTRY_VERIFY(reply->isFinished());
-    QVERIFY(!reply->isError());
+    CHECK_NO_ERROR(reply);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reply);
@@ -393,7 +393,7 @@ void tst_Notifications::remove_objects()
     QVERIFY(reply);
 
     QTRY_VERIFY(reply->isFinished());
-    QVERIFY(!reply->isError());
+    CHECK_NO_ERROR(reply);
 
     const EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reply);
