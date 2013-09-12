@@ -108,6 +108,23 @@ void tst_Files::fileUploadDownload_data()
     QTest::newRow("Chunked") << 1024;
 }
 
+struct FileUploadDownloadProgress
+{
+    qint64 _fileSize;
+    qint64 _currentTotal;
+    qint64 _currentProgress;
+    void operator ()(qint64 progress, qint64 total)
+    {
+        QVERIFY(total >= _fileSize); // "total" may contain header size
+        if (_currentTotal)
+            QCOMPARE(total, _currentTotal);
+        else
+            _currentTotal = total;
+        QVERIFY(progress > _currentProgress);
+        _currentProgress = progress;
+    }
+};
+
 void tst_Files::fileUploadDownload()
 {
     QFETCH(int, chunkSize);
@@ -146,7 +163,8 @@ void tst_Files::fileUploadDownload()
 
     QString fileName = QStringLiteral("test.png");
     QString filePath = QStringLiteral(TEST_FILE_PATH);
-    QVERIFY(QFile::exists(filePath));
+    QFile file(filePath);
+    QVERIFY(file.exists());
     QString fileId;
 
     // Attach file to the object
@@ -168,6 +186,8 @@ void tst_Files::fileUploadDownload()
         QVERIFY(responseUpload);
 
         QSignalSpy progressSpy(responseUpload, SIGNAL(progress(qint64,qint64)));
+        FileUploadDownloadProgress progress = { file.size(), 0, 0 };
+        QObject::connect(responseUpload, &EnginioReply::progress, progress);
         QTRY_VERIFY_WITH_TIMEOUT(responseUpload->isFinished(), 30000);
         CHECK_NO_ERROR(responseUpload);
         QCOMPARE(spyError.count(), 0);
@@ -194,6 +214,24 @@ void tst_Files::fileUploadDownload()
         QCOMPARE(results.count(), 1);
         QJsonObject resultObject = results.first().toObject();
         QVERIFY(!resultObject.isEmpty());
+        QVERIFY(resultObject.contains("fileAttachment"));
+        int ok = 10;
+        while (!resultObject["fileAttachment"].isObject() && --ok) {
+            qDebug() << resultObject;
+            QTest::qWait(1000); // We failed the test, but still we need to gather some debug data.
+            const EnginioReply *reply = client.query(obj2);
+            QTRY_VERIFY(reply->isFinished());
+            CHECK_NO_ERROR(reply);
+            QCOMPARE(spyError.count(), 0);
+            data = reply->data();
+            QVERIFY(data["results"].isArray());
+            results = data["results"].toArray();
+            QCOMPARE(results.count(), 1);
+            resultObject = results.first().toObject();
+            QVERIFY(!resultObject.isEmpty());
+            QVERIFY(resultObject.contains("fileAttachment"));
+        }
+        QVERIFY2(ok == 10, "resultObject[\"fileAttachment\"].isObject()");
         QVERIFY(resultObject["fileAttachment"].isObject());
         QVERIFY(!resultObject["fileAttachment"].toObject()["url"].toString().isEmpty());
         QCOMPARE(resultObject["fileAttachment"].toObject()["fileName"].toString(), fileName);
@@ -243,9 +281,12 @@ void tst_Files::fileUploadDownload()
         QCOMPARE(spyError.count(), 0);
         QCOMPARE(fileInfo->data()["fileName"].toString(), fileName);
         QFile file(filePath);
-        QCOMPARE(fileInfo->data()["fileSize"].toDouble(), (double)file.size());
-        QVERIFY(fileInfo->data()["variants"].toObject().contains("thumbnail"));
-        QString thumbnailStatus = fileInfo->data()["variants"].toObject()["thumbnail"].toObject()["status"].toString();
+        QJsonObject result = fileInfo->data();
+        QCOMPARE(result["fileSize"].toDouble(), (double)file.size());
+        QVERIFY(result.contains("variants"));
+        QVERIFY(result["variants"].isObject());
+        QVERIFY(result["variants"].toObject().contains("thumbnail"));
+        QString thumbnailStatus = result["variants"].toObject()["thumbnail"].toObject()["status"].toString();
         int count = 0;
         while (thumbnailStatus == "processing" && ++count < 20) {
             QTest::qWait(1000);
