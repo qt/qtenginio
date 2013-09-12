@@ -118,9 +118,12 @@ public:
         qDebug() << "  HTTP return code:" << backendStatus();
 
         QByteArray json = _client->_requestData.value(_nreply);
-        if (!json.isEmpty())
-            qDebug() << "Request Data:" << json;
-
+        if (!json.isEmpty()) {
+            if (request.url().toString(QUrl::None).endsWith("account/auth/identity"))
+                qDebug() << "Request Data hidden because it contains password";
+            else
+                qDebug() << "Request Data:" << json;
+        }
         if (!_data.isEmpty())
             qDebug() << "Reply Data:" << _data;
     }
