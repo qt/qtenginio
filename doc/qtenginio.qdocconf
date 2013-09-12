@@ -25,14 +25,14 @@ depends += qtcore qtgui qtwidgets qtdoc qtdeclarative
 qhp.projects            = Enginio
 
 qhp.Enginio.file                = qtenginio.qhp
-qhp.Enginio.namespace           = io.engin.$QT_VERSION
+qhp.Enginio.namespace           = io.engin.100
 qhp.Enginio.virtualFolder       = enginio
 qhp.Enginio.indexTitle          = Enginio Overview
 qhp.Enginio.indexRoot           =
 
-qhp.Enginio.filterAttributes    = enginio $QT_VERSION qtrefdoc
-qhp.Enginio.customFilters.Qt.name = Enginio $QT_VERSION
-qhp.Enginio.customFilters.Qt.filterAttributes = enginio $QT_VERSION
+qhp.Enginio.filterAttributes    = enginio 1.0.0
+qhp.Enginio.customFilters.Qt.name = Enginio 1.0.0
+qhp.Enginio.customFilters.Qt.filterAttributes = enginio 1.0.0
 
 qhp.Enginio.subprojects         = classes qmltypes examples
 
