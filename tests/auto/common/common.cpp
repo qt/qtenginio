@@ -72,13 +72,28 @@ struct PrintAllErrors
 
 EnginioBackendManager::EnginioBackendManager(QObject *parent)
     : QObject(parent)
-    , _email(qgetenv("ENGINIO_EMAIL_ADDRESS"))
-    , _password(qgetenv("ENGINIO_LOGIN_PASSWORD"))
     , _url(EnginioTests::TESTAPP_URL)
 {
-    if (_email.isEmpty() || _password.isEmpty()) {
-        qDebug("Needed environment variables ENGINIO_EMAIL_ADDRESS, ENGINIO_LOGIN_PASSWORD are not set. Backend setup failed!");
-        return;
+    QString credentialsFileName = qgetenv("ENGINIO_CREDENTIALS_FILE_PATH");
+    if (!credentialsFileName.isEmpty()) {
+        QFile credentialsFile(credentialsFileName);
+        if (!credentialsFile.open(QIODevice::ReadOnly)) {
+            qDebug() << "Could not open a file" << credentialsFileName << ". Backend setup failed!";
+            return;
+        }
+        _email = credentialsFile.readLine().trimmed();
+        _password = credentialsFile.readLine().trimmed();
+        if (_email.isEmpty() || _password.isEmpty()) {
+            qDebug("ENGINIO_CREDENTIALS_FILE_PATH environment variable was specified but we failed to load needed data. Backend setup failed!");
+            return;
+        }
+    } else {
+        _email = qgetenv("ENGINIO_EMAIL_ADDRESS");
+        _password = qgetenv("ENGINIO_LOGIN_PASSWORD");
+        if (_email.isEmpty() || _password.isEmpty()) {
+            qDebug("Needed environment variables ENGINIO_EMAIL_ADDRESS, ENGINIO_LOGIN_PASSWORD are not set. Backend setup failed!");
+            return;
+        }
     }
 
     _headers["Accept"] = QStringLiteral("application/json");
