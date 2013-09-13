@@ -31,10 +31,10 @@
     \ingroup enginio-examples
     \inmodule enginio-qt
 
-    The user interface is a list of images and a button to upload more images.
+    The user interface consists of a list of images and a button to upload more images.
 
     \section1 Backend configuration
-    For this example to work the Enginio backend needs to be set up.
+    The Enginio backend needs to be set up in order to get this example working.
 
     Go to the Enginio Dashboard and create a new backend with `Image Gallery` template.
     The template will construct a new custom backend by executing steps:
@@ -56,7 +56,7 @@
             when the thumbnail is clicked.
     \endlist
 
-    Copy the backend Id and backend Secret from the Enginio dashboard and use them when you are asked
+    Copy the backend Id and backend Secret from the Enginio dashboard and use them when requested.
 
     \section1 The example code
 

@@ -36,7 +36,7 @@
     \image image-gallery.png
 
     \section1 Backend configuration
-    For this example to work the Enginio backend needs to be set up.
+    The Enginio backend needs to be set up to get this example working.
 
     Go to the Enginio Dashboard and create a new backend with `Image Gallery` template.
 
@@ -60,7 +60,7 @@
     \endlist
 
     Copy the backend Id and backend Secret from the Enginio dashboard.
-    They need to be filled into the example when it is first time executed.
+    They need to be filled into the example when it is executed for the first time.
 
     \section1 The example code
 
@@ -74,18 +74,18 @@
     The model is used to get the list of image objects, but the images
     are only attached to the objects as file references.
     Thus the image's thumbnail is fetched by each delegate.
-    \note in a real application it might be neccessary to cache the images.
+    \note in a real application it might be necessary to cache the images.
 
     The Component.onCompleted function is used to fetch the image.
-    At the time the delegate is created, it has the JSON image object data.
-    The needed information is the "file.id" reference.
-    The "file" property was introduced in the backend setup section and as every
+    When the delegate is created, it has the JSON image object data.
+    The information needed is the "file.id" reference.
+    The "file" property was introduced in the backend setup section. Every
     object (files are just objects) contains an ID that uniquely identifies the image file.
-    Using the ID the image's thumbnail-url is then fetched ("variant": "thumbnail").
+    The image's thumbnail-url is retrieved using the ID ("variant": "thumbnail").
     \snippet image-gallery/image-gallery.qml image-fetch
 
     The meta-information about each image is displayed in simple Text elements.
-    For the file-name it is possible to directly reference the \c name property as
+    For the filename, it is possible to directly reference the \c name property as
     defined in the JSON.
     \qml
     Text { text: name }
