@@ -40,6 +40,8 @@
 #include "enginioqmlobjectadaptor_p.h"
 
 #include <QtQml/qjsvalue.h>
+#include <QtQml/qqmlengine.h>
+#include <QtQml/qqml.h>
 
 #include <QDebug>
 
@@ -177,7 +179,6 @@ EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation 
 {
     Q_D(EnginioQmlClient);
 
-    d->setEngine(query);
     ObjectAdaptor<QJSValue> o(query, d);
     QNetworkReply *nreply = d_ptr->query<QJSValue>(o, static_cast<EnginioClientPrivate::Operation>(operation));
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
@@ -191,7 +192,6 @@ EnginioQmlReply *EnginioQmlClient::create(const QJSValue &object, const Operatio
     if (!object.isObject())
         return 0;
 
-    d->setEngine(object);
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->create<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
@@ -206,7 +206,6 @@ EnginioQmlReply *EnginioQmlClient::update(const QJSValue &object, const Operatio
     if (!object.isObject())
         return 0;
 
-    d->setEngine(object);
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->update<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
@@ -221,7 +220,6 @@ EnginioQmlReply *EnginioQmlClient::remove(const QJSValue &object, const Operatio
     if (!object.isObject())
         return 0;
 
-    d->setEngine(object);
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->remove<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
@@ -236,7 +234,6 @@ EnginioQmlReply *EnginioQmlClient::downloadFile(const QJSValue &object)
     if (!object.isObject())
         return 0;
 
-    d->setEngine(object);
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->downloadFile<QJSValue>(o);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
@@ -251,7 +248,6 @@ EnginioQmlReply *EnginioQmlClient::uploadFile(const QJSValue &object, const QUrl
     if (!object.isObject())
         return 0;
 
-    d->setEngine(object);
     ObjectAdaptor<QJSValue> o(object, d);
     QNetworkReply *nreply = d_ptr->uploadFile<QJSValue>(o, url);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
@@ -261,27 +257,24 @@ EnginioQmlReply *EnginioQmlClient::uploadFile(const QJSValue &object, const QUrl
 
 QByteArray EnginioQmlClientPrivate::toJson(const QJSValue &value)
 {
-    if (!_stringify.isCallable())
-        Q_UNIMPLEMENTED(); // TODO maybe _value.toString().toUtf8()?
+    (void)jsengine();
     return _stringify.call(QJSValueList() << value).toString().toUtf8();
 }
 
 QJSValue EnginioQmlClientPrivate::fromJson(const QByteArray &value)
 {
-    if (!_parse.isCallable())
-        Q_UNIMPLEMENTED();
-    return _parse.call(QJSValueList() << _engine->toScriptValue(value));
+    (void)jsengine();
+    return _parse.call(QJSValueList() << jsengine()->toScriptValue(value));
 }
 
-void EnginioQmlClientPrivate::_setEngine(QJSEngine *engine)
+void EnginioQmlClientPrivate::_setEngine()
 {
-    Q_ASSERT(!_engine);
-    if (engine) {
-        _engine = engine;
-        _stringify = engine->evaluate("JSON.stringify");
-        _parse = engine->evaluate("JSON.parse");
-        Q_ASSERT(_stringify.isCallable());
-    }
+    QJSEngine *engine = QtQml::qmlEngine(q_ptr);
+    _engine = engine;
+    _stringify = engine->evaluate("JSON.stringify");
+    _parse = engine->evaluate("JSON.parse");
+    Q_ASSERT(_stringify.isCallable());
+    Q_ASSERT(_parse.isCallable());
 }
 
 QT_END_NAMESPACE

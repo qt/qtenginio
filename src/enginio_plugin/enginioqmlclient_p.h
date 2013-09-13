@@ -58,16 +58,17 @@ public:
 
     void init();
 
-    inline void setEngine(const QJSValue &object)
+    inline QJSEngine *jsengine()
     {
         if (Q_UNLIKELY(!_engine))
-            _setEngine(object.engine());
+            _setEngine();
+        return _engine;
     }
 
     QByteArray toJson(const QJSValue &value);
     QJSValue fromJson(const QByteArray &value);
 private:
-    void _setEngine(QJSEngine *engine);
+    void _setEngine();
 };
 
 QT_END_NAMESPACE
