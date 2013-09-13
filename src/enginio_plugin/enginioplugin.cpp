@@ -48,6 +48,8 @@
 #include <QtQml/qqmlnetworkaccessmanagerfactory.h>
 #include <QtQml/qqmlengine.h>
 
+QT_BEGIN_NAMESPACE
+
 /*!
  * \qmlmodule enginio-plugin
  * \title Enginio QML Plugin
@@ -91,3 +93,5 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterUncreatableType<EnginioIdentity>(uri, 1, 0, "EnginioIdentity", "EnginioIdentity can not be instantiated directly");
     qmlRegisterType<EnginioBasicAuthentication>(uri, 1, 0, "EnginioBasicAuthentication");
 }
+
+QT_END_NAMESPACE
