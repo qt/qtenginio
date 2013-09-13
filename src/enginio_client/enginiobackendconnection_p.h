@@ -11,7 +11,9 @@
 
 class EnginioClient;
 class EnginioReply;
-class QTcpSocket;
+
+QT_FORWARD_DECLARE_CLASS(QTcpSocket)
+
 class ENGINIOCLIENT_EXPORT EnginioBackendConnection : public QObject
 {
     Q_OBJECT

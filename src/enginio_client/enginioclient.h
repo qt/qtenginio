@@ -48,11 +48,11 @@
 #include <QtNetwork/qnetworkaccessmanager.h>
 
 class EnginioClientPrivate;
-class QNetworkAccessManager;
-
-class QNetworkReply;
 class EnginioReply;
 class EnginioIdentity;
+
+QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager)
+QT_FORWARD_DECLARE_CLASS(QNetworkReply)
 
 class ENGINIOCLIENT_EXPORT EnginioClient : public QObject
 {
