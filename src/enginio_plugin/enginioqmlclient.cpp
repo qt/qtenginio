@@ -43,6 +43,8 @@
 
 #include <QDebug>
 
+QT_BEGIN_NAMESPACE
+
 /*!
   \qmltype Enginio
   \instantiates EnginioQmlClient
@@ -282,3 +284,4 @@ void EnginioQmlClientPrivate::_setEngine(QJSEngine *engine)
     }
 }
 
+QT_END_NAMESPACE

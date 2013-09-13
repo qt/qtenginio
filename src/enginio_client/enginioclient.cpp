@@ -45,6 +45,8 @@
 #include <QtNetwork/qnetworkaccessmanager.h>
 #include <QtNetwork/qnetworkreply.h>
 
+QT_BEGIN_NAMESPACE
+
 /*!
   \module enginio-client
   \title Enginio Client Interface
@@ -631,3 +633,5 @@ bool EnginioClient::finishDelayedReplies()
     Q_D(EnginioClient);
     return d->finishDelayedReplies();
 }
+
+QT_END_NAMESPACE

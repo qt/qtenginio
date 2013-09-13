@@ -6,6 +6,7 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qmetaobject.h>
 
+QT_BEGIN_NAMESPACE
 
 /*!
   \qmltype EnginioReply
@@ -118,3 +119,5 @@ void EnginioQmlReply::emitFinished()
 {
     static_cast<EnginioQmlReplyPrivate*>(d.data())->emitFinished();
 }
+
+QT_END_NAMESPACE

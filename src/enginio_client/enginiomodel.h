@@ -44,6 +44,8 @@
 
 #include "enginioclient.h"
 
+QT_BEGIN_NAMESPACE
+
 class EnginioModelPrivate;
 class ENGINIOCLIENT_EXPORT EnginioModel : public QAbstractListModel
 {
@@ -101,5 +103,7 @@ private:
     QScopedPointer<EnginioModelPrivate> d;
     friend class EnginioModelPrivate;
 };
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOMODEL_H

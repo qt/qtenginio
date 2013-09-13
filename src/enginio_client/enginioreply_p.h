@@ -47,6 +47,8 @@
 #include "enginioclient_p.h"
 #include "enginioreply.h"
 
+QT_BEGIN_NAMESPACE
+
 class EnginioReplyPrivate {
 public:
     EnginioClientPrivate *_client;
@@ -129,5 +131,6 @@ public:
     }
 };
 
+QT_END_NAMESPACE
 
 #endif // ENGINIOREPLY_P_H

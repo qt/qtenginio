@@ -49,6 +49,8 @@
 #include <QtCore/qdatetime.h>
 #include <QtCore/quuid.h>
 
+QT_BEGIN_NAMESPACE
+
 enum {
     DeletedRow = -3,
     NoHintRow = -4,
@@ -1269,3 +1271,5 @@ bool EnginioModel::canFetchMore(const QModelIndex &parent) const
     Q_UNUSED(parent);
     return d->canFetchMore();
 }
+
+QT_END_NAMESPACE

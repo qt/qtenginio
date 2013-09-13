@@ -47,6 +47,8 @@
 #include <QtCore/qurl.h>
 #include <QtNetwork/qnetworkaccessmanager.h>
 
+QT_BEGIN_NAMESPACE
+
 class EnginioClientPrivate;
 class EnginioReply;
 class EnginioIdentity;
@@ -134,5 +136,7 @@ Q_DECLARE_TYPEINFO(EnginioClient::Operation, Q_PRIMITIVE_TYPE);
 Q_DECLARE_METATYPE(EnginioClient::Operation);
 Q_DECLARE_TYPEINFO(EnginioClient::AuthenticationState, Q_PRIMITIVE_TYPE);
 Q_DECLARE_METATYPE(EnginioClient::AuthenticationState);
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOCLIENT_H

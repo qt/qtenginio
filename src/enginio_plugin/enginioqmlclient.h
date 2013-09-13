@@ -43,6 +43,8 @@
 #include <QtQml/qjsvalue.h>
 #include <QQmlParserStatus>
 
+QT_BEGIN_NAMESPACE
+
 class EnginioQmlClientPrivate;
 class EnginioQmlClient : public EnginioClient
 {
@@ -62,6 +64,8 @@ public:
 private:
     Q_DECLARE_PRIVATE(EnginioQmlClient);
 };
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOQMLCLIENT_H
 

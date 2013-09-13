@@ -43,6 +43,8 @@
 #include <QtQml/qjsengine.h>
 #include <QtQml/qjsvalue.h>
 
+QT_BEGIN_NAMESPACE
+
 class EnginioQmlClientPrivate : public EnginioClientPrivate
 {
     QJSEngine *_engine;
@@ -67,5 +69,7 @@ public:
 private:
     void _setEngine(QJSEngine *engine);
 };
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOQMLCLIENT_P_H

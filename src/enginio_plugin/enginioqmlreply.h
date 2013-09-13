@@ -41,6 +41,8 @@
 #include "enginioreply.h"
 #include <QtQml/qjsvalue.h>
 
+QT_BEGIN_NAMESPACE
+
 class EnginioQmlClientPrivate;
 class EnginioQmlReplyPrivate;
 
@@ -60,5 +62,6 @@ private:
     Q_SIGNAL void dataChanged();
 };
 
+QT_END_NAMESPACE
 
 #endif // ENGINIOQMLREPLY_H

@@ -48,6 +48,8 @@
 
 #include "enginioclient_global.h"
 
+QT_BEGIN_NAMESPACE
+
 class EnginioClient;
 class EnginioReplyPrivate;
 class EnginioClientPrivate;
@@ -116,5 +118,6 @@ Q_DECLARE_METATYPE(EnginioReply::ErrorTypes)
 ENGINIOCLIENT_EXPORT QDebug operator<<(QDebug d, const EnginioReply *reply);
 #endif
 
+QT_END_NAMESPACE
 
 #endif // ENGINIOREPLY_H

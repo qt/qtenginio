@@ -15,6 +15,9 @@
 #include <QtNetwork/qtcpsocket.h>
 
 #define CRLF QLatin1String("\r\n")
+
+QT_BEGIN_NAMESPACE
+
 const static int NIL = 0x00;
 const static int FIN = 0x80;
 const static int MSB = 0x80;
@@ -540,3 +543,5 @@ void EnginioBackendConnection::ping()
     message.append(dummy);
     _tcpSocket->write(message);
 }
+
+QT_END_NAMESPACE

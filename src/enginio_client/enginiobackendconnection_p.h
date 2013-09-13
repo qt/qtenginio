@@ -9,6 +9,8 @@
 
 #include "enginioclient_global.h"
 
+QT_BEGIN_NAMESPACE
+
 class EnginioClient;
 class EnginioReply;
 
@@ -99,5 +101,7 @@ private:
     void timerEvent(QTimerEvent *event);
     void protocolError(const char* message, WebSocketCloseStatus status = ProtocolErrorCloseStatus);
 };
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOBACKENDCONNECTION_P_H

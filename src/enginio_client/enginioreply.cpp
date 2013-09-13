@@ -46,6 +46,8 @@
 #include "enginioclient_p.h"
 #include "enginioobjectadaptor_p.h"
 
+QT_BEGIN_NAMESPACE
+
 /*!
   \class EnginioReply
   \brief The EnginioReply class contains the data from a request to the Enginio database.
@@ -285,4 +287,7 @@ QDebug operator<<(QDebug d, const EnginioReply *reply)
     d << ")";
     return d.space();
 }
+
+QT_END_NAMESPACE
+
 #endif // QT_NO_DEBUG_STREAM
