@@ -40,6 +40,8 @@
 
 #include <QQmlExtensionPlugin>
 
+QT_BEGIN_NAMESPACE
+
 class EnginioPlugin : public QQmlExtensionPlugin
 {
     Q_OBJECT
@@ -49,6 +51,8 @@ public:
     void initializeEngine(QQmlEngine *engine, const char *uri);
     void registerTypes(const char *uri);
 };
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOPLUGIN_H
 
