@@ -5,15 +5,19 @@
 #include <QMap>
 #include <QModelIndex>
 
+QT_BEGIN_NAMESPACE
 class EnginioClient;
-class ImageModel;
 class EnginioReply;
-class ImageDownloader;
-class ImageObject;
 class QFileDialog;
 class QListView;
 class QNetworkReply;
 class QPushButton;
+QT_END_NAMESPACE
+QT_USE_NAMESPACE
+
+class ImageModel;
+class ImageObject;
+class ImageDownloader;
 
 class MainWindow : public QMainWindow
 {

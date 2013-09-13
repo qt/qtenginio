@@ -133,10 +133,10 @@ private:
 };
 
 Q_DECLARE_TYPEINFO(EnginioClient::Operation, Q_PRIMITIVE_TYPE);
-Q_DECLARE_METATYPE(EnginioClient::Operation);
 Q_DECLARE_TYPEINFO(EnginioClient::AuthenticationState, Q_PRIMITIVE_TYPE);
-Q_DECLARE_METATYPE(EnginioClient::AuthenticationState);
 
 QT_END_NAMESPACE
+Q_DECLARE_METATYPE(EnginioClient::Operation);
+Q_DECLARE_METATYPE(EnginioClient::AuthenticationState);
 
 #endif // ENGINIOCLIENT_H

@@ -4,11 +4,14 @@
 #include <QMainWindow>
 #include <QTreeView>
 
+QT_BEGIN_NAMESPACE
 class QPushButton;
 class EnginioClient;
 class EnginioReply;
-class TodosModel;
+QT_END_NAMESPACE
+QT_USE_NAMESPACE
 
+class TodosModel;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

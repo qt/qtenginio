@@ -44,6 +44,8 @@
 #include <QtCore/qscopedpointer.h>
 #include <QtCore/qstring.h>
 
+QT_BEGIN_NAMESPACE
+
 class EnginioClientPrivate;
 class ENGINIOCLIENT_EXPORT EnginioIdentity : public QObject
 {
@@ -85,5 +87,7 @@ private:
     virtual void prepareSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
     QScopedPointer<EnginioBasicAuthenticationPrivate> d_ptr;
 };
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOIDENTITY_H

@@ -29,7 +29,7 @@
     QVERIFY(response->backendStatus() >= 200 && response->backendStatus() < 300);
 
 
-class EnginioReply;
+QT_FORWARD_DECLARE_CLASS(EnginioReply);
 
 namespace EnginioTests
 {

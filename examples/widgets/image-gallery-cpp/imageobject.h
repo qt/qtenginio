@@ -4,9 +4,13 @@
 #include <QtCore>
 #include <QtGui>
 
+QT_BEGIN_NAMESPACE
 class QNetworkReply;
 class EnginioClient;
 class EnginioReply;
+QT_END_NAMESPACE
+QT_USE_NAMESPACE
+
 class ImageObject : public QObject
 {
     Q_OBJECT

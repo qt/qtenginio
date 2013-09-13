@@ -61,6 +61,8 @@
 #include <QtCore/qlinkedlist.h>
 #include <QtCore/quuid.h>
 
+QT_BEGIN_NAMESPACE
+
 #define CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, Flags) \
     {\
         QString _path; \
@@ -809,5 +811,7 @@ private:
 #undef CHECK_AND_SET_URL_PATH_IMPL
 #undef CHECK_AND_SET_PATH_WITH_ID
 #undef CHECK_AND_SET_PATH
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOCLIENT_P_H

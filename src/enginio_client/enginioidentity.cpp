@@ -44,6 +44,8 @@
 #include <QtCore/qstring.h>
 #include <QtNetwork/qnetworkreply.h>
 
+QT_BEGIN_NAMESPACE
+
 /*!
   \class EnginioIdentity
   \inmodule enginio-qt
@@ -229,3 +231,4 @@ void EnginioBasicAuthentication::prepareSessionToken(EnginioClientPrivate *engin
     d_ptr->prepareSessionToken(enginio);
 }
 
+QT_END_NAMESPACE

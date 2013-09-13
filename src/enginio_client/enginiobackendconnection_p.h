@@ -13,8 +13,7 @@ QT_BEGIN_NAMESPACE
 
 class EnginioClient;
 class EnginioReply;
-
-QT_FORWARD_DECLARE_CLASS(QTcpSocket)
+class QTcpSocket;
 
 class ENGINIOCLIENT_EXPORT EnginioBackendConnection : public QObject
 {

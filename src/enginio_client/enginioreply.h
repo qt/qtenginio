@@ -110,14 +110,14 @@ private:
 };
 
 Q_DECLARE_TYPEINFO(const EnginioReply*, Q_PRIMITIVE_TYPE);
-Q_DECLARE_METATYPE(const EnginioReply*);
 Q_DECLARE_TYPEINFO(EnginioReply::ErrorTypes, Q_PRIMITIVE_TYPE);
-Q_DECLARE_METATYPE(EnginioReply::ErrorTypes)
 
 #ifndef QT_NO_DEBUG_STREAM
 ENGINIOCLIENT_EXPORT QDebug operator<<(QDebug d, const EnginioReply *reply);
 #endif
 
 QT_END_NAMESPACE
+Q_DECLARE_METATYPE(const EnginioReply*);
+Q_DECLARE_METATYPE(EnginioReply::ErrorTypes)
 
 #endif // ENGINIOREPLY_H
