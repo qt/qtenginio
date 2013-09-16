@@ -44,6 +44,7 @@
 #include <QtCore/qjsondocument.h>
 #include <QtNetwork/qnetworkreply.h>
 
+#include "enginioreplybase.h"
 #include "enginioreply.h"
 #include "enginioreply_p.h"
 #include "enginioclient.h"
@@ -64,7 +65,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \enum EnginioReply::ErrorTypes
+  \enum EnginioReplyBase::ErrorTypes
   Describes the type of error that occured when making a request to the Enginio backend.
   \value NoError The reply returned without errors
   \value NetworkError The error was a networking problem
@@ -74,12 +75,12 @@ QT_BEGIN_NAMESPACE
 /*!
   \fn EnginioReply::finished(EnginioReply *reply)
   This signal is emitted when the EnginioReply \a reply is finished.
-  After the network operation, use the \l isError() function to check for
+  After the network operation, use the \l{EnginioReplyBase::isError()}{isError()} function to check for
   potential problems and then use the \l data property to access the returned data.
 */
 
 /*!
-  \fn EnginioReply::progress(qint64 bytesSent, qint64 bytesTotal)
+  \fn EnginioReplyBase::progress(qint64 bytesSent, qint64 bytesTotal)
   This signal is emitted for file operations, indicating the progress of up or downloads.
   The \a bytesSent is the current progress relative to the total \a bytesTotal.
 */
@@ -88,20 +89,18 @@ QT_BEGIN_NAMESPACE
   \internal
 */
 EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
-    : QObject(p->q_ptr)
-    , d(new EnginioReplyPrivate(p, reply))
+    : EnginioReplyBase(p, reply, new EnginioReplyPrivate(p, reply))
 {
-    p->registerReply(reply, this);
+    QObject::connect(this, &EnginioReply::dataChanged, this, &EnginioReplyBase::dataChanged);
 }
 
 /*!
   \internal
 */
 EnginioReply::EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv)
-    : QObject(parent->q_ptr)
-    , d(priv)
+    : EnginioReplyBase(parent, reply, priv)
 {
-    parent->registerReply(reply, this);
+    QObject::connect(this, &EnginioReply::dataChanged, this, &EnginioReplyBase::dataChanged);
 }
 
 
@@ -119,26 +118,26 @@ EnginioReply::~EnginioReply()
 }
 
 /*!
-  \property EnginioReply::networkError
+  \property EnginioReplyBase::networkError
   This property holds the network error for the request.
 */
-QNetworkReply::NetworkError EnginioReply::networkError() const
+QNetworkReply::NetworkError EnginioReplyBase::networkError() const
 {
     return d->errorCode();
 }
 
 /*!
-  \property EnginioReply::errorString
+  \property EnginioReplyBase::errorString
   This property holds the error for the request as human readable string.
-  Check \l isError() first to check if the reply is an error.
+  Check \l{EnginioReplyBase::isError()}{isError()} first to check if the reply is an error.
 */
-QString EnginioReply::errorString() const
+QString EnginioReplyBase::errorString() const
 {
     return d->errorString();
 }
 
 /*!
-  \property EnginioReply::requestId
+  \property EnginioReplyBase::requestId
   This property holds the API request ID for the request.
   The request ID is useful for end-to-end tracking of requests and to identify
   the origin of notifications.
@@ -148,7 +147,7 @@ QString EnginioReply::errorString() const
 /*!
   \internal
 */
-QString EnginioReply::requestId() const
+QString EnginioReplyBase::requestId() const
 {
     return d->requestId();
 }
@@ -175,7 +174,7 @@ void EnginioReply::emitFinished()
 /*!
   \internal
 */
-void EnginioReply::setNetworkReply(QNetworkReply *reply)
+void EnginioReplyBase::setNetworkReply(QNetworkReply *reply)
 {
     d->_client->_replyReplyMap.remove(d->_nreply);
 
@@ -191,7 +190,7 @@ void EnginioReply::setNetworkReply(QNetworkReply *reply)
 /*!
   \internal
 */
-void EnginioReply::swapNetworkReply(EnginioReply *reply)
+void EnginioReplyBase::swapNetworkReply(EnginioReplyBase *reply)
 {
     // FIXME it is ugly
     d->_client->_replyReplyMap.remove(d->_nreply);
@@ -205,7 +204,7 @@ void EnginioReply::swapNetworkReply(EnginioReply *reply)
     reply->d->_client->registerReply(reply->d->_nreply, reply);
 }
 
-void EnginioReply::dumpDebugInfo() const
+void EnginioReplyBase::dumpDebugInfo() const
 {
     d->dumpDebugInfo();
 }
@@ -217,7 +216,7 @@ void EnginioReply::dumpDebugInfo() const
 
   \note The feature can be used only with one EnginioClient
 */
-void EnginioReply::setDelayFinishedSignal(bool delay)
+void EnginioReplyBase::setDelayFinishedSignal(bool delay)
 {
     d->_delay = delay;
     d->_client->finishDelayedReplies();
@@ -227,45 +226,45 @@ void EnginioReply::setDelayFinishedSignal(bool delay)
   \internal
   Returns true if signal should be delayed
  */
-bool EnginioReply::delayFinishedSignal()
+bool EnginioReplyBase::delayFinishedSignal()
 {
     return d->_delay;
 }
 
 /*!
-  \brief EnginioReply::isError returns whether this reply was unsuccessful
+  \brief EnginioReplyBase::isError returns whether this reply was unsuccessful
   \return true if the reply did not succeed
 */
-bool EnginioReply::isError() const
+bool EnginioReplyBase::isError() const
 {
     return d->errorCode() != QNetworkReply::NoError;
 }
 
 /*!
-  \brief EnginioReply::isFinished returns whether this reply was finished or not
+  \brief EnginioReplyBase::isFinished returns whether this reply was finished or not
   \return true if the reply was finished, false otherwise.
 */
-bool EnginioReply::isFinished() const
+bool EnginioReplyBase::isFinished() const
 {
     return d->isFinished();
 }
 
 /*!
-  \property EnginioReply::backendStatus
+  \property EnginioReplyBase::backendStatus
   \return the backend return status for this reply.
-  \sa EnginioReply::ErrorTypes
+  \sa EnginioReplyBase::ErrorTypes
 */
-int EnginioReply::backendStatus() const
+int EnginioReplyBase::backendStatus() const
 {
     return d->backendStatus();
 }
 
 /*!
-  \property EnginioReply::errorType
+  \property EnginioReplyBase::errorType
   \return the type of the error
-  \sa EnginioReply::ErrorTypes
+  \sa EnginioReplyBase::ErrorTypes
 */
-EnginioReply::ErrorTypes EnginioReply::errorType() const
+EnginioReplyBase::ErrorTypes EnginioReplyBase::errorType() const
 {
     return d->errorType();
 }
@@ -290,6 +289,26 @@ QDebug operator<<(QDebug d, const EnginioReply *reply)
     d << "backendStatus=" << reply->backendStatus();
     d << ")";
     return d.space();
+}
+
+EnginioReplyBase::EnginioReplyBase(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv)
+    : QObject(parent->q_ptr)
+    , d(priv)
+{
+    parent->registerReply(reply, this);
+}
+
+EnginioReplyBase::~EnginioReplyBase()
+{
+}
+
+/*!
+  \fn EnginioReplyBase::data
+  \internal
+*/
+QJsonObject EnginioReplyBase::data() const
+{
+    return d->data();
 }
 
 QT_END_NAMESPACE

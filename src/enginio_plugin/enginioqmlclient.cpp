@@ -298,22 +298,22 @@ void EnginioQmlClientPrivate::emitSessionTerminated() const
     emit static_cast<EnginioQmlClient*>(q_ptr)->sessionTerminated();
 }
 
-void EnginioQmlClientPrivate::emitSessionAuthenticated(EnginioReply *reply)
+void EnginioQmlClientPrivate::emitSessionAuthenticated(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioQmlClient*>(q_ptr)->sessionAuthenticated(jsengine()->newQObject(reply));
 }
 
-void EnginioQmlClientPrivate::emitSessionAuthenticationError(EnginioReply *reply)
+void EnginioQmlClientPrivate::emitSessionAuthenticationError(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioQmlClient*>(q_ptr)->sessionAuthenticationError(jsengine()->newQObject(reply));
 }
 
-void EnginioQmlClientPrivate::emitFinished(EnginioReply *reply)
+void EnginioQmlClientPrivate::emitFinished(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioQmlClient*>(q_ptr)->finished(jsengine()->newQObject(reply));
 }
 
-void EnginioQmlClientPrivate::emitError(EnginioReply *reply)
+void EnginioQmlClientPrivate::emitError(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioQmlClient*>(q_ptr)->error(jsengine()->newQObject(reply));
 }

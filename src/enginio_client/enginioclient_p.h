@@ -343,7 +343,7 @@ public:
     QNetworkAccessManager *_networkManager;
     QMetaObject::Connection _networkManagerConnection;
     QNetworkRequest _request;
-    QMap<QNetworkReply*, EnginioReply*> _replyReplyMap;
+    QMap<QNetworkReply*, EnginioReplyBase*> _replyReplyMap;
     QMap<QNetworkReply*, QByteArray> _requestData;
 
     // device and last position
@@ -352,7 +352,7 @@ public:
     QJsonObject _identityToken;
     EnginioClientBase::AuthenticationState _authenticationState;
 
-    QSet<EnginioReply*> _delayedReplies; // Used only for testing
+    QSet<EnginioReplyBase*> _delayedReplies; // Used only for testing
 
     virtual void init();
 
@@ -392,7 +392,7 @@ public:
             emitSessionAuthenticated(reply);
     }
 
-    void registerReply(QNetworkReply *nreply, EnginioReply *ereply)
+    void registerReply(QNetworkReply *nreply, EnginioReplyBase *ereply)
     {
         nreply->setParent(ereply);
         _replyReplyMap[nreply] = ereply;
@@ -697,7 +697,7 @@ public:
         {
             if (!progress || !total) // TODO sometimes we get garbage as progress, it seems like a bug of Qt or Enginio web engine
                 return;
-            EnginioReply *ereply = _client->_replyReplyMap.value(_reply);
+            EnginioReplyBase *ereply = _client->_replyReplyMap.value(_reply);
             if (_client->_chunkedUploads.contains(_reply)) {
                 QPair<QIODevice*, qint64> chunkData = _client->_chunkedUploads.value(_reply);
                 total = chunkData.first->size();
@@ -713,10 +713,10 @@ public:
     };
 
     virtual void emitSessionTerminated() const;
-    virtual void emitSessionAuthenticated(EnginioReply *reply);
-    virtual void emitSessionAuthenticationError(EnginioReply *reply);
-    virtual void emitFinished(EnginioReply *reply);
-    virtual void emitError(EnginioReply *reply);
+    virtual void emitSessionAuthenticated(EnginioReplyBase *reply);
+    virtual void emitSessionAuthenticationError(EnginioReplyBase *reply);
+    virtual void emitFinished(EnginioReplyBase *reply);
+    virtual void emitError(EnginioReplyBase *reply);
 
 private:
 
@@ -780,7 +780,7 @@ private:
         return reply;
     }
 
-    void uploadChunk(EnginioReply *ereply, QIODevice *device, qint64 startPos)
+    void uploadChunk(EnginioReplyBase *ereply, QIODevice *device, qint64 startPos)
     {
         QUrl serviceUrl = _serviceUrl;
         {

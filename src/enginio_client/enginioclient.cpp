@@ -196,7 +196,7 @@ void EnginioClientPrivate::init()
 
 void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
 {
-    EnginioReply *ereply = _replyReplyMap.take(nreply);
+    EnginioReplyBase *ereply = _replyReplyMap.take(nreply);
 
     if (!ereply)
         return;
@@ -205,7 +205,6 @@ void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
         QPair<QIODevice *, qint64> deviceState = _chunkedUploads.take(nreply);
         delete deviceState.first;
         emitError(ereply);
-        emit ereply->errorChanged();
     }
 
     // continue chunked upload
@@ -247,7 +246,7 @@ bool EnginioClientPrivate::finishDelayedReplies()
     bool needToReevaluate = false;
     do {
         needToReevaluate = false;
-        foreach (EnginioReply *reply, _delayedReplies) {
+        foreach (EnginioReplyBase *reply, _delayedReplies) {
             if (!reply->delayFinishedSignal()) {
                 reply->dataChanged();
                 reply->emitFinished();
@@ -675,24 +674,24 @@ void EnginioClientPrivate::emitSessionTerminated() const
     emit static_cast<EnginioClient*>(q_ptr)->sessionTerminated();
 }
 
-void EnginioClientPrivate::emitSessionAuthenticated(EnginioReply *reply)
+void EnginioClientPrivate::emitSessionAuthenticated(EnginioReplyBase *reply)
 {
-    emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticated(reply);
+    emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticated(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientPrivate::emitSessionAuthenticationError(EnginioReply *reply)
+void EnginioClientPrivate::emitSessionAuthenticationError(EnginioReplyBase *reply)
 {
-    emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticationError(reply);
+    emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticationError(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientPrivate::emitFinished(EnginioReply *reply)
+void EnginioClientPrivate::emitFinished(EnginioReplyBase *reply)
 {
-    emit static_cast<EnginioClient*>(q_ptr)->finished(reply);
+    emit static_cast<EnginioClient*>(q_ptr)->finished(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientPrivate::emitError(EnginioReply *reply)
+void EnginioClientPrivate::emitError(EnginioReplyBase *reply)
 {
-    emit static_cast<EnginioClient*>(q_ptr)->error(reply);
+    emit static_cast<EnginioClient*>(q_ptr)->error(static_cast<EnginioReply*>(reply));
 }
 
 QT_END_NAMESPACE

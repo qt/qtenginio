@@ -62,10 +62,10 @@ public:
 
     virtual void init();
     virtual void emitSessionTerminated() const Q_DECL_OVERRIDE;
-    virtual void emitSessionAuthenticated(EnginioReply *reply) Q_DECL_OVERRIDE;
-    virtual void emitSessionAuthenticationError(EnginioReply *reply) Q_DECL_OVERRIDE;
-    virtual void emitFinished(EnginioReply *reply) Q_DECL_OVERRIDE;
-    virtual void emitError(EnginioReply *reply) Q_DECL_OVERRIDE;
+    virtual void emitSessionAuthenticated(EnginioReplyBase *reply) Q_DECL_OVERRIDE;
+    virtual void emitSessionAuthenticationError(EnginioReplyBase *reply) Q_DECL_OVERRIDE;
+    virtual void emitFinished(EnginioReplyBase *reply) Q_DECL_OVERRIDE;
+    virtual void emitError(EnginioReplyBase *reply) Q_DECL_OVERRIDE;
 
     inline QJSEngine *jsengine()
     {

@@ -53,17 +53,21 @@ class EnginioQmlReplyPrivate;
 class EnginioQmlReply : public EnginioReply
 {
     Q_OBJECT
-    Q_PROPERTY(QJSValue data READ data NOTIFY dataChanged FINAL)
+
 public:
+    Q_PROPERTY(QJSValue data READ data NOTIFY dataChanged FINAL)
+
     explicit EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply);
     ~EnginioQmlReply();
 
     virtual void emitFinished() Q_DECL_OVERRIDE;
     QJSValue data() const Q_REQUIRED_RESULT;
+
+Q_SIGNALS:
+    void dataChanged();
+
 private:
     friend class EnginioQmlReplyPrivate;
-
-    Q_SIGNAL void dataChanged();
 };
 
 QT_END_NAMESPACE

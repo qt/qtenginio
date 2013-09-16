@@ -42,15 +42,10 @@
 #ifndef ENGINIOREPLY_H
 #define ENGINIOREPLY_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qscopedpointer.h>
-#include <QtCore/qstring.h>
 #include <QtCore/qjsonobject.h>
-#include <QtCore/qtypeinfo.h>
-#include <QtCore/qmetatype.h>
-#include <QtNetwork/qnetworkreply.h>
 
 #include "enginioclient_global.h"
+#include "enginioreplybase.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -58,64 +53,31 @@ class EnginioClient;
 class EnginioReplyPrivate;
 class EnginioClientPrivate;
 
-class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
+class ENGINIOCLIENT_EXPORT EnginioReply : public EnginioReplyBase
 {
     Q_OBJECT
-    Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
-public:
-    enum ErrorTypes {
-        NoError,
-        NetworkError,
-        BackendError
-    };
-    Q_ENUMS(ErrorTypes)
 
+public:
     Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
-    Q_PROPERTY(ErrorTypes errorType READ errorType NOTIFY errorChanged)
-    Q_PROPERTY(QNetworkReply::NetworkError networkError READ networkError NOTIFY errorChanged)
-    Q_PROPERTY(QString errorString READ errorString NOTIFY errorChanged)
-    Q_PROPERTY(int backendStatus READ backendStatus NOTIFY finished)
-    Q_PROPERTY(QString requestId READ requestId CONSTANT)
 
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
     virtual ~EnginioReply();
 
     QJsonObject data() const Q_REQUIRED_RESULT;
-    ErrorTypes errorType() const Q_REQUIRED_RESULT;
-    QNetworkReply::NetworkError networkError() const Q_REQUIRED_RESULT;
-    QString errorString() const Q_REQUIRED_RESULT;
-    QString requestId() const Q_REQUIRED_RESULT;
-    int backendStatus() const Q_REQUIRED_RESULT;
 
-    bool isError() const Q_REQUIRED_RESULT;
-    bool isFinished() const Q_REQUIRED_RESULT;
-
-    Q_SLOT void dumpDebugInfo() const;
-
-    void setDelayFinishedSignal(bool delay);
-    bool delayFinishedSignal() Q_REQUIRED_RESULT;
-    void setNetworkReply(QNetworkReply *reply);
-    void swapNetworkReply(EnginioReply *reply);
 Q_SIGNALS:
     void finished(EnginioReply *reply);
     void dataChanged();
-    void errorChanged();
-    void progress(qint64 bytesSent, qint64 bytesTotal);
 
 protected:
     explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
     virtual void emitFinished();
-    QScopedPointer<EnginioReplyPrivate> d;
 
 private:
     Q_DISABLE_COPY(EnginioReply)
-
-    friend class EnginioClient;
-    friend class EnginioClientPrivate;
 };
 
 Q_DECLARE_TYPEINFO(const EnginioReply*, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(EnginioReply::ErrorTypes, Q_PRIMITIVE_TYPE);
 
 #ifndef QT_NO_DEBUG_STREAM
 ENGINIOCLIENT_EXPORT QDebug operator<<(QDebug d, const EnginioReply *reply);
@@ -123,6 +85,5 @@ ENGINIOCLIENT_EXPORT QDebug operator<<(QDebug d, const EnginioReply *reply);
 
 QT_END_NAMESPACE
 Q_DECLARE_METATYPE(const EnginioReply*);
-Q_DECLARE_METATYPE(EnginioReply::ErrorTypes)
 
 #endif // ENGINIOREPLY_H

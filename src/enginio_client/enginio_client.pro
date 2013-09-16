@@ -29,5 +29,6 @@ HEADERS += \
     enginiofakereply_p.h \
     enginiodummyreply_p.h \
     enginiostring_p.h \
-    enginioclientbase.h
+    enginioclientbase.h \
+    enginioreplybase.h
 
