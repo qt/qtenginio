@@ -204,7 +204,7 @@ void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
     if (nreply->error() != QNetworkReply::NoError) {
         QPair<QIODevice *, qint64> deviceState = _chunkedUploads.take(nreply);
         delete deviceState.first;
-        emit emitError(ereply);
+        emitError(ereply);
         emit ereply->errorChanged();
     }
 
