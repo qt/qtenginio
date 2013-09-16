@@ -713,10 +713,10 @@ public:
     };
 
     virtual void emitSessionTerminated() const;
-    virtual void emitSessionAuthenticated(EnginioReply *reply) const;
-    virtual void emitSessionAuthenticationError(EnginioReply *reply) const;
-    virtual void emitFinished(EnginioReply *reply) const;
-    virtual void emitError(EnginioReply *reply) const;
+    virtual void emitSessionAuthenticated(EnginioReply *reply);
+    virtual void emitSessionAuthenticationError(EnginioReply *reply);
+    virtual void emitFinished(EnginioReply *reply);
+    virtual void emitError(EnginioReply *reply);
 
 private:
 

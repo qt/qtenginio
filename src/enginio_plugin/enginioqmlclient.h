@@ -68,11 +68,11 @@ public:
     Q_INVOKABLE EnginioQmlReply *uploadFile(const QJSValue &object, const QUrl &url);
 
 Q_SIGNALS:
-    void sessionAuthenticated(EnginioReply *reply) const;
-    void sessionAuthenticationError(EnginioReply *reply) const;
+    void sessionAuthenticated(const  QJSValue &reply) const;
+    void sessionAuthenticationError(const  QJSValue &reply) const;
     void sessionTerminated() const;
-    void finished(EnginioReply *reply);
-    void error(EnginioReply *reply);
+    void finished(const QJSValue &reply);
+    void error(const QJSValue &reply);
 
 private:
     Q_DECLARE_PRIVATE(EnginioQmlClient);

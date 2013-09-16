@@ -675,22 +675,22 @@ void EnginioClientPrivate::emitSessionTerminated() const
     emit static_cast<EnginioClient*>(q_ptr)->sessionTerminated();
 }
 
-void EnginioClientPrivate::emitSessionAuthenticated(EnginioReply *reply) const
+void EnginioClientPrivate::emitSessionAuthenticated(EnginioReply *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticated(reply);
 }
 
-void EnginioClientPrivate::emitSessionAuthenticationError(EnginioReply *reply) const
+void EnginioClientPrivate::emitSessionAuthenticationError(EnginioReply *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticationError(reply);
 }
 
-void EnginioClientPrivate::emitFinished(EnginioReply *reply) const
+void EnginioClientPrivate::emitFinished(EnginioReply *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->finished(reply);
 }
 
-void EnginioClientPrivate::emitError(EnginioReply *reply) const
+void EnginioClientPrivate::emitError(EnginioReply *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->error(reply);
 }

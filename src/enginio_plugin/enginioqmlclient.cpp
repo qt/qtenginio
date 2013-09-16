@@ -298,24 +298,24 @@ void EnginioQmlClientPrivate::emitSessionTerminated() const
     emit static_cast<EnginioQmlClient*>(q_ptr)->sessionTerminated();
 }
 
-void EnginioQmlClientPrivate::emitSessionAuthenticated(EnginioReply *reply) const
+void EnginioQmlClientPrivate::emitSessionAuthenticated(EnginioReply *reply)
 {
-    emit static_cast<EnginioQmlClient*>(q_ptr)->sessionAuthenticated(reply);
+    emit static_cast<EnginioQmlClient*>(q_ptr)->sessionAuthenticated(jsengine()->newQObject(reply));
 }
 
-void EnginioQmlClientPrivate::emitSessionAuthenticationError(EnginioReply *reply) const
+void EnginioQmlClientPrivate::emitSessionAuthenticationError(EnginioReply *reply)
 {
-    emit static_cast<EnginioQmlClient*>(q_ptr)->sessionAuthenticationError(reply);
+    emit static_cast<EnginioQmlClient*>(q_ptr)->sessionAuthenticationError(jsengine()->newQObject(reply));
 }
 
-void EnginioQmlClientPrivate::emitFinished(EnginioReply *reply) const
+void EnginioQmlClientPrivate::emitFinished(EnginioReply *reply)
 {
-    emit static_cast<EnginioQmlClient*>(q_ptr)->finished(reply);
+    emit static_cast<EnginioQmlClient*>(q_ptr)->finished(jsengine()->newQObject(reply));
 }
 
-void EnginioQmlClientPrivate::emitError(EnginioReply *reply) const
+void EnginioQmlClientPrivate::emitError(EnginioReply *reply)
 {
-    emit static_cast<EnginioQmlClient*>(q_ptr)->error(reply);
+    emit static_cast<EnginioQmlClient*>(q_ptr)->error(jsengine()->newQObject(reply));
 }
 
 QT_END_NAMESPACE
