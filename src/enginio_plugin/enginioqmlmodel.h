@@ -38,7 +38,7 @@
 #ifndef ENGINIOQMLMODEL_H
 #define ENGINIOQMLMODEL_H
 
-#include "enginiomodel.h"
+#include <Enginio/enginiomodel.h>
 #include "enginioqmlclient.h"
 
 class EnginioQmlModel : public EnginioModel

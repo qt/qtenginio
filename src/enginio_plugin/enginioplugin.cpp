@@ -38,10 +38,10 @@
 #include "enginioplugin.h"
 #include "enginioqmlclient.h"
 #include "enginioqmlmodel.h"
-#include "enginiomodel.h"
-#include "enginioreply.h"
+#include <Enginio/enginiomodel.h>
+#include <Enginio/enginioreply.h>
 #include "enginioqmlreply.h"
-#include "enginioidentity.h"
+#include <Enginio/enginioidentity.h>
 #include <Enginio/private/enginioclient_p.h>
 
 #include <qqml.h>

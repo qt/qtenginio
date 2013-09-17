@@ -38,7 +38,7 @@
 #ifndef ENGINIOQMLCLIENT_H
 #define ENGINIOQMLCLIENT_H
 
-#include "enginioclient.h"
+#include <Enginio/enginioclient.h>
 #include "enginioqmlreply.h"
 #include <QtQml/qjsvalue.h>
 #include <QQmlParserStatus>
