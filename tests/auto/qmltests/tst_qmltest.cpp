@@ -101,9 +101,11 @@ int main(int argc, char** argv)
         << "var testObjectType = \"objects." + EnginioTests::CUSTOM_OBJECT1 + "\"";
 
     out.flush();
-    qmltestConfig.close();
+    qmltestConfig.flush();
 
     int exitStatus = quick_test_main(argc, argv, "qmltests", QUICK_TEST_SOURCE_DIR);
+
+    qmltestConfig.remove();
 
     backendManager.removeBackend(backendName);
 
