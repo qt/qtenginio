@@ -1618,16 +1618,19 @@ void tst_EnginioClient::acl()
     QVERIFY(data["update"].isArray());
 
     // update acl of the object
+    //![update-access]
+    QJsonObject aclUpdate;
+    aclUpdate["objectType"] = obj["objectType"];
+    aclUpdate["id"] = obj["id"];
     QString json = "{ \"read\": [ { \"id\": \"%3\", \"objectType\": \"users\" } ],"
                      "\"update\": [ { \"id\": \"%2\", \"objectType\": \"users\" } ],"
                      "\"admin\": [ { \"id\": \"%1\", \"objectType\": \"users\" } ] }";
     json = json.arg(id1, id2, id3);
-    QJsonObject aclUpdate = QJsonDocument::fromJson(json.toUtf8(), &parseError).object();
-    QCOMPARE(parseError.error, QJsonParseError::NoError);
-    aclUpdate["objectType"] = obj["objectType"];
-    aclUpdate["id"] = obj["id"];
+    aclUpdate["access"] = QJsonDocument::fromJson(json.toUtf8()).object();
 
     reqId = client.update(aclUpdate, EnginioClient::ObjectAclOperation);
+    //![update-access]
+
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 3);
     QCOMPARE(spyError.count(), 0);

@@ -493,6 +493,20 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation o
 
   The \a operation is the area in which the object gets created. It defaults to \l ObjectOperation
   to create new objects by default.
+
+  To update access control list of an object the JSON loook like this:
+  \code
+  {
+        "id": "objectId",
+        "objectType": "objects.objectType",
+        "access": { "read": ["id": "userId", "objectTypes": "users"],
+                     "update": ["id": "userId", "objectTypes": "users"],
+                     "admin": ["id": "userId", "objectTypes": "users"] }
+  }
+  \endcode
+  which could be implemented for example this way:
+  \snippet enginioclient/tst_enginioclient.cpp update-access
+
   \return EnginioReply containing the status of the query and the data once it is finished.
   \sa EnginioReply, create(), query(), remove()
 */

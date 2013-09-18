@@ -163,7 +163,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
             result.append(id);
             result.append('/');
             result.append(EnginioString::access);
-            return GetPathReturnValue(true, QString());
+            return GetPathReturnValue(true, EnginioString::access);
         }
         case AuthenticationOperation:
             result.append(EnginioString::authIdentity);
@@ -487,17 +487,7 @@ public:
 
         QNetworkRequest req = prepareRequest(url);
 
-        // TODO FIXME we need to remove "id" and "objectType" because of an internal server error.
-        // It failes at least for ACL but maybe for others too.
-        // Sadly we need to detach here, so it causes at least one allocation. Of course sending
-        // garbage is also wrong so maybe we should filter out data before sending, the question
-        // is how, and it seems that only enginio server knows...
-        // TODO It would work only for QJSON classes, QJSValue is a reference to real object therefore
-        // copy constructor will not detach, we are altering original object!
-        ObjectAdaptor<T> o(object);
-        o.remove(EnginioString::objectType);
-        o.remove(EnginioString::id);
-        QByteArray data = o.toJson();
+        QByteArray data = dataPropertyName.isEmpty() ? object.toJson() : object[dataPropertyName].toJson();
 
         QNetworkReply *reply = networkManager()->put(req, data);
 
@@ -515,23 +505,13 @@ public:
 
         QNetworkRequest req = prepareRequest(url);
 
-        // TODO FIXME we need to remove "id" and "objectType" because of an internal server error.
-        // It failes at least for ACL but maybe for others too.
-        // Sadly we need to detach here, so it causes at least one allocation. Of course sending
-        // garbage is also wrong so maybe we should filter out data before sending, the question
-        // is how, and it seems that only enginio server knows...
-        // TODO It would work only for QJSON classes, QJSValue is a reference to real object therefore
-        // copy constructor will not detach, we are altering original object!
-        ObjectAdaptor<T> o(object);
-        o.remove(EnginioString::objectType);
-        o.remove(EnginioString::id);
         QNetworkReply *reply = 0;
         QByteArray data;
 #if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
         if (operation != EnginioClient::ObjectAclOperation)
             reply = networkManager()->deleteResource(req);
         else {
-            data = o.toJson();
+            data = dataPropertyName.isEmpty() ? object.toJson() : object[dataPropertyName].toJson();
             QBuffer *buffer = new QBuffer();
             buffer->setData(data);
             buffer->open(QIODevice::ReadOnly);
@@ -540,7 +520,7 @@ public:
         }
 #else
         // TODO enable me https://codereview.qt-project.org/#change,56920
-        data = o.toJson();
+        data = dataPropertyName.isEmpty() ? object.toJson() : object[dataPropertyName].toJson();
         reply = networkManager()->deleteResource(req, data);
 #endif
 
