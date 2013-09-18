@@ -17,5 +17,6 @@ OTHER_FILES += \
     tst_enginioclient.qml \
     tst_files.qml \
     tst_identity.qml \
-    tst_query.qml
+    tst_query.qml \
+    tst_model.qml
 
