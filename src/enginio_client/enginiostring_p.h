@@ -64,6 +64,7 @@
     F(include, "include")\
     F(incomplete, "incomplete")\
     F(limit, "limit")\
+    F(member, "member")\
     F(members, "members")\
     F(message, "message")\
     F(messageType, "messageType")\

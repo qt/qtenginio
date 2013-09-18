@@ -465,6 +465,16 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
 
   \snippet enginioclient/tst_enginioclient.cpp create-todo
 
+  To add a new member to a usergroup, the JSON needs to look like the example below.
+  \code
+  {
+      "id": "groupId",
+      "member": { "id": "abcd", "objectType": "users" }
+  }
+  \endcode
+  It can be constructed like this:
+  \snippet enginioclient/tst_enginioclient.cpp create-newmember
+
   \return EnginioReply containing the status of the query and the data once it is finished.
   \sa EnginioReply, query(), update(), remove()
 */

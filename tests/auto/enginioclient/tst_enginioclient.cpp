@@ -97,6 +97,7 @@ private slots:
     void acl();
     void sharingNetworkManager();
     void search();
+    void assignUserToGroup();
 
 private:
     QString usergroupId(EnginioClient *client)
@@ -755,6 +756,88 @@ void tst_EnginioClient::search()
         int resultCount2 = data["results"].toArray().count();
         qDebug() << resultCount2 << " results on objects." + EnginioTests::CUSTOM_OBJECT1 + "and objects." + EnginioTests::CUSTOM_OBJECT2 + " with phrase \"object OR test\".";
         QVERIFY(resultCount2 > resultCount1);
+    }
+}
+
+void tst_EnginioClient::assignUserToGroup()
+{
+    EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString userId;
+    QString groupId;
+
+    // Preparations
+    {
+        // find a user
+        QJsonObject query;
+        EnginioReply *reply = client.query(query, EnginioClient::UserOperation);
+        QTRY_VERIFY(reply->isFinished());
+        CHECK_NO_ERROR(reply);
+
+        QJsonArray results = reply->data()["results"].toArray();
+        QVERIFY(results.count());
+
+        QJsonObject user = results[0].toObject();
+        QVERIFY(user.contains("id"));
+        userId = user["id"].toString();
+    }
+    {
+        //find a group
+        QJsonObject query;
+        EnginioReply *reply = client.query(query, EnginioClient::UsergroupOperation);
+        QTRY_VERIFY(reply->isFinished());
+        CHECK_NO_ERROR(reply);
+
+        QJsonArray results = reply->data()["results"].toArray();
+        QVERIFY(results.count());
+
+        QJsonObject group = results[0].toObject();
+        QVERIFY(group.contains("id"));
+        groupId = group["id"].toString();
+    }
+    QVERIFY(!userId.isEmpty());
+    QVERIFY(!groupId.isEmpty());
+
+    {   // check if given user is not a member of the usergroup
+        QJsonObject op;
+        op.insert("id", groupId);
+        QJsonObject query;
+        query.insert("id", userId);
+        EnginioReply *reply = client.query(op, EnginioClient::UsergroupMembersOperation);
+        QTRY_VERIFY(reply->isFinished());
+        QJsonArray results = reply->data()["results"].toArray();
+        QCOMPARE(results.count(), 0);
+    }
+    {
+        //![create-newmember]
+        QJsonObject query;
+        query["id"] = groupId;
+        QJsonObject user;
+        user["id"] = userId;
+        user["objectType"] = QString::fromUtf8("users");
+        query["member"] = user;
+
+        EnginioReply *reply = client.create(query, EnginioClient::UsergroupMembersOperation);
+        //![create-newmember]
+        QTRY_VERIFY(reply->isFinished());
+        CHECK_NO_ERROR(reply);
+        QCOMPARE(reply->data()["id"].toString(), userId);
+    }
+    {
+        // confirm operation
+        QJsonObject op;
+        op.insert("id", groupId);
+        QJsonObject query;
+        query.insert("id", userId);
+        EnginioReply *reply = client.query(op, EnginioClient::UsergroupMembersOperation);
+        QTRY_VERIFY(reply->isFinished());
+        QJsonArray results = reply->data()["results"].toArray();
+        QCOMPARE(results.count(), 1);
+        QCOMPARE(results[0].toObject()["id"].toString(), userId);
     }
 }
 
