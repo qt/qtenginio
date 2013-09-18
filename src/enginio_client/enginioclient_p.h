@@ -112,7 +112,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         return req;
     }
 
-    struct GetPathReturnValue : public QPair<bool, QString>
+    struct ENGINIOCLIENT_EXPORT GetPathReturnValue : public QPair<bool, QString>
     {
         GetPathReturnValue(bool value)
             : QPair(value, QString())
