@@ -101,33 +101,9 @@ public:
 
     void emitFinished()
     {
-        // Enginio doesn't need this reply anymore, so now we need to figure out how to
-        // delete it. There are two cases:
-        //  - finished and error signals are not connected => nobody really cares about
-        //    this reply we can safely delete it.
-        //  - at least one of finished and error signals is connected => we assume that
-        //    the connection is done from QML, so we transfer reply ownership to it. C++
-        //    developers needs to take care of such situation and addapt.
-
-        static QMetaMethod clientFinishedSignal = QMetaMethod::fromSignal(&EnginioQmlClient::finished);
-        static QMetaMethod clientErrorSignal = QMetaMethod::fromSignal(&EnginioQmlClient::error);
-        static QMetaMethod replyFinishedSignal = QMetaMethod::fromSignal(&EnginioQmlReply::finished);
-
-        // TODO it will not work because of: https://bugreports.qt-project.org/browse/QTBUG-32340
-        bool isReplyFinishedConnected = q->isSignalConnected(replyFinishedSignal);
-        bool isClientFinishedConnected = _client->isSignalConnected(clientFinishedSignal);
-        bool isClientErrorConnected = _client->isSignalConnected(clientErrorSignal);
-
-        if (Q_LIKELY(isClientFinishedConnected
-                  || isReplyFinishedConnected
-                  || isClientErrorConnected)) {
-            // something is connected and we can transfer the owership.
-            q->setParent(0);
-            QQmlEngine::setObjectOwnership(q, QQmlEngine::JavaScriptOwnership);
-            if (isReplyFinishedConnected)
-                emit q->finished(q);
-        } else
-            q->deleteLater();
+        q->setParent(0);
+        QQmlEngine::setObjectOwnership(q, QQmlEngine::JavaScriptOwnership);
+        emit q->finished(static_cast<EnginioQmlClientPrivate*>(_client)->jsengine()->newQObject(q));
     }
 
     QJSValue data() const
@@ -148,7 +124,7 @@ public:
 
 
 EnginioQmlReply::EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply)
-    : EnginioReply(parent, reply, new EnginioQmlReplyPrivate(parent, reply, this))
+    : EnginioReplyBase(parent, reply, new EnginioQmlReplyPrivate(parent, reply, this))
 {}
 
 EnginioQmlReply::~EnginioQmlReply()

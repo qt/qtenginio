@@ -50,7 +50,7 @@ QT_BEGIN_NAMESPACE
 class EnginioQmlClientPrivate;
 class EnginioQmlReplyPrivate;
 
-class EnginioQmlReply : public EnginioReply
+class EnginioQmlReply : public EnginioReplyBase
 {
     Q_OBJECT
 
@@ -64,6 +64,7 @@ public:
     QJSValue data() const Q_REQUIRED_RESULT;
 
 Q_SIGNALS:
+    void finished(const QJSValue &reply);
     void dataChanged();
 
 private:
