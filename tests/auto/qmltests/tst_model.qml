@@ -126,10 +126,7 @@ Item {
         }
 
         function test_assignOperation() {
-            skip("FIXME check why it doesn't work")
             modelCreate.operation = Enginio.ObjectOperation
-            console.log(modelCreate.operation)
-            console.log(Enginio.ObjectOperation)
             verify(modelCreate.operation === Enginio.ObjectOperation)
 
             modelCreate.operation = Enginio.ObjectAclOperation

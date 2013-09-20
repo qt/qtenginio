@@ -50,6 +50,7 @@ class EnginioModelPrivate;
 class ENGINIOCLIENT_EXPORT EnginioModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_ENUMS(EnginioClient::Operation) // TODO remove me QTBUG-33577
 public:
     explicit EnginioModel(QObject *parent = 0);
     ~EnginioModel();
