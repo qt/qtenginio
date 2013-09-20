@@ -95,6 +95,7 @@ private slots:
     void identity_afterLogout();
     void backendFakeReply();
     void acl();
+    void creator_updater();
     void sharingNetworkManager();
     void search();
     void assignUserToGroup();
@@ -1720,6 +1721,92 @@ void tst_EnginioClient::acl()
     response = spy[4][0].value<EnginioReply*>();
     QCOMPARE(response, reqId);
     CHECK_NO_ERROR(response);
+}
+
+void tst_EnginioClient::creator_updater()
+{
+    // create an object
+    EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    EnginioBasicAuthentication identity;
+    identity.setUser("logintest");
+    identity.setPassword("logintest");
+    client.setIdentity(&identity);
+
+    QString id1, id2;
+    QJsonParseError parseError;
+    {
+        QJsonObject userQuery = QJsonDocument::fromJson("{\"query\": {\"username\": {\"$in\": [\"logintest\", \"logintest2\"]}},"
+                                                        "\"sort\": [{\"sortBy\":\"username\", \"direction\": \"asc\"}]}", &parseError).object();
+        QCOMPARE(parseError.error, QJsonParseError::NoError);
+
+        const EnginioReply* reqId = client.query(userQuery, EnginioClient::UserOperation);
+        QVERIFY(reqId);
+        QTRY_VERIFY(reqId->isFinished());
+        CHECK_NO_ERROR(reqId);
+
+        QJsonArray data = reqId->data()["results"].toArray();
+        QCOMPARE(data.count(), 2);
+        id1 = data[0].toObject()["id"].toString();
+        id2 = data[1].toObject()["id"].toString();
+        QVERIFY(!id1.isEmpty());
+        QVERIFY(!id2.isEmpty());
+    }
+
+    // Make sure we are authenticated and thus have a session
+    QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
+
+    // create an object
+    QJsonObject obj;
+    obj["objectType"] = QString::fromUtf8("objects.todos");
+    obj["title"] = QString::fromUtf8("test title");
+    obj["completed"] = false;
+    const EnginioReply *reqId = client.create(obj);
+    QVERIFY(reqId);
+
+    QTRY_VERIFY(reqId->isFinished());
+    CHECK_NO_ERROR(reqId);
+    obj = reqId->data(); // so obj contains valid id
+
+    QVERIFY(obj.contains("creator"));
+    QJsonObject creator = obj["creator"].toObject();
+    QCOMPARE(creator["id"].toString(), id1);
+    QCOMPARE(creator["objectType"].toString(), QString::fromLatin1("users"));
+
+    QVERIFY(obj.contains("updater"));
+    QJsonObject updater = obj["updater"].toObject();
+    QCOMPARE(updater["id"].toString(), id1);
+    QCOMPARE(updater["objectType"].toString(), QString::fromLatin1("users"));
+
+    // Change user and update the object
+    EnginioBasicAuthentication identity2;
+    identity2.setUser("logintest2");
+    identity2.setPassword("logintest2");
+    client.setIdentity(&identity2);
+    QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
+    QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
+
+    obj["completed"] = true;
+    const EnginioReply *updateReply = client.update(obj);
+    QVERIFY(updateReply);
+
+    QTRY_VERIFY(updateReply->isFinished());
+    CHECK_NO_ERROR(updateReply);
+
+    QJsonObject updatedObj = updateReply->data();
+    QVERIFY(updatedObj.contains("creator"));
+    creator = updatedObj["creator"].toObject();
+    QCOMPARE(creator["id"].toString(), id1);
+    QCOMPARE(creator["objectType"].toString(), QString::fromLatin1("users"));
+
+    QVERIFY(updatedObj.contains("updater"));
+    updater = updatedObj["updater"].toObject();
+    QCOMPARE(updater["id"].toString(), id2);
+    QCOMPARE(updater["objectType"].toString(), QString::fromLatin1("users"));
 }
 
 void tst_EnginioClient::sharingNetworkManager()
