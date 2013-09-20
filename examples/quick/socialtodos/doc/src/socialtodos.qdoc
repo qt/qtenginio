@@ -1,0 +1,98 @@
+/****************************************************************************
+**
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of the documentation of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and Digia.  For licensing terms and
+** conditions see http://qt.digia.com/licensing.  For further information
+** use the contact form at http://qt.digia.com/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file.  Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: http://www.gnu.org/copyleft/fdl.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+/*!
+    \title Enginio QML Examples - Social Todos
+    \example socialtodos
+    \brief The Social Todo example introduces user management and sharing of objects
+    \ingroup enginio-examples
+    \inmodule enginio-qml
+
+    \section1 Introduction
+
+    This example will demonstrate some more advanced server setup and make use
+    of Enginio's built-in user management.
+
+    On the server side we will choose settings that will be safer,
+    where the simple examples ignore all security issues.
+
+    The goal is that the example allows to create user accounts,
+    log in as user, let users create todo lists with todos and
+    share todo lists amongst each other.
+
+    To keep it simple there will be no way to remove the sharing of a list
+    and every user can delete any list completely.
+
+    The organization on the backend will be:
+    \list
+        \li "users" The built in users objects are used together with basic
+        identification - username and password.
+        \li "objects.todoLists" The list of todo lists, has a "name" property for the
+        title of the list. Users can be added by manipulating
+        the access control list (ACL) of the list.
+        \li "objects.todos" The actual todo items, having a "name" and "done" property
+        to keep track of the items. It inherits the ACL from the list and
+        will be automatically deleted when a list object is deleted.
+    \endlist
+
+
+    For the server side there are two options: manual configuration or importing
+    a pre-made list of settings. The example contains a zip file (backendsetup/socialtodos.zip) that can be used
+    to pre-populate the server with the right object types.
+
+    But it is more interesting to do the setup by hand to gain a deeper understanding of Enginio
+    and how user management works.
+
+    \section1 Backend Configuration
+
+    In the backend, go to the "object types" section. Click on users.
+    Users should be able to share Todo Lists, for that we let them read each other. We do not however want
+    users to be able to change each other, so for the user configuration, under "Object ACL Template"
+    in the "All" category make sure only "read" is enabled.
+    The "Creator" should have "admin" rights.
+
+    Next we create the new object types.
+    "Add Object Type" and in the name field choose: "todoLists".
+    This will create "objects.todoLists". Add a new property "name" with type String.
+    In the "ACL Template" remove the permissions for "All" completely.
+    Now only the creator of an object will be able to read and manipulate it.
+    Save this object type.
+
+    Now only the object type for the actual individual todo items is missing.
+    Add a new object type: "todos". The properties for this object type are:
+    "title": "string", "done": "boolean" and a reference to the "todoList" the item belongs to.
+    For the last property choose "Ref" and select "objects.todoLists" as target.
+
+    In the references tab, change the ACL to "Inherit from object type and target object" and for Dependency
+    select "Delete object".
+    This setup means that the ACL will be the same as that of the todo list itself and the todo will automatically
+    be deleted when the list is deleted. Remove all permissions from the "Object ACL Template" as they are inherited now.
+
+
+
+
+
+*/
