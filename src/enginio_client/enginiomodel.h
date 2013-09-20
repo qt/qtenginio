@@ -76,7 +76,7 @@ public:
     void setQuery(const QJsonObject &query);
 
     EnginioClient::Operation operation() const Q_REQUIRED_RESULT;
-    void setOperation(EnginioClient::Operation opertaion);
+    void setOperation(EnginioClient::Operation operation);
 
     virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
