@@ -4,3 +4,4 @@ SUBDIRS += \
     image-gallery \
     socialtodos \
     todos \
+    users \
