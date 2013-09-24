@@ -52,7 +52,9 @@ Item {
         backendSecret: AppConfig.backendData.secret
         serviceUrl: AppConfig.backendData.serviceUrl
 
+        property int errorCount: 0
         onError: {
+            ++errorCount
             console.log("\n\n### ERROR")
             console.log(reply.errorString)
             reply.dumpDebugInfo()
@@ -144,8 +146,18 @@ Item {
             property int resetCount: 0
         }
 
+        function _query(query, operation) {
+            var enginioClient = modelQuery.enginio
+            modelQuery.enginio = null
+            var count = modelQuery.resetCount
+            modelQuery.operation = operation
+            modelQuery.query = query
+            modelQuery.enginio = enginioClient
+            tryCompare(modelQuery, "resetCount", ++count, 10000)
+        }
+
         function test_queryObjects() {
-            var counterObject = { "counter" : 0 }
+            var counterObject = { "counter" : 0, "enginioErrors" : enginio.errorCount}
             enginio.create({ "objectType": AppConfig.testObjectType,
                                "testCase": "EnginioModel: query",
                                "title": "prepare",
@@ -158,9 +170,69 @@ Item {
                            }, Enginio.ObjectOperation).finished.connect(function(){ counterObject.counter++});
 
             tryCompare(counterObject, "counter", 2, 10000)
-            var count = modelQuery.resetCount
-            modelQuery.query = { "limit": 2, "objectType": AppConfig.testObjectType }
-            tryCompare(modelQuery, "resetCount", ++count, 10000)
+
+            _query({ "limit": 2, "objectType": AppConfig.testObjectType }, Enginio.ObjectOperation)
+            compare(counterObject.enginioErrors, enginio.errorCount)
+
+        }
+
+        function test_queryUsers() {
+            _query({ "limit": 2, "objectType": "users" }, Enginio.UserOperation)
+        }
+
+        function test_queryUsersgroups() {
+            _query({ "limit": 2, "objectType": "usersgroups" }, Enginio.UsergroupOperation)
         }
     }
+
+    TestCase {
+        name: "EnginioModel: modify"
+
+        EnginioModel {
+            id: modelModify
+            enginio: enginio
+            query: {
+                     "objectType": AppConfig.testObjectType,
+                     "testCase": "EnginioModel: modify"
+                   }
+            Component.onCompleted: console.log("start " + modelModify)
+            Component.onDestruction: console.log("stop " + modelModify)
+        }
+
+        function test_modify() {
+            skip("The test casues crashes") // TODO fix me please.
+            var counterObject = {"counter": 0, "expectedCount": 0}
+
+            // append new data
+            modelModify.append({ "objectType": AppConfig.testObjectType,
+                             "testCase": "EnginioModel: modify",
+                             "title": "test_modify",
+                             "count": 42,
+                         }).finished.connect(function() {counterObject.counter++})
+            ++counterObject.expectedCount
+            modelModify.append({ "objectType": AppConfig.testObjectType,
+                             "testCase": "EnginioModel: modify",
+                             "title": "test_modify",
+                             "count": 43,
+                         }).finished.connect(function() {counterObject.counter++})
+            ++counterObject.expectedCount
+            tryCompare(counterObject, "counter", counterObject.expectedCount)
+            verify(!enginio.errorCount)
+
+
+            // remove data
+            modelModify.remove(0).finished.connect(function() {counterObject.counter++})
+            ++counterObject.expectedCount
+            tryCompare(counterObject, "counter", ++counterObject.expectedCount)
+            verify(!enginio.errorCount)
+
+
+            // change data
+            modelModify.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
+            ++counterObject.expectedCount
+            tryCompare(counterObject, "counter", counterObject.expectedCount)
+            verify(!enginio.errorCount)
+        }
+    }
+
 }

@@ -82,6 +82,52 @@ Item {
     }
 
     TestCase {
+        name: "EnginioClient: MostlyFakeReplies"
+
+        Enginio {
+            id: fake
+            backendId: AppConfig.backendData.id
+            backendSecret: AppConfig.backendData.secret
+            serviceUrl: AppConfig.backendData.serviceUrl
+
+            property int errorCount: 0
+            onError: {
+                    if (reply.errorType !== EnginioReply.NoError // TODO change it to EnginioReply.BackendError
+                        || reply.data.errors[0].message.length > 0
+                        || reply.data.errors[0].reason.length > 0) { // TODO add checks fro network errors
+                            ++errorCount
+                    } else
+                        console.log(JSON.stringify(reply))
+            }
+        }
+
+        function test_fakeReply() {
+            var empty = {}
+            var objectTypeOnly = {"objectType" : "objects.todos"}
+            var replies = [ fake.query(empty, Enginio.ObjectOperation),
+                            fake.query(empty, Enginio.ObjectAclOperation),
+                            fake.query(objectTypeOnly, Enginio.ObjectAclOperation),
+                            fake.query(empty, Enginio.UsergroupMembersOperation),
+
+                            fake.update(empty, Enginio.ObjectOperation),
+                            fake.update(empty, Enginio.ObjectAclOperation),
+                            fake.update(objectTypeOnly, Enginio.ObjectAclOperation),
+                            fake.update(empty, Enginio.UsergroupMembersOperation),
+
+                            fake.remove(empty, Enginio.ObjectOperation),
+                            fake.remove(empty, Enginio.ObjectAclOperation),
+                            fake.remove(objectTypeOnly, Enginio.ObjectAclOperation),
+                            fake.remove(empty, Enginio.UsergroupMembersOperation),
+
+                            fake.search(empty),
+                            fake.downloadFile(empty),
+                            fake.uploadFile(empty, "")]
+
+            tryCompare(fake, "errorCount", replies.length)
+        }
+    }
+
+    TestCase {
         name: "EnginioClient: ObjectOperation CRUD"
 
         function init() {
