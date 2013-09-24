@@ -103,7 +103,7 @@ void tst_EnginioModel::initTestCase()
     if (EnginioTests::TESTAPP_URL.isEmpty())
         QFAIL("Needed environment variable ENGINIO_API_URL is not set!");
 
-    _backendName = QStringLiteral("EnginioClient") + QString::number(QDateTime::currentMSecsSinceEpoch());
+    _backendName = QStringLiteral("EnginioModel") + QString::number(QDateTime::currentMSecsSinceEpoch());
     QVERIFY(_backendManager.createBackend(_backendName));
 
     QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, EnginioTests::TESTAPP_ENV);
