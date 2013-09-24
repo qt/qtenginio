@@ -91,6 +91,8 @@ private slots:
     void createAndModify();
     void externalNotification();
     void createUpdateRemoveWithNotification();
+    void appendBeforeInitialModelReset();
+    void appendAndChangeQueryBeforeItIsFinished();
 private:
     template<class T>
     void externallyRemovedImpl();
@@ -1180,6 +1182,75 @@ void tst_EnginioModel::createUpdateRemoveWithNotification()
         CHECK_NO_ERROR(reply);
     }
     QTRY_COMPARE(model.rowCount(), initialCount);
+}
+
+void tst_EnginioModel::appendBeforeInitialModelReset()
+{
+    // The test is trying to append data to a model before it is initially populated.
+    // This may be flaky, because it depends on a initial query being slower then append
+    // that is why it is executad in a loop.
+
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    for (int i = 0; i < 12 ; ++i) {
+        QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+        QJsonObject query;
+        query.insert("objectType", objectType);
+
+        EnginioModel model;
+        QSignalSpy resetSpy(&model, SIGNAL(modelReset()));
+        model.setQuery(query);
+        model.setEnginio(&client);
+
+        query.insert("title", QString::fromUtf8("appendAndRemoveModel"));
+        EnginioReply *reply = model.append(query);
+        QTRY_VERIFY(reply->isFinished());
+        CHECK_NO_ERROR(reply);
+        if (resetSpy.isEmpty())
+            break;
+    }
+}
+
+void tst_EnginioModel::appendAndChangeQueryBeforeItIsFinished()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+
+    EnginioModel model;
+    QSignalSpy resetSpy(&model, SIGNAL(modelReset()));
+    model.setQuery(query);
+    model.setEnginio(&client);
+    QTRY_COMPARE(resetSpy.count(), 1);
+
+    query.insert("title", QString::fromUtf8("appendAndChangeQueryBeforeItIsFinished"));
+    EnginioReply *reply = model.append(query);
+    reply->setDelayFinishedSignal(true);
+
+    {   // change query
+        QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT2;
+        QJsonObject query;
+        query.insert("objectType", objectType);
+        model.setQuery(query);
+        QVERIFY(resetSpy.count() != 2);
+        QTRY_COMPARE(resetSpy.count(), 2);
+        reply->setDelayFinishedSignal(false);
+    }
+    QTRY_VERIFY(reply->isFinished());
+    CHECK_NO_ERROR(reply);
+
+    QString appendedId = reply->data()["id"].toString();
+    for (int i = 0; i < model.rowCount(); ++i) {
+        QString id = model.data(model.index(i)).toJsonValue().toObject()["id"].toString();
+        QVERIFY(id != appendedId);
+    }
 }
 
 QTEST_MAIN(tst_EnginioModel)

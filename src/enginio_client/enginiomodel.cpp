@@ -756,12 +756,34 @@ public:
 
     void finishedCreateRequest(const EnginioReply *reply, const QString &tmpId)
     {
-        AttachedData &data = _attachedData.deref(tmpId);
-
         if (_attachedData.markRequestIdAsHandled(reply->requestId()))
             return; // request was handled
 
-        int row = data.row;
+        int row;
+        if (_attachedData.contains(tmpId))
+            // this is a common path, we got result of our create request and we still have a dummy
+            // item that we want to update.
+            row = _attachedData.deref(tmpId).row;
+        else {
+            // the dummy object doesn't exist anymore, probably it was removed by a full reset
+            // or by an initial query.
+            QString id = reply->data()[EnginioString::id].toString();
+            if (_attachedData.contains(id)) {
+                // The reset removed the dummy value but it contained the newly created (initial reset
+                // and append were reordered)
+                row = _attachedData.rowFromObjectId(id);
+            } else {
+                // we created the item but there is no sign of it. We need to check if we have more or
+                // less the same query
+                if (_query[EnginioString::objectType] == reply->data()[EnginioString::objectType]) {
+                    // the type is the same so we can re-add it
+                    receivedCreateNotification(reply->data());
+                }
+                // query was changed too much we are done.
+                return;
+            }
+        }
+
         if (reply->networkError() != QNetworkReply::NoError) {
             // We tried to create something and we failed, we need to remove tmp
             // item
