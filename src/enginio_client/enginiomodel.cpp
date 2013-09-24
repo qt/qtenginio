@@ -246,7 +246,7 @@ class EnginioModelPrivate {
     EnginioClient *_enginio;
     EnginioClient::Operation _operation;
     EnginioModel *q;
-    QVector<QMetaObject::Connection> _connections;
+    QVector<QMetaObject::Connection> _clientConnections;
 
     const static int IncrementalModelUpdate;
     typedef EnginioModelPrivateAttachedData AttachedData;
@@ -416,7 +416,7 @@ public:
 
     ~EnginioModelPrivate()
     {
-        foreach (const QMetaObject::Connection &connection, _connections)
+        foreach (const QMetaObject::Connection &connection, _clientConnections)
             QObject::disconnect(connection);
     }
 
@@ -528,15 +528,15 @@ public:
     void setEnginio(const EnginioClient *enginio)
     {
         if (_enginio) {
-            foreach(const QMetaObject::Connection &connection, _connections)
+            foreach (const QMetaObject::Connection &connection, _clientConnections)
                 QObject::disconnect(connection);
-            _connections.clear();
+            _clientConnections.clear();
         }
         _enginio = const_cast<EnginioClient*>(enginio);
         if (_enginio) {
-            _connections.append(QObject::connect(_enginio, &QObject::destroyed, EnginioDestroyed(this)));
-            _connections.append(QObject::connect(_enginio, &EnginioClient::backendIdChanged, QueryChanged(this)));
-            _connections.append(QObject::connect(_enginio, &EnginioClient::backendSecretChanged, QueryChanged(this)));
+            _clientConnections.append(QObject::connect(_enginio, &QObject::destroyed, EnginioDestroyed(this)));
+            _clientConnections.append(QObject::connect(_enginio, &EnginioClient::backendIdChanged, QueryChanged(this)));
+            _clientConnections.append(QObject::connect(_enginio, &EnginioClient::backendSecretChanged, QueryChanged(this)));
         }
         emit q->enginioChanged(_enginio);
     }
