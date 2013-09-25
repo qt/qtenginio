@@ -64,7 +64,13 @@ template <> struct ValueAdaptor<QJSValue>
     bool isComposedType() const { return _value.isObject(); }
 
     int toInt() const { return _value.toInt(); }
-    QString toString() const { return _value.toString(); }
+
+    QString toString() const {
+        if (_value.isUndefined() || _value.isNull())
+            return QString();
+        return _value.toString();
+    }
+
     ValueAdaptor<QJSValue> operator[](const QString &index) const
     {
         return ValueAdaptor<QJSValue>(_value.property(index), _client);
