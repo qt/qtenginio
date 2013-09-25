@@ -15,6 +15,7 @@ DEFINES += QUICK_TEST_SOURCE_DIR=\\\"$$_PRO_FILE_PWD_\\\"
 
 OTHER_FILES += \
     tst_enginioclient.qml \
+    tst_enginioreply.qml \
     tst_files.qml \
     tst_identity.qml \
     tst_query.qml \

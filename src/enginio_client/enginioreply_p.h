@@ -85,6 +85,8 @@ public:
 
     QString errorString() const Q_REQUIRED_RESULT
     {
+        if (errorType() == EnginioReply::BackendError)
+            return QString::fromUtf8(QJsonDocument(_data).toJson(QJsonDocument::Compact));
         return _nreply->errorString();
     }
 
