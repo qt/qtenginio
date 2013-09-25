@@ -57,6 +57,7 @@ class EnginioClientPrivate;
 class ENGINIOCLIENT_EXPORT EnginioReply : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
 public:
     enum ErrorTypes {
         NoError,
