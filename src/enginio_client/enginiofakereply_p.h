@@ -49,13 +49,17 @@ class ENGINIOCLIENT_EXPORT EnginioFakeReply : public QNetworkReply
     Q_OBJECT
     QByteArray _msg;
 public:
-    explicit EnginioFakeReply(EnginioClientPrivate *parent, QByteArray msg);
+    explicit EnginioFakeReply(EnginioClientPrivate *parent, const QByteArray &msg);
+    explicit EnginioFakeReply(QObject *parent, const QByteArray &msg);
 
     virtual void abort() Q_DECL_OVERRIDE;
     virtual bool isSequential() const Q_DECL_OVERRIDE;
     virtual qint64 size() const Q_DECL_OVERRIDE;
     virtual qint64 readData(char *dest, qint64 n) Q_DECL_OVERRIDE;
     virtual qint64 writeData(const char *data, qint64 maxSize) Q_DECL_OVERRIDE;
+
+private:
+    void init(QNetworkAccessManager*);
 };
 
 #endif // ENGINIOFAKEREPLY_P_H

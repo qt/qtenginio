@@ -50,14 +50,25 @@ struct FinishedFunctor
     }
 };
 
-EnginioFakeReply::EnginioFakeReply(EnginioClientPrivate *parent, QByteArray msg)
+EnginioFakeReply::EnginioFakeReply(EnginioClientPrivate *parent, const QByteArray &msg)
     : QNetworkReply(parent->q_ptr)
     , _msg(msg)
 {
+    init(parent->networkManager());
+}
+
+EnginioFakeReply::EnginioFakeReply(QObject *parent, const QByteArray &msg)
+    : QNetworkReply(parent)
+    , _msg(msg)
+{
+    init(EnginioClientPrivate::prepareNetworkManagerInThread());
+}
+
+void EnginioFakeReply::init(QNetworkAccessManager *qnam)
+{
     QIODevice::open(QIODevice::ReadOnly | QIODevice::Unbuffered);
-    setError(ContentNotFoundError, QString::fromUtf8(msg));
+    setError(ContentNotFoundError, QString::fromUtf8(_msg));
     setAttribute(QNetworkRequest::HttpStatusCodeAttribute, 400);
-    QNetworkAccessManager *qnam = parent->networkManager();
     setFinished(true);
     FinishedFunctor fin = {qnam, this};
     QObject::connect(this, &EnginioFakeReply::finished, fin);

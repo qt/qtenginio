@@ -93,6 +93,7 @@ private slots:
     void createUpdateRemoveWithNotification();
     void appendBeforeInitialModelReset();
     void appendAndChangeQueryBeforeItIsFinished();
+    void deleteModelDurringRequests();
 private:
     template<class T>
     void externallyRemovedImpl();
@@ -1250,6 +1251,43 @@ void tst_EnginioModel::appendAndChangeQueryBeforeItIsFinished()
     for (int i = 0; i < model.rowCount(); ++i) {
         QString id = model.data(model.index(i)).toJsonValue().toObject()["id"].toString();
         QVERIFY(id != appendedId);
+    }
+}
+
+void tst_EnginioModel::deleteModelDurringRequests()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QVarLengthArray<EnginioReply*, 12> replies;
+    {
+        QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+        QJsonObject query;
+        query.insert("objectType", objectType);
+        EnginioModel model;
+        model.setQuery(query);
+        model.setEnginio(&client);
+        query.insert("title", QString::fromUtf8("deleteModelDurringRequests"));
+        replies.append(model.append(query));
+        replies.append(model.append(query));
+        replies.append(model.setProperty(0, "title", QString::fromUtf8("deleteModelDurringRequests1")));
+        replies.append(model.remove(0));
+    }
+
+    foreach (EnginioReply *reply, replies)
+        QTRY_VERIFY(reply->isFinished());
+
+    CHECK_NO_ERROR(replies[0]);
+    CHECK_NO_ERROR(replies[1]);
+
+    for (int i = 2; i < replies.count(); ++i) {
+        QVERIFY(replies[i]->isError());
+        QCOMPARE(replies[i]->errorType(), EnginioReply::BackendError);
+        QCOMPARE(replies[i]->backendStatus(), 400);
+        QVERIFY(!replies[i]->errorString().isEmpty());
+        QVERIFY(!replies[i]->data().isEmpty());
     }
 }
 
