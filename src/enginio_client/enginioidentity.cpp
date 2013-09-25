@@ -105,7 +105,6 @@ class EnginioBasicAuthenticationPrivate
         }
     };
 
-    EnginioBasicAuthentication *q_ptr;
     QPointer<QNetworkReply> _reply;
     QMetaObject::Connection _replyFinished;
     QMetaObject::Connection _enginioDestroyed;
@@ -113,10 +112,6 @@ class EnginioBasicAuthenticationPrivate
 public:
     QString _user;
     QString _pass;
-
-    EnginioBasicAuthenticationPrivate(EnginioBasicAuthentication *q)
-        : q_ptr(q)
-    {}
 
     ~EnginioBasicAuthenticationPrivate()
     {
@@ -182,7 +177,7 @@ public:
 */
 EnginioBasicAuthentication::EnginioBasicAuthentication(QObject *parent)
     : EnginioIdentity(parent)
-    , d_ptr(new EnginioBasicAuthenticationPrivate(this))
+    , d_ptr(new EnginioBasicAuthenticationPrivate())
 {
     connect(this, &EnginioBasicAuthentication::userChanged, this, &EnginioIdentity::dataChanged);
     connect(this, &EnginioBasicAuthentication::passwordChanged, this, &EnginioIdentity::dataChanged);
