@@ -92,9 +92,10 @@ Item {
 
             property int errorCount: 0
             onError: {
-                    if (reply.errorType !== EnginioReply.NoError // TODO change it to EnginioReply.BackendError
-                        || reply.data.errors[0].message.length > 0
-                        || reply.data.errors[0].reason.length > 0) { // TODO add checks fro network errors
+                    if (reply.errorType === EnginioReply.BackendError
+                        && reply.data.errors[0].message.length > 0
+                        && reply.data.errors[0].reason.length > 0
+                        && reply.backendStatus === 400) {
                             ++errorCount
                     } else
                         console.log(JSON.stringify(reply))
