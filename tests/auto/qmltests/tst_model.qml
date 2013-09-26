@@ -193,15 +193,19 @@ Item {
             enginio: enginio
             query: {
                      "objectType": AppConfig.testObjectType,
-                     "testCase": "EnginioModel: modify"
+                     "query": {"testCase": "EnginioModel: modify"}
                    }
+
+            property int resetCounter: value
+            onModelReset: ++resetCounter
             Component.onCompleted: console.log("start " + modelModify)
             Component.onDestruction: console.log("stop " + modelModify)
         }
 
         function test_modify() {
-            skip("The test casues crashes") // TODO fix me please.
+            var errorCount = enginio.errorCount
             var counterObject = {"counter": 0, "expectedCount": 0}
+            tryCompare(modelModify, "resetCounter", 1)
 
             // append new data
             modelModify.append({ "objectType": AppConfig.testObjectType,
@@ -217,21 +221,115 @@ Item {
                          }).finished.connect(function() {counterObject.counter++})
             ++counterObject.expectedCount
             tryCompare(counterObject, "counter", counterObject.expectedCount)
-            verify(!enginio.errorCount)
+            compare(enginio.errorCount, errorCount)
 
 
             // remove data
-            modelModify.remove(0).finished.connect(function() {counterObject.counter++})
-            ++counterObject.expectedCount
-            tryCompare(counterObject, "counter", ++counterObject.expectedCount)
-            verify(!enginio.errorCount)
+            modelModify.remove(0).finished.connect(function(reply) {counterObject.counter++})
+            tryCompare(counterObject, "counter", ++counterObject.expectedCount, 10000)
+            compare(enginio.errorCount, errorCount)
 
 
             // change data
             modelModify.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
+            tryCompare(counterObject, "counter", ++counterObject.expectedCount)
+            compare(enginio.errorCount, errorCount)
+        }
+    }
+
+    TestCase {
+        name: "EnginioModel: modify unblocked, wait for the initial reset"
+
+        EnginioModel {
+            id: modelModifyUndblocked
+            enginio: enginio
+            query: {
+                     "objectType": AppConfig.testObjectType,
+                     "query": {"testCase": "EnginioModel: modify unblocked"}
+                   }
+
+            property int resetCounter: value
+            onModelReset: ++resetCounter
+        }
+
+        function test_modify() {
+            var errorCount = enginio.errorCount
+            var counterObject = {"counter": 0, "expectedCount": 0}
+            tryCompare(modelModify, "resetCounter", 1)
+
+            // append new data
+            modelModifyUndblocked.append({ "objectType": AppConfig.testObjectType,
+                             "testCase": "EnginioModel: modify unblocked",
+                             "title": "test_modify",
+                             "count": 42,
+                         }).finished.connect(function() {counterObject.counter++})
+            ++counterObject.expectedCount
+            modelModifyUndblocked.append({ "objectType": AppConfig.testObjectType,
+                             "testCase": "EnginioModel: modify unblocked",
+                             "title": "test_modify",
+                             "count": 43,
+                         }).finished.connect(function() {counterObject.counter++})
+            ++counterObject.expectedCount
+
+
+            // remove data
+            modelModifyUndblocked.remove(1).finished.connect(function(reply) {counterObject.counter++})
+            ++counterObject.expectedCount
+
+
+            // change data
+            modelModifyUndblocked.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
             ++counterObject.expectedCount
             tryCompare(counterObject, "counter", counterObject.expectedCount)
-            verify(!enginio.errorCount)
+            compare(enginio.errorCount, errorCount)
+        }
+    }
+
+
+    TestCase {
+        name: "EnginioModel: modify unblocked chaos"
+
+        EnginioModel {
+            id: modelModifyChaos
+            enginio: enginio
+            query: {
+                     "objectType": AppConfig.testObjectType,
+                     "query": {"testCase": "EnginioModel: modify unblocked chaos"}
+                   }
+
+            property int resetCounter: value
+            onModelReset: ++resetCounter
+        }
+
+        function test_modify() {
+            var errorCount = enginio.errorCount
+            var counterObject = {"counter": 0, "expectedCount": 0}
+
+            // append new data
+            modelModifyChaos.append({ "objectType": AppConfig.testObjectType,
+                             "testCase": "EnginioModel: modify unblocked chaos",
+                             "title": "test_modify",
+                             "count": 42,
+                         }).finished.connect(function() {counterObject.counter++})
+            ++counterObject.expectedCount
+            modelModifyChaos.append({ "objectType": AppConfig.testObjectType,
+                             "testCase": "EnginioModel: modify unblocked chaos",
+                             "title": "test_modify",
+                             "count": 43,
+                         }).finished.connect(function() {counterObject.counter++})
+            ++counterObject.expectedCount
+
+
+            // remove data
+            modelModifyChaos.remove(1).finished.connect(function(reply) {counterObject.counter++})
+            ++counterObject.expectedCount
+
+
+            // change data
+            modelModifyChaos.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
+            ++counterObject.expectedCount
+            tryCompare(counterObject, "counter", counterObject.expectedCount)
+            compare(enginio.errorCount, errorCount)
         }
     }
 

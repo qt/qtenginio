@@ -92,6 +92,7 @@ private slots:
     void externalNotification();
     void createUpdateRemoveWithNotification();
     void appendBeforeInitialModelReset();
+    void delayedRequestBeforeInitialModelReset();
     void appendAndChangeQueryBeforeItIsFinished();
     void deleteModelDurringRequests();
 private:
@@ -1209,6 +1210,43 @@ void tst_EnginioModel::appendBeforeInitialModelReset()
         EnginioReply *reply = model.append(query);
         QTRY_VERIFY(reply->isFinished());
         CHECK_NO_ERROR(reply);
+        if (resetSpy.isEmpty())
+            break;
+    }
+}
+
+
+void tst_EnginioModel::delayedRequestBeforeInitialModelReset()
+{
+    // This test is an extension of tst_EnginioModel::appendBeforeInitialModelReset()
+    // The test is trying to append data and modify it before model is initially populated.
+    // This may be flaky, because it depends on a initial query being slower then append
+    // that is why it is executad in a loop.
+
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    for (int i = 0; i < 12 ; ++i) {
+        QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+        QJsonObject query;
+        query.insert("objectType", objectType);
+
+        EnginioModel model;
+        QSignalSpy resetSpy(&model, SIGNAL(modelReset()));
+        model.setQuery(query);
+        model.setEnginio(&client);
+
+        query.insert("title", QString::fromUtf8("appendAndRemoveModel"));
+        EnginioReply *append1 = model.append(query);
+        EnginioReply *append2 = model.append(query);
+        EnginioReply *update = model.setProperty(0, "title", QString::fromUtf8("appendAndRemoveModel1"));
+        EnginioReply *remove = model.remove(1);
+        QTRY_VERIFY(append1->isFinished() && append2->isFinished() && remove->isFinished() && update->isFinished());
+        CHECK_NO_ERROR(append1);
+        CHECK_NO_ERROR(append2);
+        CHECK_NO_ERROR(update);
+        CHECK_NO_ERROR(remove);
         if (resetSpy.isEmpty())
             break;
     }

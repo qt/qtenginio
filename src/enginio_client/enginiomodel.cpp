@@ -593,14 +593,15 @@ public:
             _reply->setNetworkReply(nreply);
         }
 
-        int getCurrentRow() { return _model->_attachedData.deref(_tmpId).row; }
-
-        QString getAndSetCurrentId(EnginioReply *finishedCreateReply)
+        QPair<QString, int> getAndSetCurrentIdRow(EnginioReply *finishedCreateReply)
         {
             QString id = finishedCreateReply->data()[EnginioString::id].toString();
             Q_ASSERT(!id.isEmpty());
             _object[EnginioString::id] = id;
-            return id;
+            int row = Q_LIKELY(_model->_attachedData.contains(_tmpId))
+                    ? _model->_attachedData.deref(_tmpId).row
+                    : _model->_attachedData.rowFromObjectId(id); // model reset happend in a mean while
+            return qMakePair(id, row);
         }
 
         void swapNetworkReply(EnginioReply *ereply)
@@ -620,8 +621,9 @@ public:
             } else if (Q_UNLIKELY(!d._modelGuard)) {
                 d.markAsError(QByteArrayLiteral("EnginioModel was removed before this request was prepared"));
             } else {
-                const int row = d.getCurrentRow();
-                QString id = d.getAndSetCurrentId(finishedCreateReply);
+                QPair<QString, int> tmp = d.getAndSetCurrentIdRow(finishedCreateReply);
+                const int row = tmp.second;
+                QString id = tmp.first;
                 FinishedRemoveRequest finishedRequest = { d._model, id };
                 QObject::connect(d._reply, &EnginioReply::finished, finishedRequest);
                 EnginioReply *ereply = d._model->removeNow(row, d._object, id);
@@ -875,8 +877,9 @@ public:
             } else if (Q_UNLIKELY(!d._modelGuard)) {
                 d.markAsError(QByteArrayLiteral("EnginioModel was removed before this request was prepared"));
             } else {
-                const int row = d.getCurrentRow();
-                QString id = d.getAndSetCurrentId(finishedCreateReply);
+                QPair<QString, int> tmp = d.getAndSetCurrentIdRow(finishedCreateReply);
+                const int row = tmp.second;
+                QString id = tmp.first;
                 FinishedUpdateRequest finished = { d._model, id, d._object };
                 QObject::connect(d._reply, &EnginioReply::finished, finished);
                 EnginioReply *ereply = d._model->setDataNow(row, _value, _role, d._object, id);
