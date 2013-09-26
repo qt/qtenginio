@@ -97,9 +97,9 @@ Item {
                             "area": Enginio.ObjectOperation,
                             "isError": false,
                             "errorType": EnginioReply.NoError,
-                            "errorString": "xUndefined",
-                            "networkError": -1,
-                            "backendStatus": -1,
+                            "errorString": "Unknown error",
+                            "networkError": QNetworkReply.NoError,
+                            "backendStatus": 201,
                         },
                         {
                             "op": "create",
@@ -110,7 +110,7 @@ Item {
                             "area": Enginio.ObjectOperation,
                             "isError": true,
                             "errorType": EnginioReply.BackendError,
-                            "networkError": 203,
+                            "networkError": QNetworkReply.ContentNotFoundError,
                             "backendStatus": 400,
                             "errorString": "{\"errors\": [{\"message\": \"Requested object operation requires non empty 'objectType' value\",\"reason\": \"BadRequest\"}]}",
                         },
@@ -120,9 +120,9 @@ Item {
                             "area": Enginio.ObjectOperation,
                             "isError": false,
                             "errorType": EnginioReply.NoError,
-                            "networkError": 0,
+                            "networkError": QNetworkReply.NoError,
                             "backendStatus": 200,
-                            "errorString": "xUndefined",
+                            "errorString": "Unknown error",
                         },
                         {
                             "op": "query",
@@ -130,7 +130,7 @@ Item {
                             "area": Enginio.ObjectOperation,
                             "isError": true,
                             "errorType": EnginioReply.BackendError,
-                            "networkError": 203,
+                            "networkError": QNetworkReply.ContentNotFoundError,
                             "backendStatus": 400,
                             "errorString": "{\"errors\": [{\"message\": \"Requested object operation requires non empty 'objectType' value\",\"reason\": \"BadRequest\"}]}",
                         },
@@ -140,7 +140,7 @@ Item {
                             "area": Enginio.UserOperation,
                             "isError": true,
                             "errorType": EnginioReply.BackendError,
-                            "networkError": 299,
+                            "networkError": QNetworkReply.UnknownContentError,
                             "backendStatus": 400,
                             "errorString": "{\"errors\": [{\"message\": \"can't be blank\",\"property\": \"password\",\"reason\": \"ValidationFailed\"}]}",
                         },
@@ -150,9 +150,9 @@ Item {
                             "area": Enginio.UserOperation,
                             "isError": false,
                             "errorType": EnginioReply.NoError,
-                            "networkError": -1,
-                            "backendStatus": -1,
-                            "errorString": "xUndefined",
+                            "networkError": QNetworkReply.NoError,
+                            "backendStatus": 201,
+                            "errorString": "Unknown error",
                         },
                         {
                             "op": "create",
@@ -160,7 +160,7 @@ Item {
                             "area": Enginio.UserOperation,
                             "isError": true,
                             "errorType": EnginioReply.BackendError,
-                            "networkError": 299,
+                            "networkError": QNetworkReply.UnknownContentError,
                             "backendStatus": 400,
                             "errorString": "{\"errors\": [{\"message\": \"has already been taken\",\"property\": \"username\",\"reason\": \"ValidationFailed\"}]}",
                         },
@@ -179,14 +179,11 @@ Item {
             //verify(!reply.isError)
             compare(reply.errorType, d.errorType)
 
-            console.log("data:", JSON.stringify(reply.data))
+            // console.log("data:", JSON.stringify(reply.data))
 
-            if (d.networkError !== -1)
-                compare(reply.networkError, d.networkError)
-            if (d.backendStatus !== -1)
-                compare(reply.backendStatus, d.backendStatus)
-            if (d.errorString !== "xUndefined")
-                compare(reply.errorString, d.errorString)
+            compare(reply.networkError, d.networkError)
+            compare(reply.backendStatus, d.backendStatus)
+            compare(reply.errorString, d.errorString)
         }
     }
 }
