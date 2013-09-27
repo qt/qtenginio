@@ -1265,7 +1265,9 @@ bool EnginioModel::setData(const QModelIndex &index, const QVariant &value, int 
     if (index.row() >= d->rowCount()) // TODO remove as soon as we have a sparse array.
         return false;
 
-    return d->setData(index.row(), value, role);
+    EnginioReply *reply = d->setData(index.row(), value, role);
+    QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
+    return true;
 }
 
 /*!
