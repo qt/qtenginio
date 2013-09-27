@@ -12,7 +12,6 @@
 %dependencies = (
     "qtbase" => "refs/heads/stable",
     "qtdeclarative" => "refs/heads/stable",
-    "qtjsbackend" => "refs/heads/stable",
     "qtxmlpatterns" => "refs/heads/stable",
 );
 
