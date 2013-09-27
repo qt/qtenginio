@@ -115,10 +115,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
     struct ENGINIOCLIENT_EXPORT GetPathReturnValue : public QPair<bool, QString>
     {
         GetPathReturnValue(bool value)
-            : QPair(value, QString())
+            : QPair<bool, QString>(value, QString())
         {}
         GetPathReturnValue(bool value, const QString &propertyName)
-            : QPair(value, propertyName)
+            : QPair<bool, QString>(value, propertyName)
         {}
         bool successful() const { return first; }
         operator QString() const { return second; }

@@ -91,18 +91,18 @@ template <> struct ValueAdaptor<QJSValue>
 template <> struct ObjectAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
 {
     ObjectAdaptor(const QJSValue &value, EnginioQmlClientPrivate *client)
-        : ValueAdaptor(value, client)
+        : ValueAdaptor<QJSValue>(value, client)
     {}
 };
 
 template <> struct ArrayAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
 {
     ArrayAdaptor(const QJSValue &value, EnginioQmlClientPrivate *client)
-        : ValueAdaptor(value, client)
+        : ValueAdaptor<QJSValue>(value, client)
     {}
 
     ArrayAdaptor(const ArrayAdaptor<QJSValue> &value)
-        : ValueAdaptor(value)
+        : ValueAdaptor<QJSValue>(value)
     {}
 
     struct const_iterator
