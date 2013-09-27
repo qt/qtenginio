@@ -41,6 +41,8 @@
 #include <Enginio/enginiomodel.h>
 #include "enginioqmlclient.h"
 
+QT_BEGIN_NAMESPACE
+
 class EnginioQmlModel : public EnginioModel
 {
     Q_OBJECT
@@ -48,5 +50,7 @@ class EnginioQmlModel : public EnginioModel
 public:
     EnginioQmlModel(QObject *parent = 0);
 };
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOQMLOBJECTMODEL_H

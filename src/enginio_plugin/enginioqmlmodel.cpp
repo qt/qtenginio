@@ -37,6 +37,8 @@
 
 #include "enginioqmlmodel.h"
 
+QT_BEGIN_NAMESPACE
+
 /*!
   \qmltype EnginioModel
   \instantiates EnginioQmlModel
@@ -110,3 +112,5 @@ EnginioQmlModel::EnginioQmlModel(QObject *parent)
     : EnginioModel(parent)
 {
 }
+
+QT_END_NAMESPACE
