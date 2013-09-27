@@ -49,8 +49,11 @@ class TodosModel : public EnginioModel
     Q_OBJECT
 
 public:
-    int TitleRole;
-    int CompletedRole;
+    enum Roles
+    {
+        TitleRole = EnginioModel::LastRole,
+        CompletedRole
+    };
 //![definition]
 
     explicit TodosModel(QObject *parent = 0);
@@ -59,8 +62,7 @@ public:
 
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const Q_DECL_OVERRIDE;
 
-protected slots:
-    void updateRoles();
+    virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 };
 
 #endif // TODOSMODEL_H

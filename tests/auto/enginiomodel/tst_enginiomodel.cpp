@@ -95,6 +95,7 @@ private slots:
     void delayedRequestBeforeInitialModelReset();
     void appendAndChangeQueryBeforeItIsFinished();
     void deleteModelDurringRequests();
+    void updatingRoles();
 private:
     template<class T>
     void externallyRemovedImpl();
@@ -1327,6 +1328,81 @@ void tst_EnginioModel::deleteModelDurringRequests()
         QVERIFY(!replies[i]->errorString().isEmpty());
         QVERIFY(!replies[i]->data().isEmpty());
     }
+}
+
+void tst_EnginioModel::updatingRoles()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+
+    QTest::ignoreMessage(QtWarningMsg, "Can not use custom role index lower then EnginioModel::LastRole, but '261' was used for 'invalid'");
+    struct CustomModel: public EnginioModel
+    {
+        enum {
+            BarRole = EnginioModel::LastRole,
+            FooRole = EnginioModel::LastRole + 1,
+            TitleRole = EnginioModel::LastRole + 20, // existing custom role
+            InvalidRole = EnginioModel::ObjectTypeRole, // custom and with wrong index
+            IdRole = EnginioModel::IdRole // duplicate of existing role
+        };
+
+        bool useBaseClassImplementation;
+        QHash<int, QByteArray> roles;
+
+        CustomModel()
+            : useBaseClassImplementation(false)
+        {
+            roles = EnginioModel::roleNames();
+            roles.insert(CustomModel::FooRole, "foo");
+            roles.insert(CustomModel::BarRole, "bar");
+            roles.insert(CustomModel::IdRole, "id");
+            roles.insert(CustomModel::TitleRole, "title");
+            roles.insert(CustomModel::InvalidRole, "invalid");
+        }
+
+        virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE
+        {
+            return useBaseClassImplementation ? EnginioModel::roleNames() : roles;
+        }
+    } model;
+
+    QByteArray foo = "foo";
+    QByteArray bar = "bar";
+    QByteArray title = "title";
+    QByteArray invalid = "invalid";
+
+    QCOMPARE(model.roleNames()[CustomModel::FooRole], foo);
+    QCOMPARE(model.roleNames()[CustomModel::BarRole], bar);
+    QCOMPARE(model.roleNames()[CustomModel::TitleRole], title);
+    QCOMPARE(model.roleNames()[CustomModel::InvalidRole], invalid);
+
+    model.setQuery(query);
+    model.setEnginio(&client);
+
+    QCOMPARE(model.roleNames()[CustomModel::FooRole], foo);
+    QCOMPARE(model.roleNames()[CustomModel::BarRole], bar);
+    QCOMPARE(model.roleNames()[CustomModel::TitleRole], title);
+    QCOMPARE(model.roleNames()[CustomModel::InvalidRole], invalid);
+
+    QTRY_VERIFY(model.rowCount());
+
+    QCOMPARE(model.roleNames()[CustomModel::FooRole], foo);
+    QCOMPARE(model.roleNames()[CustomModel::BarRole], bar);
+    QCOMPARE(model.roleNames()[CustomModel::TitleRole], title);
+    QCOMPARE(model.roleNames()[CustomModel::InvalidRole], invalid);
+
+    model.useBaseClassImplementation = true;
+
+    QCOMPARE(model.roleNames()[CustomModel::FooRole], foo);
+    QCOMPARE(model.roleNames()[CustomModel::BarRole], bar);
+    QCOMPARE(model.roleNames()[CustomModel::TitleRole], title);
+    QCOMPARE(model.roleNames()[CustomModel::InvalidRole], QByteArray("objectType"));
 }
 
 QTEST_MAIN(tst_EnginioModel)

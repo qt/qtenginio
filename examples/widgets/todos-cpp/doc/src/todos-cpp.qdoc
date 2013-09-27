@@ -49,22 +49,22 @@
     \endcode
 
     The first step is to create a TodosModel which inherits \l {EnginioModelCpp}{EnginioModel}
-    and defines the main roles which will be used. As we are intereseted in the To Do \c title
+    and defines the main roles which will be used. As we are interested in the To Do \c title
     and the \c completed information we need to define these two roles.
     \snippet todos-cpp/todosmodel.h definition
 
-    The newly created model is empty and doesn't define any roles. Roles are created dynamically,
+    The newly created model is empty and define basic roles. Most roles are created dynamically,
     based on the json data-structure.  They have no predefined value in the \l Qt::ItemDataRole enum.
     \l{EnginioModelCpp}{EnginioModel} automatically populates itself as soon as the
     \l{EnginioModel::query}{query} and \l{EnginioModel::enginio}{enginio} properties have been set.
     When the data is downloaded, the model resets itself, and sets up the internal data cache and roles names.
-    Therefore we need to connect the reset signal in the constructor:
+    \l{EnginioModelCpp}{EnginioModel} guesses the role names based on heuristics and it may be wrong if not all
+    objects received from the backend have exactly the same structure, for example a property can be missing
+    in certain objects. To protect against such cases we overload \l{EnginioModel::roleNames}{roleNames()}
 
-    \snippet todos-cpp/todosmodel.cpp resetRoles
+    \snippet todos-cpp/todosmodel.cpp roleNames
 
-    to a slot that will query them and setup the role ids.
-
-    \snippet todos-cpp/todosmodel.cpp updateRoles
+    Remember to always call the base class implementation to avoid situations in which the internal cache is not in sync.
 
     By default \l {EnginioModelCpp}{EnginioModel} operates on \l{QJsonValue}, and that is
     what the \l{EnginioModel::data()}{data()} function returns inside the \l QVariant, but standard
@@ -91,7 +91,7 @@
     to modify the model, we also need to reimplement the EnginioModel::setData function.
     By default \l QListView uses \l{Qt::ItemDataRole} when a user decides to edit
     a data content. We need to map that role to our "title" role, and call
-    \l {EnginioModel::setProperty}{EnginioModel::setProperty()}
+    \l {EnginioModel::setData}{EnginioModel::setData()}
     to update the data, like in the following code snippet:
 
     \snippet todos-cpp/todosmodel.cpp setData

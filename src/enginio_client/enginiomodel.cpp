@@ -964,16 +964,30 @@ public:
             _rolesCounter = EnginioModel::LastRole;
         }
 
+        // check if someone does not use custom roles
+        QHash<int, QByteArray> predefinedRoles = q->roleNames();
+        foreach (int i, predefinedRoles.keys()) {
+            if (i < EnginioModel::LastRole && i >= EnginioModel::SyncedRole && predefinedRoles[i] != _roles[i].toUtf8()) {
+                qWarning("Can not use custom role index lower then EnginioModel::LastRole, but '%i' was used for '%s'", i, predefinedRoles[i].constData());
+                continue;
+            }
+            _roles[i] = QString::fromUtf8(predefinedRoles[i].constData());
+        }
+
         // estimate additional dynamic roles:
         QSet<QString> definedRoles = _roles.values().toSet();
+        QSet<int> definedRolesIndexes = predefinedRoles.keys().toSet();
         for (QJsonObject::const_iterator i = firstObject.constBegin(); i != firstObject.constEnd(); ++i) {
             const QString key = i.key();
             if (definedRoles.contains(key)) {
                 // we skip predefined keys so we can keep constant id for them
                 if (Q_UNLIKELY(key == EnginioString::_synced))
                     qWarning("EnginioModel can not be used with objects having \"_synced\" property. The property will be overriden.");
-            } else
+            } else {
+                while (definedRolesIndexes.contains(_rolesCounter))
+                    ++_rolesCounter;
                 _roles[_rolesCounter++] = i.key();
+            }
         }
     }
 
@@ -1275,10 +1289,18 @@ bool EnginioModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 /*!
     \overload
-    Returns the mapping of the model's roles to names.
-    EnginioModel will assign the properties of the objects in the \l query()
-    to roles (greater than \l Qt::UserRole).
-    Use this function to map the object property names to the role integers.
+    Returns the mapping of the model's roles to names. Use this function to map
+    the object property names to the role integers.
+
+    EnginioModel uses heuristics to assign the properties of the objects in the \l query()
+    to roles (greater than \l Qt::UserRole). Sometimes if the objects do not share
+    the same structure, if for example a property is missing, it may happen that
+    a role is missing. In such cases we recommend to overload this method to
+    enforce existence of all required roles.
+
+    \note when reimplementating this function, you need to call the base class implementation first and
+    take the result into account as shown in the {todos-cpp}{Todos Example}
+    \note custom role indexes have to be greater then or equal to \l EnginioModel::LastRole
 */
 QHash<int, QByteArray> EnginioModel::roleNames() const
 {

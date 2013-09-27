@@ -50,11 +50,7 @@
 //![resetRoles]
 TodosModel::TodosModel(QObject *parent)
     : EnginioModel(parent)
-    , TitleRole()
-    , CompletedRole()
-{
-    QObject::connect(this, &EnginioModel::modelReset, this, &TodosModel::updateRoles);
-}
+{}
 //![resetRoles]
 
 QVariant TodosModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -96,29 +92,18 @@ QVariant TodosModel::data(const QModelIndex &index, int role) const
 //![setData]
 bool TodosModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (role == Qt::EditRole) {
-        EnginioReply *reply = setProperty(index.row(), "title", value);
-        QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
-        return true;
-    }
+    if (role == Qt::EditRole || role == TitleRole)
+        return EnginioModel::setData(index, value, role);
+
     return false;
 }
 //![setData]
-
-//![updateRoles]
-void TodosModel::updateRoles()
+//![roleNames]
+QHash<int, QByteArray> TodosModel::roleNames() const
 {
-    static QByteArray titleRoleName = QByteArrayLiteral("title");
-    static QByteArray doneRoleName = QByteArrayLiteral("completed");
-    QHash<int, QByteArray> roleNames = EnginioModel::roleNames();
-    foreach(int role, roleNames.keys()) {
-        QByteArray roleName = roleNames.value(role);
-        if (roleName == titleRoleName) {
-            TitleRole = role;
-        } else if (roleName == doneRoleName) {
-            CompletedRole = role;
-        }
-    }
+    QHash<int, QByteArray> roles = EnginioModel::roleNames();
+    roles.insert(TitleRole, "title");
+    roles.insert(CompletedRole, "completed");
+    return roles;
 }
-//![updateRoles]
-
+//![roleNames]
