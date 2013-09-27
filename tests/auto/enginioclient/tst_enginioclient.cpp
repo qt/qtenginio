@@ -435,8 +435,6 @@ void tst_EnginioClient::query_usersgroup_crud()
     QJsonObject data;
     data["name"] = tmpGroupName;
 
-    qDebug() << data;
-
     EnginioReply *reply = client.create(data, EnginioClient::UsergroupOperation);
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
