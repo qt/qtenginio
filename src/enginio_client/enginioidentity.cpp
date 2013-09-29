@@ -212,7 +212,7 @@ void EnginioBasicAuthentication::setPassword(const QString &password)
     if (d_ptr->_pass == password)
         return;
     d_ptr->_pass = password;
-    emit userChanged(password);
+    emit passwordChanged(password);
 }
 
 /*!
