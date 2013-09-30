@@ -47,7 +47,7 @@ Item {
     id: root
 
     Enginio {
-        id: enginio
+        id: enginioClient
         backendId: AppConfig.backendData.id
         backendSecret: AppConfig.backendData.secret
         serviceUrl: AppConfig.backendData.serviceUrl
@@ -97,16 +97,16 @@ Item {
 
         function test_assignClient() {
             var signalCount = modelCreateEnginioChanged.count
-            modelCreate.enginio = enginio
-            verify(modelCreate.enginio == enginio)
+            modelCreate.enginio = enginioClient
+            verify(modelCreate.enginio == enginioClient)
             tryCompare(modelCreateEnginioChanged, "count", ++signalCount)
 
             modelCreate.enginio = null
             verify(modelCreate.enginio === null)
             tryCompare(modelCreateEnginioChanged, "count", ++signalCount)
 
-            modelCreate.enginio = enginio
-            verify(modelCreate.enginio == enginio)
+            modelCreate.enginio = enginioClient
+            verify(modelCreate.enginio == enginioClient)
             tryCompare(modelCreateEnginioChanged, "count", ++signalCount)
         }
 
@@ -141,7 +141,7 @@ Item {
 
         EnginioModel {
             id: modelQuery
-            enginio: enginio
+            enginio: enginioClient
             onModelAboutToBeReset: { resetCount++ }
             property int resetCount: 0
         }
@@ -157,13 +157,13 @@ Item {
         }
 
         function test_queryObjects() {
-            var counterObject = { "counter" : 0, "enginioErrors" : enginio.errorCount}
-            enginio.create({ "objectType": AppConfig.testObjectType,
+            var counterObject = { "counter" : 0, "enginioErrors" : enginioClient.errorCount}
+            enginioClient.create({ "objectType": AppConfig.testObjectType,
                                "testCase": "EnginioModel: query",
                                "title": "prepare",
                                "count": 1,
                            }, Enginio.ObjectOperation).finished.connect(function(){ counterObject.counter++});
-            enginio.create({ "objectType": AppConfig.testObjectType,
+            enginioClient.create({ "objectType": AppConfig.testObjectType,
                                "testCase": "EnginioModel: query",
                                "title": "prepare",
                                "count": 2,
@@ -172,7 +172,7 @@ Item {
             tryCompare(counterObject, "counter", 2, 10000)
 
             _query({ "limit": 2, "objectType": AppConfig.testObjectType }, Enginio.ObjectOperation)
-            compare(counterObject.enginioErrors, enginio.errorCount)
+            compare(counterObject.enginioErrors, enginioClient.errorCount)
 
         }
 
@@ -190,7 +190,7 @@ Item {
 
         EnginioModel {
             id: modelModify
-            enginio: enginio
+            enginio: enginioClient
             query: {
                      "objectType": AppConfig.testObjectType,
                      "query": {"testCase": "EnginioModel: modify"}
@@ -203,7 +203,7 @@ Item {
         }
 
         function test_modify() {
-            var errorCount = enginio.errorCount
+            var errorCount = enginioClient.errorCount
             var counterObject = {"counter": 0, "expectedCount": 0}
             tryCompare(modelModify, "resetCounter", 1)
 
@@ -221,19 +221,19 @@ Item {
                          }).finished.connect(function() {counterObject.counter++})
             ++counterObject.expectedCount
             tryCompare(counterObject, "counter", counterObject.expectedCount)
-            compare(enginio.errorCount, errorCount)
+            compare(enginioClient.errorCount, errorCount)
 
 
             // remove data
             modelModify.remove(0).finished.connect(function(reply) {counterObject.counter++})
             tryCompare(counterObject, "counter", ++counterObject.expectedCount, 10000)
-            compare(enginio.errorCount, errorCount)
+            compare(enginioClient.errorCount, errorCount)
 
 
             // change data
             modelModify.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
             tryCompare(counterObject, "counter", ++counterObject.expectedCount)
-            compare(enginio.errorCount, errorCount)
+            compare(enginioClient.errorCount, errorCount)
         }
     }
 
@@ -242,7 +242,7 @@ Item {
 
         EnginioModel {
             id: modelModifyUndblocked
-            enginio: enginio
+            enginio: enginioClient
             query: {
                      "objectType": AppConfig.testObjectType,
                      "query": {"testCase": "EnginioModel: modify unblocked"}
@@ -253,7 +253,7 @@ Item {
         }
 
         function test_modify() {
-            var errorCount = enginio.errorCount
+            var errorCount = enginioClient.errorCount
             var counterObject = {"counter": 0, "expectedCount": 0}
             tryCompare(modelModify, "resetCounter", 1)
 
@@ -281,7 +281,7 @@ Item {
             modelModifyUndblocked.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
             ++counterObject.expectedCount
             tryCompare(counterObject, "counter", counterObject.expectedCount)
-            compare(enginio.errorCount, errorCount)
+            compare(enginioClient.errorCount, errorCount)
         }
     }
 
@@ -291,7 +291,7 @@ Item {
 
         EnginioModel {
             id: modelModifyChaos
-            enginio: enginio
+            enginio: enginioClient
             query: {
                      "objectType": AppConfig.testObjectType,
                      "query": {"testCase": "EnginioModel: modify unblocked chaos"}
@@ -302,7 +302,7 @@ Item {
         }
 
         function test_modify() {
-            var errorCount = enginio.errorCount
+            var errorCount = enginioClient.errorCount
             var counterObject = {"counter": 0, "expectedCount": 0}
 
             // append new data
@@ -329,7 +329,7 @@ Item {
             modelModifyChaos.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
             ++counterObject.expectedCount
             tryCompare(counterObject, "counter", counterObject.expectedCount)
-            compare(enginio.errorCount, errorCount)
+            compare(enginioClient.errorCount, errorCount)
         }
     }
 
