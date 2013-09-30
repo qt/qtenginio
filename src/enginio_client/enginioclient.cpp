@@ -76,6 +76,9 @@ QT_BEGIN_NAMESPACE
   \l create(), \l query(), \l remove() and \l update().
   It is possible to do a fulltext search on the server using \l search().
   For file handling \l downloadFile() and \l uploadFile() are provided.
+  The functions are asynchronous, which means that they are not blocking
+  and the result of them will be delivered together with EnginioReply::finished()
+  signal.
 
   \note After the request has finished, it is the responsibility of the
   user to delete the EnginioReply object at an appropriate time.
@@ -543,7 +546,11 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
 
 /*!
   \property EnginioClient::identity
-  Represents a user.
+  Property that represents a user. Setting the property will create an asynchronous authentication request,
+  the result of it updates \l{EnginioClient::authenticationState()}{authenticationState}
+  EnginioClient does not take ownership of the \a identity object. The object
+  has to be valid to keep the authenticated session alive. When the identity object is deleted the session
+  is terminated. It is allowed to assign a null pointer to the property to terminate the session.
   \sa EnginioIdentity EnginioBasicAuthentication
 */
 EnginioIdentity *EnginioClient::identity() const
