@@ -48,8 +48,10 @@ Item {
 
     Enginio {
         id: enginioClient
-        backendId: AppConfig.backendData.id
-        backendSecret: AppConfig.backendData.secret
+        // FIXME Tests depend on the enginioClient being fully initialized
+        // currently there is no easy way to enforce it. By initializing
+        // serviceUrl first (and exploiting an undefined behavior) we expect that
+        // all models will not trigger any query using the default url.
         serviceUrl: AppConfig.backendData.serviceUrl
 
         property int errorCount: 0
@@ -60,6 +62,9 @@ Item {
             reply.dumpDebugInfo()
             console.log("\n###\n")
         }
+
+        backendId: AppConfig.backendData.id
+        backendSecret: AppConfig.backendData.secret
     }
 
     TestCase {
