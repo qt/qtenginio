@@ -42,36 +42,24 @@
 #ifndef ENGINIOMODEL_H
 #define ENGINIOMODEL_H
 
-#include <QAbstractListModel>
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qscopedpointer.h>
 
 #include "enginioclient.h"
+#include "enginiomodelbase.h"
 
 QT_BEGIN_NAMESPACE
 
 class EnginioModelPrivate;
-class ENGINIOCLIENT_EXPORT EnginioModel : public QAbstractListModel
+class ENGINIOCLIENT_EXPORT EnginioModel : public EnginioModelBase
 {
     Q_OBJECT
-    Q_ENUMS(EnginioClient::Operation) // TODO remove me QTBUG-33577
 public:
     explicit EnginioModel(QObject *parent = 0);
     ~EnginioModel();
 
-    enum Roles {
-        InvalidRole = -1,
-        SyncedRole = Qt::UserRole + 1,
-        CreatedAtRole,
-        UpdatedAtRole,
-        IdRole,
-        ObjectTypeRole,
-        LastRole // the first fully dynamic role
-    };
-
     Q_PROPERTY(EnginioClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
     Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged)
-    Q_PROPERTY(EnginioClientBase::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
 
     // TODO: that is a pretty silly name
     EnginioClient *enginio() const Q_REQUIRED_RESULT;
@@ -80,32 +68,16 @@ public:
     QJsonObject query() Q_REQUIRED_RESULT;
     void setQuery(const QJsonObject &query);
 
-    EnginioClientBase::Operation operation() const Q_REQUIRED_RESULT;
-    void setOperation(EnginioClientBase::Operation operation);
-
-    virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE;
-
-    virtual void fetchMore(const QModelIndex &parent) Q_DECL_OVERRIDE;
-    virtual bool canFetchMore(const QModelIndex &parent) const Q_DECL_OVERRIDE;
-
     Q_INVOKABLE EnginioReply *append(const QJsonObject &value);
     Q_INVOKABLE EnginioReply *remove(int row);
     Q_INVOKABLE EnginioReply *setProperty(int row, const QString &role, const QVariant &value);
 
-    virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
-
-    void disableNotifications();
 Q_SIGNALS:
-    void operationChanged(const EnginioClientBase::Operation operation);
     void queryChanged(const QJsonObject query);
     void enginioChanged(EnginioClient *enginio);
 
 private:
     Q_DISABLE_COPY(EnginioModel)
-    QScopedPointer<EnginioModelPrivate> d;
     friend class EnginioModelPrivate;
 };
 

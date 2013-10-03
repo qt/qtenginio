@@ -30,5 +30,6 @@ HEADERS += \
     enginiodummyreply_p.h \
     enginiostring_p.h \
     enginioclientbase.h \
-    enginioreplybase.h
+    enginioreplybase.h \
+    enginiomodelbase.h
 
