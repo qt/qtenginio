@@ -173,6 +173,26 @@ QT_BEGIN_NAMESPACE
 
 ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
 
+QNetworkRequest EnginioClientPrivate::prepareRequest(const QUrl &url)
+{
+    QByteArray requestId = QUuid::createUuid().toByteArray();
+
+    // Remove unneeded pretty-formatting.
+    // before: "{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}"
+    // after:  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    requestId.chop(1);      // }
+    requestId.remove(0, 1); // {
+    requestId.remove(23, 1);
+    requestId.remove(18, 1);
+    requestId.remove(13, 1);
+    requestId.remove(8, 1);
+
+    QNetworkRequest req(_request);
+    req.setUrl(url);
+    req.setRawHeader(EnginioString::XRequestId, requestId);
+    return req;
+}
+
 EnginioClientPrivate::EnginioClientPrivate(EnginioClientBase *client) :
     q_ptr(client),
     _identity(),

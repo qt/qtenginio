@@ -96,25 +96,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 {
     enum PathOptions { Default, IncludeIdInPath = 1};
 
-    QNetworkRequest prepareRequest(const QUrl &url)
-    {
-        QByteArray requestId = QUuid::createUuid().toByteArray();
-
-        // Remove unneeded pretty-formatting.
-        // before: "{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}"
-        // after:  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-        requestId.chop(1);      // }
-        requestId.remove(0, 1); // {
-        requestId.remove(23, 1);
-        requestId.remove(18, 1);
-        requestId.remove(13, 1);
-        requestId.remove(8, 1);
-
-        QNetworkRequest req(_request);
-        req.setUrl(url);
-        req.setRawHeader(EnginioString::XRequestId, requestId);
-        return req;
-    }
+    QNetworkRequest prepareRequest(const QUrl &url);
 
     struct ENGINIOCLIENT_EXPORT GetPathReturnValue : public QPair<bool, QString>
     {
