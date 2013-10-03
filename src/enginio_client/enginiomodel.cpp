@@ -107,7 +107,7 @@ class AttachedDataContainer
     typedef QHash<StorageIndex, AttachedData> Storage;
     QVector<AttachedData> _storage; // TODO replace by something smarter so we can use pointers instead of index.
 
-    const static int InvalidStorageIndex;
+    enum { InvalidStorageIndex = InvalidRow };
 
     StorageIndex append(const AttachedData &data)
     {
@@ -243,8 +243,6 @@ public:
         }
     }
 };
-
-const int AttachedDataContainer::InvalidStorageIndex = InvalidRow;
 
 class EnginioModelPrivate {
     QJsonObject _query;
