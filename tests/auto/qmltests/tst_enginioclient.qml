@@ -96,7 +96,10 @@ Item {
                     if (reply.errorType === EnginioReply.BackendError
                         && reply.data.errors[0].message.length > 0
                         && reply.data.errors[0].reason.length > 0
-                        && reply.backendStatus === 400) {
+                        && reply.backendStatus === 400
+                        && reply.isError
+                        && reply.isFinished)
+                    {
                             ++errorCount
                     } else
                         console.log(JSON.stringify(reply))

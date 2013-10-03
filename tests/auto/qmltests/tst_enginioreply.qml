@@ -206,8 +206,8 @@ Item {
             compare(finishedSpy.count, ++finished)
             compare(errorSpy.count, d.isError ? 1 : 0)
 
-            // FIXME: make isError available to QML
-            //verify(!reply.isError)
+            verify(reply.isFinished)
+            compare(reply.isError, d.isError)
             compare(reply.errorType, d.errorType)
 
             // console.log("data:", JSON.stringify(reply.data))

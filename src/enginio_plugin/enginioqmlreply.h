@@ -56,6 +56,8 @@ class EnginioQmlReply : public EnginioReplyBase
 
 public:
     Q_PROPERTY(QJSValue data READ data NOTIFY dataChanged FINAL)
+    Q_PROPERTY(bool isError READ isError NOTIFY dataChanged FINAL)
+    Q_PROPERTY(bool isFinished READ isFinished NOTIFY finished FINAL)
 
     explicit EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply);
     ~EnginioQmlReply();
