@@ -201,7 +201,7 @@ Item {
                      "query": {"testCase": "EnginioModel: modify"}
                    }
 
-            property int resetCounter: value
+            property int resetCounter: 0
             onModelReset: ++resetCounter
             Component.onCompleted: console.log("start " + modelModify)
             Component.onDestruction: console.log("stop " + modelModify)
@@ -253,7 +253,7 @@ Item {
                      "query": {"testCase": "EnginioModel: modify unblocked"}
                    }
 
-            property int resetCounter: value
+            property int resetCounter: 0
             onModelReset: ++resetCounter
         }
 
@@ -302,7 +302,7 @@ Item {
                      "query": {"testCase": "EnginioModel: modify unblocked chaos"}
                    }
 
-            property int resetCounter: value
+            property int resetCounter: 0
             onModelReset: ++resetCounter
         }
 
