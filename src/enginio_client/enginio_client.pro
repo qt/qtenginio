@@ -31,5 +31,6 @@ HEADERS += \
     enginiostring_p.h \
     enginioclientbase.h \
     enginioreplybase.h \
-    enginiomodelbase.h
+    enginiomodelbase.h \
+    enginiomodelbase_p.h
 
