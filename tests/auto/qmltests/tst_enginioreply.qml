@@ -164,6 +164,36 @@ Item {
                             "backendStatus": 400,
                             "errorString": "{\"errors\": [{\"message\": \"has already been taken\",\"property\": \"username\",\"reason\": \"ValidationFailed\"}]}",
                         },
+                        {
+                            "op": "search",
+                            "q": { "objectTypes": "notAnArrayAndSearchMissing" },
+                            "area": null,
+                            "isError": true,
+                            "errorType": EnginioReply.BackendError,
+                            "networkError": QNetworkReply.ContentNotFoundError,
+                            "backendStatus": 400,
+                            "errorString": "{\"errors\": [{\"message\": \"Fulltext Search: 'objectTypes' parameter is missing or it is not an array\",\"reason\": \"BadRequest\"}]}",
+                        },
+                        {
+                            "op": "search",
+                            "q": { "objectType": "notAnArrayAndSearchMissing" },
+                            "area": null,
+                            "isError": true,
+                            "errorType": EnginioReply.BackendError,
+                            "networkError": QNetworkReply.ContentNotFoundError,
+                            "backendStatus": 400,
+                            "errorString": "{\"errors\": [{\"message\": \"Fulltext Search: 'objectTypes' parameter is missing or it is not an array\",\"reason\": \"BadRequest\"}]}",
+                        },
+                        {
+                            "op": "search",
+                            "q": { "objectTypes": ["searchIsMissing"] },
+                            "area": null,
+                            "isError": true,
+                            "errorType": EnginioReply.BackendError,
+                            "networkError": QNetworkReply.ContentNotFoundError,
+                            "backendStatus": 400,
+                            "errorString": "{\"errors\": [{\"message\": \"Fulltext Search: 'search' parameter(s) missing\",\"reason\": \"BadRequest\"}]}",
+                        },
                     ]
         }
 

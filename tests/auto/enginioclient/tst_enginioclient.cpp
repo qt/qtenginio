@@ -1497,29 +1497,36 @@ void tst_EnginioClient::backendFakeReply()
     QSignalSpy spyReplyFinished(&client, SIGNAL(finished(EnginioReply*)));
 
     QJsonObject empty;
-    QJsonObject objecTypeOnly;
-    objecTypeOnly["objectType"] = QString::fromUtf8("objects.todos");
+    QJsonObject objectTypeOnly;
+    objectTypeOnly["objectType"] = QString::fromUtf8("objects.todos");
+    QJsonArray objectTypes;
+    objectTypes.append(QString::fromUtf8("objects.todos"));
+    QJsonObject objectWithObjectTypes;
+    objectWithObjectTypes["objectTypes"] = objectTypes;
 
     QVERIFY(client.query(empty, EnginioClient::ObjectOperation));
     QVERIFY(client.query(empty, EnginioClient::ObjectAclOperation));
-    QVERIFY(client.query(objecTypeOnly, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.query(objectTypeOnly, EnginioClient::ObjectAclOperation));
     QVERIFY(client.query(empty, EnginioClient::UsergroupMembersOperation));
 
     QVERIFY(client.update(empty, EnginioClient::ObjectOperation));
     QVERIFY(client.update(empty, EnginioClient::ObjectAclOperation));
-    QVERIFY(client.update(objecTypeOnly, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.update(objectTypeOnly, EnginioClient::ObjectAclOperation));
     QVERIFY(client.update(empty, EnginioClient::UsergroupMembersOperation));
 
     QVERIFY(client.remove(empty, EnginioClient::ObjectOperation));
     QVERIFY(client.remove(empty, EnginioClient::ObjectAclOperation));
-    QVERIFY(client.remove(objecTypeOnly, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.remove(objectTypeOnly, EnginioClient::ObjectAclOperation));
     QVERIFY(client.remove(empty, EnginioClient::UsergroupMembersOperation));
 
     QVERIFY(client.search(empty));
+    QVERIFY(client.search(objectTypeOnly));
+    QVERIFY(client.search(objectWithObjectTypes));
+
     QVERIFY(client.downloadFile(empty));
     QVERIFY(client.uploadFile(empty, QUrl()));
 
-    QTRY_COMPARE(spyClientFinished.count(), 15);
+    QTRY_COMPARE(spyClientFinished.count(), 17);
     QCOMPARE(spyClientError.count(), spyClientFinished.count());
     QCOMPARE(spyReplyFinished.count(), spyClientFinished.count());
 

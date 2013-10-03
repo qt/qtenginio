@@ -581,6 +581,8 @@ public:
         if (operation == SearchOperation) {
             ValueAdaptor<T> search = object[EnginioString::search];
             ArrayAdaptor<T> objectTypes = object[EnginioString::objectTypes].toArray();
+            if (Q_UNLIKELY(objectTypes.isEmpty()))
+                return new EnginioFakeReply(this, constructErrorMessage(QByteArrayLiteral("Fulltext Search: 'objectTypes' parameter is missing or it is not an array")));
             if (search.isComposedType()) {
                 for (typename ArrayAdaptor<T>::const_iterator i = objectTypes.constBegin(); i != objectTypes.constEnd(); ++i) {
                     urlQuery.addQueryItem(QStringLiteral("objectTypes[]"), (*i).toString());
