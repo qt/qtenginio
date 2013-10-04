@@ -523,13 +523,13 @@ void EnginioBackendConnection::onSocketReadyRead()
     \internal
 */
 
-void EnginioBackendConnection::connectToBackend(EnginioClient* client, const QJsonObject &messageFilter)
+void EnginioBackendConnection::connectToBackend(EnginioClientPrivate* client, const QJsonObject &messageFilter)
 {
     Q_ASSERT(client);
-    Q_ASSERT(!client->backendId().isEmpty());
-    Q_ASSERT(!client->backendSecret().isEmpty());
+    Q_ASSERT(!client->_backendId.isEmpty());
+    Q_ASSERT(!client->_backendSecret.isEmpty());
 
-    QUrl url(client->serviceUrl());
+    QUrl url(client->_serviceUrl);
     url.setPath(QStringLiteral("/v1/stream_url"));
 
     QByteArray filter = QJsonDocument(messageFilter).toJson(QJsonDocument::Compact);
@@ -542,8 +542,14 @@ void EnginioBackendConnection::connectToBackend(EnginioClient* client, const QJs
     data[EnginioString::headers] = headers;
 
     emit stateChanged(ConnectingState);
-    EnginioReply *reply = client->customRequest(url, QByteArrayLiteral("GET"), data);
+    QNetworkReply *nreply = client->customRequest(url, QByteArrayLiteral("GET"), data);
+    EnginioReply *reply = new EnginioReply(client, nreply);
     QObject::connect(reply, SIGNAL(finished(EnginioReply*)), this, SLOT(onEnginioFinished(EnginioReply*)));
+}
+
+void EnginioBackendConnection::connectToBackend(EnginioClient *client, const QJsonObject &messageFilter)
+{
+    connectToBackend(EnginioClientPrivate::get(client), messageFilter);
 }
 
 void EnginioBackendConnection::close(WebSocketCloseStatus closeStatus)

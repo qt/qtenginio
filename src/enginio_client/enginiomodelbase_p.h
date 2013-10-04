@@ -312,12 +312,12 @@ class EnginioModelPrivate {
             _connection = (EnginioBackendConnection*)-1;
         }
 
-        void connectToBackend(EnginioModelPrivate *model, EnginioClient *enginio, const QJsonObject &filter)
+        void connectToBackend(EnginioModelPrivate *model, EnginioClientPrivate *enginio, const QJsonObject &filter)
         {
             if (qintptr(_connection) == -1)
                 return;
             Q_ASSERT(model && enginio);
-            if (enginio->serviceUrl() != EnginioString::stagingEnginIo)
+            if (enginio->_serviceUrl != EnginioString::stagingEnginIo)
                 return;  // TODO it allows to use notification only on staging
             removeConnection(); // TODO reuse the connecton object
             _connection = new EnginioBackendConnection;
@@ -732,7 +732,7 @@ public:
             QJsonObject objectType;
             objectType.insert(EnginioString::objectType, _query[EnginioString::objectType]);
             filter.insert(EnginioString::data, objectType);
-            _notifications.connectToBackend(this, _enginio, filter);
+            _notifications.connectToBackend(this, EnginioClientPrivate::get(_enginio), filter);
 
             // send full query
             const EnginioReply *ereply = _enginio->query(_query, _operation);
