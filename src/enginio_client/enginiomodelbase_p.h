@@ -250,7 +250,7 @@ public:
 
 class EnginioModelPrivate {
     QJsonObject _query;
-    EnginioClient *_enginio;
+    EnginioClientPrivate *_enginio;
     EnginioClient::Operation _operation;
     EnginioModel *q;
     QVector<QMetaObject::Connection> _clientConnections;
@@ -537,7 +537,7 @@ public:
 
     EnginioClient *enginio() const Q_REQUIRED_RESULT
     {
-        return _enginio;
+        return EnginioClientPrivate::get(_enginio);
     }
 
     void setEnginio(const EnginioClient *enginio)
@@ -547,13 +547,13 @@ public:
                 QObject::disconnect(connection);
             _clientConnections.clear();
         }
-        _enginio = const_cast<EnginioClient*>(enginio);
+        _enginio = EnginioClientPrivate::get(const_cast<EnginioClient*>(enginio));
         if (_enginio) {
-            _clientConnections.append(QObject::connect(_enginio, &QObject::destroyed, EnginioDestroyed(this)));
-            _clientConnections.append(QObject::connect(_enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
-            _clientConnections.append(QObject::connect(_enginio, &EnginioClientBase::backendSecretChanged, QueryChanged(this)));
+            _clientConnections.append(QObject::connect(enginio, &QObject::destroyed, EnginioDestroyed(this)));
+            _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
+            _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendSecretChanged, QueryChanged(this)));
         }
-        emit q->enginioChanged(_enginio);
+        emit q->enginioChanged(const_cast<EnginioClient*>(enginio));
     }
 
     QJsonObject query() Q_REQUIRED_RESULT
@@ -566,7 +566,9 @@ public:
         QJsonObject object(value);
         QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
         object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
-        EnginioReply *ereply = _enginio->create(object, _operation);
+        ObjectAdaptor<QJsonObject> aObject(object);
+        QNetworkReply *nreply = _enginio->create(aObject, _operation);
+        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
         FinishedCreateRequest finishedRequest = { this, temporaryId };
         _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finishedRequest));
         object[EnginioString::id] = temporaryId;
@@ -669,7 +671,9 @@ public:
     {
         Q_ASSERT(!id.isEmpty());
         _attachedData.ref(id, row); // TODO if refcount is > 1 then do not emit dataChanged
-        EnginioReply *ereply = _enginio->remove(oldObject, _operation);
+        ObjectAdaptor<QJsonObject> aOldObject(oldObject);
+        QNetworkReply *nreply = _enginio->remove(aOldObject, _operation);
+        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
         FinishedRemoveRequest finishedRequest = { this, id };
         _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finishedRequest));
         _attachedData.insertRequestId(ereply->requestId(), row);
@@ -724,7 +728,7 @@ public:
 
     void execute()
     {
-        if (!_enginio || _enginio->backendId().isEmpty() || _enginio->backendSecret().isEmpty())
+        if (!_enginio || _enginio->_backendId.isEmpty() || _enginio->_backendSecret.isEmpty())
             return;
         if (!_query.isEmpty()) {
             // setup notifications
@@ -732,10 +736,12 @@ public:
             QJsonObject objectType;
             objectType.insert(EnginioString::objectType, _query[EnginioString::objectType]);
             filter.insert(EnginioString::data, objectType);
-            _notifications.connectToBackend(this, EnginioClientPrivate::get(_enginio), filter);
+            _notifications.connectToBackend(this, _enginio, filter);
 
             // send full query
-            const EnginioReply *ereply = _enginio->query(_query, _operation);
+            ObjectAdaptor<QJsonObject> aQuery(_query);
+            QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientPrivate::Operation>(_operation));
+            const EnginioReply *ereply = new EnginioReply(_enginio, nreply);
             if (_canFetchMore)
                 _latestRequestedOffset = _query[EnginioString::limit].toDouble();
             FinishedFullQueryRequest finshedRequest = { this };
@@ -908,9 +914,8 @@ public:
                 return setDataDelyed(row, value, role, oldObject);
             return setDataNow(row, value, role, oldObject, id);
         }
-        EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
-        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel: Trying to update an object with unknown role")));
-        EnginioReply *ereply = new EnginioReply(client, nreply);
+        QNetworkReply *nreply = new EnginioFakeReply(_enginio, constructErrorMessage(QByteArrayLiteral("EnginioModel: Trying to update an object with unknown role")));
+        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
         return ereply;
     }
 
@@ -922,9 +927,8 @@ public:
         Q_ASSERT(*createReply);
         *tmpId = data.id;
         Q_ASSERT(tmpId->startsWith('t'));
-        EnginioClientPrivate *client = EnginioClientPrivate::get(_enginio);
         EnginioDummyReply *nreply = new EnginioDummyReply(*createReply);
-        *newReply = new EnginioReply(client, nreply);
+        *newReply = new EnginioReply(_enginio, nreply);
     }
 
     EnginioReply *setDataDelyed(int row, const QVariant &value, int role, const QJsonObject &oldObject)
@@ -951,7 +955,9 @@ public:
         deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
         deltaObject[EnginioString::id] = id;
         deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
-        EnginioReply *ereply = _enginio->update(deltaObject, _operation);
+        ObjectAdaptor<QJsonObject> aDeltaObject(deltaObject);
+        QNetworkReply *nreply = _enginio->update(aDeltaObject, _operation);
+        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
         FinishedUpdateRequest finished = { this, id, oldObject };
         _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finished));
         _attachedData.ref(id, row);
@@ -1046,7 +1052,9 @@ public:
 
         qDebug() << Q_FUNC_INFO << query;
         _latestRequestedOffset += limit;
-        EnginioReply *ereply = _enginio->query(query, _operation);
+        ObjectAdaptor<QJsonObject> aQuery(query);
+        QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientPrivate::Operation>(_operation));
+        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
         QObject::connect(ereply, &EnginioReply::finished, ereply, &EnginioReply::deleteLater);
         FinishedIncrementalUpdateRequest finishedRequest = { this, query };
         _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finishedRequest));

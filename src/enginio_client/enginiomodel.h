@@ -73,7 +73,7 @@ public:
     Q_INVOKABLE EnginioReply *setProperty(int row, const QString &role, const QVariant &value);
 
 Q_SIGNALS:
-    void queryChanged(const QJsonObject query);
+    void queryChanged(const QJsonObject &query);
     void enginioChanged(EnginioClient *enginio);
 
 private:
