@@ -120,27 +120,18 @@ namespace  {
 struct Types
 {
     typedef EnginioQmlReply Reply;
+    typedef EnginioQmlModel Public;
+    typedef EnginioQmlClient Client;
+    typedef EnginioQmlClientPrivate ClientPrivate;
 };
 
 struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1, Types>
 {
     typedef EnginioModelPrivateT<EnginioModelPrivate1, Types> Base;
-    inline EnginioQmlModel *q() const { return static_cast<EnginioQmlModel*>(Base::q); }
 
     EnginioModelPrivate1(EnginioModelBase *pub)
         : Base(pub)
     {}
-
-    void init()
-    {
-        QObject::connect(q(), &EnginioQmlModel::queryChanged, QueryChanged(this));
-        QObject::connect(q(), &EnginioQmlModel::enginioChanged, QueryChanged(this));
-    }
-
-    void emitEnginioChanged(EnginioClientBase *enginio)
-    {
-        emit q()->enginioChanged(static_cast<EnginioClient*>(enginio));
-    }
 
     void emitQueryChanged(const QJsonObject &query)
     {
@@ -154,12 +145,6 @@ struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1, 
         EnginioQmlClientPrivate *enginio = static_cast<EnginioQmlClientPrivate*>(_enginio);
         QByteArray buffer = enginio->toJson(data);
         return QJsonDocument::fromJson(buffer).object();
-    }
-
-    virtual EnginioReplyBase *createReply(QNetworkReply *nreply) const Q_DECL_OVERRIDE
-    {
-        EnginioQmlClientPrivate *enginio = static_cast<EnginioQmlClientPrivate*>(_enginio);
-        return new EnginioQmlReply(enginio, nreply);
     }
 };
 

@@ -1021,6 +1021,11 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
 {
     typedef EnginioModelPrivate Base;
     typedef typename Types::Reply Reply;
+    typedef typename Types::Public Public;
+    typedef typename Types::Client Client;
+    typedef typename Types::ClientPrivate ClientPrivate;
+
+    inline Public *q() const { return static_cast<Public*>(Base::q); }
 
     Derived *callDerived() { return static_cast<Derived*>(this); }
     const Derived *callDerived() const { return static_cast<Derived*>(this); }
@@ -1047,7 +1052,8 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
     void init()
     {
         Base::init();
-        callDerived()->init();
+        QObject::connect(q(), &Public::queryChanged, QueryChanged(this));
+        QObject::connect(q(), &Public::enginioChanged, QueryChanged(this));
     }
 
     void setEnginio(const EnginioClientBase *enginio)
@@ -1063,7 +1069,8 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
             _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
             _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendSecretChanged, QueryChanged(this)));
         }
-        callDerived()->emitEnginioChanged(const_cast<EnginioClientBase*>(enginio));
+
+        q()->enginioChanged(static_cast<Client*>(const_cast<EnginioClientBase*>(enginio)));
     }
 
     void setQuery(const QJsonObject &query)
@@ -1094,6 +1101,13 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
     Reply *append(const QJsonObject &value) { return static_cast<Reply*>(Base::append(value)); }
     Reply *remove(int row) { return static_cast<Reply*>(Base::remove(row)); }
     Reply *setValue(int row, const QString &role, const QVariant &value) { return static_cast<Reply*>(Base::setValue(row, role, value)); }
+
+    virtual EnginioReplyBase *createReply(QNetworkReply *nreply) const Q_DECL_OVERRIDE
+    {
+        ClientPrivate *enginio = static_cast<ClientPrivate*>(_enginio);
+        return new Reply(enginio, nreply);
+    }
+
 };
 
 QT_END_NAMESPACE

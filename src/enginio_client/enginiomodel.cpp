@@ -83,6 +83,9 @@ namespace  {
 
 struct Types {
     typedef EnginioReply Reply;
+    typedef EnginioModel Public;
+    typedef EnginioClient Client;
+    typedef EnginioClientPrivate ClientPrivate;
 };
 
 struct EnginioModelPrivate1: EnginioModelPrivateT<EnginioModelPrivate1, Types>
@@ -93,32 +96,14 @@ struct EnginioModelPrivate1: EnginioModelPrivateT<EnginioModelPrivate1, Types>
         : Base(pub)
     {}
 
-    inline EnginioModel *q() const { return static_cast<EnginioModel*>(Base::q); }
-
-    void emitEnginioChanged(EnginioClientBase *enginio)
-    {
-        emit q()->enginioChanged(static_cast<EnginioClient*>(enginio));
-    }
-
     void emitQueryChanged(const QJsonObject &query)
     {
         emit q()->queryChanged(query);
     }
 
-    void init()
-    {
-        QObject::connect(q(), &EnginioModel::queryChanged, QueryChanged(this));
-        QObject::connect(q(), &EnginioModel::enginioChanged, QueryChanged(this));
-    }
-
     virtual QJsonObject replyData(const EnginioReplyBase *reply) const Q_DECL_OVERRIDE
     {
         return static_cast<const EnginioReply*>(reply)->data();
-    }
-
-    virtual EnginioReplyBase *createReply(QNetworkReply *nreply) const Q_DECL_OVERRIDE
-    {
-        return new EnginioReply(_enginio, nreply);
     }
 };
 
