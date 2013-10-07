@@ -310,8 +310,8 @@ public:
 
     EnginioClientPrivate(EnginioClientBase *client = 0);
     virtual ~EnginioClientPrivate();
-    static EnginioClientPrivate* get(EnginioClient *client) { return client->d_func(); }
-    static const EnginioClientPrivate* get(const EnginioClient *client) { return client->d_func(); }
+    static EnginioClientPrivate* get(EnginioClientBase *client) { return client->d_func(); }
+    static const EnginioClientPrivate* get(const EnginioClientBase *client) { return client->d_func(); }
     static EnginioClient* get(EnginioClientPrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
     static const EnginioClient* get(const EnginioClientPrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
 

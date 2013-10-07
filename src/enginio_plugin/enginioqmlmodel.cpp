@@ -40,6 +40,7 @@
 ****************************************************************************/
 
 #include "enginioqmlmodel.h"
+#include <Enginio/private/enginiomodelbase_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -112,8 +113,38 @@ QT_BEGIN_NAMESPACE
   \brief removes the object at \a row
 */
 
+namespace  {
+
+struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1>
+{
+    typedef EnginioModelPrivateT<EnginioModelPrivate1> Base;
+    inline EnginioQmlModel *q() const { return static_cast<EnginioQmlModel*>(Base::q); }
+
+    EnginioModelPrivate1(EnginioModelBase *pub)
+        : Base(pub)
+    {}
+
+    void init()
+    {
+        QObject::connect(q(), &EnginioQmlModel::queryChanged, QueryChanged(this));
+        QObject::connect(q(), &EnginioQmlModel::enginioChanged, QueryChanged(this));
+    }
+
+    void emitEnginioChanged(EnginioClientBase *enginio)
+    {
+        emit q()->enginioChanged(static_cast<EnginioClient*>(enginio));
+    }
+
+    void emitQueryChanged(const QJsonObject &query)
+    {
+        emit q()->queryChanged(query);
+    }
+};
+
+} // namespace
+
 EnginioQmlModel::EnginioQmlModel(QObject *parent)
-    : EnginioModel(parent)
+    : EnginioModel(parent) // TODO use EnginioModelPrivate1
 {
 }
 

@@ -249,10 +249,11 @@ public:
 
 
 class EnginioModelPrivate {
+protected:
     QJsonObject _query;
     EnginioClientPrivate *_enginio;
     EnginioClient::Operation _operation;
-    EnginioModel *q;
+    EnginioModelBase *q;
     QVector<QMetaObject::Connection> _clientConnections;
     QHash<const EnginioReply*, QMetaObject::Connection> _repliesConnections;
 
@@ -327,21 +328,6 @@ class EnginioModelPrivate {
         }
     } _notifications;
 
-    class EnginioDestroyed
-    {
-        EnginioModelPrivate *model;
-    public:
-        EnginioDestroyed(EnginioModelPrivate *m)
-            : model(m)
-        {
-            Q_ASSERT(m);
-        }
-        void operator ()()
-        {
-            model->setEnginio(0);
-        }
-    };
-
     struct FinishedRemoveRequest
     {
         EnginioModelPrivate *model;
@@ -409,7 +395,7 @@ class EnginioModelPrivate {
     };
 
 public:
-    EnginioModelPrivate(EnginioModel *q_ptr)
+    EnginioModelPrivate(EnginioModelBase *q_ptr)
         : _enginio(0)
         , _operation()
         , q(q_ptr)
@@ -430,9 +416,7 @@ public:
 
     void init()
     {
-        QObject::connect(q, &EnginioModel::queryChanged, QueryChanged(this));
         QObject::connect(q, &EnginioModelBase::operationChanged, QueryChanged(this));
-        QObject::connect(q, &EnginioModel::enginioChanged, QueryChanged(this));
     }
 
     void disableNotifications()
@@ -540,22 +524,6 @@ public:
         return EnginioClientPrivate::get(_enginio);
     }
 
-    void setEnginio(const EnginioClient *enginio)
-    {
-        if (_enginio) {
-            foreach (const QMetaObject::Connection &connection, _clientConnections)
-                QObject::disconnect(connection);
-            _clientConnections.clear();
-        }
-        _enginio = EnginioClientPrivate::get(const_cast<EnginioClient*>(enginio));
-        if (_enginio) {
-            _clientConnections.append(QObject::connect(enginio, &QObject::destroyed, EnginioDestroyed(this)));
-            _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
-            _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendSecretChanged, QueryChanged(this)));
-        }
-        emit q->enginioChanged(const_cast<EnginioClient*>(enginio));
-    }
-
     QJsonObject query() Q_REQUIRED_RESULT
     {
         return _query;
@@ -598,7 +566,7 @@ public:
         EnginioModelPrivate *_model;
         QJsonObject _object;
         QString _tmpId;
-        QPointer<EnginioModel> _modelGuard;
+        QPointer<EnginioModelBase> _modelGuard;
 
         void markAsError(QByteArray msg)
         {
@@ -687,31 +655,6 @@ public:
     {
         int key = _roles.key(role, EnginioModel::InvalidRole);
         return setData(row, value, key);
-    }
-
-    void setQuery(const QJsonObject &query)
-    {
-        _query = query;
-
-        if (_query.contains(EnginioString::pageSize)) {
-            const int pageSize = _query[EnginioString::pageSize].toDouble();
-            const QString limitString(EnginioString::limit);
-            const QString offsetString(EnginioString::offset);
-            const unsigned limit = _query[limitString].toDouble();
-            const unsigned offset = _query[offsetString].toDouble();
-            if (limit)
-                qWarning() << "EnginioModel::setQuery()" << "'limit' parameter can not be used together with model pagining feature, the value will be ignored";
-
-            if (offset) {
-                qWarning() << "EnginioModel::setQuery()" << "'offset' parameter can not be used together with model pagining feature, the value will be ignored";
-                _query.remove(offsetString);
-            }
-            _query[limitString] = pageSize;
-            _canFetchMore = true;
-        } else {
-            _canFetchMore = false;
-        }
-        emit q->queryChanged(query);
     }
 
     EnginioClientBase::Operation operation() const Q_REQUIRED_RESULT
@@ -1058,6 +1001,82 @@ public:
         QObject::connect(ereply, &EnginioReply::finished, ereply, &EnginioReply::deleteLater);
         FinishedIncrementalUpdateRequest finishedRequest = { this, query };
         _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finishedRequest));
+    }
+};
+
+
+template<typename Derived>
+struct EnginioModelPrivateT : public EnginioModelPrivate
+{
+    typedef EnginioModelPrivate Base;
+
+    Derived *callDerived() { return static_cast<Derived*>(this); }
+    const Derived *callDerived() const { return static_cast<Derived*>(this); }
+
+    class EnginioDestroyed
+    {
+        EnginioModelPrivateT *model;
+    public:
+        EnginioDestroyed(EnginioModelPrivateT *m)
+            : model(m)
+        {
+            Q_ASSERT(m);
+        }
+        void operator ()()
+        {
+            model->setEnginio(0);
+        }
+    };
+
+    EnginioModelPrivateT(EnginioModelBase *pub)
+        : Base(pub)
+    {}
+
+    void init()
+    {
+        Base::init();
+        callDerived()->init();
+    }
+
+    void setEnginio(const EnginioClientBase *enginio)
+    {
+        if (_enginio) {
+            foreach (const QMetaObject::Connection &connection, _clientConnections)
+                QObject::disconnect(connection);
+            _clientConnections.clear();
+        }
+        _enginio = EnginioClientPrivate::get(const_cast<EnginioClientBase*>(enginio));
+        if (_enginio) {
+            _clientConnections.append(QObject::connect(enginio, &QObject::destroyed, EnginioDestroyed(this)));
+            _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
+            _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendSecretChanged, QueryChanged(this)));
+        }
+        callDerived()->emitEnginioChanged(const_cast<EnginioClientBase*>(enginio));
+    }
+
+    void setQuery(const QJsonObject &query)
+    {
+        _query = query;
+
+        if (_query.contains(EnginioString::pageSize)) {
+            const int pageSize = _query[EnginioString::pageSize].toDouble();
+            const QString limitString(EnginioString::limit);
+            const QString offsetString(EnginioString::offset);
+            const unsigned limit = _query[limitString].toDouble();
+            const unsigned offset = _query[offsetString].toDouble();
+            if (limit)
+                qWarning() << "EnginioModel::setQuery()" << "'limit' parameter can not be used together with model pagining feature, the value will be ignored";
+
+            if (offset) {
+                qWarning() << "EnginioModel::setQuery()" << "'offset' parameter can not be used together with model pagining feature, the value will be ignored";
+                _query.remove(offsetString);
+            }
+            _query[limitString] = pageSize;
+            _canFetchMore = true;
+        } else {
+            _canFetchMore = false;
+        }
+        callDerived()->emitQueryChanged(query);
     }
 };
 
