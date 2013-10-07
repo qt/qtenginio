@@ -43,6 +43,7 @@
 #define ENGINIOQMLCLIENT_P_H
 
 #include <Enginio/private/enginioclient_p.h>
+#include "enginioqmlclient.h"
 
 #include <QtQml/qjsengine.h>
 #include <QtQml/qjsvalue.h>
@@ -59,6 +60,9 @@ public:
         : EnginioClientPrivate(client)
         , _engine(0)
     {}
+
+    static EnginioQmlClientPrivate* get(EnginioClientBase *client) { return static_cast<EnginioQmlClientPrivate*>(EnginioClientPrivate::get(client)); }
+    static EnginioQmlClient* get(EnginioClientPrivate *client) { return static_cast<EnginioQmlClient*>(client->q_ptr); }
 
     virtual void init();
     virtual void emitSessionTerminated() const Q_DECL_OVERRIDE;

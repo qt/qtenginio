@@ -525,11 +525,6 @@ public:
         q->endInsertRows();
     }
 
-    EnginioClient *enginio() const Q_REQUIRED_RESULT
-    {
-        return EnginioClientPrivate::get(_enginio);
-    }
-
     QJsonObject query() Q_REQUIRED_RESULT
     {
         return _query;
@@ -1056,6 +1051,11 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
         QObject::connect(q(), &Public::enginioChanged, QueryChanged(this));
     }
 
+    Client *enginio() const Q_REQUIRED_RESULT
+    {
+        return _enginio ? ClientPrivate::get(_enginio) : 0;
+    }
+
     void setEnginio(const EnginioClientBase *enginio)
     {
         if (_enginio) {
@@ -1063,11 +1063,13 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
                 QObject::disconnect(connection);
             _clientConnections.clear();
         }
-        _enginio = EnginioClientPrivate::get(const_cast<EnginioClientBase*>(enginio));
-        if (_enginio) {
+        if (enginio) {
+            _enginio = EnginioClientPrivate::get(const_cast<EnginioClientBase*>(enginio));
             _clientConnections.append(QObject::connect(enginio, &QObject::destroyed, EnginioDestroyed(this)));
             _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
             _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendSecretChanged, QueryChanged(this)));
+        } else {
+            _enginio = 0;
         }
 
         q()->enginioChanged(static_cast<Client*>(const_cast<EnginioClientBase*>(enginio)));
