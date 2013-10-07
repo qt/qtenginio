@@ -44,6 +44,7 @@
 #include "enginioclient_p.h"
 #include "enginiofakereply_p.h"
 #include "enginiodummyreply_p.h"
+#include "enginioreplybase.h"
 #include "enginiobackendconnection_p.h"
 #include "enginiomodelbase.h"
 #include "enginiomodelbase_p.h"
@@ -70,7 +71,7 @@ struct EnginioModelPrivateAttachedData
     uint ref;
     int row;
     QString id;
-    EnginioReply *createReply;
+    EnginioReplyBase *createReply;
     EnginioModelPrivateAttachedData(int initRow = DeletedRow, const QString &initId = QString())
         : ref()
         , row(initRow)
@@ -255,7 +256,7 @@ protected:
     EnginioClient::Operation _operation;
     EnginioModelBase *q;
     QVector<QMetaObject::Connection> _clientConnections;
-    QHash<const EnginioReply*, QMetaObject::Connection> _repliesConnections;
+    QHash<const EnginioReplyBase*, QMetaObject::Connection> _repliesConnections;
 
     const static int IncrementalModelUpdate;
     typedef EnginioModelPrivateAttachedData AttachedData;
@@ -332,7 +333,8 @@ protected:
     {
         EnginioModelPrivate *model;
         const QString id;
-        void operator ()(const EnginioReply *reply)
+        EnginioReplyBase *reply;
+        void operator ()()
         {
             model->finishedRemoveRequest(reply, id);
         }
@@ -343,7 +345,8 @@ protected:
         EnginioModelPrivate *model;
         const QString id;
         const QJsonObject oldValue;
-        void operator ()(const EnginioReply *reply)
+        EnginioReplyBase *reply;
+        void operator ()()
         {
             model->finishedUpdateRequest(reply, id, oldValue);
         }
@@ -353,7 +356,8 @@ protected:
     {
         EnginioModelPrivate *model;
         const QString tmpId;
-        void operator ()(const EnginioReply *reply)
+        EnginioReplyBase *reply;
+        void operator ()()
         {
             model->finishedCreateRequest(reply, tmpId);
         }
@@ -362,7 +366,8 @@ protected:
     struct FinishedFullQueryRequest
     {
         EnginioModelPrivate *model;
-        void operator ()(const EnginioReply *reply)
+        EnginioReplyBase *reply;
+        void operator ()()
         {
             model->finishedFullQueryRequest(reply);
         }
@@ -372,7 +377,8 @@ protected:
     {
         EnginioModelPrivate *model;
         const QJsonObject query;
-        void operator ()(const EnginioReply *reply)
+        EnginioReplyBase *reply;
+        void operator ()()
         {
             model->finishedIncrementalUpdateRequest(reply, query);
         }
@@ -405,7 +411,7 @@ public:
     {
     }
 
-    ~EnginioModelPrivate()
+    virtual ~EnginioModelPrivate()
     {
         foreach (const QMetaObject::Connection &connection, _clientConnections)
             QObject::disconnect(connection);
@@ -529,16 +535,16 @@ public:
         return _query;
     }
 
-    EnginioReply *append(const QJsonObject &value)
+    EnginioReplyBase *append(const QJsonObject &value)
     {
         QJsonObject object(value);
         QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
         object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
         ObjectAdaptor<QJsonObject> aObject(object);
         QNetworkReply *nreply = _enginio->create(aObject, _operation);
-        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
-        FinishedCreateRequest finishedRequest = { this, temporaryId };
-        _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finishedRequest));
+        EnginioReplyBase *ereply = createReply(nreply);
+        FinishedCreateRequest finishedRequest = { this, temporaryId, ereply };
+        _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReplyBase::dataChanged, finishedRequest));
         object[EnginioString::id] = temporaryId;
         const int row = _data.count();
         AttachedData data(row, temporaryId);
@@ -562,7 +568,7 @@ public:
 
     struct SwapNetworkReplyBase
     {
-        EnginioReply *_reply;
+        EnginioReplyBase *_reply;
         EnginioModelPrivate *_model;
         QJsonObject _object;
         QString _tmpId;
@@ -574,9 +580,9 @@ public:
             _reply->setNetworkReply(nreply);
         }
 
-        QPair<QString, int> getAndSetCurrentIdRow(EnginioReply *finishedCreateReply)
+        QPair<QString, int> getAndSetCurrentIdRow(EnginioReplyBase *finishedCreateReply)
         {
-            QString id = finishedCreateReply->data()[EnginioString::id].toString();
+            QString id = _model->replyData(finishedCreateReply)[EnginioString::id].toString();
             Q_ASSERT(!id.isEmpty());
             _object[EnginioString::id] = id;
             int row = Q_LIKELY(_model->_attachedData.contains(_tmpId))
@@ -585,7 +591,7 @@ public:
             return qMakePair(id, row);
         }
 
-        void swapNetworkReply(EnginioReply *ereply)
+        void swapNetworkReply(EnginioReplyBase *ereply)
         {
             _reply->swapNetworkReply(ereply);
             ereply->deleteLater();
@@ -595,7 +601,8 @@ public:
     struct SwapNetworkReplyForRemove
     {
         SwapNetworkReplyBase d;
-        void operator ()(EnginioReply *finishedCreateReply)
+        EnginioReplyBase *finishedCreateReply;
+        void operator ()()
         {
             if (finishedCreateReply->isError()) {
                 d.markAsError(QByteArrayLiteral("Dependent create query failed, so object could not be removed"));
@@ -605,15 +612,15 @@ public:
                 QPair<QString, int> tmp = d.getAndSetCurrentIdRow(finishedCreateReply);
                 const int row = tmp.second;
                 QString id = tmp.first;
-                FinishedRemoveRequest finishedRequest = { d._model, id };
-                QObject::connect(d._reply, &EnginioReply::finished, finishedRequest);
-                EnginioReply *ereply = d._model->removeNow(row, d._object, id);
+                FinishedRemoveRequest finishedRequest = { d._model, id, d._reply };
+                QObject::connect(d._reply, &EnginioReplyBase::dataChanged, finishedRequest);
+                EnginioReplyBase *ereply = d._model->removeNow(row, d._object, id);
                 d.swapNetworkReply(ereply);
             }
         }
     };
 
-    EnginioReply *remove(int row)
+    EnginioReplyBase *remove(int row)
     {
         QJsonObject oldObject = _data.at(row).toObject();
         QString id = oldObject[EnginioString::id].toString();
@@ -622,28 +629,28 @@ public:
         return removeNow(row, oldObject, id);
     }
 
-    EnginioReply *removeDelayed(int row, const QJsonObject &oldObject)
+    EnginioReplyBase *removeDelayed(int row, const QJsonObject &oldObject)
     {
         // We are about to remove a not synced new item. The item do not have id yet,
         // so we can not make a request now, we need to wait for finished signal.
-        EnginioReply *ereply, *createReply;
+        EnginioReplyBase *ereply, *createReply;
         QString tmpId;
         Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
         delayedOperation(row, &ereply, &tmpId, &createReply);
-        SwapNetworkReplyForRemove swapNetworkReply = {{ereply, this, oldObject, tmpId, q}};
-        QObject::connect(createReply, &EnginioReply::finished, swapNetworkReply);
+        SwapNetworkReplyForRemove swapNetworkReply = {{ereply, this, oldObject, tmpId, q}, createReply};
+        QObject::connect(createReply, &EnginioReplyBase::dataChanged, swapNetworkReply);
         return ereply;
     }
 
-    EnginioReply *removeNow(int row, const QJsonObject &oldObject, const QString &id)
+    EnginioReplyBase *removeNow(int row, const QJsonObject &oldObject, const QString &id)
     {
         Q_ASSERT(!id.isEmpty());
         _attachedData.ref(id, row); // TODO if refcount is > 1 then do not emit dataChanged
         ObjectAdaptor<QJsonObject> aOldObject(oldObject);
         QNetworkReply *nreply = _enginio->remove(aOldObject, _operation);
-        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
-        FinishedRemoveRequest finishedRequest = { this, id };
-        _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finishedRequest));
+        EnginioReplyBase *ereply = createReply(nreply);
+        FinishedRemoveRequest finishedRequest = { this, id, ereply };
+        _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReplyBase::dataChanged, finishedRequest));
         _attachedData.insertRequestId(ereply->requestId(), row);
         QVector<int> roles(1);
         roles.append(EnginioModel::SyncedRole);
@@ -651,7 +658,7 @@ public:
         return ereply;
     }
 
-    EnginioReply *setValue(int row, const QString &role, const QVariant &value)
+    EnginioReplyBase *setValue(int row, const QString &role, const QVariant &value)
     {
         int key = _roles.key(role, EnginioModel::InvalidRole);
         return setData(row, value, key);
@@ -684,20 +691,20 @@ public:
             // send full query
             ObjectAdaptor<QJsonObject> aQuery(_query);
             QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientPrivate::Operation>(_operation));
-            const EnginioReply *ereply = new EnginioReply(_enginio, nreply);
+            EnginioReplyBase *ereply = createReply(nreply);
             if (_canFetchMore)
                 _latestRequestedOffset = _query[EnginioString::limit].toDouble();
-            FinishedFullQueryRequest finshedRequest = { this };
-            _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finshedRequest));
-            QObject::connect(ereply, &EnginioReply::finished, ereply, &EnginioReply::deleteLater);
+            FinishedFullQueryRequest finshedRequest = { this, ereply };
+            _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReplyBase::dataChanged, finshedRequest));
+            QObject::connect(ereply, &EnginioReplyBase::dataChanged, ereply, &EnginioReplyBase::deleteLater);
         }
     }
 
-    void finishedIncrementalUpdateRequest(const EnginioReply *reply, const QJsonObject &query)
+    void finishedIncrementalUpdateRequest(const EnginioReplyBase *reply, const QJsonObject &query)
     {
         _repliesConnections.remove(reply);
         Q_ASSERT(_canFetchMore);
-        QJsonArray data(reply->data()[EnginioString::results].toArray());
+        QJsonArray data(replyData(reply)[EnginioString::results].toArray());
         int offset = query[EnginioString::offset].toDouble();
         int limit = query[EnginioString::limit].toDouble();
         int dataCount = data.count();
@@ -713,18 +720,18 @@ public:
         q->endInsertRows();
     }
 
-    void finishedFullQueryRequest(const EnginioReply *reply)
+    void finishedFullQueryRequest(const EnginioReplyBase *reply)
     {
         _repliesConnections.remove(reply);
         q->beginResetModel();
-        _data = reply->data()[EnginioString::results].toArray();
+        _data = replyData(reply)[EnginioString::results].toArray();
         _attachedData.initFromArray(_data);
         syncRoles();
         _canFetchMore = _canFetchMore && _data.count() && (_query[EnginioString::limit].toDouble() <= _data.count());
         q->endResetModel();
     }
 
-    void finishedCreateRequest(const EnginioReply *reply, const QString &tmpId)
+    void finishedCreateRequest(const EnginioReplyBase *reply, const QString &tmpId)
     {
         _repliesConnections.remove(reply);
         if (_attachedData.markRequestIdAsHandled(reply->requestId()))
@@ -738,7 +745,7 @@ public:
         else {
             // the dummy object doesn't exist anymore, probably it was removed by a full reset
             // or by an initial query.
-            QString id = reply->data()[EnginioString::id].toString();
+            QString id = replyData(reply)[EnginioString::id].toString();
             if (_attachedData.contains(id)) {
                 // The reset removed the dummy value but it contained the newly created (initial reset
                 // and append were reordered)
@@ -746,9 +753,9 @@ public:
             } else {
                 // we created the item but there is no sign of it. We need to check if we have more or
                 // less the same query
-                if (_query[EnginioString::objectType] == reply->data()[EnginioString::objectType]) {
+                if (_query[EnginioString::objectType] == replyData(reply)[EnginioString::objectType]) {
                     // the type is the same so we can re-add it
-                    receivedCreateNotification(reply->data());
+                    receivedCreateNotification(replyData(reply));
                 }
                 // query was changed too much we are done.
                 return;
@@ -765,11 +772,11 @@ public:
             return;
         }
 
-        const QJsonObject object = reply->data();
+        const QJsonObject object = replyData(reply);
         receivedUpdateNotification(object, tmpId, row);
     }
 
-    void finishedRemoveRequest(const EnginioReply *response, const QString &id)
+    void finishedRemoveRequest(const EnginioReplyBase *response, const QString &id)
     {
         _repliesConnections.remove(response);
         AttachedData &data = _attachedData.deref(id);
@@ -789,7 +796,7 @@ public:
         receivedRemoveNotification(_data[row].toObject(), row);
     }
 
-    void finishedUpdateRequest(const EnginioReply *reply, const QString &id, const QJsonObject &oldValue)
+    void finishedUpdateRequest(const EnginioReplyBase *reply, const QString &id, const QJsonObject &oldValue)
     {
         _repliesConnections.remove(reply);
         AttachedData &data = _attachedData.deref(id);
@@ -820,7 +827,7 @@ public:
             }
             return;
         }
-        receivedUpdateNotification(reply->data(), id, row);
+        receivedUpdateNotification(replyData(reply), id, row);
     }
 
     struct SwapNetworkReplyForSetData
@@ -828,8 +835,9 @@ public:
         SwapNetworkReplyBase d;
         QVariant _value;
         int _role;
+        EnginioReplyBase *finishedCreateReply;
 
-        void operator ()(EnginioReply *finishedCreateReply)
+        void operator ()()
         {
 
             if (finishedCreateReply->isError()) {
@@ -840,15 +848,15 @@ public:
                 QPair<QString, int> tmp = d.getAndSetCurrentIdRow(finishedCreateReply);
                 const int row = tmp.second;
                 QString id = tmp.first;
-                FinishedUpdateRequest finished = { d._model, id, d._object };
-                QObject::connect(d._reply, &EnginioReply::finished, finished);
-                EnginioReply *ereply = d._model->setDataNow(row, _value, _role, d._object, id);
+                FinishedUpdateRequest finished = { d._model, id, d._object, d._reply };
+                QObject::connect(d._reply, &EnginioReplyBase::dataChanged, finished);
+                EnginioReplyBase *ereply = d._model->setDataNow(row, _value, _role, d._object, id);
                 d.swapNetworkReply(ereply);
             }
         }
     };
 
-    EnginioReply *setData(const int row, const QVariant &value, int role)
+    EnginioReplyBase *setData(const int row, const QVariant &value, int role)
     {
         if (role > EnginioModel::SyncedRole) {
             QJsonObject oldObject = _data.at(row).toObject();
@@ -858,11 +866,11 @@ public:
             return setDataNow(row, value, role, oldObject, id);
         }
         QNetworkReply *nreply = new EnginioFakeReply(_enginio, constructErrorMessage(QByteArrayLiteral("EnginioModel: Trying to update an object with unknown role")));
-        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
+        EnginioReplyBase *ereply = createReply(nreply);
         return ereply;
     }
 
-    void delayedOperation(int row, EnginioReply **newReply, QString *tmpId, EnginioReply **createReply)
+    void delayedOperation(int row, EnginioReplyBase **newReply, QString *tmpId, EnginioReplyBase **createReply)
     {
         Q_ASSERT(!_attachedData.isSynced(row));
         AttachedData data = _attachedData.ref(row);
@@ -871,24 +879,24 @@ public:
         *tmpId = data.id;
         Q_ASSERT(tmpId->startsWith('t'));
         EnginioDummyReply *nreply = new EnginioDummyReply(*createReply);
-        *newReply = new EnginioReply(_enginio, nreply);
+        *newReply = this->createReply(nreply);
     }
 
-    EnginioReply *setDataDelyed(int row, const QVariant &value, int role, const QJsonObject &oldObject)
+    EnginioReplyBase *setDataDelyed(int row, const QVariant &value, int role, const QJsonObject &oldObject)
     {
         // We are about to update a not synced new item. The item do not have id yet,
         // so we can not make a request now, we need to wait for finished signal.
         Q_ASSERT(role > EnginioModel::SyncedRole);
-        EnginioReply *ereply, *createReply;
+        EnginioReplyBase *ereply, *createReply;
         QString tmpId;
         Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
         delayedOperation(row, &ereply, &tmpId, &createReply);
-        SwapNetworkReplyForSetData swapNetworkReply = {{ereply, this, oldObject, tmpId, q}, value, role};
-        QObject::connect(createReply, &EnginioReply::finished, swapNetworkReply);
+        SwapNetworkReplyForSetData swapNetworkReply = {{ereply, this, oldObject, tmpId, q}, value, role, createReply};
+        QObject::connect(createReply, &EnginioReplyBase::dataChanged, swapNetworkReply);
         return ereply;
     }
 
-    EnginioReply *setDataNow(const int row, const QVariant &value, int role, const QJsonObject &oldObject, const QString &id)
+    EnginioReplyBase *setDataNow(const int row, const QVariant &value, int role, const QJsonObject &oldObject, const QString &id)
     {
         Q_ASSERT(!id.isEmpty());
         Q_ASSERT(role > EnginioModel::SyncedRole);
@@ -900,9 +908,9 @@ public:
         deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
         ObjectAdaptor<QJsonObject> aDeltaObject(deltaObject);
         QNetworkReply *nreply = _enginio->update(aDeltaObject, _operation);
-        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
-        FinishedUpdateRequest finished = { this, id, oldObject };
-        _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finished));
+        EnginioReplyBase *ereply = createReply(nreply);
+        FinishedUpdateRequest finished = { this, id, oldObject, ereply };
+        _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReplyBase::dataChanged, finished));
         _attachedData.ref(id, row);
         _data.replace(row, newObject);
         _attachedData.insertRequestId(ereply->requestId(), row);
@@ -997,18 +1005,22 @@ public:
         _latestRequestedOffset += limit;
         ObjectAdaptor<QJsonObject> aQuery(query);
         QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientPrivate::Operation>(_operation));
-        EnginioReply *ereply = new EnginioReply(_enginio, nreply);
-        QObject::connect(ereply, &EnginioReply::finished, ereply, &EnginioReply::deleteLater);
-        FinishedIncrementalUpdateRequest finishedRequest = { this, query };
-        _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReply::finished, finishedRequest));
+        EnginioReplyBase *ereply = createReply(nreply);
+        QObject::connect(ereply, &EnginioReplyBase::dataChanged, ereply, &EnginioReplyBase::deleteLater);
+        FinishedIncrementalUpdateRequest finishedRequest = { this, query, ereply };
+        _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReplyBase::dataChanged, finishedRequest));
     }
+
+    virtual QJsonObject replyData(const EnginioReplyBase *reply) const = 0;
+    virtual EnginioReplyBase *createReply(QNetworkReply *nreply) const = 0;
 };
 
 
-template<typename Derived>
+template<typename Derived, typename Types>
 struct EnginioModelPrivateT : public EnginioModelPrivate
 {
     typedef EnginioModelPrivate Base;
+    typedef typename Types::Reply Reply;
 
     Derived *callDerived() { return static_cast<Derived*>(this); }
     const Derived *callDerived() const { return static_cast<Derived*>(this); }
@@ -1078,6 +1090,10 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
         }
         callDerived()->emitQueryChanged(query);
     }
+
+    Reply *append(const QJsonObject &value) { return static_cast<Reply*>(Base::append(value)); }
+    Reply *remove(int row) { return static_cast<Reply*>(Base::remove(row)); }
+    Reply *setValue(int row, const QString &role, const QVariant &value) { return static_cast<Reply*>(Base::setValue(row, role, value)); }
 };
 
 QT_END_NAMESPACE

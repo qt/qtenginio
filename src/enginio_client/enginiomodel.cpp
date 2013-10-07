@@ -81,9 +81,14 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
 
 namespace  {
 
-struct EnginioModelPrivate1: EnginioModelPrivateT<EnginioModelPrivate1>
+struct Types {
+    typedef EnginioReply Reply;
+};
+
+struct EnginioModelPrivate1: EnginioModelPrivateT<EnginioModelPrivate1, Types>
 {
-    typedef EnginioModelPrivateT<EnginioModelPrivate1> Base;
+    typedef EnginioModelPrivateT<EnginioModelPrivate1, Types> Base;
+
     EnginioModelPrivate1(EnginioModelBase *pub)
         : Base(pub)
     {}
@@ -104,6 +109,16 @@ struct EnginioModelPrivate1: EnginioModelPrivateT<EnginioModelPrivate1>
     {
         QObject::connect(q(), &EnginioModel::queryChanged, QueryChanged(this));
         QObject::connect(q(), &EnginioModel::enginioChanged, QueryChanged(this));
+    }
+
+    virtual QJsonObject replyData(const EnginioReplyBase *reply) const Q_DECL_OVERRIDE
+    {
+        return static_cast<const EnginioReply*>(reply)->data();
+    }
+
+    virtual EnginioReplyBase *createReply(QNetworkReply *nreply) const Q_DECL_OVERRIDE
+    {
+        return new EnginioReply(_enginio, nreply);
     }
 };
 
@@ -342,8 +357,8 @@ bool EnginioModelBase::setData(const QModelIndex &index, const QVariant &value, 
     if (index.row() >= d->rowCount()) // TODO remove as soon as we have a sparse array.
         return false;
 
-    EnginioReply *reply = d->setData(index.row(), value, role);
-    QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
+    EnginioReplyBase *reply = d->setData(index.row(), value, role);
+    QObject::connect(reply, &EnginioReplyBase::dataChanged, reply, &EnginioReply::deleteLater);
     return true;
 }
 

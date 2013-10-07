@@ -41,6 +41,8 @@
 
 #include "enginioqmlmodel.h"
 #include <Enginio/private/enginiomodelbase_p.h>
+#include <QtCore/qjsondocument.h>
+#include "enginioqmlclient_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -115,9 +117,14 @@ QT_BEGIN_NAMESPACE
 
 namespace  {
 
-struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1>
+struct Types
 {
-    typedef EnginioModelPrivateT<EnginioModelPrivate1> Base;
+    typedef EnginioQmlReply Reply;
+};
+
+struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1, Types>
+{
+    typedef EnginioModelPrivateT<EnginioModelPrivate1, Types> Base;
     inline EnginioQmlModel *q() const { return static_cast<EnginioQmlModel*>(Base::q); }
 
     EnginioModelPrivate1(EnginioModelBase *pub)
@@ -138,6 +145,21 @@ struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1>
     void emitQueryChanged(const QJsonObject &query)
     {
         emit q()->queryChanged(query);
+    }
+
+    virtual QJsonObject replyData(const EnginioReplyBase *reply) const Q_DECL_OVERRIDE
+    {
+        // TODO that is sooo bad, that I can not look at this.
+        QJSValue data = static_cast<const EnginioQmlReply*>(reply)->data();
+        EnginioQmlClientPrivate *enginio = static_cast<EnginioQmlClientPrivate*>(_enginio);
+        QByteArray buffer = enginio->toJson(data);
+        return QJsonDocument::fromJson(buffer).object();
+    }
+
+    virtual EnginioReplyBase *createReply(QNetworkReply *nreply) const Q_DECL_OVERRIDE
+    {
+        EnginioQmlClientPrivate *enginio = static_cast<EnginioQmlClientPrivate*>(_enginio);
+        return new EnginioQmlReply(enginio, nreply);
     }
 };
 
