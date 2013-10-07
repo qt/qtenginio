@@ -90,7 +90,7 @@ template <> struct ValueAdaptor<QJsonObject>
 template <> struct ObjectAdaptor<QJsonObject>
 {
     QJsonObject _object;
-    ObjectAdaptor(const QJsonObject &object)
+    ObjectAdaptor(const QJsonObject &object, EnginioClientPrivate* = 0)
         : _object(object)
     {}
 
@@ -98,6 +98,7 @@ template <> struct ObjectAdaptor<QJsonObject>
     bool contains(const QString &key) const { return _object.contains(key); }
     QByteArray toJson() const { return QJsonDocument(_object).toJson(QJsonDocument::Compact); }
     void remove(const QString &index) { _object.remove(index); }
+    bool isEmpty() const { return _object.isEmpty(); }
 };
 
 template <> struct ArrayAdaptor<QJsonObject>

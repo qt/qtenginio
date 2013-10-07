@@ -86,6 +86,7 @@ struct Types {
     typedef EnginioModel Public;
     typedef EnginioClient Client;
     typedef EnginioClientPrivate ClientPrivate;
+    typedef QJsonObject Data;
 };
 
 struct EnginioModelPrivate1: EnginioModelPrivateT<EnginioModelPrivate1, Types>
@@ -96,14 +97,19 @@ struct EnginioModelPrivate1: EnginioModelPrivateT<EnginioModelPrivate1, Types>
         : Base(pub)
     {}
 
-    void emitQueryChanged(const QJsonObject &query)
-    {
-        emit q()->queryChanged(query);
-    }
-
     virtual QJsonObject replyData(const EnginioReplyBase *reply) const Q_DECL_OVERRIDE
     {
         return static_cast<const EnginioReply*>(reply)->data();
+    }
+
+    virtual QJsonValue queryData(const QString &name) Q_DECL_OVERRIDE
+    {
+        return _query[name];
+    }
+
+    virtual QJsonObject queryAsJson() const Q_DECL_OVERRIDE
+    {
+        return _query;
     }
 };
 

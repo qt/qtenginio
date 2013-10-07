@@ -43,6 +43,9 @@
 #include <Enginio/private/enginiomodelbase_p.h>
 #include <QtCore/qjsondocument.h>
 #include "enginioqmlclient_p.h"
+#include "enginioqmlreply.h"
+#include "enginioqmlobjectadaptor_p.h"
+
 
 QT_BEGIN_NAMESPACE
 
@@ -123,36 +126,128 @@ struct Types
     typedef EnginioQmlModel Public;
     typedef EnginioQmlClient Client;
     typedef EnginioQmlClientPrivate ClientPrivate;
+    typedef QJSValue Data;
 };
 
 struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1, Types>
 {
     typedef EnginioModelPrivateT<EnginioModelPrivate1, Types> Base;
 
+    QJSValue convert(const QJsonObject &object) const
+    {
+        // TODO that is sooo bad, that I can not look at this.
+        // TODO trace all calls and try to remove them
+        EnginioQmlClientPrivate *enginio = static_cast<EnginioQmlClientPrivate*>(_enginio);
+        QJsonDocument doc(object);
+        QByteArray buffer = doc.toJson(QJsonDocument::Compact);
+        return enginio->fromJson(buffer);
+    }
+
+    QJsonObject convert(const QJSValue &object) const
+    {
+        // TODO that is sooo bad, that I can not look at this.
+        // TODO trace all calls and try to remove them
+        EnginioQmlClientPrivate *enginio = static_cast<EnginioQmlClientPrivate*>(_enginio);
+        QByteArray buffer = enginio->toJson(object);
+        return QJsonDocument::fromJson(buffer).object();
+    }
+
     EnginioModelPrivate1(EnginioModelBase *pub)
         : Base(pub)
     {}
 
-    void emitQueryChanged(const QJsonObject &query)
-    {
-        emit q()->queryChanged(query);
-    }
-
     virtual QJsonObject replyData(const EnginioReplyBase *reply) const Q_DECL_OVERRIDE
     {
-        // TODO that is sooo bad, that I can not look at this.
         QJSValue data = static_cast<const EnginioQmlReply*>(reply)->data();
-        EnginioQmlClientPrivate *enginio = static_cast<EnginioQmlClientPrivate*>(_enginio);
-        QByteArray buffer = enginio->toJson(data);
-        return QJsonDocument::fromJson(buffer).object();
+        return convert(data);
+    }
+
+    virtual QJsonValue queryData(const QString &name) Q_DECL_OVERRIDE
+    {
+        QJSValue value = _query.property(name);
+        QJsonValue result;
+        if (value.isObject())
+            return convert(value);
+        if (value.isString())
+            return QJsonValue(value.toString());
+        if (value.isBool())
+            return QJsonValue(value.toBool());
+        if (value.isNumber())
+            return QJsonValue(value.toNumber());
+        if (value.isUndefined())
+            return QJsonValue(QJsonValue::Undefined);
+        if (value.isNull())
+            return QJsonValue(QJsonValue::Null);
+        Q_ASSERT(false);
+    }
+
+    virtual QJsonObject queryAsJson() const Q_DECL_OVERRIDE
+    {
+        return convert(_query);
     }
 };
 
 } // namespace
 
+#define E_D() EnginioModelPrivate1 *d = static_cast<EnginioModelPrivate1*>(EnginioModelBase::d.data());
+
 EnginioQmlModel::EnginioQmlModel(QObject *parent)
-    : EnginioModel(parent) // TODO use EnginioModelPrivate1
+    : EnginioModelBase(parent, new EnginioModelPrivate1(this))
+{
+    E_D();
+    d->init();
+}
+
+EnginioQmlModel::~EnginioQmlModel()
 {
 }
 
+EnginioQmlReply *EnginioQmlModel::append(const QJSValue &value)
+{
+    E_D();
+    return d->append(d->convert(value));
+}
+
+EnginioQmlReply *EnginioQmlModel::remove(int row)
+{
+    E_D();
+    return d->remove(row);
+}
+
+EnginioQmlReply *EnginioQmlModel::setProperty(int row, const QString &role, const QVariant &value)
+{
+    E_D();
+    return d->setValue(row, role, value);
+}
+
+EnginioQmlClient *EnginioQmlModel::enginio() const
+{
+    E_D();
+    return d->enginio();
+}
+
+void EnginioQmlModel::setEnginio(const EnginioQmlClient *enginio)
+{
+    E_D();
+    if (enginio == d->enginio())
+        return;
+
+    d->setEnginio(enginio);
+}
+
+QJSValue EnginioQmlModel::query()
+{
+    E_D();
+    return d->query();
+}
+
+void EnginioQmlModel::setQuery(const QJSValue &query)
+{
+    E_D();
+    if (d->query().equals(query))
+        return;
+    return d->setQuery(query);
+}
+
 QT_END_NAMESPACE
+

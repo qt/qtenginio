@@ -42,9 +42,8 @@
 #ifndef ENGINIOQMLOBJECTADAPTOR_P_H
 #define ENGINIOQMLOBJECTADAPTOR_P_H
 
-#include "enginioqmlclient_p.h"
-
 #include <Enginio/private/enginioobjectadaptor_p.h>
+#include "enginioqmlclient_p.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qstring.h>
 #include <QtQml/qjsengine.h>
@@ -99,6 +98,7 @@ template <> struct ObjectAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
     ObjectAdaptor(const QJSValue &value, EnginioQmlClientPrivate *client)
         : ValueAdaptor<QJSValue>(value, client)
     {}
+    bool isEmpty() const { return !_value.isObject(); }
 };
 
 template <> struct ArrayAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
@@ -143,8 +143,8 @@ template <> struct ArrayAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
     const_iterator constEnd() const { return const_iterator(); }
 };
 
-ObjectAdaptor<QJSValue> ValueAdaptor<QJSValue>::toObject() const { return ObjectAdaptor<QJSValue>(_value, _client); }
-ArrayAdaptor<QJSValue> ValueAdaptor<QJSValue>::toArray() const { return ArrayAdaptor<QJSValue>(_value, _client); }
+inline ObjectAdaptor<QJSValue> ValueAdaptor<QJSValue>::toObject() const { return ObjectAdaptor<QJSValue>(_value, _client); }
+inline ArrayAdaptor<QJSValue> ValueAdaptor<QJSValue>::toArray() const { return ArrayAdaptor<QJSValue>(_value, _client); }
 
 QT_END_NAMESPACE
 

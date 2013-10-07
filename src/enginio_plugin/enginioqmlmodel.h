@@ -42,17 +42,39 @@
 #ifndef ENGINIOQMLMODEL_H
 #define ENGINIOQMLMODEL_H
 
-#include <Enginio/enginiomodel.h>
-#include "enginioqmlclient.h"
+#include <Enginio/enginiomodelbase.h>
+#include <QtQml/qjsvalue.h>
 
 QT_BEGIN_NAMESPACE
 
-class EnginioQmlModel : public EnginioModel
+class EnginioQmlReply;
+class EnginioQmlClient;
+
+class EnginioQmlModel : public EnginioModelBase
 {
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlModel)
 public:
     EnginioQmlModel(QObject *parent = 0);
+    ~EnginioQmlModel();
+
+    Q_PROPERTY(EnginioQmlClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
+    Q_PROPERTY(QJSValue query READ query WRITE setQuery NOTIFY queryChanged)
+
+    // TODO: that is a pretty silly name
+    EnginioQmlClient *enginio() const Q_REQUIRED_RESULT;
+    void setEnginio(const EnginioQmlClient *enginio);
+
+    QJSValue query() Q_REQUIRED_RESULT;
+    void setQuery(const QJSValue &query);
+
+    Q_INVOKABLE EnginioQmlReply *append(const QJSValue &value);
+    Q_INVOKABLE EnginioQmlReply *remove(int row);
+    Q_INVOKABLE EnginioQmlReply *setProperty(int row, const QString &role, const QVariant &value);
+
+Q_SIGNALS:
+    void queryChanged(const QJSValue &query);
+    void enginioChanged(EnginioQmlClient *enginio);
 };
 
 QT_END_NAMESPACE

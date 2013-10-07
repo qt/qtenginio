@@ -251,7 +251,6 @@ public:
 
 class EnginioModelPrivate {
 protected:
-    QJsonObject _query;
     EnginioClientPrivate *_enginio;
     EnginioClient::Operation _operation;
     EnginioModelBase *q;
@@ -525,16 +524,11 @@ public:
         q->endInsertRows();
     }
 
-    QJsonObject query() Q_REQUIRED_RESULT
-    {
-        return _query;
-    }
-
     EnginioReplyBase *append(const QJsonObject &value)
     {
         QJsonObject object(value);
         QString temporaryId = QString::fromLatin1("tmp") + QUuid::createUuid().toString();
-        object[EnginioString::objectType] = _query[EnginioString::objectType]; // TODO think about it, it means that not all queries are valid
+        object[EnginioString::objectType] = queryData(EnginioString::objectType); // TODO think about it, it means that not all queries are valid
         ObjectAdaptor<QJsonObject> aObject(object);
         QNetworkReply *nreply = _enginio->create(aObject, _operation);
         EnginioReplyBase *ereply = createReply(nreply);
@@ -675,20 +669,21 @@ public:
     {
         if (!_enginio || _enginio->_backendId.isEmpty() || _enginio->_backendSecret.isEmpty())
             return;
-        if (!_query.isEmpty()) {
+        if (!queryIsEmpty()) {
             // setup notifications
             QJsonObject filter;
             QJsonObject objectType;
-            objectType.insert(EnginioString::objectType, _query[EnginioString::objectType]);
+            objectType.insert(EnginioString::objectType, queryData(EnginioString::objectType));
             filter.insert(EnginioString::data, objectType);
             _notifications.connectToBackend(this, _enginio, filter);
 
             // send full query
-            ObjectAdaptor<QJsonObject> aQuery(_query);
+            QJsonObject query = queryAsJson();
+            ObjectAdaptor<QJsonObject> aQuery(query);
             QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientPrivate::Operation>(_operation));
             EnginioReplyBase *ereply = createReply(nreply);
             if (_canFetchMore)
-                _latestRequestedOffset = _query[EnginioString::limit].toDouble();
+                _latestRequestedOffset = query[EnginioString::limit].toDouble();
             FinishedFullQueryRequest finshedRequest = { this, ereply };
             _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReplyBase::dataChanged, finshedRequest));
             QObject::connect(ereply, &EnginioReplyBase::dataChanged, ereply, &EnginioReplyBase::deleteLater);
@@ -722,7 +717,7 @@ public:
         _data = replyData(reply)[EnginioString::results].toArray();
         _attachedData.initFromArray(_data);
         syncRoles();
-        _canFetchMore = _canFetchMore && _data.count() && (_query[EnginioString::limit].toDouble() <= _data.count());
+        _canFetchMore = _canFetchMore && _data.count() && (queryData(EnginioString::limit).toDouble() <= _data.count());
         q->endResetModel();
     }
 
@@ -748,7 +743,7 @@ public:
             } else {
                 // we created the item but there is no sign of it. We need to check if we have more or
                 // less the same query
-                if (_query[EnginioString::objectType] == replyData(reply)[EnginioString::objectType]) {
+                if (queryData(EnginioString::objectType) == replyData(reply)[EnginioString::objectType]) {
                     // the type is the same so we can re-add it
                     receivedCreateNotification(replyData(reply));
                 }
@@ -988,7 +983,7 @@ public:
         if (!_canFetchMore || currentOffset < _latestRequestedOffset)
             return; // we do not want to spam the server, lets wait for the last fetch
 
-        QJsonObject query(_query);
+        QJsonObject query(queryAsJson());
 
         int limit = query[EnginioString::limit].toDouble();
         limit = qMax(row - currentOffset, limit); // check if default limit is not too small
@@ -1008,6 +1003,9 @@ public:
 
     virtual QJsonObject replyData(const EnginioReplyBase *reply) const = 0;
     virtual EnginioReplyBase *createReply(QNetworkReply *nreply) const = 0;
+    virtual QJsonValue queryData(const QString &name) = 0;
+    virtual bool queryIsEmpty() const = 0;
+    virtual QJsonObject queryAsJson() const = 0;
 };
 
 
@@ -1019,11 +1017,11 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
     typedef typename Types::Public Public;
     typedef typename Types::Client Client;
     typedef typename Types::ClientPrivate ClientPrivate;
+    typedef typename Types::Data Data;
+
+    Data _query;
 
     inline Public *q() const { return static_cast<Public*>(Base::q); }
-
-    Derived *callDerived() { return static_cast<Derived*>(this); }
-    const Derived *callDerived() const { return static_cast<Derived*>(this); }
 
     class EnginioDestroyed
     {
@@ -1075,29 +1073,35 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
         q()->enginioChanged(static_cast<Client*>(const_cast<EnginioClientBase*>(enginio)));
     }
 
-    void setQuery(const QJsonObject &query)
+    Data query() Q_REQUIRED_RESULT
+    {
+        return _query;
+    }
+
+    void setQuery(const Data &query)
     {
         _query = query;
 
-        if (_query.contains(EnginioString::pageSize)) {
-            const int pageSize = _query[EnginioString::pageSize].toDouble();
-            const QString limitString(EnginioString::limit);
-            const QString offsetString(EnginioString::offset);
-            const unsigned limit = _query[limitString].toDouble();
-            const unsigned offset = _query[offsetString].toDouble();
-            if (limit)
-                qWarning() << "EnginioModel::setQuery()" << "'limit' parameter can not be used together with model pagining feature, the value will be ignored";
+        // TODO Enable together with pageing support
+//        if (_query.contains(EnginioString::pageSize)) {
+//            const int pageSize = _query[EnginioString::pageSize].toDouble();
+//            const QString limitString(EnginioString::limit);
+//            const QString offsetString(EnginioString::offset);
+//            const unsigned limit = _query[limitString].toDouble();
+//            const unsigned offset = _query[offsetString].toDouble();
+//            if (limit)
+//                qWarning() << "EnginioModel::setQuery()" << "'limit' parameter can not be used together with model pagining feature, the value will be ignored";
 
-            if (offset) {
-                qWarning() << "EnginioModel::setQuery()" << "'offset' parameter can not be used together with model pagining feature, the value will be ignored";
-                _query.remove(offsetString);
-            }
-            _query[limitString] = pageSize;
-            _canFetchMore = true;
-        } else {
-            _canFetchMore = false;
-        }
-        callDerived()->emitQueryChanged(query);
+//            if (offset) {
+//                qWarning() << "EnginioModel::setQuery()" << "'offset' parameter can not be used together with model pagining feature, the value will be ignored";
+//                _query.remove(offsetString);
+//            }
+//            _query[limitString] = pageSize;
+//            _canFetchMore = true;
+//        } else {
+//            _canFetchMore = false;
+//        }
+        emit q()->queryChanged(query);
     }
 
     Reply *append(const QJsonObject &value) { return static_cast<Reply*>(Base::append(value)); }
@@ -1110,6 +1114,10 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
         return new Reply(enginio, nreply);
     }
 
+    bool queryIsEmpty() const Q_DECL_OVERRIDE
+    {
+        return ObjectAdaptor<Data>(_query, static_cast<ClientPrivate*>(_enginio)).isEmpty();
+    }
 };
 
 QT_END_NAMESPACE
