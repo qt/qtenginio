@@ -183,7 +183,7 @@ void EnginioReplyBase::setNetworkReply(QNetworkReply *reply)
 
     d->_nreply->deleteLater();
     d->_nreply = reply;
-    d->_data = QJsonObject();
+    d->_data = QByteArray();
     d->_client->registerReply(reply, this);
 }
 
@@ -198,7 +198,7 @@ void EnginioReplyBase::swapNetworkReply(EnginioReplyBase *reply)
 
     qSwap(d->_nreply, reply->d->_nreply);
 
-    d->_data = reply->d->_data = QJsonObject();
+    d->_data = reply->d->_data = QByteArray();
 
     d->_client->registerReply(d->_nreply, this);
     reply->d->_client->registerReply(reply->d->_nreply, reply);

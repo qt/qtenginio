@@ -44,6 +44,7 @@
 
 #include <QtCore/qhash.h>
 #include <QtCore/qstring.h>
+#include <QtCore/qbytearray.h>
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qjsondocument.h>
 #include <QtNetwork/qnetworkreply.h>
@@ -57,7 +58,7 @@ class EnginioReplyPrivate {
 public:
     EnginioClientPrivate *_client;
     QNetworkReply *_nreply;
-    mutable QJsonObject _data;
+    mutable QByteArray _data;
     bool _delay;
     EnginioReplyPrivate(EnginioClientPrivate *p, QNetworkReply *reply)
         : _client(p)
@@ -90,7 +91,7 @@ public:
     QString errorString() const Q_REQUIRED_RESULT
     {
         if (errorType() == EnginioReply::BackendError)
-            return QString::fromUtf8(QJsonDocument(_data).toJson(QJsonDocument::Compact));
+            return QString::fromUtf8(_data);
         return _nreply->errorString();
     }
 
@@ -105,9 +106,9 @@ public:
 
     QJsonObject data() const Q_REQUIRED_RESULT
     {
-        if (_data.isEmpty())
-            _data = QJsonDocument::fromJson(_nreply->readAll()).object();
-        return _data;
+        if (_data.isEmpty() && _nreply->isFinished())
+            _data = _nreply->readAll();
+        return QJsonDocument::fromJson(_data).object();
     }
 
     void dumpDebugInfo() const

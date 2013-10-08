@@ -214,7 +214,14 @@ Item {
 
             compare(reply.networkError, d.networkError)
             compare(reply.backendStatus, d.backendStatus)
-            compare(reply.errorString, d.errorString)
+
+            if (d.errorString !== reply.errorString) {
+                var expectedErrorObject = JSON.parse(d.errorString)
+                var actualErrorObject = JSON.parse(reply.errorString)
+                for (var prop in expectedErrorObject) {
+                    compare(actualErrorObject[prop], expectedErrorObject[prop])
+                }
+            }
         }
     }
 }
