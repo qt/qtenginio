@@ -49,6 +49,8 @@
 #include <QtCore/qbytearray.h>
 #include <QtCore/qstring.h>
 
+QT_BEGIN_NAMESPACE
+
 // generic versions of these clasess are undefined
 template <class T> struct ValueAdaptor;
 template <class T> struct ObjectAdaptor;
@@ -125,5 +127,7 @@ template <> struct ArrayAdaptor<QJsonObject>
 
 ObjectAdaptor<QJsonObject> ValueAdaptor<QJsonObject>::toObject() const { return _value.toObject(); }
 ArrayAdaptor<QJsonObject> ValueAdaptor<QJsonObject>::toArray() const { return _value.toArray(); }
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOOBJECTADAPTOR_P_H

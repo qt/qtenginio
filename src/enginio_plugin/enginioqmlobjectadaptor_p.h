@@ -51,6 +51,8 @@
 #include <QtQml/qjsvalue.h>
 #include <QtQml/qjsvalueiterator.h>
 
+QT_BEGIN_NAMESPACE
+
 template <> struct ValueAdaptor<QJSValue>;
 template <> struct ObjectAdaptor<QJSValue>;
 template <> struct ArrayAdaptor<QJSValue>;
@@ -144,5 +146,6 @@ template <> struct ArrayAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
 ObjectAdaptor<QJSValue> ValueAdaptor<QJSValue>::toObject() const { return ObjectAdaptor<QJSValue>(_value, _client); }
 ArrayAdaptor<QJSValue> ValueAdaptor<QJSValue>::toArray() const { return ArrayAdaptor<QJSValue>(_value, _client); }
 
+QT_END_NAMESPACE
 
 #endif // ENGINIOQMLOBJECTADAPTOR_P_H
