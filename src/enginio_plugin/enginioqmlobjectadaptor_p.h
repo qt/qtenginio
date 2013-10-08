@@ -105,7 +105,7 @@ template <> struct ArrayAdaptor<QJSValue> : public ValueAdaptor<QJSValue>
         : ValueAdaptor<QJSValue>(value)
     {}
 
-    bool isEmpty() const { return _value.property(EnginioString::length).toInt(); }
+    bool isEmpty() const { return _value.property(EnginioString::length).toInt() == 0; }
 
     struct const_iterator
     {
