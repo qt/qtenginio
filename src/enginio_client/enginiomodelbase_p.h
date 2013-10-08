@@ -410,14 +410,7 @@ public:
     {
     }
 
-    virtual ~EnginioModelPrivate()
-    {
-        foreach (const QMetaObject::Connection &connection, _clientConnections)
-            QObject::disconnect(connection);
-
-        foreach (const QMetaObject::Connection &connection, _repliesConnections)
-            QObject::disconnect(connection);
-    }
+    virtual ~EnginioModelPrivate();
 
     void init()
     {
@@ -429,100 +422,10 @@ public:
         _notifications.disable();
     }
 
-    void receivedNotification(QJsonObject data)
-    {
-        const QJsonObject origin = data[EnginioString::origin].toObject();
-        const QString requestId = origin[EnginioString::apiRequestId].toString();
-        if (_attachedData.markRequestIdAsHandled(requestId))
-            return; // request was handled
-
-        QJsonObject object = data[EnginioString::data].toObject();
-        QString event = data[EnginioString::event].toString();
-        if (event == EnginioString::update) {
-            receivedUpdateNotification(object);
-        } else if (event == EnginioString::_delete) {
-            receivedRemoveNotification(object);
-        } else  if (event == EnginioString::create) {
-            const int rowHint = _attachedData.rowFromRequestId(requestId);
-            if (rowHint != NoHintRow)
-                receivedUpdateNotification(object, QString(), rowHint);
-            else
-                receivedCreateNotification(object);
-        }
-    }
-
-    void receivedRemoveNotification(const QJsonObject &object, int rowHint = NoHintRow)
-    {
-        int row = rowHint;
-        if (rowHint == NoHintRow) {
-            QString id = object[EnginioString::id].toString();
-            if (Q_UNLIKELY(!_attachedData.contains(id))) {
-                // removing not existing object
-                return;
-            }
-            row = _attachedData.rowFromObjectId(id);
-        }
-        if (Q_UNLIKELY(row == DeletedRow))
-            return;
-
-        q->beginRemoveRows(QModelIndex(), row, row);
-        _data.removeAt(row);
-        // we need to updates rows in _attachedData
-        _attachedData.updateAllDataAfterRowRemoval(row);
-        q->endRemoveRows();
-    }
-
-    void receivedUpdateNotification(const QJsonObject &object, const QString &idHint = QString(), int row = NoHintRow)
-    {
-        // update an existing object
-        if (row == NoHintRow) {
-            QString id = idHint.isEmpty() ? object[EnginioString::id].toString() : idHint;
-            Q_ASSERT(_attachedData.contains(id));
-            row = _attachedData.rowFromObjectId(id);
-        }
-        if (Q_UNLIKELY(row == DeletedRow))
-            return;
-        Q_ASSERT(row >= 0);
-
-        QJsonObject current = _data[row].toObject();
-        QDateTime currentUpdateAt = QDateTime::fromString(current[EnginioString::updatedAt].toString(), Qt::ISODate);
-        QDateTime newUpdateAt = QDateTime::fromString(object[EnginioString::updatedAt].toString(), Qt::ISODate);
-        if (newUpdateAt < currentUpdateAt) {
-            // we already have a newer version
-            return;
-        }
-        if (_data[row].toObject()[EnginioString::id].toString().isEmpty()) {
-            // Create and update may go through the same code path because
-            // the model already have a dummy item. No id means that it
-            // is a dummy item.
-            const QString newId = object[EnginioString::id].toString();
-            AttachedData newData(row, newId);
-            _attachedData.insert(newData);
-        }
-        if (_data.count() == 1) {
-            q->beginResetModel();
-            _data.replace(row, object);
-            syncRoles();
-            q->endResetModel();
-        } else {
-            _data.replace(row, object);
-            emit q->dataChanged(q->index(row), q->index(row));
-        }
-    }
-
-    void receivedCreateNotification(const QJsonObject &object)
-    {
-        // create a new object
-        QString id = object[EnginioString::id].toString();
-        Q_ASSERT(!_attachedData.contains(id));
-        AttachedData data;
-        data.row = _data.count();
-        data.id = id;
-        q->beginInsertRows(QModelIndex(), _data.count(), _data.count());
-        _attachedData.insert(data);
-        _data.append(object);
-        q->endInsertRows();
-    }
+    void receivedNotification(QJsonObject data);
+    void receivedRemoveNotification(const QJsonObject &object, int rowHint = NoHintRow);
+    void receivedUpdateNotification(const QJsonObject &object, const QString &idHint = QString(), int row = NoHintRow);
+    void receivedCreateNotification(const QJsonObject &object);
 
     EnginioReplyBase *append(const QJsonObject &value)
     {
@@ -908,32 +811,7 @@ public:
         return ereply;
     }
 
-    void syncRoles()
-    {
-        QJsonObject firstObject(_data.first().toObject()); // TODO it expects certain data structure in all objects, add way to specify roles
-
-        if (!_roles.count()) {
-            _roles.reserve(firstObject.count());
-            _roles[EnginioModel::SyncedRole] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
-            _roles[EnginioModel::CreatedAtRole] = EnginioString::createdAt;
-            _roles[EnginioModel::UpdatedAtRole] = EnginioString::updatedAt;
-            _roles[EnginioModel::IdRole] = EnginioString::id;
-            _roles[EnginioModel::ObjectTypeRole] = EnginioString::objectType;
-            _rolesCounter = EnginioModel::LastRole;
-        }
-
-        // estimate additional dynamic roles:
-        QSet<QString> definedRoles = _roles.values().toSet();
-        for (QJsonObject::const_iterator i = firstObject.constBegin(); i != firstObject.constEnd(); ++i) {
-            const QString key = i.key();
-            if (definedRoles.contains(key)) {
-                // we skip predefined keys so we can keep constant id for them
-                if (Q_UNLIKELY(key == EnginioString::_synced))
-                    qWarning("EnginioModel can not be used with objects having \"_synced\" property. The property will be overriden.");
-            } else
-                _roles[_rolesCounter++] = i.key();
-        }
-    }
+    void syncRoles();
 
     QHash<int, QByteArray> roleNames() const Q_REQUIRED_RESULT
     {
