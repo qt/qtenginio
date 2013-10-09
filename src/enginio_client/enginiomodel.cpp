@@ -64,17 +64,92 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
   \target EnginioModelCpp
   \brief EnginioModel represents data from Enginio as a \l QAbstractListModel.
 
-  Example of setting a query.
+  EnginioModel is a \l QAbstractListModel, together with a view it allows
+  to show the result of a query in a convenient way. The model executes query, update
+  and create operations asynchronously on an Enginio backend collection, which allows
+  not only to read data from the cloud but also modify it.
 
-  The query has to result in a list.
+  The simplest type of query is:
+  \code
+  { "objectType": "objects.fruits" }
+  \endcode
 
-  Inside the delegate you have the magic properties model and index.
-  Exposes the data as "model".
-  index
+  Assigning such a query to the model results in downloading of all objects from the "objects.fruits"
+  collection. It is possible to \l{EnginioModel::append}{append} new objects, to
+  \l{EnginioModel::setProperty}{modify} or to \l{EnginioModel::remove}{remove} them.
 
-  Sorting is done server side, as soon as data is changed locally it will be invalid.
+  The query has to result in a list of objects, each object becomes an item in the model. Properties
+  of the items are used as role names.
+  There are a few predefined role names that will always be available (\l{EnginioModel::Roles}{Roles}).
 
-  \note that the EnginioClient does emit the finished and error signals for the model.
+  The operations are executed asynchronously, which means that user interface is not
+  blocked while the model is initialized and updated. Every modification is divided in
+  two steps; request and confirmation. For example when \l{EnginioModel::append}{append}
+  is called EnginioModel returns immediately as if the operation had succeeded. In
+  the background it waits for confirmation from the backend and only then the operation is
+  really finished. It may happen that operation fails, for example
+  because of insufficient access rights, in that case the operation will be reverted.
+
+  There are two, ways of tracking if an item state is the same in the model and backend.
+  Each item has a role that returns a boolean \l{EnginioModel::SyncedRole}{SyncedRole}, role name "_synced" which
+  indicates whether the item is successfully updated on the server.
+  This role can for example meant to be used for a busy indicator while a property is being updated.
+  Alternatively the status of each \l{EnginioReply}{EnginioReply} returned by EnginioModel can be tracked.
+  The operation is confirmed when the reply is \l{EnginioReply::isFinished}{finished} without \l{EnginioReply::isError}{error}.
+
+  When a reply is finished it is the user's responsibility to delete it, it can be done
+  by connecting the \l{EnginioReply::finished}{finished} signal to \l{QObject::deleteLater}{deleteLater}.
+  \code
+  QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
+  \endcode
+  \note it is not safe to use the delete operator directly in \l{EnginioReply::finished}{finished}.
+
+  \note EnginioClient emits the finished and error signals for the model, not the model itself.
+
+  The \l{EnginioModel::query}{query} can contain one or more options:
+  The "sort" option, to get presorted data:
+  \code
+  {
+    "objectType": "objects.fruits",
+    "sort": [{"sortBy":"price", "direction": "asc"}]
+  }
+  \endcode
+  The "query" option is used for filtering:
+  \code
+  {
+    "objectType": "objects.fruits",
+    "query": {"name": {"$in": ["apple", "orange", "kiwi"]}}
+  }
+  \endcode
+  The "limit" option to limit the amount of results:
+  \code
+  {
+    "objectType": "objects.fruits",
+    "limit": 10
+  }
+  \endcode
+  The "offset" option to skip some results from the beginning of a result set:
+  \code
+  {
+    "objectType": "objects.fruits",
+    "offset": 10
+  }
+  \endcode
+  The options are valid only during the initial model population and
+  are not enforced in anyway when updating or otherwise modifying the model data.
+  \l QSortFilterProxyModel can be used to do more advanced sorting and filtering on the client side.
+
+  EnginioModel can not detect when a property of a result is computed by the backend.
+  For example the "include" option to \l{EnginioModel::query}{query} fills in the original creator of
+  and object with the full object representing the "creator".
+  \code
+  {
+    "objectType": "objects.fruits",
+    "include": {"creator": {}}
+  }
+  \endcode
+  For the model the "creator" property is not longer a reference (as it is on the backend), but a full object.
+  But while the full object is accessible, attempts to alter the object's data will fail.
 
   For the QML version of this class see \l {Enginio1::EnginioModel}{EnginioModel (QML)}
 */
