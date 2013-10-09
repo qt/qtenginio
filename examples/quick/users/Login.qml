@@ -39,18 +39,18 @@
 ****************************************************************************/
 
 import QtQuick 2.1
-//![imports]
 import Enginio 1.0
-//![imports]
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 
 ColumnLayout {
+    //![identity]
     EnginioBasicAuthentication {
         id: identity
         user: login.text
         password: password.text
     }
+    //![identity]
     anchors.fill: parent
     anchors.margins: 3
     spacing: 3
@@ -82,6 +82,7 @@ ColumnLayout {
         Layout.fillHeight: true
         Layout.fillWidth: true
 
+        //![connections]
         Connections {
             target: enginioClient
             onSessionAuthenticated: {
@@ -94,6 +95,7 @@ ColumnLayout {
                 data.text = data.text + "Session closed.\n\n"
             }
         }
+        //![connections]
     }
 
     states: [
@@ -104,7 +106,9 @@ ColumnLayout {
                 target: proccessButton
                 text: "Login"
                 onClicked: {
+                    //![assignIdentity]
                     enginioClient.identity = identity
+                    //![assignIdentity]
                 }
             }
         },
@@ -129,13 +133,15 @@ ColumnLayout {
             }
         },
         State {
-            name: "loggedIn"
+            name: "Authenticated"
             when: enginioClient.authenticationState == Enginio.Authenticated
             PropertyChanges {
                 target: proccessButton
                 text: "Logout"
                 onClicked: {
+                    //![assignNull]
                     enginioClient.identity = null
+                    //![assignNull]
                 }
             }
         }

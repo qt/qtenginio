@@ -3,7 +3,7 @@
 ** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
-** This file is part of the QtEnginio module of the Qt Toolkit.
+** This file is part of the Qt Quick Controls module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:BSD$
 ** You may use this file under the terms of the BSD license as follows:
@@ -39,45 +39,88 @@
 ****************************************************************************/
 
 import QtQuick 2.1
-//![imports]
 import Enginio 1.0
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
-//![imports]
 
 ColumnLayout {
     anchors.margins: 3
     spacing: 3
-    TableView {
+
+    TextField {
+        id: login
         Layout.fillWidth: true
-        Layout.fillHeight: true
+        placeholderText: "Username"
+    }
 
-        //![columns]
-        TableViewColumn { title: "First name"; role: "firstName" }
-        TableViewColumn { title: "Last name"; role: "lastName" }
-        TableViewColumn { title: "Login"; role: "username" }
-        TableViewColumn { title: "Email"; role: "email" }
-        //![columns]
+    TextField {
+        id: password
+        Layout.fillWidth: true
+        placeholderText: "Password"
+        echoMode: TextInput.PasswordEchoOnEdit
+    }
 
-        //![browse]
-        model: EnginioModel {
-            id: enginioModel
-            enginio: enginioClient
-            operation: Enginio.UserOperation
-            query: {"objectType": "users" }
-        }
-        //![browse]
+    TextField {
+        id: userFirstName
+        Layout.fillWidth: true
+        placeholderText: "First name"
+    }
+
+    TextField {
+        id: userLastName
+        Layout.fillWidth: true
+        placeholderText: "Last name"
+    }
+
+    TextField {
+        id: userEmail
+        Layout.fillWidth: true
+        placeholderText: "Email"
     }
 
     Button {
-        text: "Refresh"
+        id: proccessButton
         Layout.fillWidth: true
+        enabled: login.text.length && password.text.length
+        text: "Register"
+
+        states: [
+            State {
+                name: "Registering"
+                PropertyChanges {
+                    target: proccessButton
+                    text: "Registering..."
+                    enabled: false
+                }
+            }
+        ]
 
         onClicked: {
-            var tmp = enginioModel.query
-            enginioModel.query = {}
-            enginioModel.query = tmp
+            proccessButton.state = "Registering"
+            //![create]
+            var reply = enginioClient.create(
+                        { "username": login.text,
+                          "password": password.text,
+                          "email": userEmail.text,
+                          "firstName": userFirstName.text,
+                          "lastName": userLastName.text
+                        }, Enginio.UserOperation)
+            //![create]
+            reply.finished.connect(function() {
+                    proccessButton.state = ""
+                    if (reply.errorType !== EnginioReply.NoError) {
+                        log.text = "Failed to create an account:\n" + JSON.stringify(reply.data, undefined, 2) + "\n\n"
+                    } else {
+                        log.text = "Account Created.\n"
+                    }
+                })
         }
     }
-}
 
+    TextArea {
+        id: log
+        readOnly: true
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+    }
+}

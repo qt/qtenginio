@@ -9,5 +9,5 @@ SOURCES += ../main.cpp
 
 mac: CONFIG -= app_bundle
 
-OTHER_FILES += users.qml Browse.qml Login.qml
+OTHER_FILES += users.qml Browse.qml Login.qml Register.qml
 RESOURCES += users.qrc

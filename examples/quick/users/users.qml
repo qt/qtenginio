@@ -39,9 +39,7 @@
 ****************************************************************************/
 
 import QtQuick 2.1
-//![imports]
 import Enginio 1.0
-//![imports]
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 
@@ -51,6 +49,7 @@ Rectangle {
     width: 600
     color: "#f4f4f4"
 
+    //![client]
     Enginio {
         id: enginioClient
         backendId: enginioBackendId
@@ -58,6 +57,7 @@ Rectangle {
 
         onError: console.debug(JSON.stringify(reply.data))
     }
+    //![client]
 
     TabView {
         id: tabView
@@ -65,13 +65,18 @@ Rectangle {
         anchors.margins: 3
 
         Tab {
+            title: "Users"
+            Browse { anchors.fill: parent }
+        }
+
+        Tab {
             title: "Login"
             Login { anchors.fill: parent }
         }
 
         Tab {
-            title: "Users"
-            Browse { anchors.fill: parent }
+            title: "Register"
+            Register { anchors.fill: parent }
         }
     }
 }
