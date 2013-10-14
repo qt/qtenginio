@@ -137,7 +137,7 @@ public:
 
     Row rowFromRequestId(const RequestId &id) const
     {
-        StorageIndex idx = _requestIdIndex.value(id, qMakePair(0, InvalidStorageIndex)).second;
+        StorageIndex idx = _requestIdIndex.value(id, qMakePair(0, static_cast<int>(InvalidStorageIndex))).second;
         return idx == InvalidStorageIndex ? InvalidRow : _storage[idx].row;
     }
 
