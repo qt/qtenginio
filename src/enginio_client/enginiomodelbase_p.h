@@ -249,7 +249,7 @@ public:
 };
 
 
-class EnginioModelPrivate {
+class ENGINIOCLIENT_EXPORT EnginioModelPrivate {
 protected:
     EnginioClientPrivate *_enginio;
     EnginioClient::Operation _operation;
