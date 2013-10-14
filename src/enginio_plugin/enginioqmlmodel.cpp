@@ -179,6 +179,7 @@ struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1, 
         if (value.isNull())
             return QJsonValue(QJsonValue::Null);
         Q_ASSERT(false);
+        return QJsonValue();
     }
 
     virtual QJsonObject queryAsJson() const Q_DECL_OVERRIDE
