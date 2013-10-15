@@ -99,7 +99,7 @@ public:
     {
         if (errorCode() == QNetworkReply::NoError)
             return EnginioReply::NoError;
-        if (data().isEmpty())
+        if (_data.isEmpty())
             return EnginioReply::NetworkError;
         return EnginioReply::BackendError;
     }
