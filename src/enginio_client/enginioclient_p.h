@@ -496,7 +496,7 @@ public:
 
         QNetworkReply *reply = 0;
         QByteArray data;
-#if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
+#if 1 // QT_VERSION < QT_VERSION_CHECK(5, 4, 0) ?
         if (operation != EnginioClientBase::ObjectAclOperation)
             reply = networkManager()->deleteResource(req);
         else {
