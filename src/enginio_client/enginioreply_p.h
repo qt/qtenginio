@@ -91,7 +91,7 @@ public:
     QString errorString() const Q_REQUIRED_RESULT
     {
         if (errorType() == EnginioReply::BackendError)
-            return QString::fromUtf8(_data);
+            return QString::fromUtf8(pData());
         return _nreply->errorString();
     }
 
@@ -99,16 +99,21 @@ public:
     {
         if (errorCode() == QNetworkReply::NoError)
             return EnginioReply::NoError;
-        if (_data.isEmpty())
+        if (pData().isEmpty())
             return EnginioReply::NetworkError;
         return EnginioReply::BackendError;
     }
 
     QJsonObject data() const Q_REQUIRED_RESULT
     {
+        return QJsonDocument::fromJson(pData()).object();
+    }
+
+    QByteArray pData() const Q_REQUIRED_RESULT
+    {
         if (_data.isEmpty() && _nreply->isFinished())
             _data = _nreply->readAll();
-        return QJsonDocument::fromJson(_data).object();
+        return _data;
     }
 
     void dumpDebugInfo() const
@@ -133,8 +138,8 @@ public:
             else
                 qDebug() << "Request Data:" << json;
         }
-        if (!_data.isEmpty())
-            qDebug() << "Reply Data:" << _data;
+        if (!pData().isEmpty())
+            qDebug() << "Reply Data:" << pData();
     }
 };
 
