@@ -197,6 +197,9 @@ EnginioQmlModel::EnginioQmlModel(QObject *parent)
 {
     E_D();
     d->init();
+    QObject::connect(this, &EnginioModelBase::rowsRemoved, this, &EnginioQmlModel::rowCountChanged);
+    QObject::connect(this, &EnginioModelBase::rowsInserted, this, &EnginioQmlModel::rowCountChanged);
+    QObject::connect(this, &EnginioModelBase::modelReset, this, &EnginioQmlModel::rowCountChanged);
 }
 
 EnginioQmlModel::~EnginioQmlModel()

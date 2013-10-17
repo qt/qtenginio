@@ -60,6 +60,7 @@ public:
 
     Q_PROPERTY(EnginioQmlClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
     Q_PROPERTY(QJSValue query READ query WRITE setQuery NOTIFY queryChanged)
+    Q_PROPERTY(int rowCount READ rowCount NOTIFY rowCountChanged)
 
     // TODO: that is a pretty silly name
     EnginioQmlClient *enginio() const Q_REQUIRED_RESULT;
@@ -75,6 +76,7 @@ public:
 Q_SIGNALS:
     void queryChanged(const QJSValue &query);
     void enginioChanged(EnginioQmlClient *enginio);
+    void rowCountChanged();
 };
 
 QT_END_NAMESPACE

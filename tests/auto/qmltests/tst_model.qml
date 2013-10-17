@@ -341,4 +341,59 @@ Item {
         }
     }
 
+
+    TestCase {
+        name: "EnginioModel: rowCount"
+
+        EnginioModel {
+            id: modelRowCount
+            enginio: enginioClient
+            query: {
+                     "objectType": AppConfig.testObjectType,
+                     "query": {"testCase": "EnginioModel: rowCount"}
+                   }
+
+            property int resetCounter: 0
+            onModelReset: ++resetCounter
+
+            property int rowCountChangedCounter: 0
+            onRowCountChanged: ++rowCountChangedCounter
+        }
+
+        function test_rowCount()
+        {
+            tryCompare(modelRowCount, "resetCounter", 1)
+
+            // append and remove
+            compare(modelRowCount.rowCount, 0)
+
+            var r0 = modelRowCount.append({"objectType": AppConfig.testObjectType, "testCase": "EnginioModel: rowCount"})
+            tryCompare(r0, "isFinished", true)
+            tryCompare(r0, "isError", false)
+
+            var initialRowCount = modelRowCount.rowCount
+            var initialRowCountChangedCounter = modelRowCount.rowCountChangedCounter
+            var r1 = modelRowCount.append({"objectType": AppConfig.testObjectType, "testCase": "EnginioModel: rowCount"})
+            tryCompare(r1, "isFinished", true)
+            tryCompare(r1, "isError", false)
+            tryCompare(modelRowCount, "rowCount", initialRowCount + 1)
+            tryCompare(modelRowCount, "rowCountChangedCounter", initialRowCountChangedCounter + 1)
+
+            var r2 = modelRowCount.remove(0)
+            tryCompare(r2, "isFinished", true)
+            tryCompare(r2, "isError", false)
+            tryCompare(modelRowCount, "rowCount", initialRowCount)
+            tryCompare(modelRowCount, "rowCountChangedCounter", initialRowCountChangedCounter + 2)
+
+            // reset
+            var query = modelRowCount.query;
+            modelRowCount.query = undefined
+            compare(modelRowCount.query, undefined)
+//            tryCompare(modelRowCount, "rowCount", 0) TODO FIXME
+//            tryCompare(modelRowCount, "rowCountChangedCounter", initialRowCountChangedCounter + 3)TODO FIXME
+            modelRowCount.query = query
+            tryCompare(modelRowCount, "rowCount", initialRowCount)
+            tryCompare(modelRowCount, "rowCountChangedCounter", initialRowCountChangedCounter + 3)
+        }
+    }
 }
