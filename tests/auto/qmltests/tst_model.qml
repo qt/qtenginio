@@ -389,11 +389,11 @@ Item {
             var query = modelRowCount.query;
             modelRowCount.query = undefined
             compare(modelRowCount.query, undefined)
-//            tryCompare(modelRowCount, "rowCount", 0) TODO FIXME
-//            tryCompare(modelRowCount, "rowCountChangedCounter", initialRowCountChangedCounter + 3)TODO FIXME
+            tryCompare(modelRowCount, "rowCount", 0)
+            tryCompare(modelRowCount, "rowCountChangedCounter", initialRowCountChangedCounter + 3)
             modelRowCount.query = query
             tryCompare(modelRowCount, "rowCount", initialRowCount)
-            tryCompare(modelRowCount, "rowCountChangedCounter", initialRowCountChangedCounter + 3)
+            tryCompare(modelRowCount, "rowCountChangedCounter", initialRowCountChangedCounter + 4)
         }
     }
 }

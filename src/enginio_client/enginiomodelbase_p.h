@@ -481,9 +481,16 @@ public:
             QString id = _model->replyData(finishedCreateReply)[EnginioString::id].toString();
             Q_ASSERT(!id.isEmpty());
             _object[EnginioString::id] = id;
-            int row = Q_LIKELY(_model->_attachedData.contains(_tmpId))
-                    ? _model->_attachedData.deref(_tmpId).row
-                    : _model->_attachedData.rowFromObjectId(id); // model reset happend in a mean while
+            int row = InvalidRow;
+            if (Q_LIKELY(_model->_attachedData.contains(_tmpId)))
+                row = _model->_attachedData.deref(_tmpId).row;
+            else if (Q_LIKELY(_model->_attachedData.contains(id))) {
+                // model reset happend in a mean while
+                row = _model->_attachedData.rowFromObjectId(id);
+            } else {
+                // the model was reset, probably with a different query, beacause
+                // we have no sign of the id.
+            }
             return qMakePair(id, row);
         }
 
@@ -507,6 +514,10 @@ public:
             } else {
                 QPair<QString, int> tmp = d.getAndSetCurrentIdRow(finishedCreateReply);
                 const int row = tmp.second;
+                if (Q_UNLIKELY(row == InvalidRow)) {
+                    d.markAsError(QByteArrayLiteral("EnginioModel: The query was changed before the request could be sent"));
+                    return;
+                }
                 QString id = tmp.first;
                 FinishedRemoveRequest finishedRequest = { d._model, id, d._reply };
                 QObject::connect(d._reply, &EnginioReplyBase::dataChanged, finishedRequest);
@@ -594,6 +605,8 @@ public:
             FinishedFullQueryRequest finshedRequest = { this, ereply };
             _repliesConnections.insert(ereply, QObject::connect(ereply, &EnginioReplyBase::dataChanged, finshedRequest));
             QObject::connect(ereply, &EnginioReplyBase::dataChanged, ereply, &EnginioReplyBase::deleteLater);
+        } else {
+            fullQueryReset(QJsonArray());
         }
     }
 
@@ -620,13 +633,10 @@ public:
     void finishedFullQueryRequest(const EnginioReplyBase *reply)
     {
         _repliesConnections.remove(reply);
-        q->beginResetModel();
-        _data = replyData(reply)[EnginioString::results].toArray();
-        _attachedData.initFromArray(_data);
-        syncRoles();
-        _canFetchMore = _canFetchMore && _data.count() && (queryData(EnginioString::limit).toDouble() <= _data.count());
-        q->endResetModel();
+        fullQueryReset(replyData(reply)[EnginioString::results].toArray());
     }
+
+    void fullQueryReset(const QJsonArray &data);
 
     void finishedCreateRequest(const EnginioReplyBase *reply, const QString &tmpId)
     {
@@ -744,6 +754,10 @@ public:
             } else {
                 QPair<QString, int> tmp = d.getAndSetCurrentIdRow(finishedCreateReply);
                 const int row = tmp.second;
+                if (Q_UNLIKELY(row == InvalidRow)) {
+                    d.markAsError(QByteArrayLiteral("EnginioModel: The query was changed before the request could be sent"));
+                    return;
+                }
                 QString id = tmp.first;
                 FinishedUpdateRequest finished = { d._model, id, d._object, d._reply };
                 QObject::connect(d._reply, &EnginioReplyBase::dataChanged, finished);

@@ -245,6 +245,23 @@ void tst_EnginioModel::query_property()
     QTRY_COMPARE(spy.count(), 2);
     QVERIFY(model.query().isEmpty());
     QVERIFY(spy[1][0].value<QJsonObject>().isEmpty());
+
+    {
+        model.setOperation(EnginioClient::UserOperation);
+        QJsonObject query = QJsonDocument::fromJson("{\"limit\":5}").object();
+
+        EnginioClient client;
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+        model.setEnginio(&client);
+        model.setQuery(query);
+        QTRY_VERIFY(model.rowCount() > 0);
+
+        model.setQuery(QJsonObject());
+        QCOMPARE(model.rowCount(), 0);
+    }
 }
 
 void tst_EnginioModel::operation_property()
@@ -1245,10 +1262,10 @@ void tst_EnginioModel::delayedRequestBeforeInitialModelReset()
         EnginioReply *update = model.setProperty(0, "title", QString::fromUtf8("appendAndRemoveModel1"));
         EnginioReply *remove = model.remove(1);
         QTRY_VERIFY(append1->isFinished() && append2->isFinished() && remove->isFinished() && update->isFinished());
-        CHECK_NO_ERROR(append1);
-        CHECK_NO_ERROR(append2);
-        CHECK_NO_ERROR(update);
-        CHECK_NO_ERROR(remove);
+        QVERIFY(!append1->isError() || append1->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
+        QVERIFY(!append2->isError() || append2->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
+        QVERIFY(!update->isError() || update->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
+        QVERIFY(!remove->isError() || remove->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
         if (resetSpy.isEmpty())
             break;
     }

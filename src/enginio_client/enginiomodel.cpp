@@ -244,6 +244,19 @@ void EnginioModelPrivate::receivedUpdateNotification(const QJsonObject &object, 
     }
 }
 
+void EnginioModelPrivate::fullQueryReset(const QJsonArray &data)
+{
+    foreach (const QMetaObject::Connection &connection, _repliesConnections)
+        QObject::disconnect(connection);
+    _repliesConnections.clear();
+    q->beginResetModel();
+    _data = data;
+    _attachedData.initFromArray(_data);
+    syncRoles();
+    _canFetchMore = _canFetchMore && _data.count() && (queryData(EnginioString::limit).toDouble() <= _data.count());
+    q->endResetModel();
+}
+
 void EnginioModelPrivate::receivedCreateNotification(const QJsonObject &object)
 {
     // create a new object
