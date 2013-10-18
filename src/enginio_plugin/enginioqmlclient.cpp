@@ -43,6 +43,8 @@
 #include "Enginio/private/enginioclient_p.h"
 #include "enginioqmlobjectadaptor_p.h"
 
+#include <QtNetwork/qnetworkreply.h>
+
 #include <QtQml/qjsvalue.h>
 #include <QtQml/qqmlengine.h>
 #include <QtQml/qqml.h>
