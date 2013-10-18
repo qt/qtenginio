@@ -508,14 +508,14 @@ public:
         void operator ()()
         {
             if (finishedCreateReply->isError()) {
-                d.markAsError(QByteArrayLiteral("Dependent create query failed, so object could not be removed"));
+                d.markAsError(EnginioString::Dependent_create_query_failed_so_object_could_not_be_removed);
             } else if (Q_UNLIKELY(!d._modelGuard)) {
-                d.markAsError(QByteArrayLiteral("EnginioModel was removed before this request was prepared"));
+                d.markAsError(EnginioString::EnginioModel_was_removed_before_this_request_was_prepared);
             } else {
                 QPair<QString, int> tmp = d.getAndSetCurrentIdRow(finishedCreateReply);
                 const int row = tmp.second;
                 if (Q_UNLIKELY(row == InvalidRow)) {
-                    d.markAsError(QByteArrayLiteral("EnginioModel: The query was changed before the request could be sent"));
+                    d.markAsError(EnginioString::EnginioModel_The_query_was_changed_before_the_request_could_be_sent);
                     return;
                 }
                 QString id = tmp.first;
@@ -748,14 +748,14 @@ public:
         {
 
             if (finishedCreateReply->isError()) {
-                d.markAsError(QByteArrayLiteral("Dependent create query failed, so object coudl not be updated"));
+                d.markAsError(EnginioString::Dependent_create_query_failed_so_object_could_not_be_updated);
             } else if (Q_UNLIKELY(!d._modelGuard)) {
-                d.markAsError(QByteArrayLiteral("EnginioModel was removed before this request was prepared"));
+                d.markAsError(EnginioString::EnginioModel_was_removed_before_this_request_was_prepared);
             } else {
                 QPair<QString, int> tmp = d.getAndSetCurrentIdRow(finishedCreateReply);
                 const int row = tmp.second;
                 if (Q_UNLIKELY(row == InvalidRow)) {
-                    d.markAsError(QByteArrayLiteral("EnginioModel: The query was changed before the request could be sent"));
+                    d.markAsError(EnginioString::EnginioModel_The_query_was_changed_before_the_request_could_be_sent);
                     return;
                 }
                 QString id = tmp.first;
@@ -776,7 +776,7 @@ public:
                 return setDataDelyed(row, value, role, oldObject);
             return setDataNow(row, value, role, oldObject, id);
         }
-        QNetworkReply *nreply = new EnginioFakeReply(_enginio, constructErrorMessage(QByteArrayLiteral("EnginioModel: Trying to update an object with unknown role")));
+        QNetworkReply *nreply = new EnginioFakeReply(_enginio, constructErrorMessage(EnginioString::EnginioModel_Trying_to_update_an_object_with_unknown_role));
         EnginioReplyBase *ereply = createReply(nreply);
         return ereply;
     }

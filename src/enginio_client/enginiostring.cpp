@@ -48,4 +48,10 @@ FOR_EACH_ENGINIO_STRING(DEFINE_ENGINIO_STRING)
 
 #undef DEFINE_ENGINIO_STRING
 
-const QByteArray EnginioString::XRequestId = QByteArrayLiteral("X-Request-Id");
+
+#define DEFINE_ENGINIO_BYTEARRAY(Name, String)\
+    const QByteArray EnginioString::Name = QByteArrayLiteral(String);
+
+FOR_EACH_ENGINIO_BYTEARRAY(DEFINE_ENGINIO_BYTEARRAY)
+
+#undef DEFINE_ENGINIO_BYTEARRAY

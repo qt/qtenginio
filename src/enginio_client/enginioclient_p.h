@@ -124,7 +124,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         case ObjectOperation: {
             QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty()) {
-                msg = constructErrorMessage(QByteArrayLiteral("Requested object operation requires non empty \'objectType\' value"));
+                msg = constructErrorMessage(EnginioString::Requested_object_operation_requires_non_empty_objectType_value);
                 return GetPathReturnValue(Failed);
             }
 
@@ -135,14 +135,14 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {
             QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty()) {
-                msg = constructErrorMessage(QByteArrayLiteral("Requested object acl operation requires non empty \'objectType\' value"));
+                msg = constructErrorMessage(EnginioString::Requested_object_acl_operation_requires_non_empty_objectType_value);
                 return GetPathReturnValue(Failed);
             }
 
             result.append(objectType.replace('.', '/'));
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
-                msg = constructErrorMessage(QByteArrayLiteral("Requested object acl operation requires non empty \'id\' value"));
+                msg = constructErrorMessage(EnginioString::Requested_object_acl_operation_requires_non_empty_id_value);
                 return GetPathReturnValue(Failed);
             }
             result.append('/');
@@ -168,7 +168,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
             result.append(EnginioString::files);
             QString fileId = object[EnginioString::id].toString();
             if (fileId.isEmpty()) {
-                msg = constructErrorMessage(QByteArrayLiteral("Download operation requires non empty \'fileId\' value"));
+                msg = constructErrorMessage(EnginioString::Download_operation_requires_non_empty_fileId_value);
                 return GetPathReturnValue(Failed);
             }
             result.append(QLatin1Char('/') + fileId + QStringLiteral("/download_url"));
@@ -196,7 +196,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
-                msg = constructErrorMessage(QByteArrayLiteral("Requested usergroup member operation requires non empty \'id\' value"));
+                msg = constructErrorMessage(EnginioString::Requested_usergroup_member_operation_requires_non_empty_id_value);
                 return GetPathReturnValue(Failed);
             }
             result.append(EnginioString::usergroups);
@@ -211,7 +211,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         if (flags & IncludeIdInPath) {
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
-                msg = constructErrorMessage(QByteArrayLiteral("Requested operation requires non empty \'id\' value"));
+                msg = constructErrorMessage(EnginioString::Requested_operation_requires_non_empty_id_value);
                 return GetPathReturnValue(Failed);
             }
             result.append('/');
@@ -369,7 +369,7 @@ public:
             sessionToken = _identityToken[EnginioString::sessionToken].toString().toLatin1();
         }
 
-        _request.setRawHeader(QByteArrayLiteral("Enginio-Backend-Session"), sessionToken);
+        _request.setRawHeader(EnginioString::Enginio_Backend_Session, sessionToken);
         if (sessionToken.isEmpty())
             emitSessionTerminated();
         else
@@ -504,7 +504,7 @@ public:
             QBuffer *buffer = new QBuffer();
             buffer->setData(data);
             buffer->open(QIODevice::ReadOnly);
-            reply = networkManager()->sendCustomRequest(req, QByteArrayLiteral("DELETE"), buffer);
+            reply = networkManager()->sendCustomRequest(req, EnginioString::Delete, buffer);
             buffer->setParent(reply);
         }
 #else
@@ -571,7 +571,7 @@ public:
             ValueAdaptor<T> search = object[EnginioString::search];
             ArrayAdaptor<T> objectTypes = object[EnginioString::objectTypes].toArray();
             if (Q_UNLIKELY(objectTypes.isEmpty()))
-                return new EnginioFakeReply(this, constructErrorMessage(QByteArrayLiteral("Fulltext Search: 'objectTypes' parameter is missing or it is not an array")));
+                return new EnginioFakeReply(this, constructErrorMessage(EnginioString::Fulltext_Search_objectTypes_parameter_is_missing_or_it_is_not_an_array));
             if (search.isComposedType()) {
                 for (typename ArrayAdaptor<T>::const_iterator i = objectTypes.constBegin(); i != objectTypes.constEnd(); ++i) {
                     urlQuery.addQueryItem(QStringLiteral("objectTypes[]"), (*i).toString());
@@ -579,7 +579,7 @@ public:
                 urlQuery.addQueryItem(EnginioString::search,
                     QString::fromUtf8(search.toJson()));
             } else {
-                return new EnginioFakeReply(this, constructErrorMessage(QByteArrayLiteral("Fulltext Search: 'search' parameter(s) missing")));
+                return new EnginioFakeReply(this, constructErrorMessage(EnginioString::Fulltext_Search_search_parameter_missing));
             }
         } else
         if (object[EnginioString::query].isComposedType()) { // TODO docs are inconsistent on that
@@ -776,15 +776,14 @@ private:
         }
 
         QNetworkRequest req = prepareRequest(serviceUrl);
-        req.setHeader(QNetworkRequest::ContentTypeHeader,
-                      QByteArrayLiteral("application/octet-stream"));
+        req.setHeader(QNetworkRequest::ContentTypeHeader, EnginioString::Application_octet_stream);
 
         // Content-Range: bytes {chunkStart}-{chunkEnd}/{totalFileSize}
         qint64 size = device->size();
         qint64 endPos = qMin(startPos + _uploadChunkSize, size);
-        req.setRawHeader(QByteArrayLiteral("Content-Range"),
-                         QByteArray::number(startPos) + QByteArrayLiteral("-")
-                         + QByteArray::number(endPos) + QByteArrayLiteral("/")
+        req.setRawHeader(EnginioString::Content_Range,
+                         QByteArray::number(startPos) + EnginioString::Minus
+                         + QByteArray::number(endPos) + EnginioString::Div
                          + QByteArray::number(size));
 
         // qDebug() << "Uploading chunk from " << startPos << " to " << endPos << " of " << size;

@@ -542,7 +542,7 @@ void EnginioBackendConnection::connectToBackend(EnginioClientPrivate* client, co
     data[EnginioString::headers] = headers;
 
     emit stateChanged(ConnectingState);
-    QNetworkReply *nreply = client->customRequest(url, QByteArrayLiteral("GET"), data);
+    QNetworkReply *nreply = client->customRequest(url, EnginioString::Get, data);
     EnginioReply *reply = new EnginioReply(client, nreply);
     QObject::connect(reply, SIGNAL(finished(EnginioReply*)), this, SLOT(onEnginioFinished(EnginioReply*)));
 }

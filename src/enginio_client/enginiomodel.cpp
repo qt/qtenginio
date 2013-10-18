@@ -501,7 +501,7 @@ EnginioReply *EnginioModel::remove(int row)
 
     if (unsigned(row) >= unsigned(d->rowCount())) {
         EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
-        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel::remove: row is out of range")));
+        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(EnginioString::EnginioModel_remove_row_is_out_of_range));
         EnginioReply *ereply = new EnginioReply(client, nreply);
         return ereply;
     }
@@ -528,7 +528,7 @@ EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVar
 
     if (unsigned(row) >= unsigned(d->rowCount())) {  // TODO remove as soon as we have a sparse array.
         EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
-        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(QByteArrayLiteral("EnginioModel::setProperty: row is out of range")));
+        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(EnginioString::EnginioModel_setProperty_row_is_out_of_range));
         EnginioReply *ereply = new EnginioReply(client, nreply);
         return ereply;
     }
