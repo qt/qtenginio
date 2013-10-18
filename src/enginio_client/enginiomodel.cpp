@@ -98,7 +98,7 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
   The operation is confirmed when the reply is \l{EnginioReply::isFinished}{finished} without \l{EnginioReply::isError}{error}.
 
   When a reply is finished it is the user's responsibility to delete it, it can be done
-  by connecting the \l{EnginioReply::finished}{finished} signal to \l{QObject::deleteLater}{deleteLater}.
+  by connecting the \l{EnginioReply::finished}{finished} signal to \l{QObject::deleteLater()}{deleteLater}.
   \code
   QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
   \endcode
@@ -383,7 +383,7 @@ EnginioModelBase::~EnginioModelBase()
 {}
 
 /*!
-  \enum EnginioModel::Roles
+  \enum EnginioModelBase::Roles
 
   EnginioModel defines roles which represent data used by every object
   stored in the Enginio backend

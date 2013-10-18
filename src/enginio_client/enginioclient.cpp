@@ -116,7 +116,7 @@ QT_BEGIN_NAMESPACE
 
   Enginio provides convenient user management.
   The authentication state reflects whether the current user is authenticated.
-  \sa AuthenticationState EnginioClient::identity() EnginioBasicAuthentication
+  \sa AuthenticationState EnginioClientBase::identity() EnginioBasicAuthentication
 */
 
 /*!
@@ -133,13 +133,13 @@ QT_BEGIN_NAMESPACE
   \brief Emitted when a user login fails.
 
   The \a reply contains the details about why the login failed.
-  \sa sessionAuthenticated(), EnginioReply EnginioClient::identity() EnginioBasicAuthentication
+  \sa sessionAuthenticated(), EnginioReply EnginioClientBase::identity() EnginioBasicAuthentication
 */
 
 /*!
   \fn EnginioClient::sessionTerminated() const
   \brief Emitted when a user logs out.
-  \sa EnginioClient::identity() EnginioBasicAuthentication
+  \sa EnginioClientBase::identity() EnginioBasicAuthentication
 */
 
 /*!
@@ -554,7 +554,7 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
 /*!
   \property EnginioClientBase::identity
   Property that represents a user. Setting the property will create an asynchronous authentication request,
-  the result of it updates \l{EnginioClient::authenticationState()}{authenticationState}
+  the result of it updates \l{EnginioClientBase::authenticationState()}{authenticationState}
   EnginioClient does not take ownership of the \a identity object. The object
   has to be valid to keep the authenticated session alive. When the identity object is deleted the session
   is terminated. It is allowed to assign a null pointer to the property to terminate the session.

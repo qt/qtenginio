@@ -303,7 +303,6 @@ EnginioReplyBase::~EnginioReplyBase()
 }
 
 /*!
-  \fn EnginioReplyBase::data
   \internal
 */
 QJsonObject EnginioReplyBase::data() const

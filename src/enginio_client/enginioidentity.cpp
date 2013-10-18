@@ -165,7 +165,7 @@ public:
   Setting the identity will trigger an asynchronous request, resulting in EnginioClient::authenticationState()
   changing.
 
-  \sa EnginioClient::authenticationState() EnginioClient::identity() EnginioClient::sessionAuthenticated()
+  \sa EnginioClientBase::authenticationState() EnginioClientBase::identity() EnginioClient::sessionAuthenticated()
   \sa EnginioClient::sessionAuthenticationError() EnginioClient::sessionTerminated()
 
 */
