@@ -98,7 +98,7 @@ class EnginioBasicAuthenticationPrivate
         {}
         void operator ()()
         {
-            EnginioReply *ereply = new EnginioReply(_enginio, _reply);
+            EnginioReplyBase *ereply = _enginio->createReply(_reply);
             if (_reply->error() != QNetworkReply::NoError) {
                 emit _enginio->emitSessionAuthenticationError(ereply);
                 // TODO does ereply leak? Yes potentially. We need to think about the ownership

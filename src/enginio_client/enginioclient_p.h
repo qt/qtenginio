@@ -361,7 +361,7 @@ public:
         return _identityToken;
     }
 
-    void setIdentityToken(EnginioReply *reply)
+    void setIdentityToken(EnginioReplyBase *reply)
     {
         QByteArray sessionToken;
         if (reply) {
