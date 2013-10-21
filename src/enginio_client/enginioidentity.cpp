@@ -98,13 +98,13 @@ class EnginioBasicAuthenticationPrivate
         {}
         void operator ()()
         {
+            // TODO it creates a finished EnginioReplyBase, there will be no finished signal
             EnginioReplyBase *ereply = _enginio->createReply(_reply);
             if (_reply->error() != QNetworkReply::NoError) {
                 emit _enginio->emitSessionAuthenticationError(ereply);
                 // TODO does ereply leak? Yes potentially. We need to think about the ownership
             } else {
                 _enginio->setIdentityToken(ereply);
-                _reply->deleteLater();
             }
         }
     };
