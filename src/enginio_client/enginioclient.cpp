@@ -714,4 +714,9 @@ void EnginioClientPrivate::emitError(EnginioReplyBase *reply)
     emit static_cast<EnginioClient*>(q_ptr)->error(static_cast<EnginioReply*>(reply));
 }
 
+EnginioReplyBase *EnginioClientPrivate::createReply(QNetworkReply *nreply)
+{
+    return new EnginioReply(this, nreply);
+}
+
 QT_END_NAMESPACE

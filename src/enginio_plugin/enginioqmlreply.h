@@ -42,7 +42,7 @@
 #ifndef ENGINIOQMLREPLY_H
 #define ENGINIOQMLREPLY_H
 
-#include <Enginio/enginioreply.h>
+#include <Enginio/enginioreplybase.h>
 #include <QtQml/qjsvalue.h>
 
 QT_BEGIN_NAMESPACE

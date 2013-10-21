@@ -42,6 +42,7 @@
 #include "enginioqmlclient.h"
 #include "Enginio/private/enginioclient_p.h"
 #include "enginioqmlobjectadaptor_p.h"
+#include "enginioqmlreply.h"
 
 #include <QtNetwork/qnetworkreply.h>
 
@@ -318,6 +319,11 @@ void EnginioQmlClientPrivate::emitFinished(EnginioReplyBase *reply)
 void EnginioQmlClientPrivate::emitError(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioQmlClient*>(q_ptr)->error(jsengine()->newQObject(reply));
+}
+
+EnginioReplyBase *EnginioQmlClientPrivate::createReply(QNetworkReply *nreply)
+{
+    return new EnginioQmlReply(this, nreply);
 }
 
 QT_END_NAMESPACE

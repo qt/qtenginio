@@ -701,6 +701,7 @@ public:
     virtual void emitSessionAuthenticationError(EnginioReplyBase *reply);
     virtual void emitFinished(EnginioReplyBase *reply);
     virtual void emitError(EnginioReplyBase *reply);
+    virtual EnginioReplyBase *createReply(QNetworkReply *nreply);
 
 private:
 
