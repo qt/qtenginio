@@ -112,7 +112,7 @@ void tst_Notifications::createObjectSchema()
 void tst_Notifications::initTestCase()
 {
     if (EnginioTests::TESTAPP_URL != QStringLiteral("https://staging.engin.io"))
-        QSKIP("Notification tests can be executed anly against staging");
+        QSKIP("Notification tests can be executed only against staging");
 
     _backendManager.setServiceUrl(EnginioTests::TESTAPP_URL);
 
@@ -133,7 +133,7 @@ void tst_Notifications::initTestCase()
 void tst_Notifications::cleanupTestCase()
 {
     if (EnginioTests::TESTAPP_URL != QStringLiteral("https://staging.engin.io"))
-        QSKIP("Notification tests can be executed anly against staging");
+        QSKIP("Notification tests can be executed only against staging");
     QVERIFY(_backendManager.removeBackend(_backendName));
 }
 
