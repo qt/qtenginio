@@ -40,6 +40,8 @@
 ****************************************************************************/
 
 #include "enginioidentity.h"
+#include "enginiobasicauthentication.h"
+#include "enginiooauth2authentication.h"
 #include "enginioclient_p.h"
 #include "enginioreply.h"
 

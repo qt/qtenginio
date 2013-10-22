@@ -44,6 +44,8 @@
 #include "enginioreply_p.h"
 #include "enginiomodel.h"
 #include "enginioidentity.h"
+#include "enginiobasicauthentication.h"
+#include "enginiooauth2authentication.h"
 
 #include <QtCore/qthreadstorage.h>
 #include <QtNetwork/qnetworkaccessmanager.h>

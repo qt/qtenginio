@@ -32,5 +32,7 @@ HEADERS += \
     enginioclientbase.h \
     enginioreplybase.h \
     enginiomodelbase.h \
-    enginiomodelbase_p.h
+    enginiomodelbase_p.h \
+    enginiobasicauthentication.h \
+    enginiooauth2authentication.h
 

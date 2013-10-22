@@ -46,6 +46,8 @@
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
 #include <Enginio/enginioidentity.h>
+#include <Enginio/enginiobasicauthentication.h>
+#include <Enginio/enginiooauth2authentication.h>
 
 #include "../common/common.h"
 

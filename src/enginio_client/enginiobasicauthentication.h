@@ -3,7 +3,7 @@
 ** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
-** This file is part of the test suite of the Qt Toolkit.
+** This file is part of the QtEnginio module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -39,33 +39,44 @@
 **
 ****************************************************************************/
 
-#include <QtTest/QtTest>
-#include <QtCore/qobject.h>
+#ifndef ENGINIOBASICAUTHENTICATION_H
+#define ENGINIOBASICAUTHENTICATION_H
 
-#include "../common/identitycommon.h"
-#include <Enginio/enginiobasicauthentication.h>
+#include "enginioidentity.h"
 
-class tst_BasicAuthentication: public QObject, public IdentityCommonTest<tst_BasicAuthentication, EnginioBasicAuthentication>
+#include <QtCore/qstring.h>
+#include <QtCore/qscopedpointer.h>
+
+QT_BEGIN_NAMESPACE
+
+class EnginioBasicAuthenticationPrivate;
+class ENGINIOCLIENT_EXPORT EnginioBasicAuthentication : public EnginioIdentity
 {
     Q_OBJECT
 
-    typedef IdentityCommonTest<tst_BasicAuthentication, EnginioBasicAuthentication> Base;
 public:
-    static QJsonObject enginioData(const QJsonObject &obj) { return obj; }
+    EnginioBasicAuthentication(QObject *parent = 0);
+    ~EnginioBasicAuthentication();
 
-public slots:
-    void error(EnginioReply *reply) { Base::error(reply); }
+    Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
+    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
 
-private slots:
-    void initTestCase() { Base::initTestCase(QStringLiteral("tst_BasicAuth")); }
-    void cleanupTestCase() { Base::cleanupTestCase(); }
+    QString user() const Q_REQUIRED_RESULT;
+    void setUser(const QString &user);
 
-    void identity() { Base::identity(); }
-    void identity_changing() { Base::identity_changing(); }
-    void identity_invalid() { Base::identity_invalid(); }
-    void identity_afterLogout() { Base::identity_afterLogout(QByteArrayLiteral("Enginio-Backend-Session")); }
-    void queryRestrictedObject() { Base::queryRestrictedObject(); }
+    QString password() const Q_REQUIRED_RESULT;
+    void setPassword(const QString &password);
+
+Q_SIGNALS:
+    void userChanged(const QString &user);
+    void passwordChanged(const QString &password);
+
+private:
+    virtual void prepareSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
+    virtual void removeSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
+    QScopedPointer<EnginioBasicAuthenticationPrivate> d_ptr;
 };
 
-QTEST_MAIN(tst_BasicAuthentication)
-#include "tst_basicauthentication.moc"
+QT_END_NAMESPACE
+
+#endif // ENGINIOBASICAUTHENTICATION_H

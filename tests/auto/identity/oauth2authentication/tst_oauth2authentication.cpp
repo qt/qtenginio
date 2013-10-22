@@ -43,7 +43,7 @@
 #include <QtCore/qobject.h>
 
 #include "../common/identitycommon.h"
-#include <Enginio/enginioidentity.h>
+#include <Enginio/enginiooauth2authentication.h>
 
 class tst_OAuth2Authentication: public QObject, public IdentityCommonTest<tst_OAuth2Authentication, EnginioOAuth2Authentication>
 {

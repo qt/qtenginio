@@ -46,6 +46,8 @@
 #include <Enginio/enginioreply.h>
 #include "enginioqmlreply.h"
 #include <Enginio/enginioidentity.h>
+#include <Enginio/enginiobasicauthentication.h>
+#include <Enginio/enginiooauth2authentication.h>
 #include <Enginio/private/enginioclient_p.h>
 
 #include <qqml.h>
