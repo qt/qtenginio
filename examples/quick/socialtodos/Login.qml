@@ -212,17 +212,40 @@ Rectangle {
         enginioClient.identity = auth
     }
 
+    // Register a new user and add her to the group "myUsers"
     function register() {
         statusText.text = "Creating user account..."
-        var reply = enginioClient.create({ "username": nameInput.text, "password": passwordInput.text }, Enginio.UserOperation)
-        reply.finished.connect(function() {
-            if (reply.errorType !== EnginioReply.NoError) {
-                statusText.text = reply.errorString
+        var createAccount = enginioClient.create({ "username": nameInput.text, "password": passwordInput.text }, Enginio.UserOperation)
+        createAccount.finished.connect(function() {
+            if (createAccount.errorType !== EnginioReply.NoError) {
+                statusText.text = createAccount.errorString
             } else {
-                statusText.text = "Account Created."
-                login()
+                var groupQuery = enginioClient.query({ "query": { "name" : "myUsers" } }, Enginio.UsergroupOperation)
+                groupQuery.finished.connect(function()
+                {
+                    if (groupQuery.errorType !== EnginioReply.NoError) {
+                        statusText.text = groupQuery.errorString
+                    } else {
+                        var addUserToGroupData = {
+                            "id": groupQuery.data.results[0].id,
+                            "member" : {
+                                "id": createAccount.data.id,
+                                "objectType": "users"
+                            }
+                        }
+                        var addUserToGroup = enginioClient.create(addUserToGroupData, Enginio.UsergroupMembersOperation)
+                        addUserToGroup.finished.connect(function()
+                        {
+                            if (addUserToGroup.errorType !== EnginioReply.NoError) {
+                                statusText.text = addUserToGroup.errorString
+                            } else {
+                                statusText.text = "Account Created."
+                                login()
+                            }
+                        })
+                    }
+                })
             }
         })
     }
 }
-
