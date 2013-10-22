@@ -74,7 +74,6 @@ Q_SIGNALS:
 private:
     virtual void prepareSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
     virtual void removeSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
-    QScopedPointer<EnginioBasicAuthenticationPrivate> d_ptr;
 };
 
 QT_END_NAMESPACE

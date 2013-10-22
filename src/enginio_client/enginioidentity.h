@@ -49,12 +49,14 @@
 QT_BEGIN_NAMESPACE
 
 class EnginioClientPrivate;
+class EnginioIdentityPrivate;
 class ENGINIOCLIENT_EXPORT EnginioIdentity : public QObject
 {
     Q_OBJECT
 
 protected:
-    explicit EnginioIdentity(QObject *parent = 0);
+    explicit EnginioIdentity(EnginioIdentityPrivate *, QObject *parent);
+    EnginioIdentityPrivate *d_ptr;
 
 Q_SIGNALS:
     void dataChanged();
