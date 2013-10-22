@@ -149,9 +149,6 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
             result.append(EnginioString::access);
             return GetPathReturnValue(true, EnginioString::access);
         }
-        case AuthenticationOperation:
-            result.append(EnginioString::authIdentity);
-            break;
         case FileOperation: {
             result.append(EnginioString::files);
             // if we have a fileID, it becomes "view", otherwise it is up/download
@@ -297,7 +294,6 @@ public:
         FileOperation = EnginioClientBase::FileOperation,
 
         // private
-        AuthenticationOperation,
         SessionOperation,
         SearchOperation,
         FileChunkUploadOperation,
@@ -396,22 +392,6 @@ public:
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::dataChanged, callPrepareSessionToken));
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::aboutToDestroy, IdentityInstanceDestroyed(this)));
         emit q_ptr->identityChanged(identity);
-    }
-
-    QNetworkReply *identify(const QJsonObject &object)
-    {
-        // TODO move to identity makeRequest
-        QUrl url(_serviceUrl);
-        CHECK_AND_SET_PATH(url, object, AuthenticationOperation);
-
-        QNetworkRequest req = prepareRequest(url);
-        QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
-        QNetworkReply *reply = networkManager()->post(req, data);
-
-        if (gEnableEnginioDebugInfo)
-            _requestData.insert(reply, data);
-
-        return reply;
     }
 
     QNetworkReply *customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)

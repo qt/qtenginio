@@ -52,7 +52,6 @@
     F(access_token, "access_token")\
     F(apiEnginIo, "https://api.engin.io")\
     F(apiRequestId, "apiRequestId")\
-    F(authIdentity, "auth/identity")\
     F(complete, "complete")\
     F(count, "count")\
     F(create, "create")\
@@ -101,6 +100,7 @@
     F(users, "users")\
     F(variant, "variant")\
     F(v1_auth_oauth2_tokens, "/v1/auth/oauth2/tokens")\
+    F(v1_auth_identity, "/v1/auth/identity")\
 
 #define FOR_EACH_ENGINIO_BYTEARRAY(F)\
     F(XRequestId, "X-Request-Id")\

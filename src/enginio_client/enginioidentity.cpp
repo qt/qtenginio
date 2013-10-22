@@ -159,10 +159,17 @@ struct EnginioBasicAuthenticationPrivate: public EnginioUserPassAuthenticationPr
 {
     QNetworkReply *makeRequest(EnginioClientPrivate *enginio)
     {
-        QJsonObject data;
-        data[EnginioString::username] = _user;
-        data[EnginioString::password] = _pass;
-        return enginio->identify(data);
+        QJsonObject object;
+        object[EnginioString::username] = _user;
+        object[EnginioString::password] = _pass;
+
+        QUrl url(enginio->_serviceUrl);
+        url.setPath(EnginioString::v1_auth_identity);
+
+        QNetworkRequest req = enginio->prepareRequest(url);
+        QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
+
+        return enginio->networkManager()->post(req, data);
     }
 
     void proccessToken(EnginioClientPrivate *enginio, EnginioReplyBase *reply)
