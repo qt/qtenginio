@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-#include "enginiofakereply_p.h"
-#include "enginioclient_p.h"
+#include <Enginio/private/enginiofakereply_p.h>
+#include <Enginio/private/enginioclient_p.h>
 #include <QtCore/qmetaobject.h>
 #include <QtNetwork/qnetworkrequest.h>
 

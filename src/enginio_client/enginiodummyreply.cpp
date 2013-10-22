@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include "enginiodummyreply_p.h"
+#include <Enginio/private/enginiodummyreply_p.h>
 
 EnginioDummyReply::EnginioDummyReply(QObject *parent)
     : QNetworkReply(parent)

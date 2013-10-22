@@ -43,15 +43,15 @@
 #define ENGINIOMODELBASE_P_H
 
 
-#include "enginiomodel.h"
-#include "enginioreply.h"
-#include "enginioclient_p.h"
-#include "enginiofakereply_p.h"
-#include "enginiodummyreply_p.h"
-#include "enginioreplybase.h"
-#include "enginiobackendconnection_p.h"
-#include "enginiomodelbase.h"
-#include "enginiomodelbase_p.h"
+#include <Enginio/enginiomodel.h>
+#include <Enginio/enginioreply.h>
+#include <Enginio/private/enginioclient_p.h>
+#include <Enginio/private/enginiofakereply_p.h>
+#include <Enginio/private/enginiodummyreply_p.h>
+#include <Enginio/enginioreplybase.h>
+#include <Enginio/private/enginiobackendconnection_p.h>
+#include <Enginio/enginiomodelbase.h>
+#include <Enginio/private/enginiomodelbase_p.h>
 
 #include <QtCore/qdatetime.h>
 #include <QtCore/qdebug.h>

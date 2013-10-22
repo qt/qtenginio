@@ -49,7 +49,7 @@
 #include <QtCore/qmetatype.h>
 #include <QtNetwork/qnetworkreply.h>
 
-#include "enginioclient_global.h"
+#include <Enginio/enginioclient_global.h>
 
 QT_BEGIN_NAMESPACE
 

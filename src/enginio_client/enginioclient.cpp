@@ -39,13 +39,13 @@
 **
 ****************************************************************************/
 
-#include "enginioclient_p.h"
-#include "enginioreply.h"
-#include "enginioreply_p.h"
-#include "enginiomodel.h"
-#include "enginioidentity.h"
-#include "enginiobasicauthentication.h"
-#include "enginiooauth2authentication.h"
+#include <Enginio/private/enginioclient_p.h>
+#include <Enginio/enginioreply.h>
+#include <Enginio/private/enginioreply_p.h>
+#include <Enginio/enginiomodel.h>
+#include <Enginio/enginioidentity.h>
+#include <Enginio/enginiobasicauthentication.h>
+#include <Enginio/enginiooauth2authentication.h>
 
 #include <QtCore/qthreadstorage.h>
 #include <QtNetwork/qnetworkaccessmanager.h>

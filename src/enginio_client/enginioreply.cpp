@@ -44,12 +44,12 @@
 #include <QtCore/qjsondocument.h>
 #include <QtNetwork/qnetworkreply.h>
 
-#include "enginioreplybase.h"
-#include "enginioreply.h"
-#include "enginioreply_p.h"
-#include "enginioclient.h"
-#include "enginioclient_p.h"
-#include "enginioobjectadaptor_p.h"
+#include <Enginio/enginioreplybase.h>
+#include <Enginio/enginioreply.h>
+#include <Enginio/private/enginioreply_p.h>
+#include <Enginio/enginioclient.h>
+#include <Enginio/private/enginioclient_p.h>
+#include <Enginio/private/enginioobjectadaptor_p.h>
 
 QT_BEGIN_NAMESPACE
 

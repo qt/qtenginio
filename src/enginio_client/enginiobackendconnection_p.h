@@ -48,7 +48,7 @@
 #include <QtCore/qurl.h>
 #include <QtNetwork/qabstractsocket.h>
 
-#include "enginioclient_global.h"
+#include <Enginio/enginioclient_global.h>
 
 QT_BEGIN_NAMESPACE
 

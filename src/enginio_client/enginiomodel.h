@@ -45,8 +45,8 @@
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qscopedpointer.h>
 
-#include "enginioclient.h"
-#include "enginiomodelbase.h"
+#include <Enginio/enginioclient.h>
+#include <Enginio/enginiomodelbase.h>
 
 QT_BEGIN_NAMESPACE
 

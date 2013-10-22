@@ -44,8 +44,8 @@
 
 #include <QtCore/qjsonobject.h>
 
-#include "enginioclient_global.h"
-#include "enginioreplybase.h"
+#include <Enginio/enginioclient_global.h>
+#include <Enginio/enginioreplybase.h>
 
 QT_BEGIN_NAMESPACE
 

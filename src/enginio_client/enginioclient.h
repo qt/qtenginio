@@ -42,8 +42,8 @@
 #ifndef ENGINIOCLIENT_H
 #define ENGINIOCLIENT_H
 
-#include "enginioclient_global.h"
-#include "enginioclientbase.h"
+#include <Enginio/enginioclient_global.h>
+#include <Enginio/enginioclientbase.h>
 #include <QtCore/qjsonobject.h>
 
 QT_BEGIN_NAMESPACE

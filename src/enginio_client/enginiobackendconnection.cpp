@@ -39,10 +39,10 @@
 **
 ****************************************************************************/
 
-#include "enginiobackendconnection_p.h"
-#include "enginioclient.h"
-#include "enginioclient_p.h"
-#include "enginioreply.h"
+#include <Enginio/private/enginiobackendconnection_p.h>
+#include <Enginio/enginioclient.h>
+#include <Enginio/private/enginioclient_p.h>
+#include <Enginio/enginioreply.h>
 
 #include <QtCore/QTimerEvent>
 #include <QtCore/qbytearray.h>

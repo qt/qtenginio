@@ -42,10 +42,8 @@
 #ifndef ENGINIOOAUTH2AUTHENTICATION_H
 #define ENGINIOOAUTH2AUTHENTICATION_H
 
-#include "enginioidentity.h"
-
+#include <Enginio/enginioidentity.h>
 #include <QtCore/qstring.h>
-#include <QtCore/qscopedpointer.h>
 
 QT_BEGIN_NAMESPACE
 

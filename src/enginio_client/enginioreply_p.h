@@ -49,8 +49,8 @@
 #include <QtCore/qjsondocument.h>
 #include <QtNetwork/qnetworkreply.h>
 
-#include "enginioclient_p.h"
-#include "enginioreply.h"
+#include <Enginio/private/enginioclient_p.h>
+#include <Enginio/enginioreply.h>
 
 QT_BEGIN_NAMESPACE
 

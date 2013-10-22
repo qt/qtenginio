@@ -42,13 +42,13 @@
 #ifndef ENGINIOCLIENT_P_H
 #define ENGINIOCLIENT_P_H
 
-#include "chunkdevice_p.h"
-#include "enginioclient.h"
-#include "enginioreply.h"
-#include "enginiofakereply_p.h"
-#include "enginioidentity.h"
-#include "enginioobjectadaptor_p.h"
-#include "enginiostring_p.h"
+#include <Enginio/private/chunkdevice_p.h>
+#include <Enginio/enginioclient.h>
+#include <Enginio/enginioreply.h>
+#include <Enginio/private/enginiofakereply_p.h>
+#include <Enginio/enginioidentity.h>
+#include <Enginio/private/enginioobjectadaptor_p.h>
+#include <Enginio/private/enginiostring_p.h>
 
 #include <QNetworkAccessManager>
 #include <QPointer>

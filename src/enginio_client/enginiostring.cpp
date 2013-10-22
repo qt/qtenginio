@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include "enginiostring_p.h"
+#include <Enginio/private/enginiostring_p.h>
 
 #define DEFINE_ENGINIO_STRING(Name, String)\
     const QString EnginioString::Name = QStringLiteral(String);

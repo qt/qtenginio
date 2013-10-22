@@ -45,7 +45,7 @@
 #include <QAbstractListModel>
 #include <QtCore/qscopedpointer.h>
 
-#include "enginioclientbase.h"
+#include <Enginio/enginioclientbase.h>
 
 QT_BEGIN_NAMESPACE
 

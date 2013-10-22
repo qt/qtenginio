@@ -42,7 +42,7 @@
 #ifndef ENGINIOSTRING_P_H
 #define ENGINIOSTRING_P_H
 
-#include "enginioclient_global.h"
+#include <Enginio/enginioclient_global.h>
 #include <QtCore/qstring.h>
 
 #define FOR_EACH_ENGINIO_STRING(F)\

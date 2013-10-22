@@ -42,7 +42,7 @@
 #ifndef ENGINIOWAITREPLY_H
 #define ENGINIOWAITREPLY_H
 
-#include "enginioclient_global.h"
+#include <Enginio/enginioclient_global.h>
 #include <QtNetwork/qnetworkreply.h>
 
 class EnginioClientPrivate;

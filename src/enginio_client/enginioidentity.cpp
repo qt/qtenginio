@@ -39,11 +39,11 @@
 **
 ****************************************************************************/
 
-#include "enginioidentity.h"
-#include "enginiobasicauthentication.h"
-#include "enginiooauth2authentication.h"
-#include "enginioclient_p.h"
-#include "enginioreply.h"
+#include <Enginio/enginioidentity.h>
+#include <Enginio/enginiobasicauthentication.h>
+#include <Enginio/enginiooauth2authentication.h>
+#include <Enginio/private/enginioclient_p.h>
+#include <Enginio/enginioreply.h>
 
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qjsondocument.h>
