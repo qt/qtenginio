@@ -270,7 +270,7 @@ protected:
     unsigned _rolesCounter;
     QHash<int, QString> _roles;
 
-    QJsonArray _data; // TODO replace by a sparse array, and add laziness
+    QJsonArray _data;
 
     class NotificationObject {
         // connection object it can be:
@@ -833,7 +833,6 @@ public:
 
     QHash<int, QByteArray> roleNames() const Q_REQUIRED_RESULT
     {
-        // TODO this is not optimal, but happen once, do we want to do something about it?
         QHash<int, QByteArray> roles;
         roles.reserve(_roles.count());
         for (QHash<int, QString>::const_iterator i = _roles.constBegin();

@@ -273,7 +273,7 @@ void EnginioModelPrivate::receivedCreateNotification(const QJsonObject &object)
 
 void EnginioModelPrivate::syncRoles()
 {
-    QJsonObject firstObject(_data.first().toObject()); // TODO it expects certain data structure in all objects, add way to specify roles
+    QJsonObject firstObject(_data.first().toObject());
 
     if (!_roles.count()) {
         _roles.reserve(firstObject.count());
@@ -526,7 +526,7 @@ EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVar
         return 0;
     }
 
-    if (unsigned(row) >= unsigned(d->rowCount())) {  // TODO remove as soon as we have a sparse array.
+    if (unsigned(row) >= unsigned(d->rowCount())) {
         EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(EnginioString::EnginioModel_setProperty_row_is_out_of_range));
         EnginioReply *ereply = new EnginioReply(client, nreply);
@@ -578,7 +578,7 @@ int EnginioModelBase::rowCount(const QModelIndex &parent) const
 bool EnginioModelBase::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     E_D();
-    if (index.row() >= d->rowCount()) // TODO remove as soon as we have a sparse array.
+    if (index.row() >= d->rowCount())
         return false;
 
     EnginioReplyBase *reply = d->setData(index.row(), value, role);
