@@ -45,27 +45,28 @@
 #include "../common/identitycommon.h"
 #include <Enginio/enginioidentity.h>
 
-class tst_BasicAuthentication: public QObject, public IdentityCommonTest<tst_BasicAuthentication, EnginioBasicAuthentication>
+class tst_OAuth2Authentication: public QObject, public IdentityCommonTest<tst_OAuth2Authentication, EnginioOAuth2Authentication>
 {
     Q_OBJECT
 
-    typedef IdentityCommonTest<tst_BasicAuthentication, EnginioBasicAuthentication> Base;
+    typedef IdentityCommonTest<tst_OAuth2Authentication, EnginioOAuth2Authentication> Base;
+
 public:
-    static QJsonObject enginioData(const QJsonObject &obj) { return obj; }
+    static QJsonObject enginioData(const QJsonObject &obj) { return obj["enginio_data"].toObject(); }
 
 public slots:
     void error(EnginioReply *reply) { Base::error(reply); }
 
 private slots:
-    void initTestCase() { Base::initTestCase(QStringLiteral("tst_BasicAuth")); }
+    void initTestCase() { Base::initTestCase(QStringLiteral("tst_OAuth2Auth")); }
     void cleanupTestCase() { Base::cleanupTestCase(); }
 
     void identity() { Base::identity(); }
     void identity_changing() { Base::identity_changing(); }
     void identity_invalid() { Base::identity_invalid(); }
-    void identity_afterLogout() { Base::identity_afterLogout(QByteArrayLiteral("Enginio-Backend-Session")); }
+    void identity_afterLogout() { Base::identity_afterLogout(QByteArrayLiteral("Authorization")); }
     void queryRestrictedObject() { Base::queryRestrictedObject(); }
 };
 
-QTEST_MAIN(tst_BasicAuthentication)
-#include "tst_basicauthentication.moc"
+QTEST_MAIN(tst_OAuth2Authentication)
+#include "tst_oauth2authentication.moc"

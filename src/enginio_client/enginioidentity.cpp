@@ -71,30 +71,31 @@ EnginioIdentity::EnginioIdentity(QObject *parent) :
 {
 }
 
+class EnginioUserPassAuthenticationPrivate;
 struct DisconnectConnection
 {
-    QMetaObject::Connection _connection;
+    EnginioUserPassAuthenticationPrivate *auth;
 
-    DisconnectConnection(const QMetaObject::Connection& connection)
-        : _connection(connection)
+    DisconnectConnection(EnginioUserPassAuthenticationPrivate *authentication)
+        : auth(authentication)
     {}
 
-    void operator ()() const
-    {
-        QObject::disconnect(_connection);
-    }
+    inline void operator ()() const;
 };
 
-class EnginioBasicAuthenticationPrivate
+class EnginioUserPassAuthenticationPrivate
 {
+    template<typename T>
     class SessionSetterFunctor
     {
         EnginioClientPrivate *_enginio;
         QNetworkReply *_reply;
+        EnginioUserPassAuthenticationPrivate *_auth;
     public:
-        SessionSetterFunctor(EnginioClientPrivate *enginio, QNetworkReply *reply)
+        SessionSetterFunctor(EnginioClientPrivate *enginio, QNetworkReply *reply, EnginioUserPassAuthenticationPrivate *auth)
             : _enginio(enginio)
             , _reply(reply)
+            , _auth(auth)
         {}
         void operator ()()
         {
@@ -104,7 +105,8 @@ class EnginioBasicAuthenticationPrivate
                 emit _enginio->emitSessionAuthenticationError(ereply);
                 // TODO does ereply leak? Yes potentially. We need to think about the ownership
             } else {
-                _enginio->setIdentityToken(ereply);
+                _auth->thisAs<T>()->proccessToken(_enginio, ereply);
+                _enginio->emitSessionAuthenticated(ereply);
             }
         }
     };
@@ -117,10 +119,10 @@ public:
     QString _user;
     QString _pass;
 
-    ~EnginioBasicAuthenticationPrivate()
-    {
-        cleanupConnections();
-    }
+    ~EnginioUserPassAuthenticationPrivate();
+
+    template<class Derived>
+    Derived *thisAs() { return static_cast<Derived*>(this); }
 
     void cleanupConnections()
     {
@@ -128,19 +130,55 @@ public:
             QObject::disconnect(_replyFinished);
             QObject::disconnect(_enginioDestroyed);
             QObject::connect(_reply.data(), &QNetworkReply::finished, _reply.data(), &QNetworkReply::deleteLater);
+            _reply = 0;
         }
     }
 
+    template<typename Derived>
     void prepareSessionToken(EnginioClientPrivate *enginio)
     {
         cleanupConnections();
 
+        _reply = thisAs<Derived>()->makeRequest(enginio);
+        enginio->setAuthenticationState(EnginioClientBase::Authenticating);
+        _replyFinished = QObject::connect(_reply.data(), &QNetworkReply::finished, SessionSetterFunctor<Derived>(enginio, _reply.data(), this));
+        _enginioDestroyed = QObject::connect(enginio->q_ptr, &EnginioClient::destroyed, DisconnectConnection(this));
+    }
+
+    template<typename Derived>
+    void removeSessionToken(EnginioClientPrivate *enginio)
+    {
+        cleanupConnections();
+        thisAs<Derived>()->cleanupClient(enginio);
+        _reply = 0;
+        enginio->emitSessionTerminated();
+    }
+};
+
+struct EnginioBasicAuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
+{
+    QNetworkReply *makeRequest(EnginioClientPrivate *enginio)
+    {
         QJsonObject data;
         data[EnginioString::username] = _user;
         data[EnginioString::password] = _pass;
-        _reply = enginio->identify(data);
-        _replyFinished = QObject::connect(_reply.data(), &QNetworkReply::finished, SessionSetterFunctor(enginio, _reply.data()));
-        _enginioDestroyed = QObject::connect(enginio->q_ptr, &EnginioClient::destroyed, DisconnectConnection(_replyFinished));
+        return enginio->identify(data);
+    }
+
+    void proccessToken(EnginioClientPrivate *enginio, EnginioReplyBase *reply)
+    {
+        QByteArray sessionToken;
+        if (reply) {
+            enginio->_identityToken = reply->data();
+            sessionToken = enginio->_identityToken[EnginioString::sessionToken].toString().toLatin1();
+        }
+
+        enginio->_request.setRawHeader(EnginioString::Enginio_Backend_Session, sessionToken);
+    }
+
+    void cleanupClient(EnginioClientPrivate *enginio)
+    {
+        enginio->_request.setRawHeader(EnginioString::Enginio_Backend_Session, QByteArray());
     }
 };
 
@@ -195,7 +233,9 @@ EnginioBasicAuthentication::EnginioBasicAuthentication(QObject *parent)
   Destructs this EnginioBasicAuthentication instance.
 */
 EnginioBasicAuthentication::~EnginioBasicAuthentication()
-{}
+{
+    emit aboutToDestroy();
+}
 
 QString EnginioBasicAuthentication::user() const
 {
@@ -231,7 +271,138 @@ void EnginioBasicAuthentication::prepareSessionToken(EnginioClientPrivate *engin
     Q_ASSERT(enginio);
     Q_ASSERT(enginio->identity());
 
-    d_ptr->prepareSessionToken(enginio);
+    d_ptr->prepareSessionToken<EnginioBasicAuthenticationPrivate>(enginio);
 }
+
+/*!
+  \internal
+*/
+void EnginioBasicAuthentication::removeSessionToken(EnginioClientPrivate *enginio)
+{
+    Q_ASSERT(enginio);
+    Q_ASSERT(enginio->identity());
+    d_ptr->removeSessionToken<EnginioBasicAuthenticationPrivate>(enginio);
+}
+
+struct EnginioOAuth2AuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
+{
+    QNetworkReply *makeRequest(EnginioClientPrivate *enginio)
+    {
+        QByteArray data;
+        {
+            QUrlQuery urlQuery;
+            urlQuery.addQueryItem(EnginioString::grant_type, EnginioString::password);
+            urlQuery.addQueryItem(EnginioString::username, _user);
+            urlQuery.addQueryItem(EnginioString::password, _pass);
+            data = urlQuery.query().toUtf8();
+        }
+
+        QUrl url(enginio->_serviceUrl);
+        url.setPath(EnginioString::v1_auth_oauth2_tokens);
+
+        QNetworkRequest request(enginio->prepareRequest(url));
+        request.setHeader(QNetworkRequest::ContentTypeHeader, EnginioString::Application_x_www_form_urlencoded);
+        request.setRawHeader(EnginioString::Accept, EnginioString::Application_json);
+        // request.setRawHeader("Enginio-Backend-Secret", QByteArray()); TODO do we need to remove it?
+
+        return enginio->networkManager()->post(request, data);;
+    }
+
+    void proccessToken(EnginioClientPrivate *enginio, EnginioReplyBase *ereply)
+    {
+        QByteArray header;
+        header = EnginioString::Bearer_ + ereply->data()[EnginioString::access_token].toString().toUtf8();
+        enginio->_request.setRawHeader(EnginioString::Authorization, header);
+    }
+
+    void cleanupClient(EnginioClientPrivate *enginio)
+    {
+        enginio->_request.setRawHeader(EnginioString::Authorization, QByteArray());
+    }
+};
+
+/*!
+  Constructs a EnginioPasswordOAuth2 instance with \a parent as QObject parent.
+*/
+EnginioOAuth2Authentication::EnginioOAuth2Authentication(QObject *parent)
+    : EnginioIdentity(parent)
+    , d_ptr(new EnginioOAuth2AuthenticationPrivate())
+{
+    connect(this, &EnginioOAuth2Authentication::userChanged, this, &EnginioIdentity::dataChanged);
+    connect(this, &EnginioOAuth2Authentication::passwordChanged, this, &EnginioIdentity::dataChanged);
+}
+
+/*!
+  Destructs this EnginioPasswordOAuth2 instance.
+*/
+EnginioOAuth2Authentication::~EnginioOAuth2Authentication()
+{
+    emit aboutToDestroy();
+}
+
+/*!
+  \property EnginioOAuth2Authentication::user
+  This property contains the user name used for authentication.
+*/
+
+QString EnginioOAuth2Authentication::user() const
+{
+    return d_ptr->_user;
+}
+
+void EnginioOAuth2Authentication::setUser(const QString &user)
+{
+    if (d_ptr->_user == user)
+        return;
+    d_ptr->_user = user;
+    emit userChanged(user);
+}
+
+/*!
+  \property EnginioOAuth2Authentication::password
+  This property contains the password used for authentication.
+*/
+
+QString EnginioOAuth2Authentication::password() const
+{
+    return d_ptr->_pass;
+}
+
+void EnginioOAuth2Authentication::setPassword(const QString &password)
+{
+    if (d_ptr->_pass == password)
+        return;
+    d_ptr->_pass = password;
+    emit passwordChanged(password);
+}
+
+/*!
+  \internal
+*/
+void EnginioOAuth2Authentication::prepareSessionToken(EnginioClientPrivate *enginio)
+{
+    Q_ASSERT(enginio);
+    Q_ASSERT(enginio->identity());
+
+    d_ptr->prepareSessionToken<EnginioOAuth2AuthenticationPrivate>(enginio);
+}
+
+/*!
+  \internal
+*/
+void EnginioOAuth2Authentication::removeSessionToken(EnginioClientPrivate *enginio)
+{
+    Q_ASSERT(enginio);
+    Q_ASSERT(enginio->identity());
+    d_ptr->removeSessionToken<EnginioOAuth2AuthenticationPrivate>(enginio);
+}
+
+void DisconnectConnection::operator ()() const
+{
+    auth->cleanupConnections();
+}
+
+EnginioUserPassAuthenticationPrivate::~EnginioUserPassAuthenticationPrivate()
+{}
 
 QT_END_NAMESPACE

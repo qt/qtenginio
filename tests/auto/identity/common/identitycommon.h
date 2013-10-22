@@ -70,7 +70,8 @@ protected:
     void identity();
     void identity_changing();
     void identity_invalid();
-    void identity_afterLogout();
+    void identity_afterLogout(const QByteArray &headerName);
+    void queryRestrictedObject();
 };
 
 template<class Derived, class Identity>
@@ -90,6 +91,23 @@ void IdentityCommonTest<Derived, Identity>::initTestCase(const QString &name)
     QVERIFY(!_backendSecret.isEmpty());
 
     EnginioTests::prepareTestUsersAndUserGroups(_backendId, _backendSecret);
+    EnginioTests::prepareTestObjectType(_backendName);
+
+    {
+        QJsonObject obj;
+        obj["objectType"] = QString::fromUtf8("objects.") + EnginioTests::CUSTOM_OBJECT1;
+        obj["testCase"] = QString::fromUtf8("IdentityCommonTest");
+        obj["title"] = QString::fromUtf8("title");
+
+        EnginioClient client;
+        client.setBackendId(_backendId);
+        client.setBackendSecret(_backendSecret);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+        EnginioReply *reply = client.create(obj);
+        QTRY_VERIFY(reply->isFinished());
+        CHECK_NO_ERROR(reply);
+    }
 }
 
 template<class Derived, class Identity>
@@ -132,8 +150,7 @@ void IdentityCommonTest<Derived, Identity>::identity()
         QCOMPARE(spyAuthError.count(), 0);
         QCOMPARE(client.authenticationState(), EnginioClient::Authenticated);
 
-        QJsonObject token = spy[0][0].value<EnginioReply*>()->data();
-        QVERIFY(token.contains("sessionToken"));
+        QJsonObject token = Derived::enginioData(spy[0][0].value<EnginioReply*>()->data());
         QVERIFY(token.contains("user"));
         QVERIFY(token.contains("usergroups"));
     }
@@ -344,7 +361,7 @@ void IdentityCommonTest<Derived, Identity>::identity_changing()
         QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
 
         QTRY_COMPARE_WITH_TIMEOUT(client.authenticationState(), EnginioClient::Authenticated, 20000);
-        QJsonObject data = spy.last().last().value<EnginioReply*>()->data();
+        QJsonObject data = Derived::enginioData(spy.last().last().value<EnginioReply*>()->data());
         QCOMPARE(data["user"].toObject()["username"].toString(), QString::fromLatin1("logintest"));
     }
 }
@@ -438,7 +455,7 @@ void IdentityCommonTest<Derived, Identity>::identity_invalid()
 }
 
 template<class Derived, class Identity>
-void IdentityCommonTest<Derived, Identity>::identity_afterLogout()
+void IdentityCommonTest<Derived, Identity>::identity_afterLogout(const QByteArray &headerName)
 {
     qRegisterMetaType<QNetworkReply*>();
     EnginioClient client;
@@ -457,7 +474,6 @@ void IdentityCommonTest<Derived, Identity>::identity_afterLogout()
 
     // This may be fragile, we need real network reply to catch the header.
     QSignalSpy spy(client.networkManager(), SIGNAL(finished(QNetworkReply*)));
-    QByteArray headerName = QByteArrayLiteral("Enginio-Backend-Session");
 
     // make a connection with a new session token
     QJsonObject obj;
@@ -480,4 +496,121 @@ void IdentityCommonTest<Derived, Identity>::identity_afterLogout()
     CHECK_NO_ERROR(reqId);
     QCOMPARE(spy.count(), 2);
     QVERIFY(!spy[1][0].value<QNetworkReply*>()->request().hasRawHeader(headerName));
+}
+
+struct QueryRestrictedObject_objectId
+{
+    QString &objectId;
+    void operator ()(EnginioReply *reply)
+    {
+        CHECK_NO_ERROR(reply);
+
+        QJsonArray results = reply->data()["results"].toArray();
+        QVERIFY(results.count());
+        objectId = results[0].toObject()["id"].toString();
+        QVERIFY(!objectId.isEmpty());
+    }
+};
+
+template<typename T>
+struct QueryRestrictedObject_userId
+{
+    QString &userId;
+    void operator ()(EnginioReply *reply)
+    {
+        userId = T::enginioData(reply->data())["user"].toObject()["id"].toString();
+        QVERIFY(!userId.isEmpty());
+    }
+};
+
+template<class Derived, class Identity>
+void IdentityCommonTest<Derived, Identity>::queryRestrictedObject()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setBackendSecret(_backendSecret);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString userName = "logintest";
+    QString userPass = "logintest";
+    QString userId;
+
+    QueryRestrictedObject_userId<Derived> userIdsetter = { userId };
+    QObject::connect(&client, &EnginioClient::sessionAuthenticated, userIdsetter);
+
+    Identity identity;
+    identity.setUser(userName);
+    identity.setPassword(userPass);
+    client.setIdentity(&identity);
+    QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
+
+    QString objectType = QString::fromUtf8("objects.").append(EnginioTests::CUSTOM_OBJECT1);
+
+    // query an object
+    QString objectId; // restricted object id
+    {
+        QJsonObject obj;
+        obj["objectType"] = objectType;
+        EnginioReply *reply = client.query(obj);
+        QueryRestrictedObject_objectId setter = { objectId };
+        QObject::connect(reply, &EnginioReply::finished, setter);
+    }
+
+    QTRY_VERIFY(userId.length() && objectId.length());
+    QCOMPARE(client.authenticationState(), EnginioClient::Authenticated);
+
+    // TODO enable it
+//    // apply acl to the object allowing only user to read
+//    {
+//        QJsonObject aclUpdate;
+//        aclUpdate["objectType"] = objectType;
+//        aclUpdate["id"] = objectId;
+//        QString json = "{ \"read\": [ { \"id\": \"%1\", \"objectType\": \"users\" } ],"
+//                         "\"update\": [ { \"id\": \"%1\", \"objectType\": \"users\" } ],"
+//                         "\"admin\": [ { \"id\": \"%1\", \"objectType\": \"users\" } ] }";
+//        json = json.arg(userId);
+//        aclUpdate["access"] = QJsonDocument::fromJson(json.toUtf8()).object();
+//        qDebug() << aclUpdate;
+//        EnginioReply *reply = client.update(aclUpdate, EnginioClient::ObjectAclOperation);
+//        QTRY_VERIFY(reply->isFinished());
+//        qDebug() << reply;
+//        CHECK_NO_ERROR(reply);
+//    }
+
+//    // query the restricted object
+//    {
+//        QJsonObject obj;
+//        obj["objectType"] = objectType;
+//        QJsonObject query;
+//        query["id"] = objectId;
+//        obj["query"] = query;
+
+//        EnginioReply *reply = client.query(obj);
+//        QTRY_VERIFY(reply->isFinished());
+//        CHECK_NO_ERROR(reply);
+
+//        QJsonArray results = reply->data()["results"].toArray();
+//        QCOMPARE(results.count(), 1);
+//    }
+
+//    // logout
+//    client.setIdentity(0);
+//    QTRY_COMPARE(client.authenticationState(), EnginioClient::NotAuthenticated);
+
+//    // query the restricted object
+//    {
+//        QJsonObject obj;
+//        obj["objectType"] = objectType;
+//        QJsonObject query;
+//        query["id"] = objectId;
+//        obj["query"] = query;
+
+//        EnginioReply *reply = client.query(obj);
+//        QTRY_VERIFY(reply->isFinished());
+//        CHECK_NO_ERROR(reply);
+
+//        QJsonArray results = reply->data()["results"].toArray();
+//        QCOMPARE(results.count(), 0); // we do not have rights to access the object
+//    }
+
 }

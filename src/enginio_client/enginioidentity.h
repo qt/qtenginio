@@ -60,8 +60,10 @@ protected:
 
 Q_SIGNALS:
     void dataChanged();
+    void aboutToDestroy();
 private:
     virtual void prepareSessionToken(EnginioClientPrivate *enginio) = 0;
+    virtual void removeSessionToken(EnginioClientPrivate *enginio) = 0;
     friend class EnginioClientPrivate;
 };
 
@@ -89,7 +91,36 @@ Q_SIGNALS:
 
 private:
     virtual void prepareSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
+    virtual void removeSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
     QScopedPointer<EnginioBasicAuthenticationPrivate> d_ptr;
+};
+
+class EnginioOAuth2AuthenticationPrivate;
+class ENGINIOCLIENT_EXPORT EnginioOAuth2Authentication : public EnginioIdentity
+{
+    Q_OBJECT
+
+public:
+    EnginioOAuth2Authentication(QObject *parent = 0);
+    ~EnginioOAuth2Authentication();
+
+    Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
+    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
+
+    QString user() const Q_REQUIRED_RESULT;
+    void setUser(const QString &user);
+
+    QString password() const Q_REQUIRED_RESULT;
+    void setPassword(const QString &password);
+
+Q_SIGNALS:
+    void userChanged(const QString &user);
+    void passwordChanged(const QString &password);
+
+private:
+    virtual void prepareSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
+    virtual void removeSessionToken(EnginioClientPrivate *enginio) Q_DECL_OVERRIDE;
+    QScopedPointer<EnginioOAuth2AuthenticationPrivate> d_ptr;
 };
 
 QT_END_NAMESPACE

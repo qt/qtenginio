@@ -49,6 +49,7 @@
     F(_synced, "_synced")\
     F(_delete, "delete")\
     F(access, "access")\
+    F(access_token, "access_token")\
     F(apiEnginIo, "https://api.engin.io")\
     F(apiRequestId, "apiRequestId")\
     F(authIdentity, "auth/identity")\
@@ -63,6 +64,7 @@
     F(file, "file")\
     F(fileName, "fileName")\
     F(files, "files")\
+    F(grant_type, "grant_type")\
     F(headers, "headers")\
     F(id, "id")\
     F(include, "include")\
@@ -98,6 +100,7 @@
     F(username, "username")\
     F(users, "users")\
     F(variant, "variant")\
+    F(v1_auth_oauth2_tokens, "/v1/auth/oauth2/tokens")\
 
 #define FOR_EACH_ENGINIO_BYTEARRAY(F)\
     F(XRequestId, "X-Request-Id")\
@@ -112,6 +115,8 @@
     F(Fulltext_Search_objectTypes_parameter_is_missing_or_it_is_not_an_array, "Fulltext Search: 'objectTypes' parameter is missing or it is not an array")\
     F(Fulltext_Search_search_parameter_missing, "Fulltext Search: 'search' parameter(s) missing")\
     F(Application_octet_stream, "application/octet-stream")\
+    F(Application_json, "application/json")\
+    F(Application_x_www_form_urlencoded, "application/x-www-form-urlencoded")\
     F(Minus, "-")\
     F(Div, "/")\
     F(EnginioModel_remove_row_is_out_of_range, "EnginioModel::remove: row is out of range")\
@@ -122,7 +127,10 @@
     F(EnginioModel_The_query_was_changed_before_the_request_could_be_sent, "EnginioModel: The query was changed before the request could be sent")\
     F(EnginioModel_Trying_to_update_an_object_with_unknown_role, "EnginioModel: Trying to update an object with unknown role")\
     F(Content_Range, "Content-Range")\
-    F(Get, "GET")
+    F(Get, "GET")\
+    F(Accept, "Accept")\
+    F(Bearer_, "Bearer ")\
+    F(Authorization, "Authorization")\
 
 
 struct ENGINIOCLIENT_EXPORT EnginioString

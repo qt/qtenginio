@@ -96,8 +96,6 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 {
     enum PathOptions { Default, IncludeIdInPath = 1};
 
-    QNetworkRequest prepareRequest(const QUrl &url);
-
     struct ENGINIOCLIENT_EXPORT GetPathReturnValue : public QPair<bool, QString>
     {
         GetPathReturnValue(bool value)
@@ -361,20 +359,7 @@ public:
         return _identityToken;
     }
 
-    void setIdentityToken(EnginioReplyBase *reply)
-    {
-        QByteArray sessionToken;
-        if (reply) {
-            _identityToken = reply->data();
-            sessionToken = _identityToken[EnginioString::sessionToken].toString().toLatin1();
-        }
-
-        _request.setRawHeader(EnginioString::Enginio_Backend_Session, sessionToken);
-        if (sessionToken.isEmpty())
-            emitSessionTerminated();
-        else
-            emitSessionAuthenticated(reply);
-    }
+    QNetworkRequest prepareRequest(const QUrl &url);
 
     void registerReply(QNetworkReply *nreply, EnginioReplyBase *ereply)
     {
@@ -393,11 +378,13 @@ public:
             QObject::disconnect(identityConnection);
         _identityConnections.clear();
 
-        if (!(_identity = identity)) {
+        if (!identity) {
             // invalidate old identity token
-            setIdentityToken(0);
+            _identity->removeSessionToken(this);
+            _identity = 0;
             return;
         }
+        _identity = identity;
         CallPrepareSessionToken callPrepareSessionToken(this, identity);
         if (_backendId.isEmpty() || _backendSecret.isEmpty()) {
             if (_backendId.isEmpty())
@@ -407,20 +394,19 @@ public:
         } else
             identity->prepareSessionToken(this);
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::dataChanged, callPrepareSessionToken));
-        _identityConnections.append(QObject::connect(identity, &EnginioIdentity::destroyed, IdentityInstanceDestroyed(this)));
+        _identityConnections.append(QObject::connect(identity, &EnginioIdentity::aboutToDestroy, IdentityInstanceDestroyed(this)));
         emit q_ptr->identityChanged(identity);
     }
 
     QNetworkReply *identify(const QJsonObject &object)
     {
+        // TODO move to identity makeRequest
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH(url, object, AuthenticationOperation);
 
         QNetworkRequest req = prepareRequest(url);
         QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
         QNetworkReply *reply = networkManager()->post(req, data);
-
-        setAuthenticationState(EnginioClientBase::Authenticating);
 
         if (gEnableEnginioDebugInfo)
             _requestData.insert(reply, data);
