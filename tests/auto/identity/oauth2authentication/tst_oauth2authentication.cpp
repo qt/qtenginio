@@ -58,8 +58,18 @@ public slots:
     void error(EnginioReply *reply) { Base::error(reply); }
 
 private slots:
-    void initTestCase() { Base::initTestCase(QStringLiteral("tst_OAuth2Auth")); }
-    void cleanupTestCase() { Base::cleanupTestCase(); }
+    void initTestCase()
+    {
+        if (EnginioTests::TESTAPP_URL != QStringLiteral("https://staging.engin.io"))
+            QSKIP("OAuth2Authentication tests can be executed only against staging");
+        Base::initTestCase(QStringLiteral("tst_OAuth2Auth"));
+    }
+    void cleanupTestCase()
+    {
+        if (EnginioTests::TESTAPP_URL != QStringLiteral("https://staging.engin.io"))
+            QSKIP("OAuth2Authentication tests can be executed only against staging");
+        Base::cleanupTestCase();
+    }
 
     void identity() { Base::identity(); }
     void identity_changing() { Base::identity_changing(); }
