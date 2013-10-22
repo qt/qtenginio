@@ -684,6 +684,7 @@ EnginioClientBase::EnginioClientBase(QObject *parent, EnginioClientPrivate *d)
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
     qRegisterMetaType<EnginioBasicAuthentication*>();
+    qRegisterMetaType<EnginioOAuth2Authentication*>();
     qRegisterMetaType<EnginioClientBase::Operation>();
     qRegisterMetaType<EnginioClientBase::AuthenticationState>();
 }
