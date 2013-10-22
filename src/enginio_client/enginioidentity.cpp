@@ -65,12 +65,18 @@ QT_BEGIN_NAMESPACE
   \internal
 */
 
+/*!
+  \fn EnginioIdentity::aboutToDestroy()
+  \internal
+*/
+
 #define E_D(Name) Name##Private * const d = static_cast<Name##Private*>(d_ptr);
 
 class EnginioIdentityPrivate {};
 
 /*!
-    Constructs a new EnginioIdentity with \a parent as QObject parent.
+    Constructs a new EnginioIdentity with \a dd pointer \a parent as QObject parent.
+    \internal
 */
 EnginioIdentity::EnginioIdentity(EnginioIdentityPrivate *dd, QObject *parent)
     : QObject(parent)
