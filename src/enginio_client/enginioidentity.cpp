@@ -161,8 +161,9 @@ public:
     }
 };
 
-struct EnginioBasicAuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
+class EnginioBasicAuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
 {
+public:
     QNetworkReply *makeRequest(EnginioClientPrivate *enginio)
     {
         QJsonObject object;
@@ -304,8 +305,9 @@ void EnginioBasicAuthentication::removeSessionToken(EnginioClientPrivate *engini
     d->removeSessionToken<EnginioBasicAuthenticationPrivate>(enginio);
 }
 
-struct EnginioOAuth2AuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
+class EnginioOAuth2AuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
 {
+public:
     QNetworkReply *makeRequest(EnginioClientPrivate *enginio)
     {
         QByteArray data;
