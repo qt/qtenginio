@@ -234,7 +234,6 @@ void tst_Files::fileUploadDownload()
         }
         QVERIFY2(ok == 10, "resultObject[\"fileAttachment\"].isObject()");
         QVERIFY(resultObject["fileAttachment"].isObject());
-        QVERIFY(!resultObject["fileAttachment"].toObject()["url"].toString().isEmpty());
         QCOMPARE(resultObject["fileAttachment"].toObject()["fileName"].toString(), fileName);
 
         QFile file(filePath);
