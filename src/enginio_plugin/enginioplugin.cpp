@@ -96,6 +96,7 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterUncreatableType<EnginioQmlReply>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
     qmlRegisterUncreatableType<EnginioIdentity>(uri, 1, 0, "EnginioIdentity", "EnginioIdentity can not be instantiated directly");
     qmlRegisterType<EnginioBasicAuthentication>(uri, 1, 0, "EnginioBasicAuthentication");
+    qmlRegisterType<EnginioOAuth2Authentication>(uri, 1, 0, "EnginioOAuth2Authentication");
     qmlRegisterUncreatableType<QNetworkReply>(uri, 1, 0, "QNetworkReply", "QNetworkReply is abstract and it can not be constructed");
 }
 
