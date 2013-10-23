@@ -1,2 +1,2 @@
 include(../../common/common.pri)
-HEADERS += identitycommon.h
+HEADERS += $$PWD/identitycommon.h
