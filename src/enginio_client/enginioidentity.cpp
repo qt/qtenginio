@@ -333,7 +333,7 @@ public:
         request.setRawHeader(EnginioString::Accept, EnginioString::Application_json);
         // request.setRawHeader("Enginio-Backend-Secret", QByteArray()); TODO do we need to remove it?
 
-        return enginio->networkManager()->post(request, data);;
+        return enginio->networkManager()->post(request, data);
     }
 
     void proccessToken(EnginioClientPrivate *enginio, EnginioReplyBase *ereply)
