@@ -632,7 +632,7 @@ QSharedPointer<QNetworkAccessManager> EnginioClientBasePrivate::prepareNetworkMa
     qnam = NetworkManager->localData().toStrongRef();
     if (!qnam) {
         qnam = QSharedPointer<QNetworkAccessManager>(new QNetworkAccessManager());
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0) && !defined(QT_NO_SSL)
         qnam->connectToHostEncrypted(EnginioString::apiEnginIo);
 #endif
         NetworkManager->setLocalData(qnam);
