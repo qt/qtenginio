@@ -158,8 +158,19 @@ Rectangle {
             }
             )
 
+    Stack.onStatusChanged: {
+        if (Stack.status == Stack.Activating) {
+            nameInput.text = ""
+            passwordInput.text = ""
+            nameInput.forceActiveFocus()
+        }
+    }
+
+    EnginioBasicAuthentication { id: noAuth }
+
     function login() {
         statusText.text = "Logging in..."
+        enginioClient.identity = noAuth
         auth.user = nameInput.text
         auth.password = passwordInput.text
         enginioClient.identity = auth
