@@ -154,7 +154,7 @@ Rectangle {
                     id: placeholderText
                     anchors.fill: parent
                     verticalAlignment: Text.AlignVCenter
-                    visible: !(parent.text.length)
+                    visible: !(parent.text.length || parent.inputMethodComposing)
                     font: parent.font
                     text: "New todo..."
                     color: "#aaa"

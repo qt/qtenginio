@@ -81,14 +81,6 @@ FocusScope {
             verticalAlignment: Text.AlignVCenter
             font.pixelSize: 22 * scaleFactor
             focus: true
-            Text {
-                id: placeholderText
-                anchors.fill: parent
-                verticalAlignment: Text.AlignVCenter
-                visible: !(parent.text.length)
-                font: parent.font
-                color: "#aaa"
-            }
             onAccepted: textfield.accepted()
             Text {
                 id: placeholder
@@ -96,7 +88,6 @@ FocusScope {
                 verticalAlignment: Text.AlignVCenter
                 visible: !(parent.text.length || textInput.inputMethodComposing)
                 font: parent.font
-                text: placeholderText
                 color: "#aaa"
             }
         }
