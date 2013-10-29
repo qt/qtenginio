@@ -130,6 +130,12 @@ public:
         qDebug() << "  Request URL:" << request.url().toString(/*FormattingOptions*/ QUrl::None);
         qDebug() << "  Operation:" << operationNames[_nreply->operation()];
         qDebug() << "  HTTP return code:" << backendStatus();
+        qDebug() << "  Headers[Content-Type]:" << request.header(QNetworkRequest::ContentTypeHeader);
+        qDebug() << "  Raw headers:" << request.rawHeaderList();
+        qDebug() << "  RawHeaders[Accept]:" << request.rawHeader(EnginioString::Accept);
+        qDebug() << "  RawHeaders[Authorization]:" << request.rawHeader(EnginioString::Authorization);
+        qDebug() << "  RawHeaders[Content-Type]:" << request.rawHeader(EnginioString::Content_Type);
+        qDebug() << "  RawHeaders[XRequestId]:" << request.rawHeader(EnginioString::XRequestId);
 
         QByteArray json = _client->_requestData.value(_nreply);
         if (!json.isEmpty()) {
