@@ -54,6 +54,9 @@
 
     The first step is to create an \l{Enginio1::EnginioModel} and
     the Enginio instance with the backend configuration.
+    To get nice debug output in case something goes wrong, the onError signal in
+    Enginio is handled. Since the error is a JSON object, JSON.stringify is used
+    to format it to a string.
 
     \snippet todos/todo.qml model
 

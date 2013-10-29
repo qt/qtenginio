@@ -54,6 +54,7 @@ Rectangle {
         id: enginioModel
         client: Enginio {
             backendId: enginioBackendId
+            onError: console.log("Enginio error:", JSON.stringify(reply.data))
         }
         query: {"objectType": "objects.todos" }
     }
