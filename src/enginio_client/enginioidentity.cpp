@@ -326,7 +326,7 @@ public:
         }
 
         QUrl url(enginio->_serviceUrl);
-        url.setPath(EnginioString::v1_auth_oauth2_tokens);
+        url.setPath(EnginioString::v1_auth_oauth2_token);
 
         QNetworkRequest request(enginio->prepareRequest(url));
         request.setHeader(QNetworkRequest::ContentTypeHeader, EnginioString::Application_x_www_form_urlencoded);

@@ -99,7 +99,7 @@
     F(username, "username")\
     F(users, "users")\
     F(variant, "variant")\
-    F(v1_auth_oauth2_tokens, "/v1/auth/oauth2/tokens")\
+    F(v1_auth_oauth2_token, "/v1/auth/oauth2/token")\
     F(v1_auth_identity, "/v1/auth/identity")\
 
 #define FOR_EACH_ENGINIO_BYTEARRAY(F)\
