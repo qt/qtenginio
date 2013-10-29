@@ -90,9 +90,8 @@ class EnginioBackendManager: public QObject
     QMap<QString, QJsonArray> _backendEnvironments;
     QString _email;
     QString _password;
-    QUrl _url;
 
-    bool synchronousRequest(const QByteArray &httpOperation, const QJsonObject &data = QJsonObject());
+    bool synchronousRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data = QJsonObject());
     bool removeAppWithId(const QString &appId);
     bool authenticate();
     QString getAppId(const QString &backendName) Q_REQUIRED_RESULT;

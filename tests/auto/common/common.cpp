@@ -76,8 +76,8 @@ struct PrintAllErrors
 
 EnginioBackendManager::EnginioBackendManager(QObject *parent)
     : QObject(parent)
-    , _url(EnginioTests::TESTAPP_URL)
 {
+    _client.setServiceUrl(EnginioTests::TESTAPP_URL);
     QString credentialsFileName = qgetenv("ENGINIO_CREDENTIALS_FILE_PATH");
     if (!credentialsFileName.isEmpty()) {
         QFile credentialsFile(credentialsFileName);
@@ -120,8 +120,8 @@ void EnginioBackendManager::finished(EnginioReply *reply)
 
 void EnginioBackendManager::setServiceUrl(const QUrl &serviceUrl)
 {
-    if (_url != serviceUrl) {
-        _url = serviceUrl;
+    if (_client.serviceUrl() != serviceUrl) {
+        _client.setServiceUrl(serviceUrl);
 
         // Re-authenticate.
         if (!authenticate())
@@ -138,13 +138,13 @@ void EnginioBackendManager::error(EnginioReply *reply)
     qDebug() << "\n###\n";
 }
 
-bool EnginioBackendManager::synchronousRequest(const QByteArray &httpOperation, const QJsonObject &data)
+bool EnginioBackendManager::synchronousRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)
 {
     QSignalSpy finishedSpy(&_client, SIGNAL(finished(EnginioReply *)));
     QSignalSpy errorSpy(&_client, SIGNAL(error(EnginioReply *)));
     PrintAllErrors printErrors(&errorSpy);
     _responseData = QJsonObject();
-    _client.customRequest(_url, httpOperation, data);
+    _client.customRequest(url, httpOperation, data);
     return finishedSpy.wait(30000) && !errorSpy.count();
 }
 
@@ -156,10 +156,11 @@ bool EnginioBackendManager::authenticate()
     QJsonObject obj;
     obj["payload"] = credentials;
     obj["headers"] = _headers;
-    _url.setPath(QStringLiteral("/v1/account/auth/identity"));
+    QUrl url(_client.serviceUrl());
+    url.setPath(QStringLiteral("/v1/account/auth/identity"));
 
     // Authenticate developer
-    synchronousRequest(postRequest, obj);
+    synchronousRequest(url, postRequest, obj);
     QString sessionToken = _responseData["sessionToken"].toString();
     _headers["Enginio-Backend-Session"] = sessionToken;
 
@@ -189,9 +190,10 @@ QJsonArray EnginioBackendManager::getAllBackends()
 {
     QJsonObject obj;
     obj["headers"] = _headers;
-    _url.setPath("/v1/account/apps");
+    QUrl url(_client.serviceUrl());
+    url.setPath("/v1/account/apps");
 
-    synchronousRequest(getRequest, obj);
+    synchronousRequest(url, getRequest, obj);
     return _responseData["results"].toArray();
 }
 
@@ -207,9 +209,10 @@ QJsonArray EnginioBackendManager::getEnvironments(const QString &backendName)
     appPath.append(appId);
     QJsonObject obj;
     obj["headers"] = _headers;
-    _url.setPath(appPath);
+    QUrl url(_client.serviceUrl());
+    url.setPath(appPath);
 
-    if (synchronousRequest(getRequest, obj)) {
+    if (synchronousRequest(url, getRequest, obj)) {
         environments = _responseData["environments"].toArray();
         _backendEnvironments[backendName] = environments;
     }
@@ -226,8 +229,9 @@ bool EnginioBackendManager::removeAppWithId(const QString &appId)
     obj["headers"] = _headers;
     QString appsPath = QStringLiteral("/v1/account/apps/");
     appsPath.append(appId);
-    _url.setPath(appsPath);
-    return synchronousRequest(deleteRequest, obj);
+    QUrl url(_client.serviceUrl());
+    url.setPath(appsPath);
+    return synchronousRequest(url, deleteRequest, obj);
 }
 
 bool EnginioBackendManager::createBackend(const QString &backendName)
@@ -239,9 +243,10 @@ bool EnginioBackendManager::createBackend(const QString &backendName)
     QJsonObject backend;
     backend["name"] = backendName;
     obj["payload"] = backend;
-    _url.setPath("/v1/account/apps");
+    QUrl url(_client.serviceUrl());
+    url.setPath("/v1/account/apps");
 
-    if (!synchronousRequest(postRequest, obj))
+    if (!synchronousRequest(url, postRequest, obj))
         return false;
 
     _backendEnvironments[backendName] = _responseData["environments"].toArray();
@@ -286,8 +291,9 @@ bool EnginioBackendManager::createObjectType(const QString &backendName, const Q
     obj["headers"] = _headers;
     obj["payload"] = schema;
 
-    _url.setPath("/v1/object_types");
-    synchronousRequest(postRequest, obj);
+    QUrl url(_client.serviceUrl());
+    url.setPath("/v1/object_types");
+    synchronousRequest(url, postRequest, obj);
     return !_responseData["properties"].toArray().isEmpty();
 }
 

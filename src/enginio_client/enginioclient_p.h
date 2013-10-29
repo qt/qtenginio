@@ -398,6 +398,7 @@ public:
     {
         Q_ASSERT(!url.isEmpty());
         Q_ASSERT(!httpOperation.isEmpty());
+        Q_ASSERT_X(url.host() == _serviceUrl.host(), "EnginioClientBase::customRequest", "Missmatch between hosts was detected");
 
         QNetworkRequest req = prepareRequest(url);
 
