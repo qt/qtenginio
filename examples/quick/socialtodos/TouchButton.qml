@@ -37,50 +37,55 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
 import QtQuick 2.1
 
-Rectangle {
-    property alias text: t.text
-    property int rightMargin: 0
+Item {
+    id: button
+    signal clicked
+    property alias text: label.text
+    property color baseColor: "#555"
+    property color textColor: "#fff"
+    height: Math.round(40 * scaleFactor)
+    width: Math.round(160 * scaleFactor)
+    activeFocusOnTab: true
 
-    anchors.top: parent.top
-    width: parent.width
-    height: 70 * scaleFactor
-    color: "white"
 
-    Item {
-        height: parent.height
-        width: parent.height
-        id: backButton
-        Image {
-            anchors.centerIn: parent
-            width:  implicitWidth * scaleFactor
-            height: implicitHeight * scaleFactor
-            source: "qrc:icons/back_icon.png"
-            MouseArea {
-                anchors.fill: parent
-                anchors.margins: - 10
-                onClicked: mainView.pop()
-            }
-        }
-    }
-    Text {
-        id: t
-        anchors.left: backButton.right
-        anchors.leftMargin: 10 * scaleFactor
-        anchors.right: parent.right
-        anchors.rightMargin: rightMargin
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: -3
-        elide: Text.ElideMiddle
-        font.bold: true
-        font.pixelSize: 36 * scaleFactor
-        color: "#555"
-    }
     Rectangle {
-        width: parent.width; height: 1
-        anchors.bottom: parent.bottom
-        color: "#bbb"
+        anchors.fill: button
+        color: "#ffffff"
+        anchors.bottomMargin: intScaleFactor
+        radius: background.radius
+    }
+
+    Keys.onReturnPressed: clicked()
+
+    Rectangle {
+        id: background
+        opacity: enabled ? 1 : 0.7
+        Behavior on opacity {NumberAnimation{}}
+        radius: height/2
+        border.width: intScaleFactor * button.activeFocus ? 2 : 1
+        border.color: Qt.darker(baseColor, 1.4)
+        anchors.fill: parent
+        gradient: Gradient {
+            GradientStop { color: mousearea.pressed ? baseColor : Qt.lighter(baseColor, 1.4) ; position: 0 }
+            GradientStop { color: baseColor ; position: 1 }
+        }
+
+        Text {
+            id: label
+            anchors.centerIn: parent
+            font.pixelSize: 22 * scaleFactor
+            font.bold: true
+            color: textColor
+            style: Text.Raised
+            styleColor: "#44000000"
+        }
+
+        MouseArea {
+            id: mousearea
+            onClicked: button.clicked()
+            anchors.fill: parent
+        }
     }
 }

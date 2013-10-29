@@ -83,7 +83,7 @@ Rectangle {
         delegate: BorderImage {
             id: item
 
-            width: parent.width ; height: 40
+            width: parent.width ; height: 40 * scaleFactor
             source: mouse.pressed ? "qrc:images/delegate_pressed.png" : "qrc:images/delegate.png"
             border.left: 5; border.top: 5
             border.right: 5; border.bottom: 5
@@ -98,8 +98,8 @@ Rectangle {
 
             Item {
                 id: checkBox
-                height: 40
-                width: 42
+                height: 40 * scaleFactor
+                width: 42 * scaleFactor
                 Image {
                     anchors.centerIn: parent
                     fillMode: Image.PreserveAspectFit
@@ -110,7 +110,7 @@ Rectangle {
                 anchors.left: checkBox.right
                 anchors.verticalCenter: parent.verticalCenter
                 text: modelData
-                font.pixelSize: 22
+                font.pixelSize: 22 * scaleFactor
             }
 
             MouseArea {

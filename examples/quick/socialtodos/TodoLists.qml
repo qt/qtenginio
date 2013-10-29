@@ -39,7 +39,6 @@
 ****************************************************************************/
 
 import QtQuick 2.1
-import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 import Enginio 1.0
 
@@ -70,14 +69,14 @@ Rectangle {
 
         anchors.top: header.bottom
         width: parent.width
-        height: parent.height - 140
+        height: parent.height - 140 * scaleFactor
     }
 
     BorderImage {
         anchors.top: list.bottom
         anchors.bottom: parent.bottom
         width: parent.width
-        height: 70
+        height: 70 * scaleFactor
 
         source: "qrc:images/delegate.png"
         border.left: 5; border.top: 5
@@ -94,48 +93,33 @@ Rectangle {
             color: "white"
         }
 
-        BorderImage {
+        TextField {
+            id: textInput
             anchors.left: parent.left
             anchors.right: addButton.left
             anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: 16
-            source: "qrc:images/textfield.png"
-            border.left: 14 ; border.right: 14 ; border.top: 8 ; border.bottom: 8
-
-            TextInput{
-                id: textInput
-                anchors.fill: parent
-                clip: true
-                anchors.leftMargin: 14
-                anchors.rightMargin: 14
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: 22
-                Text {
-                    id: placeholderText
-                    anchors.fill: parent
-                    verticalAlignment: Text.AlignVCenter
-                    visible: !(parent.text.length)
-                    font: parent.font
-                    text: "New list..."
-                    color: "#aaa"
-                }
-                onAccepted: {
-                    enginioModel.append({"name": textInput.text} )
-                    textInput.text = ""
-                }
+            anchors.margins: 16 * scaleFactor
+            placeholderText: "New list..."
+            onAccepted: {
+                enginioModel.append({"name": textInput.text} )
+                textInput.text = ""
             }
+
         }
 
         Item {
             id: addButton
 
-            width: 40 ; height: 40
-            anchors.margins: 20
+            width: 40 * scaleFactor
+            height: 40 * scaleFactor
+            anchors.margins: 20 * scaleFactor
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             enabled: textInput.text.length
             Image {
                 source: addMouseArea.pressed ? "qrc:icons/add_icon_pressed.png" : "qrc:icons/add_icon.png"
+                width:  implicitWidth * scaleFactor
+                height: implicitHeight * scaleFactor
                 anchors.centerIn: parent
                 opacity: enabled ? 1 : 0.5
             }
@@ -158,7 +142,7 @@ Rectangle {
         BorderImage {
             id: item
 
-            width: parent.width ; height: 70
+            width: parent.width ; height: 70 * scaleFactor
             source: mouse.pressed ? "qrc:images/delegate_pressed.png" : "qrc:images/delegate.png"
             border.left: 5; border.top: 5
             border.right: 5; border.bottom: 5
@@ -183,14 +167,14 @@ Rectangle {
             Text {
                 id: todoText
                 text: name + " by " + ((model["creator"] && creator.username) ? creator.username : username)
-                font.pixelSize: 26
+                font.pixelSize: 26 * scaleFactor
                 color: "#333"
 
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.leftMargin: 12
-                anchors.rightMargin: 40
+                anchors.leftMargin: 16 * scaleFactor
+                anchors.rightMargin: 60 * scaleFactor
                 elide: Text.ElideRight
             }
 
@@ -199,10 +183,12 @@ Rectangle {
                 id: removeIcon
 
                 source: removeMouseArea.pressed ? "qrc:icons/delete_icon_pressed.png" : "qrc:icons/delete_icon.png"
-                anchors.margins: 20
+                anchors.margins: 20 * scaleFactor
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 opacity: enabled ? 1 : 0.5
+                width:  implicitWidth * scaleFactor
+                height: implicitHeight * scaleFactor
                 Behavior on opacity {NumberAnimation{duration: 100}}
                 MouseArea {
                     id: removeMouseArea

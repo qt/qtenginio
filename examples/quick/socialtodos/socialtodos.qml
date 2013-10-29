@@ -40,12 +40,17 @@
 
 import QtQuick 2.1
 import QtQuick.Controls 1.0
+import QtQuick.Window 2.1
 import Enginio 1.0
 
 Rectangle {
     id: root
-    width: 400
-    height: 640
+
+    property real scaleFactor: Screen.pixelDensity / 5.0
+    property int intScaleFactor: Math.max(1, scaleFactor)
+
+    width: 400 * scaleFactor
+    height: 640 * scaleFactor
     color: "#f4f4f4"
 
     Component {

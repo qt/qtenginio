@@ -62,8 +62,10 @@ Rectangle {
     Header {
         id: header
         text: listName
+        rightMargin: icon.width
 
         Item {
+            id: icon
             height: parent.height
             width: parent.height
             anchors.right: parent.right
@@ -71,6 +73,8 @@ Rectangle {
                 id: shareButton
                 anchors.centerIn: parent
                 source: mouse.pressed ? "qrc:icons/share_icon_pressed.png" : "qrc:icons/share_icon.png"
+                width:  implicitWidth * scaleFactor
+                height: implicitHeight * scaleFactor
                 MouseArea {
                     id: mouse
                     anchors.fill: parent
@@ -103,6 +107,7 @@ Rectangle {
     BorderImage {
         id: footer
 
+        height: 70 * scaleFactor
         width: parent.width
         anchors.bottom: parent.bottom
         source: "qrc:images/delegate.png"
@@ -120,47 +125,30 @@ Rectangle {
             color: "white"
         }
 
-        BorderImage {
+        TextField {
+            anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.right: addButton.left
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: 16
-            source:"images/textfield.png"
-            border.left: 14 ; border.right: 14 ; border.top: 8 ; border.bottom: 8
-
-            TextInput{
-                id: textInput
-                anchors.fill: parent
-                clip: true
-                anchors.leftMargin: 14
-                anchors.rightMargin: 14
-                verticalAlignment: Text.AlignVCenter
-                font.pixelSize: 22
-                Text {
-                    id: placeholderText
-                    anchors.fill: parent
-                    verticalAlignment: Text.AlignVCenter
-                    visible: !(parent.text.length)
-                    font: parent.font
-                    text: "New todo..."
-                    color: "#aaa"
-                }
-                onAccepted: {
-                    enginioModel.append({"title": textInput.text, "done": false, "todoList": { "id": listId, "objectType": "objects.todoLists" } } )
-                    textInput.text = ""
-                }
+            anchors.margins: 16 * scaleFactor
+            placeholderText: "New todo..."
+            onAccepted: {
+                enginioModel.append({"title": textInput.text, "done": false, "todoList": { "id": listId, "objectType": "objects.todoLists" } } )
+                textInput.text = ""
             }
         }
 
         Item {
             id: addButton
 
-            width: 40 ; height: 40
-            anchors.margins: 20
+            width: 40 * scaleFactor
+            height: 40 * scaleFactor
+            anchors.margins: 20 * scaleFactor
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             enabled: textInput.text.length
             Image {
+                width:  implicitWidth * scaleFactor
+                height: implicitHeight * scaleFactor
                 source: addMouseArea.pressed ? "qrc:icons/add_icon_pressed.png" : "qrc:icons/add_icon.png"
                 anchors.centerIn: parent
                 opacity: enabled ? 1 : 0.5
@@ -179,7 +167,7 @@ Rectangle {
         BorderImage {
             id: item
 
-            width: parent.width ; height: 70
+            width: parent.width ; height: 70 * scaleFactor
             source: mouse.pressed ? "qrc:images/delegate_pressed.png" : "qrc:images/delegate.png"
             border.left: 5; border.top: 5
             border.right: 5; border.bottom: 5
@@ -205,8 +193,9 @@ Rectangle {
             Image {
                 id: checkbox
                 anchors.left: parent.left
-                anchors.leftMargin: 16
-                width: 32
+                anchors.leftMargin: 16 * scaleFactor
+                height: width
+                width: 32 * scaleFactor
                 fillMode: Image.PreserveAspectFit
                 anchors.verticalCenter: parent.verticalCenter
                 source: done ? "qrc:images/checkmark.png" : ""
@@ -215,14 +204,14 @@ Rectangle {
             Text {
                 id: todoText
                 text: title
-                font.pixelSize: 26
+                font.pixelSize: 26 * scaleFactor
                 color: "#333"
 
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: checkbox.right
                 anchors.right: parent.right
-                anchors.leftMargin: 12
-                anchors.rightMargin: 40
+                anchors.leftMargin: 16 * scaleFactor
+                anchors.rightMargin: 40 * scaleFactor
                 elide: Text.ElideRight
             }
 
@@ -231,7 +220,9 @@ Rectangle {
                 id: removeIcon
 
                 source: removeMouseArea.pressed ? "qrc:icons/delete_icon_pressed.png" : "qrc:icons/delete_icon.png"
-                anchors.margins: 20
+                width:  implicitWidth * scaleFactor
+                height: implicitHeight * scaleFactor
+                anchors.margins: 20 * scaleFactor
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 opacity: enabled ? 1 : 0.5

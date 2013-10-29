@@ -39,7 +39,6 @@
 ****************************************************************************/
 
 import QtQuick 2.1
-import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 import Enginio 1.0
 
@@ -51,7 +50,7 @@ Rectangle {
         id: header
         anchors.top: parent.top
         width: parent.width
-        height: 70
+        height: 70 * scaleFactor
         color: "white"
 
         Row {
@@ -61,7 +60,7 @@ Rectangle {
             spacing: 4
             Image {
                 source: "qrc:images/enginio.png"
-                width: 160 ; height: 60
+                width: 160 * scaleFactor ; height: 60 * scaleFactor
                 fillMode: Image.PreserveAspectFit
             }
             Text {
@@ -69,7 +68,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.verticalCenterOffset: -3
                 font.bold: true
-                font.pixelSize: 46
+                font.pixelSize: 46 * scaleFactor
                 color: "#555"
             }
         }
@@ -100,102 +99,56 @@ Rectangle {
             width: parent.width
             color: "white"
         }
+    }
 
-        ColumnLayout {
-            x: 10
-            y: 10
-            height: parent.height - 2
-            width: parent.width - 20
-            spacing: 10
+    Column {
+        anchors.centerIn: parent
+        anchors.alignWhenCentered: true
+        width: 360 * scaleFactor
+        spacing: 14 * intScaleFactor
 
-            BorderImage {
-                Layout.fillWidth: true
-                source: "images/textfield.png"
-                border.left: 14 ; border.right: 14 ; border.top: 8 ; border.bottom: 8
+        TextField {
+            id: nameInput
+            onAccepted: passwordInput.forceActiveFocus()
+            placeholderText: "Username"
+        }
 
-                TextInput {
-                    id: nameInput
-                    anchors.fill: parent
-                    clip: true
-                    anchors.leftMargin: 14
-                    anchors.rightMargin: 14
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: 22
-                    focus: true
-                    activeFocusOnTab: true
+        TextField {
+            id: passwordInput
+            onAccepted: login()
+            placeholderText: "Password"
+            echoMode: TextInput.Password
+        }
 
-                    Text {
-                        anchors.fill: parent
-                        verticalAlignment: Text.AlignVCenter
-                        visible: !(parent.text.length)
-                        font: parent.font
-                        text: "Username"
-                        color: "#aaa"
-                    }
-                    onAccepted: passwordInput.forceActiveFocus()
-                }
+        Row {
+            // button
+            spacing: 20 * scaleFactor
+            width: 360 * scaleFactor
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.alignWhenCentered: true
+            TouchButton {
+                text: "Login"
+                baseColor: "#7a5"
+                width: (parent.width - parent.spacing)/2
+                onClicked: login()
+                enabled: enginioClient.authenticationState !== Enginio.Authenticating && nameInput.text.length && passwordInput.text.length
             }
-
-            BorderImage {
-                Layout.fillWidth: true
-
-                height: 40
-                source: "images/textfield.png"
-                border.left: 14 ; border.right: 14 ; border.top: 8 ; border.bottom: 8
-
-                TextInput{
-                    id: passwordInput
-                    anchors.fill: parent
-                    clip: true
-                    anchors.leftMargin: 14
-                    anchors.rightMargin: 14
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: 22
-                    echoMode: TextInput.Password
-
-                    activeFocusOnTab: true
-                    Text {
-                        anchors.fill: parent
-                        verticalAlignment: Text.AlignVCenter
-                        visible: !(parent.text.length)
-                        font: parent.font
-                        text: "Password"
-                        color: "#aaa"
-                    }
-                    onAccepted: login()
-                }
-            }
-
-            RowLayout {
-                // button
-                width: parent.width
-                height: 60
-                spacing: 10
-
-                Button {
-                    text: "Login"
-                    onClicked: login()
-                    enabled: enginioClient.authenticationState !== Enginio.Authenticating && nameInput.text.length && passwordInput.text.length
-                }
-                Button {
-                    text: "Register"
-                    onClicked: register()
-                    enabled: enginioClient.authenticationState !== Enginio.Authenticating && nameInput.text.length && passwordInput.text.length
-                }
-
-            }
-
-            Item {
-                Layout.fillHeight: true
-            }
-            Item {
-                width: parent.width
-                height: 40
-                Text {
-                    id: statusText
-                }
+            TouchButton {
+                text: "Register"
+                onClicked: register()
+                width: (parent.width - parent.spacing)/2
+                enabled: enginioClient.authenticationState !== Enginio.Authenticating && nameInput.text.length && passwordInput.text.length
             }
         }
+    }
+
+    Text {
+        id: statusText
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottomMargin: 70 * scaleFactor
+        font.pixelSize: 18 * scaleFactor
+        color: "#444"
     }
 
     Component.onCompleted:

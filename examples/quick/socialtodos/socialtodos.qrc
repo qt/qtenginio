@@ -19,9 +19,11 @@
     <qresource prefix="/">
         <file>socialtodos.qml</file>
         <file>Login.qml</file>
+        <file>TextField.qml</file>
         <file>TodoLists.qml</file>
         <file>List.qml</file>
         <file>ShareDialog.qml</file>
         <file>Header.qml</file>
+        <file>TouchButton.qml</file>
     </qresource>
 </RCC>

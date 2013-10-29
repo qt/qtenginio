@@ -37,50 +37,69 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
 import QtQuick 2.1
 
-Rectangle {
-    property alias text: t.text
-    property int rightMargin: 0
+FocusScope {
+    id: textfield
 
-    anchors.top: parent.top
-    width: parent.width
-    height: 70 * scaleFactor
-    color: "white"
+    property alias text: textInput.text
+    property alias placeholderText: placeholder.text
+    property alias echoMode: textInput.echoMode
+    signal accepted
 
-    Item {
-        height: parent.height
-        width: parent.height
-        id: backButton
-        Image {
-            anchors.centerIn: parent
-            width:  implicitWidth * scaleFactor
-            height: implicitHeight * scaleFactor
-            source: "qrc:icons/back_icon.png"
-            MouseArea {
+    activeFocusOnTab: true
+
+    implicitHeight: Math.round(40 * scaleFactor)
+    implicitWidth: Math.round(parent.width)
+
+    Rectangle {
+        anchors.fill: editbg
+        radius: editbg.radius
+        color: "#aaffffff"
+        anchors.bottomMargin: -1
+    }
+
+    Rectangle {
+        id: editbg
+        anchors.fill: parent
+        radius: height/2
+        border.width: intScaleFactor
+        border.color: "#999"
+
+        gradient: Gradient {
+            GradientStop {color: "#eee" ; position: 0}
+            GradientStop {color: "white" ; position: 0.1}
+            GradientStop {color: "white" ; position: 1}
+        }
+
+        TextInput{
+            id: textInput
+            anchors.fill: parent
+            clip: true
+            anchors.leftMargin: 16 * scaleFactor
+            anchors.rightMargin: 16 * scaleFactor
+            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: 22 * scaleFactor
+            focus: true
+            Text {
+                id: placeholderText
                 anchors.fill: parent
-                anchors.margins: - 10
-                onClicked: mainView.pop()
+                verticalAlignment: Text.AlignVCenter
+                visible: !(parent.text.length)
+                font: parent.font
+                color: "#aaa"
+            }
+            onAccepted: textfield.accepted()
+            Text {
+                id: placeholder
+                anchors.fill: parent
+                verticalAlignment: Text.AlignVCenter
+                visible: !(parent.text.length || textInput.inputMethodComposing)
+                font: parent.font
+                text: placeholderText
+                color: "#aaa"
             }
         }
     }
-    Text {
-        id: t
-        anchors.left: backButton.right
-        anchors.leftMargin: 10 * scaleFactor
-        anchors.right: parent.right
-        anchors.rightMargin: rightMargin
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: -3
-        elide: Text.ElideMiddle
-        font.bold: true
-        font.pixelSize: 36 * scaleFactor
-        color: "#555"
-    }
-    Rectangle {
-        width: parent.width; height: 1
-        anchors.bottom: parent.bottom
-        color: "#bbb"
-    }
 }
+
