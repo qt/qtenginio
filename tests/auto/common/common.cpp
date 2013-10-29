@@ -118,17 +118,6 @@ void EnginioBackendManager::finished(EnginioReply *reply)
     _responseData = reply->data();
 }
 
-void EnginioBackendManager::setServiceUrl(const QUrl &serviceUrl)
-{
-    if (_client.serviceUrl() != serviceUrl) {
-        _client.setServiceUrl(serviceUrl);
-
-        // Re-authenticate.
-        if (!authenticate())
-            qDebug("ERROR: Session authentication failed!");
-    }
-}
-
 void EnginioBackendManager::error(EnginioReply *reply)
 {
     Q_ASSERT(reply);

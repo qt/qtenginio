@@ -105,7 +105,6 @@ public slots:
 public:
     explicit EnginioBackendManager(QObject *parent = 0);
     virtual ~EnginioBackendManager();
-    void setServiceUrl(const QUrl &serviceUrl);
     bool createBackend(const QString &backendName);
     bool removeBackend(const QString &backendName);
     bool createObjectType(const QString &backendName, const QString &environment, const QJsonObject &schema);

@@ -114,8 +114,6 @@ void tst_Notifications::initTestCase()
     if (EnginioTests::TESTAPP_URL != QStringLiteral("https://staging.engin.io"))
         QSKIP("Notification tests can be executed only against staging");
 
-    _backendManager.setServiceUrl(EnginioTests::TESTAPP_URL);
-
     _backendName = QStringLiteral("Notifications") + QString::number(QDateTime::currentMSecsSinceEpoch());
     QVERIFY(_backendManager.createBackend(_backendName));
 
