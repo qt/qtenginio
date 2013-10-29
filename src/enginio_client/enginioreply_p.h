@@ -85,7 +85,7 @@ public:
 
     QString requestId() const Q_REQUIRED_RESULT
     {
-        return QString::fromUtf8(_nreply->request().rawHeader(EnginioString::XRequestId));
+        return QString::fromUtf8(_nreply->request().rawHeader(EnginioString::X_Request_Id));
     }
 
     QString errorString() const Q_REQUIRED_RESULT
@@ -135,7 +135,7 @@ public:
         qDebug() << "  RawHeaders[Accept]:" << request.rawHeader(EnginioString::Accept);
         qDebug() << "  RawHeaders[Authorization]:" << request.rawHeader(EnginioString::Authorization);
         qDebug() << "  RawHeaders[Content-Type]:" << request.rawHeader(EnginioString::Content_Type);
-        qDebug() << "  RawHeaders[XRequestId]:" << request.rawHeader(EnginioString::XRequestId);
+        qDebug() << "  RawHeaders[X_Request_Id]:" << request.rawHeader(EnginioString::X_Request_Id);
 
         QByteArray json = _client->_requestData.value(_nreply);
         if (!json.isEmpty()) {

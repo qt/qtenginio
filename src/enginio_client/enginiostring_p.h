@@ -103,7 +103,7 @@
     F(v1_auth_identity, "/v1/auth/identity")\
 
 #define FOR_EACH_ENGINIO_BYTEARRAY(F)\
-    F(XRequestId, "X-Request-Id")\
+    F(X_Request_Id, "X-Request-Id")\
     F(Requested_object_operation_requires_non_empty_objectType_value, "Requested object operation requires non empty \'objectType\' value")\
     F(Requested_object_acl_operation_requires_non_empty_objectType_value, "Requested object acl operation requires non empty \'objectType\' value")\
     F(Requested_object_acl_operation_requires_non_empty_id_value, "Requested object acl operation requires non empty \'id\' value")\

@@ -191,7 +191,7 @@ QNetworkRequest EnginioClientPrivate::prepareRequest(const QUrl &url)
 
     QNetworkRequest req(_request);
     req.setUrl(url);
-    req.setRawHeader(EnginioString::XRequestId, requestId);
+    req.setRawHeader(EnginioString::X_Request_Id, requestId);
     return req;
 }
 
