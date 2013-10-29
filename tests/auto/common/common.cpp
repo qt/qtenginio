@@ -41,6 +41,7 @@
 
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
+#include <Enginio/private/enginiostring_p.h>
 #include <QtCore/qjsonarray.h>
 #include <QtTest/QSignalSpy>
 #include <QtTest/QtTest>
@@ -139,19 +140,29 @@ bool EnginioBackendManager::synchronousRequest(const QUrl &url, const QByteArray
 
 bool EnginioBackendManager::authenticate()
 {
-    QJsonObject credentials;
-    credentials["email"] = _email;
-    credentials["password"] = _password;
-    QJsonObject obj;
-    obj["payload"] = credentials;
-    obj["headers"] = _headers;
+    QByteArray data;
+    {
+        QUrlQuery urlQuery;
+        urlQuery.addQueryItem(EnginioString::grant_type, EnginioString::password);
+        urlQuery.addQueryItem(EnginioString::username, _email);
+        urlQuery.addQueryItem(EnginioString::password, _password);
+        data = urlQuery.query().toUtf8();
+    }
     QUrl url(_client.serviceUrl());
-    url.setPath(QStringLiteral("/v1/account/auth/identity"));
+    url.setPath(QStringLiteral("/v1/account/auth/oauth2/token"));
 
-    // Authenticate developer
-    synchronousRequest(url, postRequest, obj);
-    QString sessionToken = _responseData["sessionToken"].toString();
-    _headers["Enginio-Backend-Session"] = sessionToken;
+    QNetworkRequest request/*(enginio->prepareRequest(url))*/;
+    request.setHeader(QNetworkRequest::ContentTypeHeader, EnginioString::Application_x_www_form_urlencoded);
+    request.setRawHeader(EnginioString::Accept, EnginioString::Application_json);
+    request.setUrl(url);
+
+    QNetworkReply *reply = _client.networkManager()->post(request, data);
+    QSignalSpy spy(reply, SIGNAL(finished()));
+    spy.wait(20000);
+
+    _responseData = QJsonDocument::fromJson(reply->readAll()).object();
+    QString sessionToken = _responseData[EnginioString::access_token].toString();
+    _headers[EnginioString::Authorization] = EnginioString::Bearer_ + sessionToken;
 
     return !sessionToken.isEmpty();
 }

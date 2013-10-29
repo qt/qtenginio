@@ -1,3 +1,4 @@
+QT += enginio-private
 SOURCES += $$PWD/common.cpp
 HEADERS += $$PWD/common.h
 
