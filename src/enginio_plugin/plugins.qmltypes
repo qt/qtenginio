@@ -48,7 +48,6 @@ Module {
             }
         }
         Property { name: "backendId"; type: "QByteArray" }
-        Property { name: "backendSecret"; type: "QByteArray" }
         Property { name: "serviceUrl"; type: "QUrl" }
         Property { name: "identity"; type: "EnginioIdentity"; isPointer: true }
         Property { name: "authenticationState"; type: "AuthenticationState"; isReadonly: true }
@@ -64,10 +63,6 @@ Module {
         Signal {
             name: "backendIdChanged"
             Parameter { name: "backendId"; type: "QByteArray" }
-        }
-        Signal {
-            name: "backendSecretChanged"
-            Parameter { name: "backendSecret"; type: "QByteArray" }
         }
         Signal {
             name: "serviceUrlChanged"

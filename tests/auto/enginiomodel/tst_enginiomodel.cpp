@@ -60,7 +60,6 @@ class tst_EnginioModel: public QObject
     QString _backendName;
     EnginioTests::EnginioBackendManager _backendManager;
     QByteArray _backendId;
-    QByteArray _backendSecret;
 
 public slots:
     void error(EnginioReply *reply) {
@@ -112,13 +111,11 @@ void tst_EnginioModel::initTestCase()
 
     QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, EnginioTests::TESTAPP_ENV);
     _backendId = apiKeys["backendId"].toString().toUtf8();
-    _backendSecret = apiKeys["backendSecret"].toString().toUtf8();
 
     QVERIFY(!_backendId.isEmpty());
-    QVERIFY(!_backendSecret.isEmpty());
 
     // The test operates on user data.
-    EnginioTests::prepareTestUsersAndUserGroups(_backendId, _backendSecret);
+    EnginioTests::prepareTestUsersAndUserGroups(_backendId);
     EnginioTests::prepareTestObjectType(_backendName);
 }
 
@@ -146,7 +143,6 @@ void tst_EnginioModel::ctor()
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         client.setBackendId(_backendId);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
-        client.setBackendSecret(_backendSecret);
         model.setEnginio(&client);
     }
     {   // check if destructor of a fully initilized EnginioClient detach fully initilized model
@@ -157,7 +153,6 @@ void tst_EnginioModel::ctor()
         model.setQuery(query);
         client.setBackendId(_backendId);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
-        client.setBackendSecret(_backendSecret);
         model.setEnginio(&client);
     }
 }
@@ -204,7 +199,6 @@ void tst_EnginioModel::enginio_property()
         // check if initial set is not calling reset twice
         EnginioClient client;
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         EnginioModel model;
@@ -215,6 +209,24 @@ void tst_EnginioModel::enginio_property()
         model.setQuery(query);
         model.setOperation(EnginioClient::UserOperation);
         model.setEnginio(&client);
+
+        QTRY_COMPARE(spyAboutToReset.count(), 1);
+        QTRY_COMPARE(spyReset.count(), 1);
+    }
+    {
+        // check if initial set is not calling reset twice
+        EnginioClient client;
+        client.setBackendId(_backendId);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+        EnginioModel model;
+        QSignalSpy spyAboutToReset(&model, SIGNAL(modelAboutToBeReset()));
+        QSignalSpy spyReset(&model, SIGNAL(modelReset()));
+        model.setEnginio(&client);
+        QJsonObject query;
+        query.insert("limit", 1);
+        query.insert("objectTypes", "objects." + EnginioTests::CUSTOM_OBJECT1);
+        model.setQuery(query);
 
         QTRY_COMPARE(spyAboutToReset.count(), 1);
         QTRY_COMPARE(spyReset.count(), 1);
@@ -252,7 +264,6 @@ void tst_EnginioModel::query_property()
 
         EnginioClient client;
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         model.setEnginio(&client);
@@ -300,7 +311,6 @@ void tst_EnginioModel::roleNames()
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
@@ -330,7 +340,6 @@ void tst_EnginioModel::listView()
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
@@ -383,7 +392,6 @@ void tst_EnginioModel::invalidRemove()
 {
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioModel model;
@@ -420,7 +428,6 @@ void tst_EnginioModel::invalidSetProperty()
 {
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioModel model;
@@ -491,11 +498,9 @@ void tst_EnginioModel::multpleConnections()
     {
         EnginioClientConnectionSpy client1;
         client1.setBackendId(_backendId);
-        client1.setBackendSecret(_backendSecret);
         client1.setServiceUrl(EnginioTests::TESTAPP_URL);
         EnginioClientConnectionSpy client2;
         client2.setBackendId(_backendId);
-        client2.setBackendSecret(_backendSecret);
         client2.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         EnginioModelConnectionSpy model;
@@ -516,16 +521,13 @@ void tst_EnginioModel::multpleConnections()
         // All of them are acctually disconnected but disconnectNotify is not called, it is
         // a known bug in Qt.
         QCOMPARE(client1.counter["backendIdChanged"], 20);
-        QCOMPARE(client1.counter["backendSecretChanged"], 20);
         QCOMPARE(client1.counter["destroyed"], 20);
         QCOMPARE(client2.counter["backendIdChanged"], 20);
-        QCOMPARE(client2.counter["backendSecretChanged"], 20);
         QCOMPARE(client2.counter["destroyed"], 20);
     }
     {
         EnginioClientConnectionSpy client;
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         EnginioModelConnectionSpy model;
@@ -548,7 +550,6 @@ void tst_EnginioModel::multpleConnections()
     {
         EnginioClientConnectionSpy client;
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         EnginioModelConnectionSpy model;
@@ -594,7 +595,6 @@ void tst_EnginioModel::deletionReordered()
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
@@ -632,7 +632,6 @@ void tst_EnginioModel::deleteTwiceTheSame()
 
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
@@ -675,7 +674,6 @@ void tst_EnginioModel::updateAndDeleteReordered()
 
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
@@ -717,7 +715,6 @@ void tst_EnginioModel::updateReordered()
 
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     model.setEnginio(&client);
 
@@ -760,7 +757,6 @@ void tst_EnginioModel::append()
 
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioModel model;
@@ -880,7 +876,6 @@ void tst_EnginioModel::externallyRemovedImpl()
 
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     {
@@ -966,7 +961,6 @@ void tst_EnginioModel::createAndModify()
 {
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);;
 
     QString propertyName = "title";
@@ -1054,7 +1048,6 @@ void tst_EnginioModel::externalNotification()
 
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString propertyName = "title";
@@ -1126,7 +1119,6 @@ void tst_EnginioModel::createUpdateRemoveWithNotification()
 {
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString propertyName = "title";
@@ -1213,7 +1205,6 @@ void tst_EnginioModel::appendBeforeInitialModelReset()
 
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     for (int i = 0; i < 12 ; ++i) {
         QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
@@ -1244,7 +1235,6 @@ void tst_EnginioModel::delayedRequestBeforeInitialModelReset()
 
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     for (int i = 0; i < 12 ; ++i) {
         QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
@@ -1275,7 +1265,6 @@ void tst_EnginioModel::appendAndChangeQueryBeforeItIsFinished()
 {
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
@@ -1315,7 +1304,6 @@ void tst_EnginioModel::deleteModelDurringRequests()
 {
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QVarLengthArray<EnginioReply*, 12> replies;
@@ -1352,7 +1340,6 @@ void tst_EnginioModel::updatingRoles()
 {
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;

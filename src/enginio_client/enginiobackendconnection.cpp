@@ -507,7 +507,7 @@ void EnginioBackendConnection::onSocketReadyRead()
 
 /*!
     \brief Establish a stateful connection to the backend specified by EnginioClient
-    \a client. Note that the client already has to be set up (e.g. backendId and backendSecret has to be valid).
+    \a client. Note that the client already has to be set up (e.g. backendId has to be valid).
     Optionally, to let the server only send specific messages of interest,
     a \a messageFilter can be provided with the following json scheme:
 
@@ -527,7 +527,6 @@ void EnginioBackendConnection::connectToBackend(EnginioClientPrivate* client, co
 {
     Q_ASSERT(client);
     Q_ASSERT(!client->_backendId.isEmpty());
-    Q_ASSERT(!client->_backendSecret.isEmpty());
 
     QUrl url(client->_serviceUrl);
     url.setPath(QStringLiteral("/v1/stream_url"));

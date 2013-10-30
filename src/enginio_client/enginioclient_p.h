@@ -245,8 +245,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
         {}
         void operator ()()
         {
-            if (!_enginio->_backendId.isEmpty() && !_enginio->_backendSecret.isEmpty()) {
-                // TODO should we disconnect backendId and backendSecret change singals?
+            if (!_enginio->_backendId.isEmpty()) {
+                // TODO should we disconnect backendId change singals?
                 _identity->prepareSessionToken(_enginio);
             }
         }
@@ -312,7 +312,6 @@ public:
 
     EnginioClientBase *q_ptr;
     QByteArray _backendId;
-    QByteArray _backendSecret;
     EnginioIdentity *_identity;
 
     QLinkedList<QMetaObject::Connection> _connections;
@@ -382,11 +381,8 @@ public:
         }
         _identity = identity;
         CallPrepareSessionToken callPrepareSessionToken(this, identity);
-        if (_backendId.isEmpty() || _backendSecret.isEmpty()) {
-            if (_backendId.isEmpty())
-                _identityConnections.append(QObject::connect(q_ptr, &EnginioClientBase::backendIdChanged, callPrepareSessionToken));
-            if (_backendSecret.isEmpty())
-                _identityConnections.append(QObject::connect(q_ptr, &EnginioClientBase::backendSecretChanged, callPrepareSessionToken));
+        if (_backendId.isEmpty()) {
+            _identityConnections.append(QObject::connect(q_ptr, &EnginioClientBase::backendIdChanged, callPrepareSessionToken));
         } else
             identity->prepareSessionToken(this);
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::dataChanged, callPrepareSessionToken));

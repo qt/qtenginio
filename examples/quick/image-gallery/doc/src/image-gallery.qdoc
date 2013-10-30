@@ -59,7 +59,7 @@
         when the thumbnail is clicked.
     \endlist
 
-    Copy the backend Id and backend Secret from the Enginio dashboard.
+    Copy the backend Id from the Enginio dashboard.
     They need to be filled into the example when it is executed for the first time.
 
     \section1 The example code

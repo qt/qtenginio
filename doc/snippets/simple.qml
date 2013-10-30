@@ -48,7 +48,6 @@ Rectangle {
     Enginio {
         id: client
         backendId: "YOUR_BACKEND_ID" // from Enginio Dashboard
-        backendSecret: "YOUR_BACKEND_SECRET" // from Enginio Dashboard
     }
     //! [client]
 

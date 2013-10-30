@@ -56,7 +56,7 @@
             when the thumbnail is clicked.
     \endlist
 
-    Copy the backend Id and backend Secret from the Enginio dashboard and use them when requested.
+    Copy the backend Id from the Enginio dashboard and use them when requested.
 
     \section1 The example code
 

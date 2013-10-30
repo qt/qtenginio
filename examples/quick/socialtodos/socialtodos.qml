@@ -61,7 +61,6 @@ Rectangle {
     Enginio {
         id: enginioClient
         backendId: enginioBackendId
-        backendSecret: enginioBackendSecret
 
         onAuthenticationStateChanged: {
             console.log("Auth state:", authenticationState)
@@ -72,7 +71,7 @@ Rectangle {
         onError: console.log(JSON.stringify(reply.data))
     }
 
-    EnginioBasicAuthentication {
+    EnginioOAuth2Authentication {
         id: auth
     }
 

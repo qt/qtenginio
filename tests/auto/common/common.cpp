@@ -305,7 +305,6 @@ QJsonObject EnginioBackendManager::backendApiKeys(const QString &backendName, co
         return QJsonObject();
 
     QString backendId;
-    QString backendSecret;
 
     foreach (const QJsonValue &value, environments) {
         QJsonObject env = value.toObject();
@@ -313,24 +312,21 @@ QJsonObject EnginioBackendManager::backendApiKeys(const QString &backendName, co
             backendId = env["id"].toString();
             QJsonArray keys = env["apiKeys"].toArray();
             QJsonObject apiKey = keys.first().toObject();
-            backendSecret = apiKey["key"].toString();
             break;
         }
     }
 
     QJsonObject apiKeys;
     apiKeys["backendId"] = backendId;
-    apiKeys["backendSecret"] = backendSecret;
 
     return apiKeys;
 }
 
-void prepareTestUsersAndUserGroups(const QByteArray& backendId, const QByteArray& backendSecret)
+void prepareTestUsersAndUserGroups(const QByteArray& backendId)
 {
     // Create some users to be used in later tests
     EnginioClient client;
     client.setBackendId(backendId);
-    client.setBackendSecret(backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));

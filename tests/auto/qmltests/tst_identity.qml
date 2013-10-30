@@ -50,7 +50,6 @@ Item {
     Enginio {
         id: enginio
         backendId: AppConfig.backendData.id
-        backendSecret: AppConfig.backendData.secret
         serviceUrl: AppConfig.backendData.serviceUrl
 
         onError: {
@@ -61,13 +60,13 @@ Item {
         }
     }
 
-    EnginioBasicAuthentication {
+    EnginioOAuth2Authentication {
         id: validIdentity
         user: "logintest"
         password: "logintest"
     }
 
-    EnginioBasicAuthentication {
+    EnginioOAuth2Authentication {
         id: invalidIdentity
         user: "INVALID"
         password: "INVALID"

@@ -61,9 +61,8 @@ int main(int argc, char* argv[])
     view.engine()->addImportPath(qmlImportDir.canonicalPath());
     QObject::connect(view.engine(), SIGNAL(quit()), &app, SLOT(quit()));
 
-    QPair<QByteArray, QByteArray> backendData = backendIdAndSecret(ENGINIO_SAMPLE_NAME);
-    view.engine()->rootContext()->setContextProperty("enginioBackendId", backendData.first);
-    view.engine()->rootContext()->setContextProperty("enginioBackendSecret", backendData.second);
+    QByteArray enginioBackendId = backendId(ENGINIO_SAMPLE_NAME);
+    view.engine()->rootContext()->setContextProperty("enginioBackendId", enginioBackendId);
 
     view.setSource(QUrl("qrc:///" ENGINIO_SAMPLE_NAME ".qml"));
     view.setResizeMode(QQuickView::SizeRootObjectToView);

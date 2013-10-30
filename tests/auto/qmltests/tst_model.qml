@@ -47,29 +47,28 @@ import "config.js" as AppConfig
 Item {
     id: root
 
-    Enginio {
-        id: enginioClient
-        // FIXME Tests depend on the enginioClient being fully initialized
-        // currently there is no easy way to enforce it. By initializing
-        // serviceUrl first (and exploiting an undefined behavior) we expect that
-        // all models will not trigger any query using the default url.
-        serviceUrl: AppConfig.backendData.serviceUrl
-
-        property int errorCount: 0
-        onError: {
-            ++errorCount
-            console.log("\n\n### ERROR")
-            console.log(reply.errorString)
-            reply.dumpDebugInfo()
-            console.log("\n###\n")
-        }
-
-        backendId: AppConfig.backendData.id
-        backendSecret: AppConfig.backendData.secret
+    function replyDumpDebugInfo(reply) {
+        console.log("\n\n### ERROR")
+        console.log(reply.errorString)
+        reply.dumpDebugInfo()
+        console.log("\n###\n")
     }
 
     TestCase {
         name: "EnginioModel: create"
+
+        Enginio {
+            id: enginioClientCreate
+            serviceUrl: AppConfig.backendData.serviceUrl
+
+            property int errorCount: 0
+            onError: {
+                ++errorCount
+                replyDumpDebugInfo(reply)
+            }
+
+            backendId: AppConfig.backendData.id
+        }
 
         EnginioModel {
             id: modelCreate
@@ -103,16 +102,16 @@ Item {
 
         function test_assignClient() {
             var signalCount = modelCreateEnginioChanged.count
-            modelCreate.enginio = enginioClient
-            verify(modelCreate.enginio == enginioClient)
+            modelCreate.enginio = enginioClientCreate
+            verify(modelCreate.enginio == enginioClientCreate)
             tryCompare(modelCreateEnginioChanged, "count", ++signalCount)
 
             modelCreate.enginio = null
             verify(modelCreate.enginio === null)
             tryCompare(modelCreateEnginioChanged, "count", ++signalCount)
 
-            modelCreate.enginio = enginioClient
-            verify(modelCreate.enginio == enginioClient)
+            modelCreate.enginio = enginioClientCreate
+            verify(modelCreate.enginio == enginioClientCreate)
             tryCompare(modelCreateEnginioChanged, "count", ++signalCount)
         }
 
@@ -147,7 +146,18 @@ Item {
 
         EnginioModel {
             id: modelQuery
-            enginio: enginioClient
+            enginio: Enginio {
+                id: enginioClientQuery
+                serviceUrl: AppConfig.backendData.serviceUrl
+
+                property int errorCount: 0
+                onError: {
+                    ++errorCount
+                    replyDumpDebugInfo(reply)
+                }
+
+                backendId: AppConfig.backendData.id
+            }
             onModelAboutToBeReset: { resetCount++ }
             property int resetCount: 0
         }
@@ -163,13 +173,13 @@ Item {
         }
 
         function test_queryObjects() {
-            var counterObject = { "counter" : 0, "enginioErrors" : enginioClient.errorCount}
-            enginioClient.create({ "objectType": AppConfig.testObjectType,
+            var counterObject = { "counter" : 0, "enginioErrors" : enginioClientQuery.errorCount}
+            enginioClientQuery.create({ "objectType": AppConfig.testObjectType,
                                "testCase": "EnginioModel: query",
                                "title": "prepare",
                                "count": 1,
                            }, Enginio.ObjectOperation).finished.connect(function(){ counterObject.counter++});
-            enginioClient.create({ "objectType": AppConfig.testObjectType,
+            enginioClientQuery.create({ "objectType": AppConfig.testObjectType,
                                "testCase": "EnginioModel: query",
                                "title": "prepare",
                                "count": 2,
@@ -178,7 +188,7 @@ Item {
             tryCompare(counterObject, "counter", 2, 10000)
 
             _query({ "limit": 2, "objectType": AppConfig.testObjectType }, Enginio.ObjectOperation)
-            compare(counterObject.enginioErrors, enginioClient.errorCount)
+            compare(counterObject.enginioErrors, enginioClientQuery.errorCount)
 
         }
 
@@ -196,7 +206,18 @@ Item {
 
         EnginioModel {
             id: modelModify
-            enginio: enginioClient
+            enginio: Enginio {
+                id: enginioClientModify
+                serviceUrl: AppConfig.backendData.serviceUrl
+
+                property int errorCount: 0
+                onError: {
+                    ++errorCount
+                    replyDumpDebugInfo(reply)
+                }
+
+                backendId: AppConfig.backendData.id
+            }
             query: {
                      "objectType": AppConfig.testObjectType,
                      "query": {"testCase": "EnginioModel: modify"}
@@ -207,9 +228,9 @@ Item {
         }
 
         function test_modify() {
-            var errorCount = enginioClient.errorCount
+            var errorCount = enginioClientModify.errorCount
             var counterObject = {"counter": 0, "expectedCount": 0}
-            tryCompare(modelModify, "resetCounter", 1)
+            tryCompare(modelModify, "resetCounter", 2)
 
             // append new data
             modelModify.append({ "objectType": AppConfig.testObjectType,
@@ -225,19 +246,19 @@ Item {
                          }).finished.connect(function() {counterObject.counter++})
             ++counterObject.expectedCount
             tryCompare(counterObject, "counter", counterObject.expectedCount)
-            compare(enginioClient.errorCount, errorCount)
+            compare(enginioClientModify.errorCount, errorCount)
 
 
             // remove data
             modelModify.remove(0).finished.connect(function(reply) {counterObject.counter++})
             tryCompare(counterObject, "counter", ++counterObject.expectedCount, 10000)
-            compare(enginioClient.errorCount, errorCount)
+            compare(enginioClientModify.errorCount, errorCount)
 
 
             // change data
             modelModify.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
             tryCompare(counterObject, "counter", ++counterObject.expectedCount)
-            compare(enginioClient.errorCount, errorCount)
+            compare(enginioClientModify.errorCount, errorCount)
         }
     }
 
@@ -246,7 +267,18 @@ Item {
 
         EnginioModel {
             id: modelModifyUndblocked
-            enginio: enginioClient
+            enginio: Enginio {
+                id: enginioClientModifyUndblocked
+                serviceUrl: AppConfig.backendData.serviceUrl
+
+                property int errorCount: 0
+                onError: {
+                    ++errorCount
+                    replyDumpDebugInfo(reply)
+                }
+
+                backendId: AppConfig.backendData.id
+            }
             query: {
                      "objectType": AppConfig.testObjectType,
                      "query": {"testCase": "EnginioModel: modify unblocked"}
@@ -257,9 +289,9 @@ Item {
         }
 
         function test_modify() {
-            var errorCount = enginioClient.errorCount
+            var errorCount = enginioClientModifyUndblocked.errorCount
             var counterObject = {"counter": 0, "expectedCount": 0}
-            tryCompare(modelModifyUndblocked, "resetCounter", 1)
+            tryCompare(modelModifyUndblocked, "resetCounter", 2)
 
             // append new data
             modelModifyUndblocked.append({ "objectType": AppConfig.testObjectType,
@@ -285,7 +317,7 @@ Item {
             modelModifyUndblocked.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
             ++counterObject.expectedCount
             tryCompare(counterObject, "counter", counterObject.expectedCount)
-            compare(enginioClient.errorCount, errorCount)
+            compare(enginioClientModifyUndblocked.errorCount, errorCount)
         }
     }
 
@@ -295,7 +327,18 @@ Item {
 
         EnginioModel {
             id: modelModifyChaos
-            enginio: enginioClient
+            enginio: Enginio {
+                id: enginioClientModifyChaos
+                serviceUrl: AppConfig.backendData.serviceUrl
+
+                property int errorCount: 0
+                onError: {
+                    ++errorCount
+                    replyDumpDebugInfo(reply)
+                }
+
+                backendId: AppConfig.backendData.id
+            }
             query: {
                      "objectType": AppConfig.testObjectType,
                      "query": {"testCase": "EnginioModel: modify unblocked chaos"}
@@ -306,9 +349,9 @@ Item {
         }
 
         function test_modify() {
-            if (enginioClient.serviceUrl !== "https://staging.engin.io")
+            if (enginioClientModifyChaos.serviceUrl !== "https://staging.engin.io")
                 skip("FIXME the test crashes on staging because of enabled notifications")
-            var errorCount = enginioClient.errorCount
+            var errorCount = enginioClientModifyChaos.errorCount
             var counterObject = {"counter": 0, "expectedCount": 0}
 
             // append new data
@@ -335,7 +378,7 @@ Item {
             modelModifyChaos.setProperty(0, "count", 77).finished.connect(function() {counterObject.counter++})
             ++counterObject.expectedCount
             tryCompare(counterObject, "counter", counterObject.expectedCount)
-            compare(enginioClient.errorCount, errorCount)
+            compare(enginioClientModifyChaos.errorCount, errorCount)
         }
     }
 
@@ -345,7 +388,17 @@ Item {
 
         EnginioModel {
             id: modelRowCount
-            enginio: enginioClient
+            enginio: Enginio {
+                serviceUrl: AppConfig.backendData.serviceUrl
+
+                property int errorCount: 0
+                onError: {
+                    ++errorCount
+                    replyDumpDebugInfo(reply)
+                }
+
+                backendId: AppConfig.backendData.id
+            }
             query: {
                      "objectType": AppConfig.testObjectType,
                      "query": {"testCase": "EnginioModel: rowCount"}
@@ -360,7 +413,7 @@ Item {
 
         function test_rowCount()
         {
-            tryCompare(modelRowCount, "resetCounter", 1)
+            tryCompare(modelRowCount, "resetCounter", 2)
 
             // append and remove
             compare(modelRowCount.rowCount, 0)

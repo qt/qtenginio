@@ -67,7 +67,7 @@ QT_BEGIN_NAMESPACE
   It is used for all communication with the Enginio backend.
   \l EnginioModel compliments it to make handling of multiple objects simple.
 
-  The backend is identified by \l{backendId}{backend ID} and \l{backendSecret}{secret}.
+  The backend is identified by \l{backendId}{backend ID}.
   \snippet simple.qml client
 
   Once the backend is configured, it is possible to run queries by calling query on
@@ -82,11 +82,6 @@ QT_BEGIN_NAMESPACE
 /*!
   \qmlproperty string Enginio1::Enginio::backendId
   Enginio backend ID. This can be obtained from the Enginio dashboard.
-*/
-
-/*!
-  \qmlproperty string Enginio1::Enginio::backendSecret
-  Enginio backend secret. This can be obtained from the Enginio dashboard.
 */
 
 /*!

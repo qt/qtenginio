@@ -64,14 +64,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowTitle(QStringLiteral("Enginio TODO example"));
 
-    QPair<QByteArray, QByteArray> backendData = backendIdAndSecret("todo");
-    QByteArray EnginioBackendId = backendData.first;
-    QByteArray EnginioBackendSecret = backendData.second;
+    QByteArray EnginioBackendId = backendId("todo");
 
     //![client]
     m_client = new EnginioClient(this);
     m_client->setBackendId(EnginioBackendId);
-    m_client->setBackendSecret(EnginioBackendSecret);
     //![client]
 
     QObject::connect(m_client, &EnginioClient::error, this, &MainWindow::error);

@@ -92,14 +92,12 @@ int main(int argc, char** argv)
 
     QJsonObject apiKeys = backendManager.backendApiKeys(backendName, EnginioTests::TESTAPP_ENV);
     QByteArray backendId = apiKeys["backendId"].toString().toUtf8();
-    QByteArray backendSecret = apiKeys["backendSecret"].toString().toUtf8();
 
-    EnginioTests::prepareTestUsersAndUserGroups(backendId, backendSecret);
+    EnginioTests::prepareTestUsersAndUserGroups(backendId);
 
     QTextStream out(&qmltestConfig);
     out << "var backendData = {\n" \
         << "    id: \"" << backendId << "\",\n" \
-        << "    secret: \"" << backendSecret << "\",\n" \
         << "    serviceUrl: \"" << EnginioTests::TESTAPP_URL << "\"\n" \
         << "}\n"
         << "var testSourcePath = \"" QUICK_TEST_SOURCE_DIR "\"\n" \

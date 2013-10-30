@@ -49,7 +49,6 @@ Rectangle {
     Enginio {
         id: client
         backendId: Config.id
-        backendSecret: Config.secret
         onFinished: console.log("Engino request finished." + reply.data)
         onError: console.log("Enginio error " + reply.errorCode + ": " + reply.errorString)
     }

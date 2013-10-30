@@ -50,7 +50,6 @@ Item {
     Enginio {
         id: enginio
         backendId: AppConfig.backendData.id
-        backendSecret: AppConfig.backendData.secret
         serviceUrl: AppConfig.backendData.serviceUrl
 
         property int errorCount: 0

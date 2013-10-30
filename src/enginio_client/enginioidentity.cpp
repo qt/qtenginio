@@ -40,7 +40,6 @@
 ****************************************************************************/
 
 #include <Enginio/enginioidentity.h>
-#include <Enginio/enginiobasicauthentication.h>
 #include <Enginio/enginiooauth2authentication.h>
 #include <Enginio/private/enginioclient_p.h>
 #include <Enginio/enginioreply.h>
@@ -167,150 +166,6 @@ public:
     }
 };
 
-class EnginioBasicAuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
-{
-public:
-    QNetworkReply *makeRequest(EnginioClientPrivate *enginio)
-    {
-        QJsonObject object;
-        object[EnginioString::username] = _user;
-        object[EnginioString::password] = _pass;
-
-        QUrl url(enginio->_serviceUrl);
-        url.setPath(EnginioString::v1_auth_identity);
-
-        QNetworkRequest req = enginio->prepareRequest(url);
-        QByteArray data(QJsonDocument(object).toJson(QJsonDocument::Compact));
-
-        return enginio->networkManager()->post(req, data);
-    }
-
-    void proccessToken(EnginioClientPrivate *enginio, EnginioReplyBase *reply)
-    {
-        QByteArray sessionToken;
-        if (reply) {
-            enginio->_identityToken = reply->data();
-            sessionToken = enginio->_identityToken[EnginioString::sessionToken].toString().toLatin1();
-        }
-
-        enginio->_request.setRawHeader(EnginioString::Enginio_Backend_Session, sessionToken);
-    }
-
-    void cleanupClient(EnginioClientPrivate *enginio)
-    {
-        enginio->_request.setRawHeader(EnginioString::Enginio_Backend_Session, QByteArray());
-    }
-};
-
-/*!
-  \class EnginioBasicAuthentication
-  \inmodule enginio-qt
-  \ingroup enginio-client
-  \brief Represents a user that is authenticated directly by the backend.
-
-  This class can authenticate a user by verifying the user's login and password.
-  The user has to exist in the backend already.
-
-  To authenticate an instance of EnginioClient called \a client such code may be used:
-  \code
-    EnginioBasicAuthentication identity;
-    identity.setUser(_user);
-    identity.setPassword(_user);
-
-    client.setIdentity(&identity);
-  \endcode
-
-  Setting the identity will trigger an asynchronous request, resulting in EnginioClient::authenticationState()
-  changing.
-
-  \sa EnginioClientBase::authenticationState() EnginioClientBase::identity() EnginioClient::sessionAuthenticated()
-  \sa EnginioClient::sessionAuthenticationError() EnginioClient::sessionTerminated()
-
-*/
-
-/*!
-  \property EnginioBasicAuthentication::user
-  This property contains the user name used for authentication.
-*/
-
-/*!
-  \property EnginioBasicAuthentication::password
-  This property contains the password used for authentication.
-*/
-
-/*!
-  Constructs a EnginioBasicAuthentication instance with \a parent as QObject parent.
-*/
-EnginioBasicAuthentication::EnginioBasicAuthentication(QObject *parent)
-    : EnginioIdentity(new EnginioBasicAuthenticationPrivate(), parent)
-{
-    connect(this, &EnginioBasicAuthentication::userChanged, this, &EnginioIdentity::dataChanged);
-    connect(this, &EnginioBasicAuthentication::passwordChanged, this, &EnginioIdentity::dataChanged);
-}
-
-/*!
-  Destructs this EnginioBasicAuthentication instance.
-*/
-EnginioBasicAuthentication::~EnginioBasicAuthentication()
-{
-    emit aboutToDestroy();
-    E_D(EnginioBasicAuthentication);
-    delete d;
-}
-
-QString EnginioBasicAuthentication::user() const
-{
-    E_D(EnginioBasicAuthentication);
-    return d->_user;
-}
-
-void EnginioBasicAuthentication::setUser(const QString &user)
-{
-    E_D(EnginioBasicAuthentication);
-    if (d->_user == user)
-        return;
-    d->_user = user;
-    emit userChanged(user);
-}
-
-QString EnginioBasicAuthentication::password() const
-{
-    E_D(EnginioBasicAuthentication);
-    return d->_pass;
-}
-
-void EnginioBasicAuthentication::setPassword(const QString &password)
-{
-    E_D(EnginioBasicAuthentication);
-    if (d->_pass == password)
-        return;
-    d->_pass = password;
-    emit passwordChanged(password);
-}
-
-/*!
-  \internal
-*/
-void EnginioBasicAuthentication::prepareSessionToken(EnginioClientPrivate *enginio)
-{
-    Q_ASSERT(enginio);
-    Q_ASSERT(enginio->identity());
-    E_D(EnginioBasicAuthentication);
-    d->prepareSessionToken<EnginioBasicAuthenticationPrivate>(enginio);
-}
-
-/*!
-  \internal
-*/
-void EnginioBasicAuthentication::removeSessionToken(EnginioClientPrivate *enginio)
-{
-    Q_ASSERT(enginio);
-    Q_ASSERT(enginio->identity());
-
-    E_D(EnginioBasicAuthentication);
-    d->removeSessionToken<EnginioBasicAuthenticationPrivate>(enginio);
-}
-
 class EnginioOAuth2AuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
 {
 public:
@@ -331,7 +186,6 @@ public:
         QNetworkRequest request(enginio->prepareRequest(url));
         request.setHeader(QNetworkRequest::ContentTypeHeader, EnginioString::Application_x_www_form_urlencoded);
         request.setRawHeader(EnginioString::Accept, EnginioString::Application_json);
-        // request.setRawHeader("Enginio-Backend-Secret", QByteArray()); TODO do we need to remove it?
 
         return enginio->networkManager()->post(request, data);
     }
@@ -348,6 +202,31 @@ public:
         enginio->_request.setRawHeader(EnginioString::Authorization, QByteArray());
     }
 };
+
+/*!
+  \class EnginioOAuth2Authentication
+  \inmodule enginio-qt
+  \ingroup enginio-client
+  \brief Represents a user that is authenticated directly by the backend using OAuth2 standard.
+
+  This class can authenticate a user by verifying the user's login and password.
+  The user has to exist in the backend already.
+
+  To authenticate an instance of EnginioClient called \a client such code may be used:
+  \code
+    EnginioOAuth2Authentication identity;
+    identity.setUser(_user);
+    identity.setPassword(_user);
+
+    client.setIdentity(&identity);
+  \endcode
+
+  Setting the identity will trigger an asynchronous request, resulting in EnginioClient::authenticationState()
+  changing.
+
+  \sa EnginioClientBase::authenticationState() EnginioClientBase::identity() EnginioClient::sessionAuthenticated()
+  \sa EnginioClient::sessionAuthenticationError() EnginioClient::sessionTerminated()
+*/
 
 /*!
   Constructs a EnginioPasswordOAuth2 instance with \a parent as QObject parent.

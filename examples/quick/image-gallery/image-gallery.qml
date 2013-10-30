@@ -72,7 +72,6 @@ Rectangle {
     Enginio {
         id: client
         backendId: enginioBackendId
-        backendSecret: enginioBackendSecret
         onError: console.log("Enginio error: " + reply.errorCode + ": " + reply.errorString)
     }
     //! [client]

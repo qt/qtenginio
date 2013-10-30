@@ -44,10 +44,9 @@
 #include "ui_helperdialog.h"
 
 const QString backendIdKey = QStringLiteral("backendId");
-const QString backendSecretKey = QStringLiteral("backendSecret");
 const QString showAgainKey = QStringLiteral("showAgain");
 
-QPair<QByteArray, QByteArray> backendIdAndSecret(const QString &exampleName)
+QByteArray backendId(const QString &exampleName)
 {
 
     QString fileName = QStringLiteral("EnginioExamples.conf");
@@ -65,23 +64,19 @@ QPair<QByteArray, QByteArray> backendIdAndSecret(const QString &exampleName)
 
     settings->beginGroup(exampleName);
     QByteArray id = settings->value(backendIdKey).toByteArray();
-    QByteArray secret= settings->value(backendSecretKey).toByteArray();
     bool askAgain = settings->value(showAgainKey, true).toBool();
 
-    if (askAgain || id.isEmpty() || secret.isEmpty()) {
+    if (askAgain || id.isEmpty()) {
         Ui::Dialog dialog;
         QDialog d;
         dialog.setupUi(&d);
         dialog.exampleName->setText(exampleName);
         dialog.backendId->setText(id);
-        dialog.backendSecret->setText(secret);
 
         if (d.exec() == QDialog::Accepted) {
             id = dialog.backendId->text().toLocal8Bit();
-            secret = dialog.backendSecret->text().toLocal8Bit();
             askAgain = !dialog.askAgain->isChecked();
             settings->setValue(backendIdKey, id);
-            settings->setValue(backendSecretKey, secret);
             settings->setValue(showAgainKey, askAgain);
         }
     }
@@ -89,6 +84,6 @@ QPair<QByteArray, QByteArray> backendIdAndSecret(const QString &exampleName)
     settings->endGroup();
     settings->sync();
 
-    return qMakePair(id, secret);
+    return id;
 }
 

@@ -78,12 +78,12 @@
 
     \section1 User authentication
     Authentication is quite easy, the only thing that needs to be done is to assign an identity, for example
-    \l{EnginioBasicAuthentication}{EnginioBasicAuthentication} object to \l{Enginio::identity}{Enginio::identity}.
+    \l{EnginioOAuth2Authentication}{EnginioOAuth2Authentication} object to \l{Enginio::identity}{Enginio::identity}.
     After a while \l{Enginio::authenticationState}{Enginio::authenticationState} will change and
     \l{Enginio::sessionAuthenticated}{sessionAuthenticated} or \l{Enginio::sessionAuthenticationError}{sessionAuthenticationError}
     will be emitted.
 
-    The first thing we need to do is to create an identity object: \l{EnginioBasicAuthentication}{EnginioBasicAuthentication}
+    The first thing we need to do is to create an identity object: \l{EnginioOAuth2Authentication}{EnginioOAuth2Authentication}
     \snippet users/Login.qml identity
 
     Then depending on state of the application we assign the object to

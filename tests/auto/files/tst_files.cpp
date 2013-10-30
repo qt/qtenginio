@@ -60,7 +60,6 @@ class tst_Files: public QObject
     QString _backendName;
     EnginioTests::EnginioBackendManager _backendManager;
     QByteArray _backendId;
-    QByteArray _backendSecret;
 
 public slots:
     void error(EnginioReply *reply) {
@@ -87,10 +86,8 @@ void tst_Files::initTestCase()
 
     QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, EnginioTests::TESTAPP_ENV);
     _backendId = apiKeys["backendId"].toString().toUtf8();
-    _backendSecret = apiKeys["backendSecret"].toString().toUtf8();
 
     QVERIFY(!_backendId.isEmpty());
-    QVERIFY(!_backendSecret.isEmpty());
 
     EnginioTests::prepareTestObjectType(_backendName);
 }
@@ -133,7 +130,6 @@ void tst_Files::fileUploadDownload()
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     if (chunkSize > 0) {

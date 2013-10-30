@@ -53,7 +53,6 @@ Rectangle {
     Enginio {
         id: enginioClient
         backendId: enginioBackendId
-        backendSecret: enginioBackendSecret
 
         onError: console.debug(JSON.stringify(reply.data))
     }

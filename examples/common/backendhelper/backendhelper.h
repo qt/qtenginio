@@ -43,6 +43,6 @@
 
 #include <QtCore>
 
-QPair<QByteArray, QByteArray> backendIdAndSecret(const QString &exampleName);
+QByteArray backendId(const QString &exampleName);
 
 #endif

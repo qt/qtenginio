@@ -61,7 +61,6 @@ protected:
     QString _backendName;
     EnginioTests::EnginioBackendManager _backendManager;
     QByteArray _backendId;
-    QByteArray _backendSecret;
 
     void initTestCase(const QString &name);
     void cleanupTestCase();
@@ -85,12 +84,10 @@ void IdentityCommonTest<Derived, Identity>::initTestCase(const QString &name)
 
     QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, EnginioTests::TESTAPP_ENV);
     _backendId = apiKeys["backendId"].toString().toUtf8();
-    _backendSecret = apiKeys["backendSecret"].toString().toUtf8();
 
     QVERIFY(!_backendId.isEmpty());
-    QVERIFY(!_backendSecret.isEmpty());
 
-    EnginioTests::prepareTestUsersAndUserGroups(_backendId, _backendSecret);
+    EnginioTests::prepareTestUsersAndUserGroups(_backendId);
     EnginioTests::prepareTestObjectType(_backendName);
 
     {
@@ -101,7 +98,6 @@ void IdentityCommonTest<Derived, Identity>::initTestCase(const QString &name)
 
         EnginioClient client;
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         EnginioReply *reply = client.create(obj);
@@ -141,7 +137,6 @@ void IdentityCommonTest<Derived, Identity>::identity()
 
 
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setIdentity(&identity);
 
@@ -169,7 +164,6 @@ void IdentityCommonTest<Derived, Identity>::identity()
         client.setIdentity(&identity);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
 
         QTRY_COMPARE(spy.count(), 1);
         QCOMPARE(spyError.count(), 0);
@@ -189,7 +183,6 @@ void IdentityCommonTest<Derived, Identity>::identity()
         client.setIdentity(&identity);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
 
         QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
         QCOMPARE(spyError.count(), 0);
@@ -216,7 +209,6 @@ void IdentityCommonTest<Derived, Identity>::identity()
         client.setIdentity(&identity);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
 
         QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
         QCOMPARE(spyError.count(), 0);
@@ -232,7 +224,6 @@ void IdentityCommonTest<Derived, Identity>::identity()
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), This(), SLOT(error(EnginioReply *)));
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
-        client.setBackendSecret(_backendSecret);
 
         QSignalSpy spyAuthError(&client, SIGNAL(sessionAuthenticationError(EnginioReply*)));
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
@@ -273,7 +264,6 @@ void IdentityCommonTest<Derived, Identity>::identity()
         EnginioClient *client = new EnginioClient;
         client->setServiceUrl(EnginioTests::TESTAPP_URL);
         client->setBackendId(_backendId);
-        client->setBackendSecret(_backendSecret);
 
         Identity identity;
         client->setIdentity(&identity);
@@ -289,7 +279,6 @@ void IdentityCommonTest<Derived, Identity>::identity()
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), This(), SLOT(error(EnginioReply *)));
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
-        client.setBackendSecret(_backendSecret);
         client.setBackendId(_backendId);
         {
             Identity identity;
@@ -306,7 +295,6 @@ void IdentityCommonTest<Derived, Identity>::identity_changing()
         EnginioClient client;
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
 
         Identity identity;
         identity.setUser("logintest");
@@ -322,7 +310,6 @@ void IdentityCommonTest<Derived, Identity>::identity_changing()
         EnginioClient client;
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
 
         Identity identity;
         identity.setUser("logintest");
@@ -343,7 +330,6 @@ void IdentityCommonTest<Derived, Identity>::identity_changing()
         EnginioClient client;
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
 
         QSignalSpy spy(&client, SIGNAL(sessionAuthenticated(EnginioReply*)));
         Identity identity;
@@ -381,7 +367,6 @@ void IdentityCommonTest<Derived, Identity>::identity_invalid()
         identity.setPassword("invalidPassword");
 
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setIdentity(&identity);
 
@@ -402,7 +387,6 @@ void IdentityCommonTest<Derived, Identity>::identity_invalid()
         identity.setPassword("logintest");
 
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
         client.setIdentity(&identity);
 
@@ -431,10 +415,9 @@ void IdentityCommonTest<Derived, Identity>::identity_invalid()
         QCOMPARE(client.authenticationState(), EnginioClient::Authenticated);
     }
     {
-        // wrong backend id and secret plus invalid password
+        // wrong backend id and invalid password
         EnginioClient client;
         client.setBackendId("deadbeef");
-        client.setBackendSecret("deadbeef");
         Identity identity;
         identity.setUser("invalidLogin");
         identity.setPassword("invalidPassword");
@@ -446,7 +429,6 @@ void IdentityCommonTest<Derived, Identity>::identity_invalid()
         // missing empty user name and pass
         EnginioClient client;
         client.setBackendId(_backendId);
-        client.setBackendSecret(_backendSecret);
         Identity identity;
         client.setIdentity(&identity);
         QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
@@ -465,7 +447,6 @@ void IdentityCommonTest<Derived, Identity>::identity_afterLogout(const QByteArra
     identity.setPassword("logintest");
 
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
     client.setIdentity(&identity);
 
@@ -528,7 +509,6 @@ void IdentityCommonTest<Derived, Identity>::queryRestrictedObject()
 {
     EnginioClient client;
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     QString userName = "logintest";

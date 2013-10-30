@@ -55,7 +55,6 @@ Item {
     Enginio {
         id: enginio
         backendId: AppConfig.backendData.id
-        backendSecret: AppConfig.backendData.secret
         serviceUrl: AppConfig.backendData.serviceUrl
 
         onError: {

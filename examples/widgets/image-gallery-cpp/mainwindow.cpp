@@ -65,10 +65,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowTitle(QStringLiteral("Enginio Image Gallery"));
 
-    QPair<QByteArray, QByteArray> backendData = backendIdAndSecret("image-gallery");
     m_client = new EnginioClient(this);
-    m_client->setBackendId(backendData.first);
-    m_client->setBackendSecret(backendData.second);
+    m_client->setBackendId(backendId("image-gallery"));
 
     m_model = new ImageModel(this);
     m_model->setEnginio(m_client);

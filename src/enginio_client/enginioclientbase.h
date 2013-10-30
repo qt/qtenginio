@@ -82,15 +82,12 @@ public:
     ~EnginioClientBase();
 
     Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
-    Q_PROPERTY(QByteArray backendSecret READ backendSecret WRITE setBackendSecret NOTIFY backendSecretChanged FINAL)
     Q_PROPERTY(QUrl serviceUrl READ serviceUrl WRITE setServiceUrl NOTIFY serviceUrlChanged FINAL)
     Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
     Q_PROPERTY(AuthenticationState authenticationState READ authenticationState NOTIFY authenticationStateChanged FINAL)
 
     QByteArray backendId() const Q_REQUIRED_RESULT;
     void setBackendId(const QByteArray &backendId);
-    QByteArray backendSecret() const Q_REQUIRED_RESULT;
-    void setBackendSecret(const QByteArray &backendSecret);
     EnginioIdentity *identity() const Q_REQUIRED_RESULT;
     void setIdentity(EnginioIdentity *identity);
     AuthenticationState authenticationState() const Q_REQUIRED_RESULT;
@@ -103,7 +100,6 @@ public:
 
 Q_SIGNALS:
     void backendIdChanged(const QByteArray &backendId);
-    void backendSecretChanged(const QByteArray &backendSecret);
     void serviceUrlChanged(const QUrl& url);
     void authenticationStateChanged(const AuthenticationState state);
     void identityChanged(const EnginioIdentity *identity);

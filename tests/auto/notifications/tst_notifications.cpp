@@ -58,7 +58,6 @@ class tst_Notifications: public QObject
     QString _backendName;
     EnginioTests::EnginioBackendManager _backendManager;
     QByteArray _backendId;
-    QByteArray _backendSecret;
 
 public slots:
     void error(EnginioReply *reply) {
@@ -120,10 +119,8 @@ void tst_Notifications::initTestCase()
     QJsonObject apiKeys = _backendManager.backendApiKeys(_backendName, EnginioTests::TESTAPP_ENV);
 
     _backendId = apiKeys["backendId"].toString().toUtf8();
-    _backendSecret = apiKeys["backendSecret"].toString().toUtf8();
 
     QVERIFY(!_backendId.isEmpty());
-    QVERIFY(!_backendSecret.isEmpty());
 
     createObjectSchema();
 }
@@ -140,7 +137,6 @@ void tst_Notifications::populateWithData()
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioBackendConnection connection;
@@ -271,7 +267,6 @@ void tst_Notifications::update_objects()
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioBackendConnection connection;
@@ -368,7 +363,6 @@ void tst_Notifications::remove_objects()
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
-    client.setBackendSecret(_backendSecret);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioBackendConnection connection;

@@ -44,7 +44,6 @@
 #include <Enginio/private/enginioreply_p.h>
 #include <Enginio/enginiomodel.h>
 #include <Enginio/enginioidentity.h>
-#include <Enginio/enginiobasicauthentication.h>
 #include <Enginio/enginiooauth2authentication.h>
 
 #include <QtCore/qthreadstorage.h>
@@ -68,14 +67,13 @@ QT_BEGIN_NAMESPACE
   \brief EnginioClient handles all communication with the Enginio server
 
   The Enginio server supports several separate "backends" with each account.
-  By setting the \l EnginioClientBase::backendId and \l EnginioClientBase::backendSecret a backend is chosen.
-  After setting the ID and secret interaction with the server is possible.
+  By setting the \l EnginioClientBase::backendId a backend is chosen.
+  After setting the ID interaction with the server is possible.
   The information about the backend is available on the Enginio Dashboard
   after logging in to \l {http://engin.io}{Enginio}.
   \code
     EnginioClient *client = new EnginioClient(parent);
     client->setBackendId(QByteArrayLiteral("YOUR_BACKEND_ID"));
-    client->setBackendSecret(QByteArrayLiteral("YOUR_BACKEND_SECRET"));
   \endcode
 
   The basic functions used to interact with the backend are
@@ -118,7 +116,7 @@ QT_BEGIN_NAMESPACE
 
   Enginio provides convenient user management.
   The authentication state reflects whether the current user is authenticated.
-  \sa AuthenticationState EnginioClientBase::identity() EnginioBasicAuthentication
+  \sa AuthenticationState EnginioClientBase::identity() EnginioOAuth2Authentication
 */
 
 /*!
@@ -127,7 +125,7 @@ QT_BEGIN_NAMESPACE
 
   The \a reply contains the details about the login.
 
-  \sa sessionAuthenticationError(), EnginioReply, EnginioBasicAuthentication
+  \sa sessionAuthenticationError(), EnginioReply, EnginioOAuth2Authentication
 */
 
 /*!
@@ -135,13 +133,13 @@ QT_BEGIN_NAMESPACE
   \brief Emitted when a user login fails.
 
   The \a reply contains the details about why the login failed.
-  \sa sessionAuthenticated(), EnginioReply EnginioClientBase::identity() EnginioBasicAuthentication
+  \sa sessionAuthenticated(), EnginioReply EnginioClientBase::identity() EnginioOAuth2Authentication
 */
 
 /*!
   \fn EnginioClient::sessionTerminated() const
   \brief Emitted when a user logs out.
-  \sa EnginioClientBase::identity() EnginioBasicAuthentication
+  \sa EnginioClientBase::identity() EnginioOAuth2Authentication
 */
 
 /*!
@@ -315,11 +313,10 @@ EnginioClient::~EnginioClient()
  * \brief The unique ID for the used Enginio backend.
  *
  * The backend ID determines which Enginio backend is used
- * by this instance of EnginioClient. The backend ID and \l backendSecret are
+ * by this instance of EnginioClient. The backend ID is
  * required for Enginio to work.
  * It is possible to use several Enginio backends simultaneously
  * by having several instances of EnginioClient.
- * \sa backendSecret
  */
 QByteArray EnginioClientBase::backendId() const
 {
@@ -334,27 +331,6 @@ void EnginioClientBase::setBackendId(const QByteArray &backendId)
         d->_backendId = backendId;
         d->_request.setRawHeader("Enginio-Backend-Id", d->_backendId);
         emit backendIdChanged(backendId);
-    }
-}
-
-/*!
- * \property EnginioClientBase::backendSecret
- * \brief The backend secret that corresponds to the \l backendId.
- * The secret is used to authenticate the Enginio connection.
- */
-QByteArray EnginioClientBase::backendSecret() const
-{
-    Q_D(const EnginioClient);
-    return d->_backendSecret;
-}
-
-void EnginioClientBase::setBackendSecret(const QByteArray &backendSecret)
-{
-    Q_D(EnginioClient);
-    if (d->_backendSecret != backendSecret) {
-        d->_backendSecret = backendSecret;
-        d->_request.setRawHeader("Enginio-Backend-Secret", d->_backendSecret);
-        emit backendSecretChanged(backendSecret);
     }
 }
 
@@ -560,7 +536,7 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
   EnginioClient does not take ownership of the \a identity object. The object
   has to be valid to keep the authenticated session alive. When the identity object is deleted the session
   is terminated. It is allowed to assign a null pointer to the property to terminate the session.
-  \sa EnginioIdentity EnginioBasicAuthentication
+  \sa EnginioIdentity EnginioOAuth2Authentication
 */
 EnginioIdentity *EnginioClientBase::identity() const
 {
@@ -683,7 +659,6 @@ EnginioClientBase::EnginioClientBase(QObject *parent, EnginioClientPrivate *d)
     qRegisterMetaType<EnginioModel*>();
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
-    qRegisterMetaType<EnginioBasicAuthentication*>();
     qRegisterMetaType<EnginioOAuth2Authentication*>();
     qRegisterMetaType<EnginioClientBase::Operation>();
     qRegisterMetaType<EnginioClientBase::AuthenticationState>();

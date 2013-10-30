@@ -111,7 +111,7 @@ public:
     QJsonObject backendApiKeys(const QString &backendName, const QString &environment);
 };
 
-void prepareTestUsersAndUserGroups(const QByteArray &backendId, const QByteArray &backendSecret);
+void prepareTestUsersAndUserGroups(const QByteArray &backendId);
 bool prepareTestObjectType(const QString &backendName);
 
 }

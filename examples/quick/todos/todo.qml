@@ -54,7 +54,6 @@ Rectangle {
         id: enginioModel
         enginio: Enginio {
             backendId: enginioBackendId
-            backendSecret: enginioBackendSecret
         }
         query: {"objectType": "objects.todos" }
     }

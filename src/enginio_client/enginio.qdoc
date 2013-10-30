@@ -58,8 +58,8 @@ This section gives a short high-level overview of the concepts used throughout t
 
 The Qt library is a client-side library to communicate with the server at \l {http://engin.io}.
 Several backends can exist for each account on the server.
-For all communication with the server, the backend is determined by its ID combined with a secret (similar to a password).
-When shipping an application built with Enginio, the backend ID and secret will be the same for all users of that application.
+For all communication with the server, the backend is determined by its ID.
+When shipping an application built with Enginio, the backend ID will be the same for all users of that application.
 
 \section2 Objects
 
@@ -180,15 +180,14 @@ To use Enginio's QML API, you have to import the library.
 import Enginio 1.0
 \endcode
 
-Then initialize the \l{Enginio}{enginio client} with the \l{Enginio::backendId}{Backend Id} and the Backend Secret values. Those can be copied from the Dashboard.
+Then initialize the \l{Enginio}{enginio client} with the \l{Enginio::backendId}{Backend Id value, which can be copied from the Dashboard.
 
-Go to Dashboard ⇒ Your Backend home-view ⇒ See ’Keys box’ ⇒ Copy Backend Id and Backend Secret values.
+Go to Dashboard ⇒ Your Backend home-view ⇒ See ’Keys box’ ⇒ Copy Backend Id value.
 
 \code
 Enginio {
     id: enginio
     backendId: "YOUR_OWN_BACKEND_ID"
-    backendSecret: "YOUR_OWN_BACKEND_SECRET"
 }
 \endcode
 
@@ -238,14 +237,14 @@ To use Enginio Qt library in your code, you have to include relevant library hea
 Before making any calls to the Enginio API, the \l EnginioClient needs to be instantiated.
 They can be copied from the Dashboard.
 Go to the \l{https://dashboard.engin.io/}{Enginio Dashboard} and select a backend.
-Copy the Backend Id and the Backend Secret values.
+Copy the Backend Id value.
 
 \code
 QString backendId("YOUR_OWN_BACKEND_ID");
-QString backendSecret("YOUR_OWN_BACKEND_SECRET");
-EnginioClient *client = new EnginioClient(backendId, backendSecret);
+EnginioClient *client = new EnginioClient;
+client->setBackendId(backendId);
 \endcode
-For testing purposes, it is easiest to hardcode the backend ID and the backend secret directly into application code. But this might not be always the best choice and sometimes it might be beneficial to put the backend configuration in a separate configuration file.
+For testing purposes, it is easiest to hardcode the backend ID directly into application code. But this might not be always the best choice and sometimes it might be beneficial to put the backend configuration in a separate configuration file.
 \section1 Store your first Object
 
 Create an object in JSON format and fill in the data:

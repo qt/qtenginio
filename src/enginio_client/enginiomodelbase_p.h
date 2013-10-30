@@ -585,7 +585,7 @@ public:
 
     void execute()
     {
-        if (!_enginio || _enginio->_backendId.isEmpty() || _enginio->_backendSecret.isEmpty())
+        if (!_enginio || _enginio->_backendId.isEmpty())
             return;
         if (!queryIsEmpty()) {
             // setup notifications
@@ -959,7 +959,6 @@ struct EnginioModelPrivateT : public EnginioModelPrivate
             _enginio = EnginioClientPrivate::get(const_cast<EnginioClientBase*>(enginio));
             _clientConnections.append(QObject::connect(enginio, &QObject::destroyed, EnginioDestroyed(this)));
             _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
-            _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendSecretChanged, QueryChanged(this)));
         } else {
             _enginio = 0;
         }

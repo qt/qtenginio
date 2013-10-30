@@ -46,7 +46,6 @@
 #include <Enginio/enginioreply.h>
 #include "enginioqmlreply.h"
 #include <Enginio/enginioidentity.h>
-#include <Enginio/enginiobasicauthentication.h>
 #include <Enginio/enginiooauth2authentication.h>
 #include <Enginio/private/enginioclient_p.h>
 
@@ -97,7 +96,6 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterUncreatableType<EnginioReply>(uri, 1, 0, "__EnginioReply", "__EnginioReply cannot be instantiated.");
     qmlRegisterUncreatableType<EnginioQmlReply>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
     qmlRegisterUncreatableType<EnginioIdentity>(uri, 1, 0, "EnginioIdentity", "EnginioIdentity can not be instantiated directly");
-    qmlRegisterType<EnginioBasicAuthentication>(uri, 1, 0, "EnginioBasicAuthentication");
     qmlRegisterType<EnginioOAuth2Authentication>(uri, 1, 0, "EnginioOAuth2Authentication");
     qmlRegisterUncreatableType<QNetworkReply>(uri, 1, 0, "QNetworkReply", "QNetworkReply is abstract and it can not be constructed");
 }
