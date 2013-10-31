@@ -60,14 +60,10 @@ public slots:
 private slots:
     void initTestCase()
     {
-        if (EnginioTests::TESTAPP_URL != QStringLiteral("https://staging.engin.io"))
-            QSKIP("OAuth2Authentication tests can be executed only against staging");
         Base::initTestCase(QStringLiteral("tst_OAuth2Auth"));
     }
     void cleanupTestCase()
     {
-        if (EnginioTests::TESTAPP_URL != QStringLiteral("https://staging.engin.io"))
-            QSKIP("OAuth2Authentication tests can be executed only against staging");
         Base::cleanupTestCase();
     }
 
