@@ -609,22 +609,22 @@ EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
     return ereply;
 }
 
-Q_GLOBAL_STATIC(QThreadStorage<QNetworkAccessManager*>, NetworkManager)
+Q_GLOBAL_STATIC(QThreadStorage<QWeakPointer<QNetworkAccessManager> >, NetworkManager)
 
 void EnginioClientPrivate::assignNetworkManager()
 {
     Q_ASSERT(!_networkManager);
 
     _networkManager = prepareNetworkManagerInThread();
-    _networkManagerConnection = QObject::connect(_networkManager, &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
+    _networkManagerConnection = QObject::connect(_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
 }
 
-QNetworkAccessManager *EnginioClientPrivate::prepareNetworkManagerInThread()
+QSharedPointer<QNetworkAccessManager> EnginioClientPrivate::prepareNetworkManagerInThread()
 {
-    QNetworkAccessManager *qnam;
-    qnam = NetworkManager->localData();
+    QSharedPointer<QNetworkAccessManager> qnam;
+    qnam = NetworkManager->localData().toStrongRef();
     if (!qnam) {
-        qnam = new QNetworkAccessManager(); // it will be deleted by QThreadStorage.
+        qnam = QSharedPointer<QNetworkAccessManager>(new QNetworkAccessManager());
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         qnam->connectToHostEncrypted(EnginioString::apiEnginIo);
 #endif

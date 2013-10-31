@@ -65,7 +65,7 @@ EnginioFakeReply::EnginioFakeReply(QObject *parent, const QByteArray &msg)
     : QNetworkReply(parent)
     , _msg(msg)
 {
-    init(EnginioClientPrivate::prepareNetworkManagerInThread());
+    init(EnginioClientPrivate::prepareNetworkManagerInThread().data());
 }
 
 void EnginioFakeReply::init(QNetworkAccessManager *qnam)

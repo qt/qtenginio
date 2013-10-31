@@ -65,11 +65,13 @@ QT_BEGIN_NAMESPACE
 
 class EnginioNetworkAccessManagerFactory: public QQmlNetworkAccessManagerFactory
 {
+    QSharedPointer<QNetworkAccessManager> _guard;
 public:
     virtual QNetworkAccessManager *create(QObject *parent) Q_DECL_OVERRIDE
     {
         Q_UNUSED(parent);
-        return EnginioClientPrivate::prepareNetworkManagerInThread();
+        _guard = EnginioClientPrivate::prepareNetworkManagerInThread();
+        return _guard.data();
     }
 };
 

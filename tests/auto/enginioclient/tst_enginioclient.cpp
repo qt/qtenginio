@@ -94,6 +94,7 @@ private slots:
     void acl();
     void creator_updater();
     void sharingNetworkManager();
+    void lifeTimeOfNetworkManager();
     void search();
     void assignUserToGroup();
 
@@ -1440,6 +1441,42 @@ void tst_EnginioClient::sharingNetworkManager()
     QVERIFY(e2->networkManager());
     e2->networkManager()->children(); // should not crash
     delete e2;
+}
+
+struct NetworkManagerDestroySignalSpy
+{
+    bool &called;
+    void operator()() { called = true; }
+};
+
+void tst_EnginioClient::lifeTimeOfNetworkManager()
+{
+    struct : public QThread {
+        void run()
+        {
+            bool result = false;
+            NetworkManagerDestroySignalSpy spy = { result };
+            {
+                EnginioClient client;
+                QNetworkAccessManager *qnam = client.networkManager();
+                QVERIFY(qnam);
+                QObject::connect(qnam, &QNetworkAccessManager::destroyed, spy);
+            }
+            QVERIFY(spy.called);
+            // we need to repeat the operation to confirm that a qnam instance will
+            // be re-created when needed.
+            result = false;
+            {
+                EnginioClient client;
+                QNetworkAccessManager *qnam = client.networkManager();
+                QVERIFY(qnam);
+                QObject::connect(qnam, &QNetworkAccessManager::destroyed, spy);
+            }
+            QVERIFY(spy.called);
+        }
+    } thread;
+    thread.start();
+    QVERIFY(thread.wait(10000));
 }
 
 void tst_EnginioClient::prepareForSearch()

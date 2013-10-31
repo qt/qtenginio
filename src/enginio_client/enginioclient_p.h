@@ -317,7 +317,7 @@ public:
     QLinkedList<QMetaObject::Connection> _connections;
     QVarLengthArray<QMetaObject::Connection, 4> _identityConnections;
     QUrl _serviceUrl;
-    QNetworkAccessManager *_networkManager;
+    QSharedPointer<QNetworkAccessManager> _networkManager;
     QMetaObject::Connection _networkManagerConnection;
     QNetworkRequest _request;
     QMap<QNetworkReply*, EnginioReplyBase*> _replyReplyMap;
@@ -619,11 +619,11 @@ public:
 
     QNetworkAccessManager *networkManager() const Q_REQUIRED_RESULT
     {
-        return _networkManager;
+        return _networkManager.data();
     }
 
     void assignNetworkManager();
-    static QNetworkAccessManager *prepareNetworkManagerInThread() Q_REQUIRED_RESULT;
+    static QSharedPointer<QNetworkAccessManager> prepareNetworkManagerInThread() Q_REQUIRED_RESULT;
 
     bool isSignalConnected(const QMetaMethod &signal) const Q_REQUIRED_RESULT
     {
