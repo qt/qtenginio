@@ -261,7 +261,7 @@ Item {
         function test_modify() {
             var errorCount = enginioClient.errorCount
             var counterObject = {"counter": 0, "expectedCount": 0}
-            tryCompare(modelModify, "resetCounter", 1)
+            tryCompare(modelModifyUndblocked, "resetCounter", 1)
 
             // append new data
             modelModifyUndblocked.append({ "objectType": AppConfig.testObjectType,
