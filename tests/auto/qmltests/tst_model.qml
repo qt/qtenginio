@@ -204,8 +204,6 @@ Item {
 
             property int resetCounter: 0
             onModelReset: ++resetCounter
-            Component.onCompleted: console.log("start " + modelModify)
-            Component.onDestruction: console.log("stop " + modelModify)
         }
 
         function test_modify() {
