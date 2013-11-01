@@ -40,6 +40,7 @@
 
 import QtQuick 2.1
 import QtQuick.Layouts 1.0
+import QtQuick.Controls 1.0 as Controls
 import Enginio 1.0
 
 Rectangle {
@@ -158,8 +159,8 @@ Rectangle {
             }
             )
 
-    Stack.onStatusChanged: {
-        if (Stack.status == Stack.Activating) {
+    Controls.Stack.onStatusChanged: {
+        if (Controls.Stack.status == Controls.Stack.Activating) {
             nameInput.text = ""
             passwordInput.text = ""
             nameInput.forceActiveFocus()
