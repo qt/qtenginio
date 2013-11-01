@@ -7,9 +7,9 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
-        name: "EnginioBasicAuthentication"
+        name: "EnginioOAuth2Authentication"
         prototype: "EnginioIdentity"
-        exports: ["Enginio/EnginioBasicAuthentication 1.0"]
+        exports: ["Enginio/EnginioOAuth2Authentication 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "user"; type: "string" }
         Property { name: "password"; type: "string" }

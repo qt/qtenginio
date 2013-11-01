@@ -45,7 +45,7 @@ import QtQuick.Layouts 1.0
 
 ColumnLayout {
     //![identity]
-    EnginioBasicAuthentication {
+    EnginioOAuth2Authentication {
         id: identity
         user: login.text
         password: password.text
