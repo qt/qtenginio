@@ -166,7 +166,7 @@ Rectangle {
         }
     }
 
-    EnginioBasicAuthentication { id: noAuth }
+    EnginioOAuth2Authentication { id: noAuth }
 
     function login() {
         statusText.text = "Logging in..."
