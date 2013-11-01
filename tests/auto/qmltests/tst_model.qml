@@ -55,6 +55,68 @@ Item {
     }
 
     TestCase {
+        name: "EnginioModel: without client"
+        EnginioModel {
+            id: modelMissingClient
+        }
+        function test_append()
+        {
+            ignoreWarning("EnginioQmlModel::append(): Enginio client is not set")
+            compare(modelMissingClient.append(null), null)
+            ignoreWarning("EnginioQmlModel::append(): Enginio client is not set")
+            compare(modelMissingClient.append({"objectType": "objects.todos", "title": "no go"}), null)
+        }
+        function test_remove()
+        {
+            ignoreWarning("EnginioQmlModel::remove(): Enginio client is not set")
+            compare(modelMissingClient.remove(0), null)
+        }
+        function test_setProperty()
+        {
+            ignoreWarning("EnginioQmlModel::setProperty(): Enginio client is not set")
+            compare(modelMissingClient.setProperty(0, "title", "foo"), null)
+        }
+        function rowCount()
+        {
+            compare(rowCount(), 0)
+        }
+    }
+
+    TestCase {
+        name: "EnginioModel: invalid row number"
+
+        EnginioModel {
+            id: modelInvalidRow
+            enginio: Enginio {
+                serviceUrl: AppConfig.backendData.serviceUrl
+                backendId: AppConfig.backendData.id
+            }
+            query: {
+                     "objectType": AppConfig.testObjectType,
+                     "query": {"testCase": "EnginioModel: invalid row"}
+                   }
+
+            property int resetCounter: 0
+            onModelReset: ++resetCounter
+        }
+
+        function test_remove()
+        {
+            tryCompare(modelInvalidRow, "resetCounter", 2)
+            var reply = modelInvalidRow.remove(modelInvalidRow.rowCount)
+            tryCompare(reply, "isError", true)
+            verify(reply, "isError", true)
+        }
+        function test_setProperty()
+        {
+            tryCompare(modelInvalidRow, "resetCounter", 2)
+            var reply = modelInvalidRow.setProperty(modelInvalidRow.rowCount, "title", "foo")
+            tryCompare(reply, "isError", true)
+            verify(reply, "isError", true)
+        }
+    }
+
+    TestCase {
         name: "EnginioModel: create"
 
         Enginio {

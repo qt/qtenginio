@@ -121,6 +121,8 @@
     F(Div, "/")\
     F(EnginioModel_remove_row_is_out_of_range, "EnginioModel::remove: row is out of range")\
     F(EnginioModel_setProperty_row_is_out_of_range, "EnginioModel::setProperty: row is out of range")\
+    F(EnginioQmlModel_remove_row_is_out_of_range, "EnginioQmlModel::remove: row is out of range")\
+    F(EnginioQmlModel_setProperty_row_is_out_of_range, "EnginioQmlModel::setProperty: row is out of range")\
     F(Dependent_create_query_failed_so_object_could_not_be_removed, "Dependent create query failed, so object could not be removed")\
     F(Dependent_create_query_failed_so_object_could_not_be_updated, "Dependent create query failed, so object could not be updated")\
     F(EnginioModel_was_removed_before_this_request_was_prepared, "EnginioModel was removed before this request was prepared")\

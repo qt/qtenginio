@@ -209,18 +209,46 @@ EnginioQmlModel::~EnginioQmlModel()
 EnginioQmlReply *EnginioQmlModel::append(const QJSValue &value)
 {
     E_D();
+    if (Q_UNLIKELY(!d->enginio())) {
+        qWarning("EnginioQmlModel::append(): Enginio client is not set");
+        return 0;
+    }
+
     return d->append(d->convert(value));
 }
 
 EnginioQmlReply *EnginioQmlModel::remove(int row)
 {
     E_D();
+    if (Q_UNLIKELY(!d->enginio())) {
+        qWarning("EnginioQmlModel::remove(): Enginio client is not set");
+        return 0;
+    }
+
+    if (unsigned(row) >= unsigned(d->rowCount())) {
+        EnginioQmlClientPrivate *client = EnginioQmlClientPrivate::get(d->enginio());
+        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(EnginioString::EnginioQmlModel_remove_row_is_out_of_range));
+        EnginioQmlReply *ereply = new EnginioQmlReply(client, nreply);
+        return ereply;
+    }
     return d->remove(row);
 }
 
 EnginioQmlReply *EnginioQmlModel::setProperty(int row, const QString &role, const QVariant &value)
 {
     E_D();
+    if (Q_UNLIKELY(!d->enginio())) {
+        qWarning("EnginioQmlModel::setProperty(): Enginio client is not set");
+        return 0;
+    }
+
+    if (unsigned(row) >= unsigned(d->rowCount())) {
+        EnginioQmlClientPrivate *client = EnginioQmlClientPrivate::get(d->enginio());
+        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(EnginioString::EnginioQmlModel_setProperty_row_is_out_of_range));
+        EnginioQmlReply *ereply = new EnginioQmlReply(client, nreply);
+        return ereply;
+    }
+
     return d->setValue(row, role, value);
 }
 
