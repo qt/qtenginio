@@ -20,7 +20,7 @@ exampledirs += \
                snippets \
                ../tests/auto \
 
-depends += qtcore qtgui qtwidgets qtdoc qtdeclarative
+depends += qtcore qtgui qtwidgets qtdoc qtdeclarative qtquickcontrols
 
 qhp.projects            = Enginio
 

@@ -63,7 +63,7 @@
     We will also use a common \l{Enginio}{Enginio} connection as shown here:
     \snippet users/users.qml client
 
-    The example is organized into separate tabs by using \l TabView. Each tab is showing different
+    The example is organized into separate tabs by using \l{TabView}. Each tab is showing different
     functionality.
 
     \section1 Browsing users data

@@ -180,7 +180,7 @@ To use Enginio's QML API, you have to import the library.
 import Enginio 1.0
 \endcode
 
-Then initialize the \l{Enginio}{enginio client} with the \l{Enginio::backendId}{Backend Id value, which can be copied from the Dashboard.
+Then initialize the \l{Enginio}{enginio client} with the \l{Enginio::backendId}{backend id} value, which can be copied from the Dashboard.
 
 Go to Dashboard ⇒ Your Backend home-view ⇒ See ’Keys box’ ⇒ Copy Backend Id value.
 
