@@ -27,7 +27,7 @@
 /*!
     \title Enginio QML Examples - Image Gallery
     \example image-gallery
-    \brief This is an example showing up and download of files in Enginio.
+    \brief This is an example that demonstrates uploading and downloading of files in Enginio.
     \ingroup enginio-examples
     \inmodule enginio-qml
 
@@ -38,7 +38,7 @@
     \section1 Backend configuration
     The Enginio backend needs to be set up to get this example working.
 
-    Go to the Enginio Dashboard and create a new backend with `Image Gallery` template.
+    Go to the Enginio Dashboard and create a new backend with 'Image Gallery' template.
 
     The template will construct a new custom backend by executing steps:
     \list
@@ -55,12 +55,12 @@
         }
         \endcode
         This JSON snippet triggers the server to generate thumbnails for all uploaded images.
-        In the image gallery the thumbnails will be used in the list view, the full image will be shown
+        In the image gallery, the thumbnails will be used in the list view. The full image will be shown
         when the thumbnail is clicked.
     \endlist
 
     Copy the backend Id from the Enginio dashboard.
-    They need to be filled into the example when it is executed for the first time.
+    They need to be entered into the example when it is executed for the first time.
 
     \section1 The example code
 

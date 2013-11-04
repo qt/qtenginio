@@ -30,7 +30,7 @@
 \contentspage {Enginio Overview}{Contents}
 \indexpage Enginio Overview
 \startpage Enginio Overview
-\nextpage Enginio Installation and Prerequisits
+\nextpage Enginio Installation and Prerequisites
 
 \title Enginio Overview
 
@@ -40,7 +40,7 @@ Enginio is a Backend-as-a-Service solution to ease backend development for any c
 
 To get started quickly, follow the mini-tutorial using Qt Quick or C++.
 \list
-\li \l {Enginio Installation and Prerequisits}
+\li \l {Enginio Installation and Prerequisites}
 \li \l {Getting Started with Enginio using Qt Quick}
 \li \l {Getting Started with Enginio using C++}
 \endlist
@@ -54,7 +54,7 @@ To get started quickly, follow the mini-tutorial using Qt Quick or C++.
 \section1 Overview
 
 When using Enginio (with Qt Quick or C++), the API is following a general pattern that will be helpful to understand.
-This section gives a short high-level overview of the concepts used throughout the library.
+This section gives a short, high-level overview of the concepts used throughout the library.
 
 The Qt library is a client-side library to communicate with the server at \l {http://engin.io}.
 Several backends can exist for each account on the server.
@@ -64,11 +64,11 @@ When shipping an application built with Enginio, the backend ID will be the same
 \section2 Objects
 
 Enginio provides several types of objects: "custom objects", "users", "user groups", "files" and more.
-All communication with the backend uses JSON. For QML JSON comes in very natural since
-the objects can simply be written inline. On the C++ side, \l QJsonObject and \l QJsonValue are used.
+All communication with the backend uses JSON. When writing QML, JSON can simply be written inline.
+On the C++ side, \l QJsonObject and \l QJsonValue are used.
 
 Each object in the database has an \c id, \c objectType, \c createdAt and \c updatedAt property that are reserved and always exist.
-For example a custom object with no additional properties (in JSON) might look like this:
+For example, a custom object with no additional properties (in JSON) might look like this:
 \code
 {
     "id": "51cdbc08989e975ec300772a",
@@ -77,7 +77,7 @@ For example a custom object with no additional properties (in JSON) might look l
     "updatedAt": "2013-06-28T16:38:32.725Z"
 }
 \endcode
-With this basis the objects can be augmented with user defined properties that contain the actual application data and can
+With this basis, the objects can be augmented with user defined properties that contain the actual application data and can
 even contain other objects.
 For a more detailed description see the \l{http://engin.io/documentation/overview/objects}{Enginio Object documentation}.
 
@@ -100,7 +100,7 @@ in the \l {EnginioClient}{EnginioClient Class} in C++ or \l {Enginio1::Enginio}{
 
 For file management, the operations are slightly different.
 Files are always attached to objects and can only be referenced through them.
-The Qt library provides convenient functions to up- and download files.
+The Qt library provides convenient functions to upload and download files.
 
 The entire Enginio documentation including backend and client is available here: \l{http://engin.io/documentation/}{Enginio Documentation}
 */
@@ -111,7 +111,7 @@ The entire Enginio documentation including backend and client is available here:
 \nextpage Getting Started with Enginio using Qt Quick
 \previouspage Enginio Overview
 
-\title Enginio Installation and Prerequisits
+\title Enginio Installation and Prerequisites
 
 This guide shows how to use the Enginio Qt library in a Qt application
 (both Qt C++ and QML cases are covered).
@@ -161,7 +161,7 @@ You can use Enginio with an existing installation of Qt 5.1 or later, or get Qt 
 \page enginio-qml
 \indexpage Enginio Overview
 \nextpage Getting Started with Enginio using C++
-\previouspage Enginio Installation and Prerequisits
+\previouspage Enginio Installation and Prerequisites
 
 \title Getting Started with Enginio using Qt Quick
 \brief Introduction to using Enginio using Qt Quick
@@ -180,7 +180,7 @@ To use Enginio's QML API, you have to import the library.
 import Enginio 1.0
 \endcode
 
-Then initialize the \l{Enginio}{enginio client} with the \l{Enginio::backendId}{backend id} value, which can be copied from the Dashboard.
+Initialize the \l{Enginio}{enginio client} with the \l{Enginio::backendId}{Backend Id} value, which can be copied from the Dashboard.
 
 Go to Dashboard ⇒ Your Backend home-view ⇒ See ’Keys box’ ⇒ Copy Backend Id value.
 
@@ -193,7 +193,7 @@ Enginio {
 
 \section1 Store your first Object
 
-Next store an Object to Enginio. First create an object in JSON format and fill it with data as you need.
+Now you can store an Object with Enginio. First, create an object in JSON format and fill it with data as needed.
 Then call create on the client with the JSON object as a parameter.
 
 \code
@@ -222,7 +222,7 @@ Now you can \l{Checking stored objects in the Dashboard}{check the Enginio dashb
 
 \section1 Setup Qt application project
 
-You need to link to Enginio. For QMake-based projects simply add
+You need to link to Enginio. For qmake-based projects simply add
 \code
 QT += enginio
 \endcode
@@ -230,7 +230,7 @@ to your \c .pro file.
 
 \section1 Initialize Enginio Client
 
-To use Enginio Qt library in your code, you have to include relevant library headers.
+To use the Enginio Qt library in your code, you have to include relevant library headers.
 \code
  #include <Enginio/Enginio>
 \endcode
@@ -244,7 +244,7 @@ QString backendId("YOUR_OWN_BACKEND_ID");
 EnginioClient *client = new EnginioClient;
 client->setBackendId(backendId);
 \endcode
-For testing purposes, it is easiest to hardcode the backend ID directly into application code. But this might not be always the best choice and sometimes it might be beneficial to put the backend configuration in a separate configuration file.
+For testing purposes, it is easiest to hardcode the backend ID directly into application code. However, this might not be always the best choice, and sometimes it might be beneficial to put the backend configuration in a separate configuration file.
 \section1 Store your first Object
 
 Create an object in JSON format and fill in the data:
@@ -261,7 +261,7 @@ Create the object in the Enginio database by calling \l{EnginioClient::create()}
     connect(client, SIGNAL(finished(EnginioReply*)), this, SLOT(uploadFinished(EnginioReply*)));
 \endcode
 Note that the \l{EnginioClient::create()}{create()} method performs the actual asynchronous network communication.
-You need to wait for its completion by connecting to the \l{EnginioClient::finished()}{finished} and the \l{EnginioClient::error()}{error} signals.
+You need to wait for its completion by connecting to the \l{EnginioClient::finished()}{finished} and \l{EnginioClient::error()}{error} signals.
 
 Now you can \l{Checking stored objects in the Dashboard}{check the Enginio dashboard} for the newly created object.
 */
@@ -294,7 +294,7 @@ To get convenient access to objects stored in Enginio, consider using \l Enginio
 \indexpage Enginio Overview
 
 \list
-\li \l {Enginio Installation and Prerequisits}
+\li \l {Enginio Installation and Prerequisites}
 \li \l {Getting Started with Enginio using Qt Quick}
 \li \l {Getting Started with Enginio using C++}
 \endlist

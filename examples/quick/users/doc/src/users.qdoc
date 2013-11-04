@@ -28,20 +28,20 @@
 /*!
     \title Enginio QML Examples - Users
     \example users
-    \brief The Users example introduces user registration, authentication and browsing
+    \brief The Users example introduces user registration, authentication and browsing.
     \ingroup enginio-examples
     \inmodule enginio-qml
 
     \section1 Introduction
 
-    This example will demonstrate how to register and authenticate a user, what kind of information
+    This example will demonstrate how to register and authenticate a user, and what kind of information
     is attached to an authenticated session. This is a simple example and data access rights
-    management is not covered here, for such information please refer to Social Todo example.
+    management is not covered here. For such information, please refer to the Social Todo example.
 
     There is no special need for the backend setup. This example will use only predefined
     structures, which are the same for every backend.
 
-    The example is an application that shows users registered in the backend, allows to register
+    The example is an application that shows users registered in the backend, allows registration of
     new users and shows how to login in separate tabs.
 
     Each backend contains the "users" object type, which defines a structure
@@ -51,11 +51,14 @@
     \list
       \li username - required name used for logging in.
       \li email - unique email address of a user.
-      \li firstName, lastName - optional user's credentials.
+      \li firstName, lastName - user's credentials (optional).
       \li password - write-only property, this value is used during authentication.
     \endlist
-    It can be extended, by custom properties too. Username and password are always required
-    and cannot be empty.
+
+    The "users" object can be extended by custom properties, too.
+
+    \note \e username and \e password are always required and cannot be empty.
+
     \section1 General example structure
     This example uses QtEnginio library together with QtQuickControls, therefore both have
     to be imported.
@@ -63,51 +66,49 @@
     We will also use a common \l{Enginio}{Enginio} connection as shown here:
     \snippet users/users.qml client
 
-    The example is organized into separate tabs by using \l{TabView}. Each tab is showing different
+    The example is organized into separate tabs by using \l TabView. Each tab shows different
     functionality.
 
-    \section1 Browsing users data
+    \section1 Browsing users' data
     The most convenient method to browse users is to use \l{Enginio1::EnginioModel}{EnginioModel}. The model can
-    automatically download all data that we need. It is sufficient to set three properties;
+    automatically download all data that we need. It is sufficient to set three properties:
     \l{Enginio1::EnginioModel::enginio}{enginio}, \l{Enginio1::EnginioModel::query}{query}
     and \l{Enginio1::EnginioModel::operation}{operation} as shown below:
     \snippet users/Browse.qml browse
 
-    The model is used directly by TableView in which we define data that will be shown
+    The model is used directly by TableView, in which we define data that will be shown.
     \snippet users/Browse.qml columns
 
     \section1 User authentication
-    Authentication is quite easy, the only thing that needs to be done is to assign an identity, for example
+    Authentication is quite easy. The only thing that needs to be done is to assign an identity, for example
     \l{EnginioOAuth2Authentication}{EnginioOAuth2Authentication} object to \l{Enginio::identity}{Enginio::identity}.
-    After a while \l{Enginio::authenticationState}{Enginio::authenticationState} will change and
+    After a while, \l{Enginio::authenticationState}{Enginio::authenticationState} will change and
     \l{Enginio::sessionAuthenticated}{sessionAuthenticated} or \l{Enginio::sessionAuthenticationError}{sessionAuthenticationError}
     will be emitted.
 
     The first thing we need to do is to create an identity object: \l{EnginioOAuth2Authentication}{EnginioOAuth2Authentication}
     \snippet users/Login.qml identity
 
-    Then depending on state of the application we assign the object to
+    Then, depending on the state of the application, we assign the object to
     our enginioClient instance. There are four possible states, defined by
-    \l{EnginioClient::AuthenticationState}. From the initial one called "NotAuthenticated",
-    after assigning the Identity object, the state changes to "Authenticating".
+    \l{EnginioClient::AuthenticationState}. After assigning the Identity object,
+    the state changes from the initial "NotAuthenticated" to "Authenticating".
     \snippet users/Login.qml assignIdentity
 
     Once the authentication query finishes, the state changes to "Authenticated" or
     "AuthenticationFailure" depending on the authentication result. Null
-    assignment to the \l{Enginio::identity}{identity}
+    assignment to the \l{Enginio::identity}{identity} causes the session to terminate immediately:
     \snippet users/Login.qml assignNull
 
-    causes session to terminate immediately.
-
-    For educational purposes, in the example we also show a log window with a data, attached to
-    a session changing state.
+    For educational purposes, in the example we also show a log window with data attached to
+    a session that is changing state.
     \snippet users/Login.qml connections
 
-    \section1 Registering a new user.
-    Registration of a new user is equals to adding new object to "users" collection. It can be achieved
-    for example using \l{Enginio::create}{create} function as shown below:
+    \section1 Registering a new user
+    Registration of a new user is as simple as adding a new object to the "users" collection. It can be achieved
+    by using the \l{Enginio::create}{create} function, as shown below:
     \snippet users/Register.qml create
 
-    We could also use \l{Enginio1::EnginioModel::append}{EnginioModel::append} method in the browsing example
+    We could also use the \l{Enginio1::EnginioModel::append}{EnginioModel::append} method in the browsing example
     to accomplish the same task.
 */

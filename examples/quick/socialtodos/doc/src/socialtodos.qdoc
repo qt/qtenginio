@@ -36,20 +36,19 @@
     This example will demonstrate some more advanced server setup and make use
     of Enginio's built-in user management.
 
-    On the server side we will choose settings that will be safer,
-    where the simple examples ignore all security issues.
+    On the server side, we will choose settings that will be safer,
+    whereas the simple examples ignore all security issues.
 
-    The goal is that the example allows to create user accounts,
-    log in as user, let users create todo lists with todos and
-    share todo lists amongst each other.
+    The goal of the example is to allow the user to create accounts,
+    log in to those accounts, create todo lists, and share todo lists with other users.
 
-    To keep it simple there will be no way to remove the sharing of a list
-    and every user can delete any list completely.
+    To keep it simple, there will be no way to stop sharing a list
+    and every user can delete any list.
 
     The organization on the backend will be:
     \list
         \li "users" The built in users objects are used together with basic
-        identification - username and password.
+        identification: username and password.
         \li "objects.todoLists" The list of todo lists, has a "name" property for the
         title of the list. Users can be added by manipulating
         the access control list (ACL) of the list.
@@ -59,25 +58,25 @@
     \endlist
 
 
-    For the server side there are two options: manual configuration or importing
+    For the server side, there are two options: manual configuration or importing
     a pre-made list of settings. The example contains a zip file (backendsetup/socialtodos.zip) that can be used
     to pre-populate the server with the right object types.
 
-    But it is more interesting to do the setup by hand to gain a deeper understanding of Enginio
+    However, it is more interesting to do the setup by hand to gain a deeper understanding of Enginio
     and how user management works.
 
     \section1 Backend Configuration
 
     In the backend, go to the "object types" section. Click on users.
-    Users should be able to share Todo Lists, for that we let them read each other. We do not however want
-    users to be able to change each other, so for the user configuration, under "Object ACL Template"
-    in the "All" category make sure only "read" is enabled.
+    Users should be able to share Todo Lists. To achieve this, we let them read each other. We do not, however, want
+    users to be able to change each other. So in the user configuration, under "Object ACL Template"
+    in the "All" category, make sure only "read" is enabled.
     The "Creator" should have "admin" rights.
 
     Next we create the new object types.
-    "Add Object Type" and in the name field choose: "todoLists".
+    In the name field under "Add Object Type", choose: "todoLists".
     This will create "objects.todoLists". Add a new property "name" with type String.
-    In the "ACL Template" remove the permissions for "All" completely.
+    In the "ACL Template", remove the permissions for "All" completely.
     Now only the creator of an object will be able to read and manipulate it.
     Save this object type.
 
@@ -86,7 +85,7 @@
     "title": "string", "done": "boolean" and a reference to the "todoList" the item belongs to.
     For the last property choose "Ref" and select "objects.todoLists" as target.
 
-    In the references tab, change the ACL to "Inherit from object type and target object" and for Dependency
+    In the references tab, change the ACL to "Inherit from object type and target object", and for Dependency
     select "Delete object".
     This setup means that the ACL will be the same as that of the todo list itself and the todo will automatically
     be deleted when the list is deleted. Remove all permissions from the "Object ACL Template" as they are inherited now.

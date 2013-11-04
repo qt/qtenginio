@@ -27,11 +27,11 @@
 /*!
     \title Enginio C++ Examples - Todos
     \example todos-cpp
-    \brief The Todo example shows the \l {EnginioModelCpp}{EnginioModel} usage together with QtWigets
+    \brief The Todo example shows the \l {EnginioModelCpp}{EnginioModel} usage together with QtWigets.
     \ingroup enginio-examples
     \inmodule enginio-qt
 
-    In this example a simple list of objects is displayed in a \l QListView.
+    In this example, a simple list of objects is displayed in a \l QListView.
     Each item in the list is a "To Do" object which can be "done" or "not yet done".
     Todos can be added, removed, or altered.
 
