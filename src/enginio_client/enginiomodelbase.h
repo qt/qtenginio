@@ -42,7 +42,7 @@
 #ifndef ENGINIOMODELBASE_H
 #define ENGINIOMODELBASE_H
 
-#include <QAbstractListModel>
+#include <QtCore/qabstractitemmodel.h>
 #include <QtCore/qscopedpointer.h>
 
 #include <Enginio/enginioclientbase.h>
