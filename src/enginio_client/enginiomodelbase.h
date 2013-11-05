@@ -65,7 +65,7 @@ public:
         UpdatedAtRole,
         IdRole,
         ObjectTypeRole,
-        LastRole // the first fully dynamic role
+        LastRole = Qt::UserRole + 10 // the first fully dynamic role
     };
 
     Q_PROPERTY(EnginioClientBase::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
