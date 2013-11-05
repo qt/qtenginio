@@ -126,6 +126,7 @@ Rectangle {
         }
 
         TextField {
+            id: textInput
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.right: addButton.left
