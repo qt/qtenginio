@@ -129,9 +129,11 @@ struct Types
     typedef QJSValue Data;
 };
 
-struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1, Types>
+} // namespace
+
+struct EnginioQmlModelPrivate : public EnginioModelPrivateT<EnginioQmlModelPrivate, Types>
 {
-    typedef EnginioModelPrivateT<EnginioModelPrivate1, Types> Base;
+    typedef EnginioModelPrivateT<EnginioQmlModelPrivate, Types> Base;
 
     QJSValue convert(const QJsonObject &object) const
     {
@@ -152,7 +154,7 @@ struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1, 
         return QJsonDocument::fromJson(buffer).object();
     }
 
-    EnginioModelPrivate1(EnginioModelBase *pub)
+    EnginioQmlModelPrivate(EnginioModelBase *pub)
         : Base(pub)
     {}
 
@@ -188,12 +190,10 @@ struct EnginioModelPrivate1 : public EnginioModelPrivateT<EnginioModelPrivate1, 
     }
 };
 
-} // namespace
-
-#define E_D() EnginioModelPrivate1 *d = static_cast<EnginioModelPrivate1*>(EnginioModelBase::d.data());
+#define E_D() EnginioQmlModelPrivate *d = static_cast<EnginioQmlModelPrivate*>(EnginioModelBase::d.data());
 
 EnginioQmlModel::EnginioQmlModel(QObject *parent)
-    : EnginioModelBase(parent, new EnginioModelPrivate1(this))
+    : EnginioModelBase(parent, new EnginioQmlModelPrivate(this))
 {
     E_D();
     d->init();
