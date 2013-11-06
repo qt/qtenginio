@@ -14,6 +14,7 @@ OTHER_FILES += \
     List.qml \
     Login.qml \
     ShareDialog.qml \
+    TextField.qml \
     TodoLists.qml \
     socialtodos.qml
 
