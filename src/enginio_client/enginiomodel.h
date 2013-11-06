@@ -50,7 +50,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class EnginioModelBasePrivate;
+class EnginioModelPrivate;
 class ENGINIOCLIENT_EXPORT EnginioModel : public EnginioModelBase
 {
     Q_OBJECT

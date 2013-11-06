@@ -322,11 +322,13 @@ struct Types {
     typedef QJsonObject Data;
 };
 
-struct EnginioModelPrivate1: EnginioModelPrivateT<EnginioModelPrivate1, Types>
-{
-    typedef EnginioModelPrivateT<EnginioModelPrivate1, Types> Base;
+} // namespace
 
-    EnginioModelPrivate1(EnginioModelBase *pub)
+struct EnginioModelPrivate: EnginioModelPrivateT<EnginioModelPrivate, Types>
+{
+    typedef EnginioModelPrivateT<EnginioModelPrivate, Types> Base;
+
+    EnginioModelPrivate(EnginioModelBase *pub)
         : Base(pub)
     {}
 
@@ -346,16 +348,14 @@ struct EnginioModelPrivate1: EnginioModelPrivateT<EnginioModelPrivate1, Types>
     }
 };
 
-} // namespace
 
-
-#define E_D() EnginioModelPrivate1 *d = static_cast<EnginioModelPrivate1*>(EnginioModelBase::d.data());
+#define E_D() EnginioModelPrivate *d = static_cast<EnginioModelPrivate*>(EnginioModelBase::d.data());
 
 /*!
     Constructs a new model with \a parent as QObject parent.
 */
 EnginioModel::EnginioModel(QObject *parent)
-    : EnginioModelBase(parent, new EnginioModelPrivate1(this))
+    : EnginioModelBase(parent, new EnginioModelPrivate(this))
 {
     E_D();
     d->init();
