@@ -253,7 +253,7 @@ public:
 };
 
 
-class ENGINIOCLIENT_EXPORT EnginioModelPrivate {
+class ENGINIOCLIENT_EXPORT EnginioModelBasePrivate {
 protected:
     EnginioClientPrivate *_enginio;
     EnginioClient::Operation _operation;
@@ -281,7 +281,7 @@ protected:
 
         struct NotificationReceived
         {
-            EnginioModelPrivate *model;
+            EnginioModelBasePrivate *model;
 
             void operator ()(QJsonObject data)
             {
@@ -317,7 +317,7 @@ protected:
             _connection = (EnginioBackendConnection*)-1;
         }
 
-        void connectToBackend(EnginioModelPrivate *model, EnginioClientPrivate *enginio, const QJsonObject &filter)
+        void connectToBackend(EnginioModelBasePrivate *model, EnginioClientPrivate *enginio, const QJsonObject &filter)
         {
             if (qintptr(_connection) == -1)
                 return;
@@ -334,7 +334,7 @@ protected:
 
     struct FinishedRemoveRequest
     {
-        EnginioModelPrivate *model;
+        EnginioModelBasePrivate *model;
         const QString id;
         EnginioReplyBase *reply;
         void operator ()()
@@ -345,7 +345,7 @@ protected:
 
     struct FinishedUpdateRequest
     {
-        EnginioModelPrivate *model;
+        EnginioModelBasePrivate *model;
         const QString id;
         const QJsonObject oldValue;
         EnginioReplyBase *reply;
@@ -357,7 +357,7 @@ protected:
 
     struct FinishedCreateRequest
     {
-        EnginioModelPrivate *model;
+        EnginioModelBasePrivate *model;
         const QString tmpId;
         EnginioReplyBase *reply;
         void operator ()()
@@ -368,7 +368,7 @@ protected:
 
     struct FinishedFullQueryRequest
     {
-        EnginioModelPrivate *model;
+        EnginioModelBasePrivate *model;
         EnginioReplyBase *reply;
         void operator ()()
         {
@@ -378,7 +378,7 @@ protected:
 
     struct FinishedIncrementalUpdateRequest
     {
-        EnginioModelPrivate *model;
+        EnginioModelBasePrivate *model;
         const QJsonObject query;
         EnginioReplyBase *reply;
         void operator ()()
@@ -389,9 +389,9 @@ protected:
 
     class QueryChanged
     {
-        EnginioModelPrivate *model;
+        EnginioModelBasePrivate *model;
     public:
-        QueryChanged(EnginioModelPrivate *m)
+        QueryChanged(EnginioModelBasePrivate *m)
             : model(m)
         {
             Q_ASSERT(m);
@@ -404,7 +404,7 @@ protected:
     };
 
 public:
-    EnginioModelPrivate(EnginioModelBase *q_ptr)
+    EnginioModelBasePrivate(EnginioModelBase *q_ptr)
         : _enginio(0)
         , _operation()
         , q(q_ptr)
@@ -414,7 +414,7 @@ public:
     {
     }
 
-    virtual ~EnginioModelPrivate();
+    virtual ~EnginioModelBasePrivate();
 
     void init()
     {
@@ -465,7 +465,7 @@ public:
     struct SwapNetworkReplyBase
     {
         EnginioReplyBase *_reply;
-        EnginioModelPrivate *_model;
+        EnginioModelBasePrivate *_model;
         QJsonObject _object;
         QString _tmpId;
         QPointer<EnginioModelBase> _modelGuard;
@@ -904,9 +904,9 @@ public:
 
 
 template<typename Derived, typename Types>
-struct EnginioModelPrivateT : public EnginioModelPrivate
+struct EnginioModelPrivateT : public EnginioModelBasePrivate
 {
-    typedef EnginioModelPrivate Base;
+    typedef EnginioModelBasePrivate Base;
     typedef typename Types::Reply Reply;
     typedef typename Types::Public Public;
     typedef typename Types::Client Client;

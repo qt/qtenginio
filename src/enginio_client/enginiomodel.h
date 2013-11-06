@@ -50,7 +50,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class EnginioModelPrivate;
+class EnginioModelBasePrivate;
 class ENGINIOCLIENT_EXPORT EnginioModel : public EnginioModelBase
 {
     Q_OBJECT
@@ -78,7 +78,7 @@ Q_SIGNALS:
 
 private:
     Q_DISABLE_COPY(EnginioModel)
-    friend class EnginioModelPrivate;
+    friend class EnginioModelBasePrivate;
 };
 
 QT_END_NAMESPACE

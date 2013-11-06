@@ -49,13 +49,13 @@
 
 QT_BEGIN_NAMESPACE
 
-class EnginioModelPrivate;
+class EnginioModelBasePrivate;
 class ENGINIOCLIENT_EXPORT EnginioModelBase : public QAbstractListModel
 {
     Q_OBJECT
     Q_ENUMS(EnginioClientBase::Operation) // TODO remove me QTBUG-33577
 public:
-    explicit EnginioModelBase(QObject *parent, EnginioModelPrivate *d_ptr);
+    explicit EnginioModelBase(QObject *parent, EnginioModelBasePrivate *d_ptr);
     ~EnginioModelBase();
 
     enum Roles {
@@ -87,10 +87,10 @@ public:
 Q_SIGNALS:
     void operationChanged(const EnginioClientBase::Operation operation);
 protected:
-    QScopedPointer<EnginioModelPrivate> d;
+    QScopedPointer<EnginioModelBasePrivate> d;
 private:
     Q_DISABLE_COPY(EnginioModelBase)
-    friend class EnginioModelPrivate;
+    friend class EnginioModelBasePrivate;
 };
 
 

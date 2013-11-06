@@ -55,7 +55,7 @@
 
 QT_BEGIN_NAMESPACE
 
-const int EnginioModelPrivate::IncrementalModelUpdate = -2;
+const int EnginioModelBasePrivate::IncrementalModelUpdate = -2;
 
 /*!
   \class EnginioModel
@@ -154,7 +154,7 @@ const int EnginioModelPrivate::IncrementalModelUpdate = -2;
   For the QML version of this class see \l {Enginio1::EnginioModel}{EnginioModel (QML)}
 */
 
-EnginioModelPrivate::~EnginioModelPrivate()
+EnginioModelBasePrivate::~EnginioModelBasePrivate()
 {
     foreach (const QMetaObject::Connection &connection, _clientConnections)
         QObject::disconnect(connection);
@@ -163,7 +163,7 @@ EnginioModelPrivate::~EnginioModelPrivate()
         QObject::disconnect(connection);
 }
 
-void EnginioModelPrivate::receivedNotification(QJsonObject data)
+void EnginioModelBasePrivate::receivedNotification(QJsonObject data)
 {
     const QJsonObject origin = data[EnginioString::origin].toObject();
     const QString requestId = origin[EnginioString::apiRequestId].toString();
@@ -185,7 +185,7 @@ void EnginioModelPrivate::receivedNotification(QJsonObject data)
     }
 }
 
-void EnginioModelPrivate::receivedRemoveNotification(const QJsonObject &object, int rowHint)
+void EnginioModelBasePrivate::receivedRemoveNotification(const QJsonObject &object, int rowHint)
 {
     int row = rowHint;
     if (rowHint == NoHintRow) {
@@ -206,7 +206,7 @@ void EnginioModelPrivate::receivedRemoveNotification(const QJsonObject &object, 
     q->endRemoveRows();
 }
 
-void EnginioModelPrivate::receivedUpdateNotification(const QJsonObject &object, const QString &idHint, int row)
+void EnginioModelBasePrivate::receivedUpdateNotification(const QJsonObject &object, const QString &idHint, int row)
 {
     // update an existing object
     if (row == NoHintRow) {
@@ -244,7 +244,7 @@ void EnginioModelPrivate::receivedUpdateNotification(const QJsonObject &object, 
     }
 }
 
-void EnginioModelPrivate::fullQueryReset(const QJsonArray &data)
+void EnginioModelBasePrivate::fullQueryReset(const QJsonArray &data)
 {
     foreach (const QMetaObject::Connection &connection, _repliesConnections)
         QObject::disconnect(connection);
@@ -257,7 +257,7 @@ void EnginioModelPrivate::fullQueryReset(const QJsonArray &data)
     q->endResetModel();
 }
 
-void EnginioModelPrivate::receivedCreateNotification(const QJsonObject &object)
+void EnginioModelBasePrivate::receivedCreateNotification(const QJsonObject &object)
 {
     // create a new object
     QString id = object[EnginioString::id].toString();
@@ -271,7 +271,7 @@ void EnginioModelPrivate::receivedCreateNotification(const QJsonObject &object)
     q->endInsertRows();
 }
 
-void EnginioModelPrivate::syncRoles()
+void EnginioModelBasePrivate::syncRoles()
 {
     QJsonObject firstObject(_data.first().toObject());
 
@@ -371,7 +371,7 @@ EnginioModel::~EnginioModel()
     \internal
     Constructs a new model with \a parent as QObject parent.
 */
-EnginioModelBase::EnginioModelBase(QObject *parent, EnginioModelPrivate *d_ptr)
+EnginioModelBase::EnginioModelBase(QObject *parent, EnginioModelBasePrivate *d_ptr)
     : QAbstractListModel(parent)
     , d(d_ptr)
 {}
