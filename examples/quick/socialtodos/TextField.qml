@@ -92,5 +92,10 @@ FocusScope {
             }
         }
     }
+
+    onAccepted: {
+        Qt.inputMethod.commit();
+        Qt.inputMethod.hide();
+    }
 }
 
