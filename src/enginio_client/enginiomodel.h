@@ -78,6 +78,7 @@ Q_SIGNALS:
 
 private:
     Q_DISABLE_COPY(EnginioModel)
+    Q_DECLARE_PRIVATE(EnginioModel)
     friend class EnginioModelBasePrivate;
 };
 

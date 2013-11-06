@@ -348,16 +348,13 @@ struct EnginioModelPrivate: EnginioModelPrivateT<EnginioModelPrivate, Types>
     }
 };
 
-
-#define E_D() EnginioModelPrivate *d = static_cast<EnginioModelPrivate*>(EnginioModelBase::d.data());
-
 /*!
     Constructs a new model with \a parent as QObject parent.
 */
 EnginioModel::EnginioModel(QObject *parent)
-    : EnginioModelBase(parent, new EnginioModelPrivate(this))
+    : EnginioModelBase(*new EnginioModelPrivate(this), parent)
 {
-    E_D();
+    Q_D(EnginioModel);
     d->init();
 }
 
@@ -371,9 +368,8 @@ EnginioModel::~EnginioModel()
     \internal
     Constructs a new model with \a parent as QObject parent.
 */
-EnginioModelBase::EnginioModelBase(QObject *parent, EnginioModelBasePrivate *d_ptr)
-    : QAbstractListModel(parent)
-    , d(d_ptr)
+EnginioModelBase::EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent)
+    : QAbstractListModel(dd, parent)
 {}
 
 /*!
@@ -414,13 +410,13 @@ EnginioModelBase::~EnginioModelBase()
 */
 EnginioClient *EnginioModel::enginio() const
 {
-    E_D();
+    Q_D(const EnginioModel);
     return d->enginio();
 }
 
 void EnginioModel::setEnginio(const EnginioClient *enginio)
 {
-    E_D();
+    Q_D(EnginioModel);
     if (enginio == d->enginio())
         return;
     d->setEnginio(enginio);
@@ -436,13 +432,13 @@ void EnginioModel::setEnginio(const EnginioClient *enginio)
 */
 QJsonObject EnginioModel::query()
 {
-    E_D();
+    Q_D(EnginioModel);
     return d->query();
 }
 
 void EnginioModel::setQuery(const QJsonObject &query)
 {
-    E_D();
+    Q_D(EnginioModel);
     if (d->query() == query)
         return;
     return d->setQuery(query);
@@ -456,13 +452,13 @@ void EnginioModel::setQuery(const QJsonObject &query)
 */
 EnginioClientBase::Operation EnginioModelBase::operation() const
 {
-    E_D();
+    Q_D(const EnginioModelBase);
     return d->operation();
 }
 
 void EnginioModelBase::setOperation(EnginioClientBase::Operation operation)
 {
-    E_D();
+    Q_D(EnginioModelBase);
     if (operation == d->operation())
         return;
     d->setOperation(operation);
@@ -476,7 +472,7 @@ void EnginioModelBase::setOperation(EnginioClientBase::Operation operation)
 */
 EnginioReply *EnginioModel::append(const QJsonObject &value)
 {
-    E_D();
+    Q_D(EnginioModel);
     if (Q_UNLIKELY(!d->enginio())) {
         qWarning("EnginioModel::append(): Enginio client is not set");
         return 0;
@@ -493,7 +489,7 @@ EnginioReply *EnginioModel::append(const QJsonObject &value)
 */
 EnginioReply *EnginioModel::remove(int row)
 {
-    E_D();
+    Q_D(EnginioModel);
     if (Q_UNLIKELY(!d->enginio())) {
         qWarning("EnginioModel::remove(): Enginio client is not set");
         return 0;
@@ -520,7 +516,7 @@ EnginioReply *EnginioModel::remove(int row)
 */
 EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVariant &value)
 {
-    E_D();
+    Q_D(EnginioModel);
     if (Q_UNLIKELY(!d->enginio())) {
         qWarning("EnginioModel::setProperty(): Enginio client is not set");
         return 0;
@@ -553,7 +549,7 @@ Qt::ItemFlags EnginioModelBase::flags(const QModelIndex &index) const
 */
 QVariant EnginioModelBase::data(const QModelIndex &index, int role) const
 {
-    E_D();
+    Q_D(const EnginioModelBase);
     if (!index.isValid() || index.row() < 0 || index.row() >= d->rowCount())
         return QVariant();
 
@@ -566,7 +562,7 @@ QVariant EnginioModelBase::data(const QModelIndex &index, int role) const
 */
 int EnginioModelBase::rowCount(const QModelIndex &parent) const
 {
-    E_D();
+    Q_D(const EnginioModelBase);
     Q_UNUSED(parent);
     return d->rowCount();
 }
@@ -577,7 +573,7 @@ int EnginioModelBase::rowCount(const QModelIndex &parent) const
 */
 bool EnginioModelBase::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    E_D();
+    Q_D(EnginioModelBase);
     if (index.row() >= d->rowCount())
         return false;
 
@@ -603,7 +599,7 @@ bool EnginioModelBase::setData(const QModelIndex &index, const QVariant &value, 
 */
 QHash<int, QByteArray> EnginioModelBase::roleNames() const
 {
-    E_D();
+    Q_D(const EnginioModelBase);
     return d->roleNames();
 }
 
@@ -613,7 +609,7 @@ QHash<int, QByteArray> EnginioModelBase::roleNames() const
 */
 void EnginioModelBase::disableNotifications()
 {
-    E_D();
+    Q_D(EnginioModelBase);
     d->disableNotifications();
 }
 
@@ -623,7 +619,7 @@ void EnginioModelBase::disableNotifications()
 */
 void EnginioModelBase::fetchMore(const QModelIndex &parent)
 {
-    E_D();
+    Q_D(EnginioModelBase);
     d->fetchMore(parent.row());
 }
 
@@ -634,7 +630,7 @@ void EnginioModelBase::fetchMore(const QModelIndex &parent)
 bool EnginioModelBase::canFetchMore(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    E_D();
+    Q_D(const EnginioModelBase);
     return d->canFetchMore();
 }
 

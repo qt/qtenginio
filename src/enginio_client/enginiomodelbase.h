@@ -55,7 +55,7 @@ class ENGINIOCLIENT_EXPORT EnginioModelBase : public QAbstractListModel
     Q_OBJECT
     Q_ENUMS(EnginioClientBase::Operation) // TODO remove me QTBUG-33577
 public:
-    explicit EnginioModelBase(QObject *parent, EnginioModelBasePrivate *d_ptr);
+    explicit EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent);
     ~EnginioModelBase();
 
     enum Roles {
@@ -86,11 +86,11 @@ public:
     void disableNotifications();
 Q_SIGNALS:
     void operationChanged(const EnginioClientBase::Operation operation);
-protected:
-    QScopedPointer<EnginioModelBasePrivate> d;
+
 private:
     Q_DISABLE_COPY(EnginioModelBase)
-    friend class EnginioModelBasePrivate;
+    Q_DECLARE_PRIVATE(EnginioModelBase)
+    friend class EnginioModelPrivate;
 };
 
 

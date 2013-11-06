@@ -190,12 +190,10 @@ struct EnginioQmlModelPrivate : public EnginioModelPrivateT<EnginioQmlModelPriva
     }
 };
 
-#define E_D() EnginioQmlModelPrivate *d = static_cast<EnginioQmlModelPrivate*>(EnginioModelBase::d.data());
-
 EnginioQmlModel::EnginioQmlModel(QObject *parent)
-    : EnginioModelBase(parent, new EnginioQmlModelPrivate(this))
+    : EnginioModelBase(*new EnginioQmlModelPrivate(this), parent)
 {
-    E_D();
+    Q_D(EnginioQmlModel);
     d->init();
     QObject::connect(this, &EnginioModelBase::rowsRemoved, this, &EnginioQmlModel::rowCountChanged);
     QObject::connect(this, &EnginioModelBase::rowsInserted, this, &EnginioQmlModel::rowCountChanged);
@@ -208,7 +206,8 @@ EnginioQmlModel::~EnginioQmlModel()
 
 EnginioQmlReply *EnginioQmlModel::append(const QJSValue &value)
 {
-    E_D();
+    Q_D(EnginioQmlModel);
+
     if (Q_UNLIKELY(!d->enginio())) {
         qWarning("EnginioQmlModel::append(): Enginio client is not set");
         return 0;
@@ -219,7 +218,7 @@ EnginioQmlReply *EnginioQmlModel::append(const QJSValue &value)
 
 EnginioQmlReply *EnginioQmlModel::remove(int row)
 {
-    E_D();
+    Q_D(EnginioQmlModel);
     if (Q_UNLIKELY(!d->enginio())) {
         qWarning("EnginioQmlModel::remove(): Enginio client is not set");
         return 0;
@@ -231,12 +230,13 @@ EnginioQmlReply *EnginioQmlModel::remove(int row)
         EnginioQmlReply *ereply = new EnginioQmlReply(client, nreply);
         return ereply;
     }
+
     return d->remove(row);
 }
 
 EnginioQmlReply *EnginioQmlModel::setProperty(int row, const QString &role, const QVariant &value)
 {
-    E_D();
+    Q_D(EnginioQmlModel);
     if (Q_UNLIKELY(!d->enginio())) {
         qWarning("EnginioQmlModel::setProperty(): Enginio client is not set");
         return 0;
@@ -254,13 +254,13 @@ EnginioQmlReply *EnginioQmlModel::setProperty(int row, const QString &role, cons
 
 EnginioQmlClient *EnginioQmlModel::enginio() const
 {
-    E_D();
+    Q_D(const EnginioQmlModel);
     return d->enginio();
 }
 
 void EnginioQmlModel::setEnginio(const EnginioQmlClient *enginio)
 {
-    E_D();
+    Q_D(EnginioQmlModel);
     if (enginio == d->enginio())
         return;
 
@@ -269,13 +269,13 @@ void EnginioQmlModel::setEnginio(const EnginioQmlClient *enginio)
 
 QJSValue EnginioQmlModel::query()
 {
-    E_D();
+    Q_D(EnginioQmlModel);
     return d->query();
 }
 
 void EnginioQmlModel::setQuery(const QJSValue &query)
 {
-    E_D();
+    Q_D(EnginioQmlModel);
     if (d->query().equals(query))
         return;
     return d->setQuery(query);

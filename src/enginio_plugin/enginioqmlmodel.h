@@ -49,7 +49,7 @@ QT_BEGIN_NAMESPACE
 
 class EnginioQmlReply;
 class EnginioQmlClient;
-
+class EnginioQmlModelPrivate;
 class EnginioQmlModel : public EnginioModelBase
 {
     Q_OBJECT
@@ -77,6 +77,8 @@ Q_SIGNALS:
     void queryChanged(const QJSValue &query);
     void enginioChanged(EnginioQmlClient *enginio);
     void rowCountChanged();
+private:
+    Q_DECLARE_PRIVATE(EnginioQmlModel)
 };
 
 QT_END_NAMESPACE

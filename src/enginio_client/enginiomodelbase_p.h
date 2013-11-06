@@ -62,6 +62,8 @@
 #include <QtCore/quuid.h>
 #include <QtCore/qvector.h>
 
+#include <QtCore/private/qabstractitemmodel_p.h>
+
 QT_BEGIN_NAMESPACE
 
 enum {
@@ -253,7 +255,7 @@ public:
 };
 
 
-class ENGINIOCLIENT_EXPORT EnginioModelBasePrivate {
+class ENGINIOCLIENT_EXPORT EnginioModelBasePrivate : public QAbstractItemModelPrivate {
 protected:
     EnginioClientPrivate *_enginio;
     EnginioClient::Operation _operation;
@@ -848,7 +850,7 @@ public:
         return _data.count();
     }
 
-    QVariant data(unsigned row, int role) Q_REQUIRED_RESULT
+    QVariant data(unsigned row, int role) const Q_REQUIRED_RESULT
     {
         if (role == EnginioModel::SyncedRole) {
             return _attachedData.isSynced(row);

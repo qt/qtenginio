@@ -2,7 +2,7 @@ requires(qtHaveModule(quick))
 
 TARGETPATH = Enginio
 
-QT += qml quick enginio enginio-private
+QT += qml quick enginio enginio-private core-private
 
 include(../src.pri)
 

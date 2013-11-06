@@ -1,5 +1,5 @@
 TARGET = Enginio
-QT += network
+QT += core-private network
 DEFINES += ENGINIOCLIENT_LIBRARY
 MODULE = enginio
 
