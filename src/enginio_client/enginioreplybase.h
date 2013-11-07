@@ -54,14 +54,14 @@
 QT_BEGIN_NAMESPACE
 
 class EnginioClientPrivate;
-class EnginioReplyPrivate;
+class EnginioReplyBasePrivate;
 class ENGINIOCLIENT_EXPORT EnginioReplyBase: public QObject
 {
     Q_OBJECT
     Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
 
 protected:
-    QScopedPointer<EnginioReplyPrivate> d;
+    QScopedPointer<EnginioReplyBasePrivate> d;
 
 public:
     enum ErrorTypes {
@@ -71,7 +71,7 @@ public:
     };
     Q_ENUMS(ErrorTypes)
 
-    EnginioReplyBase(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
+    EnginioReplyBase(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv);
     ~EnginioReplyBase();
 
     Q_PROPERTY(ErrorTypes errorType READ errorType NOTIFY dataChanged)

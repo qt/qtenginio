@@ -50,7 +50,7 @@
 QT_BEGIN_NAMESPACE
 
 class EnginioClient;
-class EnginioReplyPrivate;
+class EnginioReplyBasePrivate;
 class EnginioClientPrivate;
 
 class ENGINIOCLIENT_EXPORT EnginioReply : public EnginioReplyBase
@@ -70,7 +70,7 @@ Q_SIGNALS:
     void dataChanged();
 
 protected:
-    explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
+    explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv);
     virtual void emitFinished();
 
 private:

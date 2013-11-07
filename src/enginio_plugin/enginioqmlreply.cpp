@@ -85,14 +85,14 @@ QT_BEGIN_NAMESPACE
   The backend status code.
 */
 
-class EnginioQmlReplyPrivate : public EnginioReplyPrivate
+class EnginioQmlReplyPrivate : public EnginioReplyBasePrivate
 {
     EnginioQmlReply *q;
     QMetaObject::Connection _orphanConnection;
 
 public:
     EnginioQmlReplyPrivate(EnginioQmlClientPrivate *client, QNetworkReply *reply, EnginioQmlReply *q_ptr)
-        : EnginioReplyPrivate(client, reply)
+        : EnginioReplyBasePrivate(client, reply)
         , q(q_ptr)
     {
         Q_ASSERT(client);
