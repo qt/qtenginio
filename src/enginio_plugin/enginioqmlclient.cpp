@@ -164,7 +164,7 @@ QT_BEGIN_NAMESPACE
 */
 
 EnginioQmlClient::EnginioQmlClient(QObject *parent)
-    : EnginioClientBase(parent, new EnginioQmlClientPrivate)
+    : EnginioClientBase(*new EnginioQmlClientPrivate, parent)
 {
     Q_D(EnginioQmlClient);
     d->init();

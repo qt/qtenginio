@@ -104,7 +104,7 @@ Q_SIGNALS:
     void identityChanged(const EnginioIdentity *identity);
 
 protected:
-    explicit EnginioClientBase(QObject *parent, EnginioClientBasePrivate *d);
+    explicit EnginioClientBase(EnginioClientBasePrivate &dd, QObject *parent);
 
 private:
     Q_DECLARE_PRIVATE(EnginioClientBase)

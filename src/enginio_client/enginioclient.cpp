@@ -299,7 +299,7 @@ public:
   \brief Creates a new EnginioClient with \a parent as QObject parent.
 */
 EnginioClient::EnginioClient(QObject *parent)
-    : EnginioClientBase(parent, new EnginioClientPrivate)
+    : EnginioClientBase(*new EnginioClientPrivate, parent)
 {
     Q_D(EnginioClient);
     d->init();
@@ -658,9 +658,8 @@ bool EnginioClientBase::finishDelayedReplies()
 /*!
   \internal
 */
-EnginioClientBase::EnginioClientBase(QObject *parent, EnginioClientBasePrivate *d)
-
-    : QObject(*d, parent)
+EnginioClientBase::EnginioClientBase(EnginioClientBasePrivate &dd, QObject *parent)
+    : QObject(dd, parent)
 {
     qRegisterMetaType<EnginioClient*>();
     qRegisterMetaType<EnginioModel*>();
