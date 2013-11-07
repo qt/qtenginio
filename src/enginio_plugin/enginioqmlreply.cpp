@@ -87,19 +87,19 @@ QT_BEGIN_NAMESPACE
 
 class EnginioQmlReplyPrivate : public EnginioReplyBasePrivate
 {
-    EnginioQmlReply *q;
     QMetaObject::Connection _orphanConnection;
 
+    Q_DECLARE_PUBLIC(EnginioQmlReply)
 public:
-    EnginioQmlReplyPrivate(EnginioQmlClientPrivate *client, QNetworkReply *reply, EnginioQmlReply *q_ptr)
+    EnginioQmlReplyPrivate(EnginioQmlClientPrivate *client, QNetworkReply *reply)
         : EnginioReplyBasePrivate(client, reply)
-        , q(q_ptr)
     {
         Q_ASSERT(client);
     }
 
     void emitFinished()
     {
+        Q_Q(EnginioQmlReply);
         q->setParent(0);
         QQmlEngine::setObjectOwnership(q, QQmlEngine::JavaScriptOwnership);
         emit q->finished(static_cast<EnginioQmlClientPrivate*>(_client)->jsengine()->newQObject(q));
@@ -116,7 +116,7 @@ public:
 
 
 EnginioQmlReply::EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply *reply)
-    : EnginioReplyBase(parent, reply, new EnginioQmlReplyPrivate(parent, reply, this))
+    : EnginioReplyBase(parent, reply, new EnginioQmlReplyPrivate(parent, reply))
 {}
 
 EnginioQmlReply::~EnginioQmlReply()
