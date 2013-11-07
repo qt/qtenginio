@@ -96,6 +96,7 @@ private slots:
     void appendAndChangeQueryBeforeItIsFinished();
     void deleteModelDurringRequests();
     void updatingRoles();
+    void setData();
 private:
     template<class T>
     void externallyRemovedImpl();
@@ -1424,6 +1425,65 @@ void tst_EnginioModel::updatingRoles()
     QCOMPARE(model.roleNames()[CustomModel::BarRole], bar);
     QCOMPARE(model.roleNames()[CustomModel::TitleRole], title);
     QCOMPARE(model.roleNames()[CustomModel::InvalidRole], QByteArray("objectType"));
+}
+
+void tst_EnginioModel::setData()
+{
+    QString propertyName = "title";
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    struct Model: public EnginioModel {
+        enum Roles {
+            TitleRole = EnginioModel::LastRole
+        };
+
+        virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE
+        {
+            QHash<int, QByteArray> roles = EnginioModel::roleNames();
+            roles.insert(TitleRole, "title");
+            return roles;
+        }
+    } model;
+
+    model.disableNotifications();
+    model.setQuery(query);
+
+    {   // init the model
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setEnginio(&client);
+
+        QTRY_VERIFY(spy.count() > 0);
+    }
+
+    if (model.rowCount() < 1) {
+        QJsonObject o;
+        o.insert(propertyName, QString::fromLatin1("o"));
+        o.insert("objectType", objectType);
+        model.append(o);
+    }
+
+    // try to get data through an invalid index
+    QCOMPARE(model.data(model.index(-1)), QVariant());
+    QCOMPARE(model.data(model.index(-1, 1)), QVariant());
+    QCOMPARE(model.data(model.index(model.rowCount() + 3)), QVariant());
+    QCOMPARE(model.data(model.index(model.rowCount())), QVariant());
+
+    QTRY_VERIFY(model.rowCount() > 0);
+
+    // try to set data through an invalid index
+    QVERIFY(!model.setData(model.index(model.rowCount()), QVariant()));
+    QVERIFY(!model.setData(model.index(model.rowCount() + 3), QVariant()));
+    QVERIFY(!model.setData(model.index(-1), QVariant()));
+    QVERIFY(!model.setData(model.index(-1, 1), QVariant()));
+
+    // make a correct setData call
+    QVERIFY(model.setData(model.index(0), QString::fromLatin1("1111"), Model::TitleRole));
 }
 
 QTEST_MAIN(tst_EnginioModel)

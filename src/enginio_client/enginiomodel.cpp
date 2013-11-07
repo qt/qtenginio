@@ -574,7 +574,7 @@ int EnginioModelBase::rowCount(const QModelIndex &parent) const
 bool EnginioModelBase::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     Q_D(EnginioModelBase);
-    if (index.row() >= d->rowCount())
+    if (unsigned(index.row()) >= unsigned(d->rowCount()))
         return false;
 
     EnginioReplyBase *reply = d->setData(index.row(), value, role);
