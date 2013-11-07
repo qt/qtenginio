@@ -102,16 +102,6 @@ EnginioReply::EnginioReply(EnginioClientBasePrivate *p, QNetworkReply *reply)
 }
 
 /*!
-  \internal
-*/
-EnginioReply::EnginioReply(EnginioClientBasePrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv)
-    : EnginioReplyBase(parent, reply, priv)
-{
-    QObject::connect(this, &EnginioReply::dataChanged, this, &EnginioReplyBase::dataChanged);
-}
-
-
-/*!
   \brief Destroys the EnginioReply.
 
   The reply needs to be deleted after the finished signal is emitted.
