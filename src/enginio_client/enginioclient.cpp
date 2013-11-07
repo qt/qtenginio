@@ -272,7 +272,7 @@ bool EnginioClientPrivate::finishDelayedReplies()
                 reply->emitFinished();
                 emitFinished(reply);
                 if (gEnableEnginioDebugInfo)
-                    _requestData.remove(reply->d->_nreply); // FIXME it is ugly, and breaks encapsulation
+                    _requestData.remove(reply->d_func()->_nreply); // FIXME it is ugly, and breaks encapsulation
                 _delayedReplies.remove(reply);
                 needToReevaluate = true;
             }

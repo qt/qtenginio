@@ -70,7 +70,7 @@ Q_SIGNALS:
     void dataChanged();
 
 private:
-    friend class EnginioQmlReplyPrivate;
+    Q_DECLARE_PRIVATE(EnginioQmlReply)
 };
 
 QT_END_NAMESPACE

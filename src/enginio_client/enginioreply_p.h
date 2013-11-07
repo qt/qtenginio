@@ -52,9 +52,11 @@
 #include <Enginio/private/enginioclient_p.h>
 #include <Enginio/enginioreply.h>
 
+#include <QtCore/private/qobject_p.h>
+
 QT_BEGIN_NAMESPACE
 
-class EnginioReplyBasePrivate {
+class EnginioReplyBasePrivate : public QObjectPrivate {
 public:
     EnginioClientPrivate *_client;
     QNetworkReply *_nreply;

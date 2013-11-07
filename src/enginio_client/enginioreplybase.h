@@ -60,8 +60,7 @@ class ENGINIOCLIENT_EXPORT EnginioReplyBase: public QObject
     Q_OBJECT
     Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
 
-protected:
-    QScopedPointer<EnginioReplyBasePrivate> d;
+    Q_DECLARE_PRIVATE(EnginioReplyBase)
 
 public:
     enum ErrorTypes {

@@ -120,14 +120,12 @@ EnginioQmlReply::EnginioQmlReply(EnginioQmlClientPrivate *parent, QNetworkReply 
 {}
 
 EnginioQmlReply::~EnginioQmlReply()
-{
-    EnginioQmlReplyPrivate *priv = static_cast<EnginioQmlReplyPrivate *>(d.take());
-    delete priv;
-}
+{}
 
 QJSValue EnginioQmlReply::data() const
 {
-    return static_cast<const EnginioQmlReplyPrivate*>(d.data())->data();
+    Q_D(const EnginioQmlReply);
+    return d->data();
 }
 
 /*!
@@ -135,7 +133,8 @@ QJSValue EnginioQmlReply::data() const
 */
 void EnginioQmlReply::emitFinished()
 {
-    static_cast<EnginioQmlReplyPrivate*>(d.data())->emitFinished();
+    Q_D(EnginioQmlReply);
+    d->emitFinished();
 }
 
 QT_END_NAMESPACE
