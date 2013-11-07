@@ -231,6 +231,22 @@ void tst_EnginioModel::enginio_property()
         QTRY_COMPARE(spyAboutToReset.count(), 1);
         QTRY_COMPARE(spyReset.count(), 1);
     }
+    {
+        // check if assigning the same enginio is not emitting the changed signal
+        EnginioClient client;
+        EnginioModel model;
+
+        QSignalSpy clientSpy(&model, SIGNAL(enginioChanged(EnginioClient*)));
+        QCOMPARE(model.enginio(), (EnginioClient *)0);
+
+        model.setEnginio(&client);
+        QCOMPARE(clientSpy.count(), 1);
+        QCOMPARE(clientSpy[0][0].value<EnginioClient*>(), &client);
+        QCOMPARE(model.enginio(), &client);
+
+        model.setEnginio(&client);
+        QCOMPARE(clientSpy.count(), 1);
+    }
 }
 
 void tst_EnginioModel::query_property()
