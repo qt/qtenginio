@@ -71,6 +71,7 @@ protected:
     void identity_invalid();
     void identity_afterLogout(const QByteArray &headerName);
     void queryRestrictedObject();
+    void userAndPass();
 };
 
 template<class Derived, class Identity>
@@ -593,4 +594,49 @@ void IdentityCommonTest<Derived, Identity>::queryRestrictedObject()
 //        QCOMPARE(results.count(), 0); // we do not have rights to access the object
 //    }
 
+}
+
+template<class Derived, class Identity>
+void IdentityCommonTest<Derived, Identity>::userAndPass()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString userName = "logintest";
+    QString userPass = "logintest";
+
+    Identity identity;
+    QSignalSpy userSpy(&identity, SIGNAL(userChanged(QString)));
+    QSignalSpy passSpy(&identity, SIGNAL(passwordChanged(QString)));
+
+    QCOMPARE(identity.user(), QString());
+    QCOMPARE(identity.password(), QString());
+
+    identity.setUser(userName);
+    QCOMPARE(userSpy.count(), 1);
+    QCOMPARE(passSpy.count(), 0);
+    identity.setPassword(userPass);
+    QCOMPARE(passSpy.count(), 1);
+
+    QCOMPARE(identity.user(), userName);
+    QCOMPARE(identity.password(), userPass);
+
+    // no real change
+    identity.setUser(userName);
+    QCOMPARE(userSpy.count(), 1);
+    identity.setPassword(userPass);
+    QCOMPARE(passSpy.count(), 1);
+
+    QCOMPARE(identity.user(), userName);
+    QCOMPARE(identity.password(), userPass);
+
+    identity.setUser(QString());
+    QCOMPARE(userSpy.count(), 2);
+    QCOMPARE(passSpy.count(), 1);
+    identity.setPassword(QString());
+    QCOMPARE(passSpy.count(), 2);
+
+    QCOMPARE(identity.user(), QString());
+    QCOMPARE(identity.password(), QString());
 }

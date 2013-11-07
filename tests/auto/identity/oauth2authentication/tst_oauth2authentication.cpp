@@ -72,6 +72,7 @@ private slots:
     void identity_invalid() { Base::identity_invalid(); }
     void identity_afterLogout() { Base::identity_afterLogout(QByteArrayLiteral("Authorization")); }
     void queryRestrictedObject() { Base::queryRestrictedObject(); }
+    void userAndPass() { Base::userAndPass(); }
 };
 
 QTEST_MAIN(tst_OAuth2Authentication)
