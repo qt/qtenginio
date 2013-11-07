@@ -50,9 +50,9 @@
 #include <Enginio/private/enginioobjectadaptor_p.h>
 #include <Enginio/private/enginiostring_p.h>
 
-#include <QNetworkAccessManager>
-#include <QPointer>
-#include <QUrl>
+#include <QtNetwork/qnetworkaccessmanager.h>
+#include <QtCore/qpointer.h>
+#include <QtCore/qurl.h>
 #include <QtCore/qjsondocument.h>
 #include <QtNetwork/qnetworkrequest.h>
 #include <QtNetwork/qnetworkreply.h>
