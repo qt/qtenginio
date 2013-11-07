@@ -65,6 +65,8 @@
 #include <QtCore/qlinkedlist.h>
 #include <QtCore/quuid.h>
 
+#include <QtCore/private/qobject_p.h>
+
 QT_BEGIN_NAMESPACE
 
 #define CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, Flags) \
@@ -80,10 +82,10 @@ QT_BEGIN_NAMESPACE
     }
 
 #define CHECK_AND_SET_PATH(Url, Object, Operation) \
-    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientPrivate::Default)
+    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientBasePrivate::Default)
 
 #define CHECK_AND_SET_PATH_WITH_ID(Url, Object, Operation) \
-    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientPrivate::IncludeIdInPath)
+    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientBasePrivate::IncludeIdInPath)
 
 static QByteArray constructErrorMessage(QByteArray msg)
 {
@@ -92,7 +94,7 @@ static QByteArray constructErrorMessage(QByteArray msg)
     return msgBegin + msg + msgEnd;
 }
 
-class ENGINIOCLIENT_EXPORT EnginioClientPrivate
+class ENGINIOCLIENT_EXPORT EnginioClientBasePrivate : public QObjectPrivate
 {
     enum PathOptions { Default, IncludeIdInPath = 1};
 
@@ -218,10 +220,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
     class ReplyFinishedFunctor
     {
-        EnginioClientPrivate *d;
+        EnginioClientBasePrivate *d;
 
     public:
-        ReplyFinishedFunctor(EnginioClientPrivate *enginio)
+        ReplyFinishedFunctor(EnginioClientBasePrivate *enginio)
             : d(enginio)
         {
             Q_ASSERT(d);
@@ -235,11 +237,11 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
     class CallPrepareSessionToken
     {
-        EnginioClientPrivate *_enginio;
+        EnginioClientBasePrivate *_enginio;
         EnginioIdentity *_identity;
 
     public:
-        CallPrepareSessionToken(EnginioClientPrivate *enginio, EnginioIdentity *identity)
+        CallPrepareSessionToken(EnginioClientBasePrivate *enginio, EnginioIdentity *identity)
             : _enginio(enginio)
             , _identity(identity)
         {}
@@ -254,10 +256,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 
     class IdentityInstanceDestroyed
     {
-        EnginioClientPrivate *_enginio;
+        EnginioClientBasePrivate *_enginio;
 
     public:
-        IdentityInstanceDestroyed(EnginioClientPrivate *enginio)
+        IdentityInstanceDestroyed(EnginioClientBasePrivate *enginio)
             : _enginio(enginio)
         {}
         void operator ()()
@@ -269,10 +271,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientPrivate
 protected:
     class AuthenticationStateTrackerFunctor
     {
-        EnginioClientPrivate *_enginio;
+        EnginioClientBasePrivate *_enginio;
         EnginioClientBase::AuthenticationState _state;
     public:
-        AuthenticationStateTrackerFunctor(EnginioClientPrivate *enginio, EnginioClientBase::AuthenticationState state = EnginioClient::NotAuthenticated)
+        AuthenticationStateTrackerFunctor(EnginioClientBasePrivate *enginio, EnginioClientBase::AuthenticationState state = EnginioClient::NotAuthenticated)
             : _enginio(enginio)
             , _state(state)
         {}
@@ -302,12 +304,12 @@ public:
 
     Q_ENUMS(Operation)
 
-    EnginioClientPrivate(EnginioClientBase *client = 0);
-    virtual ~EnginioClientPrivate();
-    static EnginioClientPrivate* get(EnginioClientBase *client) { return client->d_func(); }
-    static const EnginioClientPrivate* get(const EnginioClientBase *client) { return client->d_func(); }
-    static EnginioClient* get(EnginioClientPrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
-    static const EnginioClient* get(const EnginioClientPrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
+    EnginioClientBasePrivate(EnginioClientBase *client = 0);
+    virtual ~EnginioClientBasePrivate();
+    static EnginioClientBasePrivate* get(EnginioClientBase *client) { return client->d_func(); }
+    static const EnginioClientBasePrivate* get(const EnginioClientBase *client) { return client->d_func(); }
+    static EnginioClient* get(EnginioClientBasePrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
+    static const EnginioClient* get(const EnginioClientBasePrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
 
 
     EnginioClientBase *q_ptr;
@@ -633,7 +635,7 @@ public:
     class UploadProgressFunctor
     {
     public:
-        UploadProgressFunctor(EnginioClientPrivate *client, QNetworkReply *reply)
+        UploadProgressFunctor(EnginioClientBasePrivate *client, QNetworkReply *reply)
             : _client(client), _reply(reply)
         {
             Q_ASSERT(_client);
@@ -655,7 +657,7 @@ public:
             emit ereply->progress(progress, total);
         }
     private:
-        EnginioClientPrivate *_client;
+        EnginioClientBasePrivate *_client;
         QNetworkReply *_reply;
     };
 

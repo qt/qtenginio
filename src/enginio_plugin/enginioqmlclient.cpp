@@ -184,7 +184,7 @@ EnginioQmlReply *EnginioQmlClient::search(const QJSValue &query)
     Q_D(EnginioQmlClient);
 
     ObjectAdaptor<QJSValue> o(query, d);
-    QNetworkReply *nreply = d_ptr->query<QJSValue>(o, EnginioClientPrivate::SearchOperation);
+    QNetworkReply *nreply = d->query<QJSValue>(o, EnginioClientBasePrivate::SearchOperation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
     return ereply;
 }
@@ -194,7 +194,7 @@ EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation 
     Q_D(EnginioQmlClient);
 
     ObjectAdaptor<QJSValue> o(query, d);
-    QNetworkReply *nreply = d_ptr->query<QJSValue>(o, static_cast<EnginioClientPrivate::Operation>(operation));
+    QNetworkReply *nreply = d->query<QJSValue>(o, static_cast<EnginioClientBasePrivate::Operation>(operation));
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
     return ereply;
 }
@@ -207,7 +207,7 @@ EnginioQmlReply *EnginioQmlClient::create(const QJSValue &object, const Operatio
         return 0;
 
     ObjectAdaptor<QJSValue> o(object, d);
-    QNetworkReply *nreply = d_ptr->create<QJSValue>(o, operation);
+    QNetworkReply *nreply = d->create<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
 
     return ereply;
@@ -221,7 +221,7 @@ EnginioQmlReply *EnginioQmlClient::update(const QJSValue &object, const Operatio
         return 0;
 
     ObjectAdaptor<QJSValue> o(object, d);
-    QNetworkReply *nreply = d_ptr->update<QJSValue>(o, operation);
+    QNetworkReply *nreply = d->update<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
 
     return ereply;
@@ -235,7 +235,7 @@ EnginioQmlReply *EnginioQmlClient::remove(const QJSValue &object, const Operatio
         return 0;
 
     ObjectAdaptor<QJSValue> o(object, d);
-    QNetworkReply *nreply = d_ptr->remove<QJSValue>(o, operation);
+    QNetworkReply *nreply = d->remove<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
 
     return ereply;
@@ -249,7 +249,7 @@ EnginioQmlReply *EnginioQmlClient::downloadFile(const QJSValue &object)
         return 0;
 
     ObjectAdaptor<QJSValue> o(object, d);
-    QNetworkReply *nreply = d_ptr->downloadFile<QJSValue>(o);
+    QNetworkReply *nreply = d->downloadFile<QJSValue>(o);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
 
     return ereply;
@@ -263,7 +263,7 @@ EnginioQmlReply *EnginioQmlClient::uploadFile(const QJSValue &object, const QUrl
         return 0;
 
     ObjectAdaptor<QJSValue> o(object, d);
-    QNetworkReply *nreply = d_ptr->uploadFile<QJSValue>(o, url);
+    QNetworkReply *nreply = d->uploadFile<QJSValue>(o, url);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
 
     return ereply;

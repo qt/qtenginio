@@ -257,7 +257,7 @@ public:
 
 class ENGINIOCLIENT_EXPORT EnginioModelBasePrivate : public QAbstractItemModelPrivate {
 protected:
-    EnginioClientPrivate *_enginio;
+    EnginioClientBasePrivate *_enginio;
     EnginioClient::Operation _operation;
     EnginioModelBase *q;
     QVector<QMetaObject::Connection> _clientConnections;
@@ -319,7 +319,7 @@ protected:
             _connection = (EnginioBackendConnection*)-1;
         }
 
-        void connectToBackend(EnginioModelBasePrivate *model, EnginioClientPrivate *enginio, const QJsonObject &filter)
+        void connectToBackend(EnginioModelBasePrivate *model, EnginioClientBasePrivate *enginio, const QJsonObject &filter)
         {
             if (qintptr(_connection) == -1)
                 return;
@@ -600,7 +600,7 @@ public:
             // send full query
             QJsonObject query = queryAsJson();
             ObjectAdaptor<QJsonObject> aQuery(query);
-            QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientPrivate::Operation>(_operation));
+            QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientBasePrivate::Operation>(_operation));
             EnginioReplyBase *ereply = _enginio->createReply(nreply);
             if (_canFetchMore)
                 _latestRequestedOffset = query[EnginioString::limit].toDouble();
@@ -891,7 +891,7 @@ public:
         qDebug() << Q_FUNC_INFO << query;
         _latestRequestedOffset += limit;
         ObjectAdaptor<QJsonObject> aQuery(query);
-        QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientPrivate::Operation>(_operation));
+        QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientBasePrivate::Operation>(_operation));
         EnginioReplyBase *ereply = _enginio->createReply(nreply);
         QObject::connect(ereply, &EnginioReplyBase::dataChanged, ereply, &EnginioReplyBase::deleteLater);
         FinishedIncrementalUpdateRequest finishedRequest = { this, query, ereply };
@@ -958,7 +958,7 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
             _clientConnections.clear();
         }
         if (enginio) {
-            _enginio = EnginioClientPrivate::get(const_cast<EnginioClientBase*>(enginio));
+            _enginio = EnginioClientBasePrivate::get(const_cast<EnginioClientBase*>(enginio));
             _clientConnections.append(QObject::connect(enginio, &QObject::destroyed, EnginioDestroyed(this)));
             _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
         } else {

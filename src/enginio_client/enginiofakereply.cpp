@@ -54,7 +54,7 @@ struct FinishedFunctor
     }
 };
 
-EnginioFakeReply::EnginioFakeReply(EnginioClientPrivate *parent, const QByteArray &msg)
+EnginioFakeReply::EnginioFakeReply(EnginioClientBasePrivate *parent, const QByteArray &msg)
     : QNetworkReply(parent->q_ptr)
     , _msg(msg)
 {
@@ -65,7 +65,7 @@ EnginioFakeReply::EnginioFakeReply(QObject *parent, const QByteArray &msg)
     : QNetworkReply(parent)
     , _msg(msg)
 {
-    init(EnginioClientPrivate::prepareNetworkManagerInThread().data());
+    init(EnginioClientBasePrivate::prepareNetworkManagerInThread().data());
 }
 
 void EnginioFakeReply::init(QNetworkAccessManager *qnam)

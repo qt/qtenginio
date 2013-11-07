@@ -523,7 +523,7 @@ void EnginioBackendConnection::onSocketReadyRead()
     \internal
 */
 
-void EnginioBackendConnection::connectToBackend(EnginioClientPrivate* client, const QJsonObject &messageFilter)
+void EnginioBackendConnection::connectToBackend(EnginioClientBasePrivate* client, const QJsonObject &messageFilter)
 {
     Q_ASSERT(client);
     Q_ASSERT(!client->_backendId.isEmpty());
@@ -548,7 +548,7 @@ void EnginioBackendConnection::connectToBackend(EnginioClientPrivate* client, co
 
 void EnginioBackendConnection::connectToBackend(EnginioClient *client, const QJsonObject &messageFilter)
 {
-    connectToBackend(EnginioClientPrivate::get(client), messageFilter);
+    connectToBackend(EnginioClientBasePrivate::get(client), messageFilter);
 }
 
 void EnginioBackendConnection::close(WebSocketCloseStatus closeStatus)

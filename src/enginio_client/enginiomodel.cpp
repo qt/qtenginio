@@ -318,7 +318,7 @@ struct Types {
     typedef EnginioReply Reply;
     typedef EnginioModel Public;
     typedef EnginioClient Client;
-    typedef EnginioClientPrivate ClientPrivate;
+    typedef EnginioClientBasePrivate ClientPrivate;
     typedef QJsonObject Data;
 };
 
@@ -496,7 +496,7 @@ EnginioReply *EnginioModel::remove(int row)
     }
 
     if (unsigned(row) >= unsigned(d->rowCount())) {
-        EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
+        EnginioClientBasePrivate *client = EnginioClientBasePrivate::get(d->enginio());
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(EnginioString::EnginioModel_remove_row_is_out_of_range));
         EnginioReply *ereply = new EnginioReply(client, nreply);
         return ereply;
@@ -523,7 +523,7 @@ EnginioReply *EnginioModel::setProperty(int row, const QString &role, const QVar
     }
 
     if (unsigned(row) >= unsigned(d->rowCount())) {
-        EnginioClientPrivate *client = EnginioClientPrivate::get(d->enginio());
+        EnginioClientBasePrivate *client = EnginioClientBasePrivate::get(d->enginio());
         QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(EnginioString::EnginioModel_setProperty_row_is_out_of_range));
         EnginioReply *ereply = new EnginioReply(client, nreply);
         return ereply;

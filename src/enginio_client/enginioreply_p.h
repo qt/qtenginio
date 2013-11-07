@@ -58,11 +58,11 @@ QT_BEGIN_NAMESPACE
 
 class EnginioReplyBasePrivate : public QObjectPrivate {
 public:
-    EnginioClientPrivate *_client;
+    EnginioClientBasePrivate *_client;
     QNetworkReply *_nreply;
     mutable QByteArray _data;
     bool _delay;
-    EnginioReplyBasePrivate(EnginioClientPrivate *p, QNetworkReply *reply)
+    EnginioReplyBasePrivate(EnginioClientBasePrivate *p, QNetworkReply *reply)
         : _client(p)
         , _nreply(reply)
         , _delay(false)

@@ -53,7 +53,7 @@ QT_BEGIN_NAMESPACE
 
 class QNetworkAccessManager;
 class EnginioIdentity;
-class EnginioClientPrivate;
+class EnginioClientBasePrivate;
 
 class ENGINIOCLIENT_EXPORT EnginioClientBase : public QObject
 {
@@ -78,7 +78,7 @@ public:
     };
     Q_ENUMS(Operation)
 
-    explicit EnginioClientBase(QObject *parent, EnginioClientPrivate *d);
+    explicit EnginioClientBase(QObject *parent, EnginioClientBasePrivate *d);
     ~EnginioClientBase();
 
     Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
@@ -104,10 +104,8 @@ Q_SIGNALS:
     void authenticationStateChanged(const AuthenticationState state);
     void identityChanged(const EnginioIdentity *identity);
 
-protected:
-    QScopedPointer<EnginioClientPrivate> d_ptr;
-    Q_DECLARE_PRIVATE(EnginioClient)
 private:
+    Q_DECLARE_PRIVATE(EnginioClientBase)
     Q_DISABLE_COPY(EnginioClientBase)
 };
 

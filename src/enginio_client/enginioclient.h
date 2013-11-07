@@ -51,13 +51,15 @@ QT_BEGIN_NAMESPACE
 class QNetworkAccessManager;
 class QNetworkReply;
 class EnginioReply;
-
+class EnginioClientPrivate;
 class ENGINIOCLIENT_EXPORT EnginioClient : public EnginioClientBase
 {
     Q_OBJECT
 
     Q_ENUMS(EnginioClientBase::Operation); // TODO remove me QTBUG-33577
     Q_ENUMS(EnginioClientBase::AuthenticationState); // TODO remove me QTBUG-33577
+
+    Q_DECLARE_PRIVATE(EnginioClient)
 public:
     explicit EnginioClient(QObject *parent = 0);
     ~EnginioClient();

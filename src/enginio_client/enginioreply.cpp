@@ -87,7 +87,7 @@ QT_BEGIN_NAMESPACE
 
 class EnginioReplyPrivate: public EnginioReplyBasePrivate {
 public:
-    EnginioReplyPrivate(EnginioClientPrivate *p, QNetworkReply *reply)
+    EnginioReplyPrivate(EnginioClientBasePrivate *p, QNetworkReply *reply)
         : EnginioReplyBasePrivate(p, reply)
     {}
 };
@@ -95,7 +95,7 @@ public:
 /*!
   \internal
 */
-EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
+EnginioReply::EnginioReply(EnginioClientBasePrivate *p, QNetworkReply *reply)
     : EnginioReplyBase(p, reply, new EnginioReplyPrivate(p, reply))
 {
     QObject::connect(this, &EnginioReply::dataChanged, this, &EnginioReplyBase::dataChanged);
@@ -104,7 +104,7 @@ EnginioReply::EnginioReply(EnginioClientPrivate *p, QNetworkReply *reply)
 /*!
   \internal
 */
-EnginioReply::EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv)
+EnginioReply::EnginioReply(EnginioClientBasePrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv)
     : EnginioReplyBase(parent, reply, priv)
 {
     QObject::connect(this, &EnginioReply::dataChanged, this, &EnginioReplyBase::dataChanged);
@@ -306,7 +306,7 @@ QDebug operator<<(QDebug d, const EnginioReply *reply)
     return d.space();
 }
 
-EnginioReplyBase::EnginioReplyBase(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv)
+EnginioReplyBase::EnginioReplyBase(EnginioClientBasePrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv)
     : QObject(*priv, parent->q_ptr)
 {
     parent->registerReply(reply, this);

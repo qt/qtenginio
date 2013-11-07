@@ -173,7 +173,7 @@ QT_BEGIN_NAMESPACE
 
 ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
 
-QNetworkRequest EnginioClientPrivate::prepareRequest(const QUrl &url)
+QNetworkRequest EnginioClientBasePrivate::prepareRequest(const QUrl &url)
 {
     QByteArray requestId = QUuid::createUuid().toByteArray();
 
@@ -193,7 +193,7 @@ QNetworkRequest EnginioClientPrivate::prepareRequest(const QUrl &url)
     return req;
 }
 
-EnginioClientPrivate::EnginioClientPrivate(EnginioClientBase *client) :
+EnginioClientBasePrivate::EnginioClientBasePrivate(EnginioClientBase *client) :
     q_ptr(client),
     _identity(),
     _serviceUrl(EnginioString::apiEnginIo),
@@ -207,14 +207,14 @@ EnginioClientPrivate::EnginioClientPrivate(EnginioClientBase *client) :
                           QStringLiteral("application/json"));
 }
 
-void EnginioClientPrivate::init()
+void EnginioClientBasePrivate::init()
 {
     QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
     QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientBase::Authenticated));
     QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientBase::AuthenticationFailure));
 }
 
-void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
+void EnginioClientBasePrivate::replyFinished(QNetworkReply *nreply)
 {
     EnginioReplyBase *ereply = _replyReplyMap.take(nreply);
 
@@ -260,7 +260,7 @@ void EnginioClientPrivate::replyFinished(QNetworkReply *nreply)
     }
 }
 
-bool EnginioClientPrivate::finishDelayedReplies()
+bool EnginioClientBasePrivate::finishDelayedReplies()
 {
     // search if we can trigger an old finished signal.
     bool needToReevaluate = false;
@@ -281,7 +281,7 @@ bool EnginioClientPrivate::finishDelayedReplies()
     return !_delayedReplies.isEmpty();
 }
 
-EnginioClientPrivate::~EnginioClientPrivate()
+EnginioClientBasePrivate::~EnginioClientBasePrivate()
 {
     foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
         QObject::disconnect(identityConnection);
@@ -289,6 +289,13 @@ EnginioClientPrivate::~EnginioClientPrivate()
         QObject::disconnect(connection);
     QObject::disconnect(_networkManagerConnection);
 }
+
+class EnginioClientPrivate: public EnginioClientBasePrivate {
+public:
+    EnginioClientPrivate(EnginioClientBase *client)
+        : EnginioClientBasePrivate(client)
+    {}
+};
 
 /*!
   \brief Creates a new EnginioClient with \a parent as QObject parent.
@@ -320,13 +327,13 @@ EnginioClient::~EnginioClient()
  */
 QByteArray EnginioClientBase::backendId() const
 {
-    Q_D(const EnginioClient);
+    Q_D(const EnginioClientBase);
     return d->_backendId;
 }
 
 void EnginioClientBase::setBackendId(const QByteArray &backendId)
 {
-    Q_D(EnginioClient);
+    Q_D(EnginioClientBase);
     if (d->_backendId != backendId) {
         d->_backendId = backendId;
         d->_request.setRawHeader("Enginio-Backend-Id", d->_backendId);
@@ -353,7 +360,7 @@ void EnginioClientBase::setBackendId(const QByteArray &backendId)
 */
 QUrl EnginioClientBase::serviceUrl() const
 {
-    Q_D(const EnginioClient);
+    Q_D(const EnginioClientBase);
     return d->_serviceUrl;
 }
 
@@ -362,7 +369,7 @@ QUrl EnginioClientBase::serviceUrl() const
 */
 void EnginioClientBase::setServiceUrl(const QUrl &serviceUrl)
 {
-    Q_D(EnginioClient);
+    Q_D(EnginioClientBase);
     if (d->_serviceUrl != serviceUrl) {
         d->_serviceUrl = serviceUrl;
         emit serviceUrlChanged(serviceUrl);
@@ -377,7 +384,7 @@ void EnginioClientBase::setServiceUrl(const QUrl &serviceUrl)
 */
 QNetworkAccessManager *EnginioClientBase::networkManager() const
 {
-    Q_D(const EnginioClient);
+    Q_D(const EnginioClientBase);
     return d->networkManager();
 }
 
@@ -418,7 +425,7 @@ EnginioReply *EnginioClient::search(const QJsonObject &query)
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->query<QJsonObject>(query, EnginioClientPrivate::SearchOperation);
+    QNetworkReply *nreply = d->query<QJsonObject>(query, EnginioClientBasePrivate::SearchOperation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     return ereply;
 }
@@ -439,7 +446,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->query<QJsonObject>(query, static_cast<EnginioClientPrivate::Operation>(operation));
+    QNetworkReply *nreply = d->query<QJsonObject>(query, static_cast<EnginioClientBasePrivate::Operation>(operation));
     EnginioReply *ereply = new EnginioReply(d, nreply);
 
     return ereply;
@@ -540,13 +547,13 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
 */
 EnginioIdentity *EnginioClientBase::identity() const
 {
-    Q_D(const EnginioClient);
+    Q_D(const EnginioClientBase);
     return d->identity();
 }
 
 void EnginioClientBase::setIdentity(EnginioIdentity *identity)
 {
-    Q_D(EnginioClient);
+    Q_D(EnginioClientBase);
     if (d->_identity == identity)
         return;
     d->setIdentity(identity);
@@ -611,15 +618,15 @@ EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
 
 Q_GLOBAL_STATIC(QThreadStorage<QWeakPointer<QNetworkAccessManager> >, NetworkManager)
 
-void EnginioClientPrivate::assignNetworkManager()
+void EnginioClientBasePrivate::assignNetworkManager()
 {
     Q_ASSERT(!_networkManager);
 
     _networkManager = prepareNetworkManagerInThread();
-    _networkManagerConnection = QObject::connect(_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientPrivate::ReplyFinishedFunctor(this));
+    _networkManagerConnection = QObject::connect(_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientBasePrivate::ReplyFinishedFunctor(this));
 }
 
-QSharedPointer<QNetworkAccessManager> EnginioClientPrivate::prepareNetworkManagerInThread()
+QSharedPointer<QNetworkAccessManager> EnginioClientBasePrivate::prepareNetworkManagerInThread()
 {
     QSharedPointer<QNetworkAccessManager> qnam;
     qnam = NetworkManager->localData().toStrongRef();
@@ -635,7 +642,7 @@ QSharedPointer<QNetworkAccessManager> EnginioClientPrivate::prepareNetworkManage
 
 EnginioClientBase::AuthenticationState EnginioClientBase::authenticationState() const
 {
-    Q_D(const EnginioClient);
+    Q_D(const EnginioClientBase);
     return d->authenticationState();
 }
 
@@ -646,14 +653,13 @@ EnginioClientBase::AuthenticationState EnginioClientBase::authenticationState() 
 */
 bool EnginioClientBase::finishDelayedReplies()
 {
-    Q_D(EnginioClient);
+    Q_D(EnginioClientBase);
     return d->finishDelayedReplies();
 }
 
-EnginioClientBase::EnginioClientBase(QObject *parent, EnginioClientPrivate *d)
+EnginioClientBase::EnginioClientBase(QObject *parent, EnginioClientBasePrivate *d)
 
-    : QObject(parent)
-    , d_ptr(d)
+    : QObject(*d, parent)
 {
     qRegisterMetaType<EnginioClient*>();
     qRegisterMetaType<EnginioModel*>();
@@ -667,32 +673,32 @@ EnginioClientBase::EnginioClientBase(QObject *parent, EnginioClientPrivate *d)
 EnginioClientBase::~EnginioClientBase()
 {}
 
-void EnginioClientPrivate::emitSessionTerminated() const
+void EnginioClientBasePrivate::emitSessionTerminated() const
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionTerminated();
 }
 
-void EnginioClientPrivate::emitSessionAuthenticated(EnginioReplyBase *reply)
+void EnginioClientBasePrivate::emitSessionAuthenticated(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticated(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientPrivate::emitSessionAuthenticationError(EnginioReplyBase *reply)
+void EnginioClientBasePrivate::emitSessionAuthenticationError(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticationError(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientPrivate::emitFinished(EnginioReplyBase *reply)
+void EnginioClientBasePrivate::emitFinished(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->finished(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientPrivate::emitError(EnginioReplyBase *reply)
+void EnginioClientBasePrivate::emitError(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->error(static_cast<EnginioReply*>(reply));
 }
 
-EnginioReplyBase *EnginioClientPrivate::createReply(QNetworkReply *nreply)
+EnginioReplyBase *EnginioClientBasePrivate::createReply(QNetworkReply *nreply)
 {
     return new EnginioReply(this, nreply);
 }

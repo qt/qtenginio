@@ -133,7 +133,7 @@ void tst_Files::fileUploadDownload()
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     if (chunkSize > 0) {
-        EnginioClientPrivate *clientPrivate = EnginioClientPrivate::get(&client);
+        EnginioClientBasePrivate *clientPrivate = EnginioClientBasePrivate::get(&client);
         clientPrivate->_uploadChunkSize = chunkSize;
     }
 

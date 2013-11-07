@@ -99,11 +99,11 @@ class EnginioUserPassAuthenticationPrivate : public EnginioIdentityPrivate
     template<typename T>
     class SessionSetterFunctor
     {
-        EnginioClientPrivate *_enginio;
+        EnginioClientBasePrivate *_enginio;
         QNetworkReply *_reply;
         EnginioUserPassAuthenticationPrivate *_auth;
     public:
-        SessionSetterFunctor(EnginioClientPrivate *enginio, QNetworkReply *reply, EnginioUserPassAuthenticationPrivate *auth)
+        SessionSetterFunctor(EnginioClientBasePrivate *enginio, QNetworkReply *reply, EnginioUserPassAuthenticationPrivate *auth)
             : _enginio(enginio)
             , _reply(reply)
             , _auth(auth)
@@ -146,7 +146,7 @@ public:
     }
 
     template<typename Derived>
-    void prepareSessionToken(EnginioClientPrivate *enginio)
+    void prepareSessionToken(EnginioClientBasePrivate *enginio)
     {
         cleanupConnections();
 
@@ -157,7 +157,7 @@ public:
     }
 
     template<typename Derived>
-    void removeSessionToken(EnginioClientPrivate *enginio)
+    void removeSessionToken(EnginioClientBasePrivate *enginio)
     {
         cleanupConnections();
         thisAs<Derived>()->cleanupClient(enginio);
@@ -169,7 +169,7 @@ public:
 class EnginioOAuth2AuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
 {
 public:
-    QNetworkReply *makeRequest(EnginioClientPrivate *enginio)
+    QNetworkReply *makeRequest(EnginioClientBasePrivate *enginio)
     {
         QByteArray data;
         {
@@ -190,14 +190,14 @@ public:
         return enginio->networkManager()->post(request, data);
     }
 
-    void proccessToken(EnginioClientPrivate *enginio, EnginioReplyBase *ereply)
+    void proccessToken(EnginioClientBasePrivate *enginio, EnginioReplyBase *ereply)
     {
         QByteArray header;
         header = EnginioString::Bearer_ + ereply->data()[EnginioString::access_token].toString().toUtf8();
         enginio->_request.setRawHeader(EnginioString::Authorization, header);
     }
 
-    void cleanupClient(EnginioClientPrivate *enginio)
+    void cleanupClient(EnginioClientBasePrivate *enginio)
     {
         enginio->_request.setRawHeader(EnginioString::Authorization, QByteArray());
     }
@@ -291,7 +291,7 @@ void EnginioOAuth2Authentication::setPassword(const QString &password)
 /*!
   \internal
 */
-void EnginioOAuth2Authentication::prepareSessionToken(EnginioClientPrivate *enginio)
+void EnginioOAuth2Authentication::prepareSessionToken(EnginioClientBasePrivate *enginio)
 {
     Q_ASSERT(enginio);
     Q_ASSERT(enginio->identity());
@@ -302,7 +302,7 @@ void EnginioOAuth2Authentication::prepareSessionToken(EnginioClientPrivate *engi
 /*!
   \internal
 */
-void EnginioOAuth2Authentication::removeSessionToken(EnginioClientPrivate *enginio)
+void EnginioOAuth2Authentication::removeSessionToken(EnginioClientBasePrivate *enginio)
 {
     Q_ASSERT(enginio);
     Q_ASSERT(enginio->identity());

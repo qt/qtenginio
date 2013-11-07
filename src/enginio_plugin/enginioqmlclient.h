@@ -75,7 +75,7 @@ Q_SIGNALS:
     void error(const QJSValue &reply);
 
 private:
-    Q_DECLARE_PRIVATE(EnginioQmlClient);
+    Q_DECLARE_PRIVATE(EnginioQmlClient)
 };
 
 QT_END_NAMESPACE

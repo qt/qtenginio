@@ -51,7 +51,7 @@ QT_BEGIN_NAMESPACE
 
 class EnginioClient;
 class EnginioReplyPrivate;
-class EnginioClientPrivate;
+class EnginioClientBasePrivate;
 
 class ENGINIOCLIENT_EXPORT EnginioReply : public EnginioReplyBase
 {
@@ -60,7 +60,7 @@ class ENGINIOCLIENT_EXPORT EnginioReply : public EnginioReplyBase
 public:
     Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
 
-    explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply);
+    explicit EnginioReply(EnginioClientBasePrivate *parent, QNetworkReply *reply);
     virtual ~EnginioReply();
 
     QJsonObject data() const Q_REQUIRED_RESULT;
@@ -70,7 +70,7 @@ Q_SIGNALS:
     void dataChanged();
 
 protected:
-    explicit EnginioReply(EnginioClientPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
+    explicit EnginioReply(EnginioClientBasePrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
     virtual void emitFinished();
 
 private:

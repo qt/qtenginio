@@ -45,7 +45,7 @@
 #include <Enginio/enginioclient_global.h>
 #include <QtNetwork/qnetworkreply.h>
 
-class EnginioClientPrivate;
+class EnginioClientBasePrivate;
 class EnginioReply;
 class ENGINIOCLIENT_EXPORT EnginioDummyReply : public QNetworkReply
 {
