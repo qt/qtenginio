@@ -628,12 +628,6 @@ public:
     void assignNetworkManager();
     static QSharedPointer<QNetworkAccessManager> prepareNetworkManagerInThread() Q_REQUIRED_RESULT;
 
-    bool isSignalConnected(const QMetaMethod &signal) const Q_REQUIRED_RESULT
-    {
-        Q_Q(const EnginioClientBase);
-        return q->isSignalConnected(signal);
-    }
-
     class UploadProgressFunctor
     {
     public:
