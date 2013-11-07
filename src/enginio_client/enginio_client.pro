@@ -3,6 +3,8 @@ QT += network
 DEFINES += ENGINIOCLIENT_LIBRARY
 MODULE = enginio
 
+include(../src.pri)
+
 load(qt_module)
 
 SOURCES += \

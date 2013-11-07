@@ -4,6 +4,8 @@ TARGETPATH = Enginio
 
 QT += qml quick enginio enginio-private
 
+include(../src.pri)
+
 load(qml_plugin)
 
 TARGET = enginioplugin
