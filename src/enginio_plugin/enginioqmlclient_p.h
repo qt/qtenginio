@@ -55,10 +55,11 @@ class EnginioQmlClientPrivate : public EnginioClientBasePrivate
     QJSEngine *_engine;
     QJSValue _stringify;
     QJSValue _parse;
+
+    Q_DECLARE_PUBLIC(EnginioQmlClient)
 public:
-    EnginioQmlClientPrivate(EnginioClientBase *client)
-        : EnginioClientBasePrivate(client)
-        , _engine(0)
+    EnginioQmlClientPrivate()
+        : _engine(0)
     {}
 
     static EnginioQmlClientPrivate* get(EnginioClientBase *client) { return static_cast<EnginioQmlClientPrivate*>(EnginioClientBasePrivate::get(client)); }

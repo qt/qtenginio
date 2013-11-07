@@ -193,8 +193,7 @@ QNetworkRequest EnginioClientBasePrivate::prepareRequest(const QUrl &url)
     return req;
 }
 
-EnginioClientBasePrivate::EnginioClientBasePrivate(EnginioClientBase *client) :
-    q_ptr(client),
+EnginioClientBasePrivate::EnginioClientBasePrivate() :
     _identity(),
     _serviceUrl(EnginioString::apiEnginIo),
     _networkManager(),
@@ -292,8 +291,7 @@ EnginioClientBasePrivate::~EnginioClientBasePrivate()
 
 class EnginioClientPrivate: public EnginioClientBasePrivate {
 public:
-    EnginioClientPrivate(EnginioClientBase *client)
-        : EnginioClientBasePrivate(client)
+    EnginioClientPrivate()
     {}
 };
 
@@ -301,7 +299,7 @@ public:
   \brief Creates a new EnginioClient with \a parent as QObject parent.
 */
 EnginioClient::EnginioClient(QObject *parent)
-    : EnginioClientBase(parent, new EnginioClientPrivate(this))
+    : EnginioClientBase(parent, new EnginioClientPrivate)
 {
     Q_D(EnginioClient);
     d->init();

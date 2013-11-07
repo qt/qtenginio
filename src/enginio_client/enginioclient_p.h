@@ -268,6 +268,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientBasePrivate : public QObjectPrivate
         }
     };
 
+    Q_DECLARE_PUBLIC(EnginioClientBase)
 protected:
     class AuthenticationStateTrackerFunctor
     {
@@ -304,15 +305,13 @@ public:
 
     Q_ENUMS(Operation)
 
-    EnginioClientBasePrivate(EnginioClientBase *client = 0);
+    EnginioClientBasePrivate();
     virtual ~EnginioClientBasePrivate();
     static EnginioClientBasePrivate* get(EnginioClientBase *client) { return client->d_func(); }
     static const EnginioClientBasePrivate* get(const EnginioClientBase *client) { return client->d_func(); }
     static EnginioClient* get(EnginioClientBasePrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
     static const EnginioClient* get(const EnginioClientBasePrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
 
-
-    EnginioClientBase *q_ptr;
     QByteArray _backendId;
     EnginioIdentity *_identity;
 
@@ -340,10 +339,11 @@ public:
 
     void setAuthenticationState(const EnginioClientBase::AuthenticationState state)
     {
+        Q_Q(EnginioClientBase);
         if (_authenticationState == state)
             return;
         _authenticationState = state;
-        emit q_ptr->authenticationStateChanged(state);
+        emit q->authenticationStateChanged(state);
     }
 
     EnginioClientBase::AuthenticationState authenticationState() const Q_REQUIRED_RESULT
@@ -371,6 +371,7 @@ public:
 
     void setIdentity(EnginioIdentity *identity)
     {
+        Q_Q(EnginioClientBase);
         foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
             QObject::disconnect(identityConnection);
         _identityConnections.clear();
@@ -384,12 +385,12 @@ public:
         _identity = identity;
         CallPrepareSessionToken callPrepareSessionToken(this, identity);
         if (_backendId.isEmpty()) {
-            _identityConnections.append(QObject::connect(q_ptr, &EnginioClientBase::backendIdChanged, callPrepareSessionToken));
+            _identityConnections.append(QObject::connect(q, &EnginioClientBase::backendIdChanged, callPrepareSessionToken));
         } else
             identity->prepareSessionToken(this);
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::dataChanged, callPrepareSessionToken));
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::aboutToDestroy, IdentityInstanceDestroyed(this)));
-        emit q_ptr->identityChanged(identity);
+        emit q->identityChanged(identity);
     }
 
     QNetworkReply *customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data)
@@ -629,7 +630,8 @@ public:
 
     bool isSignalConnected(const QMetaMethod &signal) const Q_REQUIRED_RESULT
     {
-        return q_ptr->isSignalConnected(signal);
+        Q_Q(const EnginioClientBase);
+        return q->isSignalConnected(signal);
     }
 
     class UploadProgressFunctor
