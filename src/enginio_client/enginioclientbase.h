@@ -78,7 +78,6 @@ public:
     };
     Q_ENUMS(Operation)
 
-    explicit EnginioClientBase(QObject *parent, EnginioClientBasePrivate *d);
     ~EnginioClientBase();
 
     Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
@@ -103,6 +102,9 @@ Q_SIGNALS:
     void serviceUrlChanged(const QUrl& url);
     void authenticationStateChanged(const AuthenticationState state);
     void identityChanged(const EnginioIdentity *identity);
+
+protected:
+    explicit EnginioClientBase(QObject *parent, EnginioClientBasePrivate *d);
 
 private:
     Q_DECLARE_PRIVATE(EnginioClientBase)

@@ -655,6 +655,9 @@ bool EnginioClientBase::finishDelayedReplies()
     return d->finishDelayedReplies();
 }
 
+/*!
+  \internal
+*/
 EnginioClientBase::EnginioClientBase(QObject *parent, EnginioClientBasePrivate *d)
 
     : QObject(*d, parent)
