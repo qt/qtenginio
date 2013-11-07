@@ -5,6 +5,7 @@ contains(CONFIG, coverage) {
     QMAKE_LDFLAGS += -fprofile-arcs -ftest-coverage --coverage
     CXXFLAGS += -fprofile-arcs -ftest-coverage --coverage
     LIBS += -lgcov
+    DEFINES += QT_NO_DEBUG
   } else {
     warning("Test coverage is supported only through gcc")
   }
