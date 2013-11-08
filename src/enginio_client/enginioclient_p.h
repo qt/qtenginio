@@ -87,13 +87,6 @@ QT_BEGIN_NAMESPACE
 #define CHECK_AND_SET_PATH_WITH_ID(Url, Object, Operation) \
     CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientBasePrivate::IncludeIdInPath)
 
-static QByteArray constructErrorMessage(QByteArray msg)
-{
-    static QByteArray msgBegin = QByteArrayLiteral("{\"errors\": [{\"message\": \"");
-    static QByteArray msgEnd = QByteArrayLiteral("\",\"reason\": \"BadRequest\"}]}");
-    return msgBegin + msg + msgEnd;
-}
-
 class ENGINIOCLIENT_EXPORT EnginioClientBasePrivate : public QObjectPrivate
 {
     enum PathOptions { Default, IncludeIdInPath = 1};
@@ -311,6 +304,8 @@ public:
     static const EnginioClientBasePrivate* get(const EnginioClientBase *client) { return client->d_func(); }
     static EnginioClient* get(EnginioClientBasePrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
     static const EnginioClient* get(const EnginioClientBasePrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
+
+    static QByteArray constructErrorMessage(const QByteArray &msg);
 
     QByteArray _backendId;
     EnginioIdentity *_identity;

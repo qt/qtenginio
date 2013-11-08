@@ -703,4 +703,11 @@ EnginioReplyBase *EnginioClientBasePrivate::createReply(QNetworkReply *nreply)
     return new EnginioReply(this, nreply);
 }
 
+QByteArray EnginioClientBasePrivate::constructErrorMessage(const QByteArray &msg)
+{
+    static QByteArray msgBegin = QByteArrayLiteral("{\"errors\": [{\"message\": \"");
+    static QByteArray msgEnd = QByteArrayLiteral("\",\"reason\": \"BadRequest\"}]}");
+    return msgBegin + msg + msgEnd;
+}
+
 QT_END_NAMESPACE

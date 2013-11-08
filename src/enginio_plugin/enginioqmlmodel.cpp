@@ -226,7 +226,7 @@ EnginioQmlReply *EnginioQmlModel::remove(int row)
 
     if (unsigned(row) >= unsigned(d->rowCount())) {
         EnginioQmlClientPrivate *client = EnginioQmlClientPrivate::get(d->enginio());
-        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(EnginioString::EnginioQmlModel_remove_row_is_out_of_range));
+        QNetworkReply *nreply = new EnginioFakeReply(client, EnginioQmlClientPrivate::constructErrorMessage(EnginioString::EnginioQmlModel_remove_row_is_out_of_range));
         EnginioQmlReply *ereply = new EnginioQmlReply(client, nreply);
         return ereply;
     }
@@ -244,7 +244,7 @@ EnginioQmlReply *EnginioQmlModel::setProperty(int row, const QString &role, cons
 
     if (unsigned(row) >= unsigned(d->rowCount())) {
         EnginioQmlClientPrivate *client = EnginioQmlClientPrivate::get(d->enginio());
-        QNetworkReply *nreply = new EnginioFakeReply(client, constructErrorMessage(EnginioString::EnginioQmlModel_setProperty_row_is_out_of_range));
+        QNetworkReply *nreply = new EnginioFakeReply(client, EnginioQmlClientPrivate::constructErrorMessage(EnginioString::EnginioQmlModel_setProperty_row_is_out_of_range));
         EnginioQmlReply *ereply = new EnginioQmlReply(client, nreply);
         return ereply;
     }

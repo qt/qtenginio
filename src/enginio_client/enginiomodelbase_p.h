@@ -474,7 +474,7 @@ public:
 
         void markAsError(QByteArray msg)
         {
-            EnginioFakeReply *nreply = new EnginioFakeReply(_reply, constructErrorMessage(msg));
+            EnginioFakeReply *nreply = new EnginioFakeReply(_reply, EnginioClientBasePrivate::constructErrorMessage(msg));
             _reply->setNetworkReply(nreply);
         }
 
@@ -778,7 +778,7 @@ public:
                 return setDataDelyed(row, value, role, oldObject);
             return setDataNow(row, value, role, oldObject, id);
         }
-        QNetworkReply *nreply = new EnginioFakeReply(_enginio, constructErrorMessage(EnginioString::EnginioModel_Trying_to_update_an_object_with_unknown_role));
+        QNetworkReply *nreply = new EnginioFakeReply(_enginio, EnginioClientBasePrivate::constructErrorMessage(EnginioString::EnginioModel_Trying_to_update_an_object_with_unknown_role));
         EnginioReplyBase *ereply = _enginio->createReply(nreply);
         return ereply;
     }
