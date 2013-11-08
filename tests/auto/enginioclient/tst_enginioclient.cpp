@@ -1113,11 +1113,13 @@ void tst_EnginioClient::backendFakeReply()
 
     QVERIFY(client.update(empty, EnginioClient::ObjectOperation));
     QVERIFY(client.update(empty, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.update(objectTypeOnly, EnginioClient::ObjectOperation));
     QVERIFY(client.update(objectTypeOnly, EnginioClient::ObjectAclOperation));
     QVERIFY(client.update(empty, EnginioClient::UsergroupMembersOperation));
 
     QVERIFY(client.remove(empty, EnginioClient::ObjectOperation));
     QVERIFY(client.remove(empty, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.remove(objectTypeOnly, EnginioClient::ObjectOperation));
     QVERIFY(client.remove(objectTypeOnly, EnginioClient::ObjectAclOperation));
     QVERIFY(client.remove(empty, EnginioClient::UsergroupMembersOperation));
 
@@ -1128,7 +1130,7 @@ void tst_EnginioClient::backendFakeReply()
     QVERIFY(client.downloadFile(empty));
     QVERIFY(client.uploadFile(empty, QUrl()));
 
-    QTRY_COMPARE(spyClientFinished.count(), 17);
+    QTRY_COMPARE(spyClientFinished.count(), 19);
     QCOMPARE(spyClientError.count(), spyClientFinished.count());
     QCOMPARE(spyReplyFinished.count(), spyClientFinished.count());
 
