@@ -466,7 +466,7 @@ public:
         if (operation != EnginioClientBase::ObjectAclOperation)
             reply = networkManager()->deleteResource(req);
         else {
-            data = dataPropertyName.isEmpty() ? object.toJson() : object[dataPropertyName].toJson();
+            data = object[dataPropertyName].toJson();
             QBuffer *buffer = new QBuffer();
             buffer->setData(data);
             buffer->open(QIODevice::ReadOnly);
