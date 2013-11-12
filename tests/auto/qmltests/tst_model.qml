@@ -230,6 +230,8 @@ Item {
             var count = modelQuery.resetCount
             modelQuery.operation = operation
             modelQuery.query = query
+            // re-assigning the same object should not trigger the property change
+            modelQuery.query = query
             modelQuery.enginio = enginioClient
             tryCompare(modelQuery, "resetCount", ++count, 10000)
         }
