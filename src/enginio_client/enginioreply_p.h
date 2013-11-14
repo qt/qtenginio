@@ -57,6 +57,7 @@
 QT_BEGIN_NAMESPACE
 
 class EnginioReplyBasePrivate : public QObjectPrivate {
+    Q_DECLARE_PUBLIC(EnginioReplyBase)
 public:
     EnginioClientBasePrivate *_client;
     QNetworkReply *_nreply;
@@ -149,6 +150,9 @@ public:
         if (!pData().isEmpty())
             qDebug() << "Reply Data:" << pData();
     }
+
+    void setNetworkReply(QNetworkReply *reply);
+    void swapNetworkReply(EnginioReplyBasePrivate *other);
 };
 
 QT_END_NAMESPACE

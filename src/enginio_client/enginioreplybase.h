@@ -91,7 +91,7 @@ public:
     void setDelayFinishedSignal(bool delay);
     bool delayFinishedSignal() Q_REQUIRED_RESULT;
 
-    void swapNetworkReply(EnginioReplyBase *reply);
+    void swapNetworkReply(EnginioReplyBase *other);
     void setNetworkReply(QNetworkReply *reply);
     virtual void emitFinished() = 0;
     QJsonObject data() const Q_REQUIRED_RESULT;

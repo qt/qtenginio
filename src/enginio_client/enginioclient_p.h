@@ -359,6 +359,11 @@ public:
         _replyReplyMap[nreply] = ereply;
     }
 
+    void unregisterReply(QNetworkReply *nreply)
+    {
+        _replyReplyMap.remove(nreply);
+    }
+
     EnginioIdentity *identity() const Q_REQUIRED_RESULT
     {
         return _identity;

@@ -173,33 +173,45 @@ void EnginioReply::emitFinished()
 void EnginioReplyBase::setNetworkReply(QNetworkReply *reply)
 {
     Q_D(EnginioReplyBase);
-    d->_client->_replyReplyMap.remove(d->_nreply);
+    d->setNetworkReply(reply);
+}
+
+void EnginioReplyBasePrivate::setNetworkReply(QNetworkReply *reply)
+{
+    Q_Q(EnginioReplyBase);
+    _client->unregisterReply(_nreply);
 
     if (gEnableEnginioDebugInfo)
-        d->_client->_requestData.remove(d->_nreply);
+        _client->_requestData.remove(_nreply);
 
-    d->_nreply->deleteLater();
-    d->_nreply = reply;
-    d->_data = QByteArray();
-    d->_client->registerReply(reply, this);
+    _nreply->deleteLater();
+    _nreply = reply;
+    _data = QByteArray();
+
+    _client->registerReply(reply, q);
 }
 
 /*!
   \internal
 */
-void EnginioReplyBase::swapNetworkReply(EnginioReplyBase *reply)
+void EnginioReplyBase::swapNetworkReply(EnginioReplyBase *other)
 {
     Q_D(EnginioReplyBase);
-    // FIXME it is ugly
-    d->_client->_replyReplyMap.remove(d->_nreply);
-    reply->d_func()->_client->_replyReplyMap.remove(reply->d_func()->_nreply);
+    d->swapNetworkReply(other->d_func());
+}
 
-    qSwap(d->_nreply, reply->d_func()->_nreply);
+void EnginioReplyBasePrivate::swapNetworkReply(EnginioReplyBasePrivate *other)
+{
+    Q_Q(EnginioReplyBase);
+    Q_ASSERT(other->_client == _client);
+    _client->unregisterReply(_nreply);
+    _client->unregisterReply(other->_nreply);
 
-    d->_data = reply->d_func()->_data = QByteArray();
+    qSwap(_nreply, other->_nreply);
+    _data = other->_data = QByteArray();
 
-    d->_client->registerReply(d->_nreply, this);
-    reply->d_func()->_client->registerReply(reply->d_func()->_nreply, reply);
+    _client->registerReply(_nreply, q);
+    _client->registerReply(other->_nreply, other->q_func());
 }
 
 void EnginioReplyBase::dumpDebugInfo() const
