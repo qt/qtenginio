@@ -324,8 +324,9 @@ struct Types {
 
 } // namespace
 
-struct EnginioModelPrivate: EnginioModelPrivateT<EnginioModelPrivate, Types>
+class EnginioModelPrivate: public EnginioModelPrivateT<EnginioModelPrivate, Types>
 {
+public:
     typedef EnginioModelPrivateT<EnginioModelPrivate, Types> Base;
 
     EnginioModelPrivate(EnginioModelBase *pub)

@@ -131,8 +131,9 @@ struct Types
 
 } // namespace
 
-struct EnginioQmlModelPrivate : public EnginioModelPrivateT<EnginioQmlModelPrivate, Types>
+class EnginioQmlModelPrivate : public EnginioModelPrivateT<EnginioQmlModelPrivate, Types>
 {
+public:
     typedef EnginioModelPrivateT<EnginioQmlModelPrivate, Types> Base;
 
     QJSValue convert(const QJsonObject &object) const
