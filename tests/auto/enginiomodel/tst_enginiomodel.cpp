@@ -1531,6 +1531,7 @@ void tst_EnginioModel::deleteReply()
 
     replies.append(model.append(newUser));
     replies.append(model.append(newUser));
+    replies.append(model.remove(model.rowCount() - 1));
 
     QSet<QString> requests;
     requests.reserve(replies.count());

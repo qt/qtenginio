@@ -322,6 +322,7 @@ EnginioReplyBase::~EnginioReplyBase()
         QObject::connect(d->_nreply, &QNetworkReply::finished, d->_nreply, &QNetworkReply::deleteLater);
         d->_client->unregisterReply(d->_nreply);
         d->_nreply->setParent(d->_nreply->manager());
+        d->_nreply->abort();
     }
 }
 

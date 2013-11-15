@@ -40,6 +40,7 @@
 ****************************************************************************/
 
 #include <Enginio/private/enginiodummyreply_p.h>
+#include <Enginio/private/enginioclient_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -48,7 +49,25 @@ EnginioDummyReply::EnginioDummyReply(QObject *parent)
 {
 }
 
-void EnginioDummyReply::abort() { Q_UNIMPLEMENTED(); }
+struct EnginioDummyReplyAbort
+{
+    QNetworkAccessManager *_qnam;
+    EnginioDummyReply *_reply;
+    void operator ()()
+    {
+        _qnam->finished(_reply);
+    }
+};
+
+void EnginioDummyReply::abort()
+{
+    QNetworkReply::close();
+    setError(OperationCanceledError, tr("Operation canceled"));
+    setFinished(true);
+    EnginioDummyReplyAbort fin = {EnginioClientConnectionPrivate::prepareNetworkManagerInThread().data(), this};
+    QObject::connect(this, &EnginioDummyReply::finished, fin);
+    QMetaObject::invokeMethod(this, "finished", Qt::QueuedConnection);
+}
 
 bool EnginioDummyReply::isSequential() const
 {
