@@ -184,7 +184,13 @@ void EnginioReplyBasePrivate::setNetworkReply(QNetworkReply *reply)
     if (gEnableEnginioDebugInfo)
         _client->_requestData.remove(_nreply);
 
-    _nreply->deleteLater();
+    if (!_nreply->isFinished()) {
+        _nreply->setParent(_nreply->manager());
+        QObject::connect(_nreply, &QNetworkReply::finished, _nreply, &QNetworkReply::deleteLater);
+        _nreply->abort();
+    } else {
+        _nreply->deleteLater();
+    }
     _nreply = reply;
     _data = QByteArray();
 
