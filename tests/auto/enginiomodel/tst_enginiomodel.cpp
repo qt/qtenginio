@@ -73,6 +73,7 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void ctor();
+    void deleteReply();
     void enginio_property();
     void query_property();
     void operation_property();
@@ -1484,6 +1485,75 @@ void tst_EnginioModel::setData()
 
     // make a correct setData call
     QVERIFY(model.setData(model.index(0), QString::fromLatin1("1111"), Model::TitleRole));
+}
+
+struct DeleteReplyCountHelper
+{
+    QSet<QString> &requests;
+    int &counter;
+    void operator ()(QNetworkReply *reply)
+    {
+        QString requestId(reply->request().rawHeader("X-Request-Id"));
+        if (requests.contains(requestId))
+            ++counter;
+    }
+};
+
+void tst_EnginioModel::deleteReply()
+{
+    // This test may be a bit fragile, the main point of it is to test if
+    // directly deleting a reply is not causing a crash. We do not do
+    // any guaranties about the behavior. The test relays on fact that QNetworkReply
+    // is not deleted if not finished, so we can wait for the finish signal and
+    // compare request id, if we catch all then we are sure that everything went ok
+    // if not we can not say anything.
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QJsonObject query;
+    query.insert("limit", 1);
+
+    EnginioModel model;
+    model.disableNotifications();
+    model.setOperation(EnginioClient::UserOperation);
+    model.setQuery(query);
+    model.setEnginio(&client);
+
+    QJsonObject newUser;
+    newUser.insert("username", QString::fromUtf8("fool"));
+    newUser.insert("password", QString::fromUtf8("foolPass"));
+
+    QNetworkAccessManager *qnam = client.networkManager();
+    QVector<EnginioReply *> replies;
+
+    QTRY_VERIFY(model.rowCount() > 0);
+
+    replies.append(model.append(newUser));
+    replies.append(model.append(newUser));
+
+    QSet<QString> requests;
+    requests.reserve(replies.count());
+    foreach (EnginioReply *r, replies) {
+        requests.insert(r->requestId());
+    }
+
+    int counter = 0;
+    DeleteReplyCountHelper handler = { requests, counter };
+
+    struct DeleteReplyDisconnectHelper
+    {
+        QMetaObject::Connection _connection;
+        ~DeleteReplyDisconnectHelper()
+        {
+           QObject::disconnect(_connection);
+        }
+    } connection = {QObject::connect(qnam, &QNetworkAccessManager::finished, handler)};
+
+    // it is not supported but we should not crash
+    qDeleteAll(replies);
+
+    QTRY_COMPARE(counter, replies.count());
 }
 
 QTEST_MAIN(tst_EnginioModel)

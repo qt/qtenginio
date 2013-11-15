@@ -70,6 +70,7 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void internal_createObjectType();
+    void deleteReply();
     void create_todos();
     void update_todos();
     void query_todos();
@@ -819,6 +820,59 @@ void tst_EnginioClient::assignUserToGroup()
     }
 }
 
+struct DeleteReplyCountHelper
+{
+    QSet<QString> &requests;
+    int &counter;
+    void operator ()(QNetworkReply *reply)
+    {
+        QString requestId(reply->request().rawHeader("X-Request-Id"));
+        if (requests.contains(requestId))
+            ++counter;
+    }
+};
+
+void tst_EnginioClient::deleteReply()
+{
+    // This test may be a bit fragile, the main point of it is to test if
+    // directly deleting a reply is not causing a crash. We do not do
+    // any guaranties about the behavior. The test relays on fact that QNetworkReply
+    // is not deleted if not finished, so we can wait for the finish signal and
+    // compare request id, if we catch all then we are sure that everything went ok
+    // if not we can not say anything.
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QNetworkAccessManager *qnam = client.networkManager();
+
+    QVector<EnginioReply *> replies;
+    replies.append(client.query(QJsonObject(), EnginioClient::UserOperation));
+    replies.append(client.create(QJsonObject(), EnginioClient::UserOperation));
+
+    QSet<QString> requests;
+    requests.reserve(replies.count());
+    foreach (EnginioReply *r, replies) {
+        requests.insert(r->requestId());
+    }
+
+    int counter = 0;
+    DeleteReplyCountHelper handler = { requests, counter };
+    struct DeleteReplyDisconnectHelper
+    {
+        QMetaObject::Connection _connection;
+        ~DeleteReplyDisconnectHelper()
+        {
+           QObject::disconnect(_connection);
+        }
+    } connection = {QObject::connect(qnam, &QNetworkAccessManager::finished, handler)};
+
+    // it is not supported but we should not crash
+    qDeleteAll(replies);
+
+    QTRY_COMPARE(counter, replies.count());
+}
+
 void tst_EnginioClient::create_todos()
 {
     QJsonObject todos;
@@ -895,6 +949,7 @@ void tst_EnginioClient::users_crud()
 
         const EnginioReply* reqId = client.create(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
+        QCOMPARE(reqId->parent(), &client);
 
         QTRY_COMPARE(spy.count(), spyCount + 1);
         QCOMPARE(spyError.count(), 0);
@@ -917,6 +972,8 @@ void tst_EnginioClient::users_crud()
         obj["query"] = query;
         const EnginioReply* reqId = client.query(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
+        QCOMPARE(reqId->parent(), &client);
+
         QTRY_COMPARE(spy.count(), spyCount + 1);
         QCOMPARE(spyError.count(), 0);
         CHECK_NO_ERROR(reqId);
@@ -933,6 +990,8 @@ void tst_EnginioClient::users_crud()
         obj["id"] = id;
         const EnginioReply* reqId = client.update(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
+        QCOMPARE(reqId->parent(), &client);
+
         QTRY_COMPARE(spy.count(), spyCount + 1);
         QCOMPARE(spyError.count(), 0);
         CHECK_NO_ERROR(reqId);
@@ -947,6 +1006,7 @@ void tst_EnginioClient::users_crud()
         obj["id"] = id;
         const EnginioReply* reqId = client.remove(obj, EnginioClient::UserOperation);
         QVERIFY(reqId);
+        QCOMPARE(reqId->parent(), &client);
 
         QTRY_COMPARE(spy.count(), spyCount + 1);
         QCOMPARE(spyError.count(), 0);
@@ -1138,6 +1198,8 @@ void tst_EnginioClient::backendFakeReply()
         EnginioReply *reply = spyClientFinished[i][0].value<EnginioReply*>();
         QVERIFY(reply->isFinished());
         QVERIFY(reply->isError());
+        QCOMPARE(reply->parent(), &client);
+
         QJsonObject data = reply->data();
         QVERIFY(!data.isEmpty());
 

@@ -316,6 +316,13 @@ EnginioReplyBase::EnginioReplyBase(EnginioClientBasePrivate *parent, QNetworkRep
 
 EnginioReplyBase::~EnginioReplyBase()
 {
+    Q_D(EnginioReplyBase);
+    Q_ASSERT(d->_nreply->parent() == this);
+    if (Q_UNLIKELY(!d->isFinished())) {
+        QObject::connect(d->_nreply, &QNetworkReply::finished, d->_nreply, &QNetworkReply::deleteLater);
+        d->_client->unregisterReply(d->_nreply);
+        d->_nreply->setParent(d->_nreply->manager());
+    }
 }
 
 /*!
