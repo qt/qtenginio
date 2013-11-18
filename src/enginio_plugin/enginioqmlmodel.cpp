@@ -168,7 +168,6 @@ public:
     virtual QJsonValue queryData(const QString &name) Q_DECL_OVERRIDE
     {
         QJSValue value = _query.property(name);
-        QJsonValue result;
         if (value.isObject())
             return convert(value);
         if (value.isString())
