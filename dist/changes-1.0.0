@@ -1,0 +1,38 @@
+Enginio 1.0 introduces many improvements to stability and API compared to previous beta versions.
+
+API Changes
+-----------
+- backendSecret has been removed from EnginioClient (both QML and C++)
+- Switch to OAuth2 as authentication mechanism everywhere
+  - EnginioBasicAuthentication removed
+  - EnginioOAuth2Authentication added
+- Many properties and signal&slots argument types changed to better fit QML API
+- Simplify working with dynamic roles in C++
+- New property in Enginio model qml: rowCount
+- ObjectAclOperation and UsergroupMembersOperation JSON api was fixed
+- EnginioClient is not exposed to QML directly anymore
+
+Fixed Issues
+------------
+- It was not possible to add a user to a group with Qt api
+- Enums would sometimes not work
+- EnginioIdentity would emit userChanged instead of passwordChanged
+- Several memory leaks and crashes
+- Fixed namespace builds
+- Improved documentation
+- QNetworkAccessManager is deleted when not needed anymore
+- Improved build system
+- Improved error messages
+- Fixed autocompletion of QML types in QtCreator
+- Fixed non-local enums usage in QML
+- Fixed no-widget build
+
+Examples
+--------
+- Added users example (showing user accounts and management)
+- Added Social Todos example (showing user management and ACLs)
+
+
+Platform Specific Issues
+------------------------
+- Fixed MSVC 2012 compilation
