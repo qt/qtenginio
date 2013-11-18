@@ -93,29 +93,29 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::search(QJsonObject query)
+  \qmlmethod EnginioReply Enginio1::Enginio::search(QJSValue query)
   \brief Perform a full text search on the database
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::query(QJsonObject query, Operation operation)
+  \qmlmethod EnginioReply Enginio1::Enginio::query(QJSValue query, Operation operation)
   \brief Query the database.
 */
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::create(QJsonObject query, Operation operation)
+  \qmlmethod EnginioReply Enginio1::Enginio::create(QJSValue query, Operation operation)
   \brief Create an object in the database.
 */
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::update(QJsonObject query, Operation operation)
+  \qmlmethod EnginioReply Enginio1::Enginio::update(QJSValue query, Operation operation)
   \brief Update an object in the database.
 */
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::remove(QJsonObject query, Operation operation)
+  \qmlmethod EnginioReply Enginio1::Enginio::remove(QJSValue query, Operation operation)
   \brief Remove an object from the database.
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::uploadFile(QJsonObject object, QUrl file)
+  \qmlmethod EnginioReply Enginio1::Enginio::uploadFile(QJSValue object, QUrl file)
   \brief Stores a \a file attached to an \a object in Enginio
 
   Each uploaded file needs to be associated with an object in the database.
@@ -136,7 +136,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::downloadFile(QJsonObject object)
+  \qmlmethod EnginioReply Enginio1::Enginio::downloadFile(QJSValue object)
   \brief Get the download URL for a file
 
   \snippet qmltests/tst_files.qml download
@@ -151,7 +151,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlsignal Enginio1::Enginio::finished(EnginioReply reply)
+  \qmlsignal Enginio1::Enginio::finished(QJSValue reply)
   This signal is emitted when a \a reply finishes.
 
   \note that this signal is alwasy emitted, independent of whether
@@ -159,7 +159,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlsignal Enginio1::Enginio::error(EnginioReply reply)
+  \qmlsignal Enginio1::Enginio::error(QJSValue reply)
   This signal is emitted when a \a reply finishes and contains an error.
 */
 

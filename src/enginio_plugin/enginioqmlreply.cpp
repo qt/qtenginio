@@ -61,7 +61,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty QJsonObject Enginio1::EnginioReply::data
+  \qmlproperty QJSValue Enginio1::EnginioReply::data
   The data of this reply.
 */
 

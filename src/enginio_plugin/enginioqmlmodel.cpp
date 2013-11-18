@@ -78,7 +78,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty QJsonObject Enginio1::EnginioModel::query
+  \qmlproperty QJSValue Enginio1::EnginioModel::query
   The query used to populate the model with data.
 */
 
@@ -93,7 +93,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioModel::append(QJsonObject value)
+  \qmlmethod EnginioReply Enginio1::EnginioModel::append(QJSValue value)
   \brief Add a new object to the model and database.
 
   To add a "city" object to the model by appending it:
