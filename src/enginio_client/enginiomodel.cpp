@@ -159,8 +159,7 @@ EnginioModelBasePrivate::~EnginioModelBasePrivate()
     foreach (const QMetaObject::Connection &connection, _clientConnections)
         QObject::disconnect(connection);
 
-    foreach (const QMetaObject::Connection &connection, _repliesConnections)
-        QObject::disconnect(connection);
+    delete _replyConnectionConntext;
 }
 
 void EnginioModelBasePrivate::receivedNotification(QJsonObject data)
@@ -250,9 +249,8 @@ void EnginioModelBasePrivate::receivedUpdateNotification(const QJsonObject &obje
 
 void EnginioModelBasePrivate::fullQueryReset(const QJsonArray &data)
 {
-    foreach (const QMetaObject::Connection &connection, _repliesConnections)
-        QObject::disconnect(connection);
-    _repliesConnections.clear();
+    delete _replyConnectionConntext;
+    _replyConnectionConntext = new QObject();
     q->beginResetModel();
     _data = data;
     _attachedData.initFromArray(_data);

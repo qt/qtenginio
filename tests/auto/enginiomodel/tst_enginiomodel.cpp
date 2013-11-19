@@ -1224,7 +1224,7 @@ void tst_EnginioModel::appendBeforeInitialModelReset()
     EnginioClient client;
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-    for (int i = 0; i < 12 ; ++i) {
+    for (int i = 0; i < 24 ; ++i) {
         QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
         QJsonObject query;
         query.insert("objectType", objectType);
@@ -1254,7 +1254,7 @@ void tst_EnginioModel::delayedRequestBeforeInitialModelReset()
     EnginioClient client;
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-    for (int i = 0; i < 12 ; ++i) {
+    for (int i = 0; i < 24 ; ++i) {
         QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
         QJsonObject query;
         query.insert("objectType", objectType);
