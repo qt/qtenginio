@@ -216,7 +216,11 @@ void EnginioModelBasePrivate::receivedUpdateNotification(const QJsonObject &obje
     }
     if (Q_UNLIKELY(row == DeletedRow))
         return;
-    Q_ASSERT(row >= 0);
+    // FIXME Sometimes it may happen that we get an update about an object that was created just after
+    // the full query and before notifications are setup. For now we inore such situation in future
+    // we should create a createNotification.
+    if (Q_UNLIKELY(row < 0))
+        return;
 
     QJsonObject current = _data[row].toObject();
     QDateTime currentUpdateAt = QDateTime::fromString(current[EnginioString::updatedAt].toString(), Qt::ISODate);
