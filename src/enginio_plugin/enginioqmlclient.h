@@ -58,6 +58,7 @@ class EnginioQmlClient : public EnginioClientBase
     Q_ENUMS(EnginioClientBase::AuthenticationState); // TODO remove me QTBUG-33577
 public:
     EnginioQmlClient(QObject *parent = 0);
+    ~EnginioQmlClient();
 
     Q_INVOKABLE EnginioQmlReply *search(const QJSValue &query);
     Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);

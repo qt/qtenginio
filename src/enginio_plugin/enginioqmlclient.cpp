@@ -170,6 +170,9 @@ EnginioQmlClient::EnginioQmlClient(QObject *parent)
     d->init();
 }
 
+EnginioQmlClient::~EnginioQmlClient()
+{}
+
 void EnginioQmlClientPrivate::init()
 {
     Q_Q(EnginioQmlClient);
