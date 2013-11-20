@@ -674,7 +674,9 @@ EnginioClientConnection::EnginioClientConnection(EnginioClientConnectionPrivate 
 }
 
 EnginioClientConnection::~EnginioClientConnection()
-{}
+{
+    qDeleteAll(findChildren<EnginioReplyBase *>());
+}
 
 void EnginioClientConnectionPrivate::emitSessionTerminated() const
 {
