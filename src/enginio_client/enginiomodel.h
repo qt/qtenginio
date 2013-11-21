@@ -69,7 +69,7 @@ public:
 
     Q_INVOKABLE EnginioReply *append(const QJsonObject &value);
     Q_INVOKABLE EnginioReply *remove(int row);
-    Q_INVOKABLE EnginioReply *setData(int row, const QString &role, const QVariant &value);
+    Q_INVOKABLE EnginioReply *setData(int row, const QVariant &value, const QString &role);
     using EnginioModelBase::setData;
 
 Q_SIGNALS:

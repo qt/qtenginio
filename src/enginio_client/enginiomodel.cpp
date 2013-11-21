@@ -519,7 +519,7 @@ EnginioReply *EnginioModel::remove(int row)
   \return reply from backend
   \sa EnginioClient::update()
 */
-EnginioReply *EnginioModel::setData(int row, const QString &role, const QVariant &value)
+EnginioReply *EnginioModel::setData(int row, const QVariant &value, const QString &role)
 {
     Q_D(EnginioModel);
     if (Q_UNLIKELY(!d->enginio())) {
