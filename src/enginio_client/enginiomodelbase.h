@@ -60,7 +60,7 @@ public:
     explicit EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent);
     ~EnginioModelBase();
 
-    enum Roles {
+    enum Role {
         InvalidRole = -1,
         SyncedRole = Qt::UserRole + 1,
         CreatedAtRole,

@@ -49,7 +49,7 @@ class TodosModel : public EnginioModel
     Q_OBJECT
 
 public:
-    enum Roles
+    enum Role
     {
         TitleRole = EnginioModel::LastRole,
         CompletedRole

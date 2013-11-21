@@ -51,7 +51,7 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const;
 
-    enum Roles {
+    enum Role {
         Id = Qt::UserRole + 1,
         Image,
         FileName,
