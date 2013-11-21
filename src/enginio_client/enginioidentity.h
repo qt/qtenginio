@@ -53,10 +53,10 @@ class EnginioIdentityPrivate;
 class ENGINIOCLIENT_EXPORT EnginioIdentity : public QObject
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(EnginioIdentity)
 
 protected:
-    explicit EnginioIdentity(EnginioIdentityPrivate *, QObject *parent);
-    EnginioIdentityPrivate *d_ptr;
+    explicit EnginioIdentity(EnginioIdentityPrivate &, QObject *parent);
 
 Q_SIGNALS:
     void dataChanged();

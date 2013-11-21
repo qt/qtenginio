@@ -53,6 +53,7 @@ class ENGINIOCLIENT_EXPORT EnginioOAuth2Authentication : public EnginioIdentity
     Q_OBJECT
     Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
     Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
+    Q_DECLARE_PRIVATE(EnginioOAuth2Authentication)
 
 public:
     explicit EnginioOAuth2Authentication(QObject *parent = 0);

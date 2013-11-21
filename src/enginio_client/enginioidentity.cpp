@@ -69,17 +69,14 @@ QT_BEGIN_NAMESPACE
   \internal
 */
 
-#define E_D(Name) Name##Private * const d = static_cast<Name##Private*>(d_ptr);
-
-class EnginioIdentityPrivate {};
+class EnginioIdentityPrivate : public QObjectPrivate {};
 
 /*!
     Constructs a new EnginioIdentity with \a dd pointer \a parent as QObject parent.
     \internal
 */
-EnginioIdentity::EnginioIdentity(EnginioIdentityPrivate *dd, QObject *parent)
-    : QObject(parent)
-    , d_ptr(dd)
+EnginioIdentity::EnginioIdentity(EnginioIdentityPrivate &dd, QObject *parent)
+    : QObject(dd, parent)
 {}
 
 class EnginioUserPassAuthenticationPrivate;
@@ -232,7 +229,7 @@ public:
   Constructs a EnginioPasswordOAuth2 instance with \a parent as QObject parent.
 */
 EnginioOAuth2Authentication::EnginioOAuth2Authentication(QObject *parent)
-    : EnginioIdentity(new EnginioOAuth2AuthenticationPrivate(), parent)
+    : EnginioIdentity(*new EnginioOAuth2AuthenticationPrivate(), parent)
 {
     connect(this, &EnginioOAuth2Authentication::userChanged, this, &EnginioIdentity::dataChanged);
     connect(this, &EnginioOAuth2Authentication::passwordChanged, this, &EnginioIdentity::dataChanged);
@@ -244,8 +241,6 @@ EnginioOAuth2Authentication::EnginioOAuth2Authentication(QObject *parent)
 EnginioOAuth2Authentication::~EnginioOAuth2Authentication()
 {
     emit aboutToDestroy();
-    E_D(EnginioOAuth2Authentication);
-    delete d;
 }
 
 /*!
@@ -255,13 +250,13 @@ EnginioOAuth2Authentication::~EnginioOAuth2Authentication()
 
 QString EnginioOAuth2Authentication::user() const
 {
-    E_D(EnginioOAuth2Authentication);
+    Q_D(const EnginioOAuth2Authentication);
     return d->_user;
 }
 
 void EnginioOAuth2Authentication::setUser(const QString &user)
 {
-    E_D(EnginioOAuth2Authentication);
+    Q_D(EnginioOAuth2Authentication);
     if (d->_user == user)
         return;
     d->_user = user;
@@ -275,13 +270,13 @@ void EnginioOAuth2Authentication::setUser(const QString &user)
 
 QString EnginioOAuth2Authentication::password() const
 {
-    E_D(EnginioOAuth2Authentication);
+    Q_D(const EnginioOAuth2Authentication);
     return d->_pass;
 }
 
 void EnginioOAuth2Authentication::setPassword(const QString &password)
 {
-    E_D(EnginioOAuth2Authentication);
+    Q_D(EnginioOAuth2Authentication);
     if (d->_pass == password)
         return;
     d->_pass = password;
@@ -295,7 +290,7 @@ void EnginioOAuth2Authentication::prepareSessionToken(EnginioClientConnectionPri
 {
     Q_ASSERT(enginio);
     Q_ASSERT(enginio->identity());
-    E_D(EnginioOAuth2Authentication);
+    Q_D(EnginioOAuth2Authentication);
     d->prepareSessionToken<EnginioOAuth2AuthenticationPrivate>(enginio);
 }
 
@@ -306,7 +301,7 @@ void EnginioOAuth2Authentication::removeSessionToken(EnginioClientConnectionPriv
 {
     Q_ASSERT(enginio);
     Q_ASSERT(enginio->identity());
-    E_D(EnginioOAuth2Authentication);
+    Q_D(EnginioOAuth2Authentication);
     d->removeSessionToken<EnginioOAuth2AuthenticationPrivate>(enginio);
 }
 
