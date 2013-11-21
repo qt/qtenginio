@@ -157,8 +157,7 @@ void MainWindow::toggleCompleted()
 {
     QModelIndex index = m_view->currentIndex();
     bool completed = m_model->data(index, m_model->CompletedRole).toBool();
-    EnginioReply *reply = m_model->setProperty(index.row(), "completed", !completed);
-    QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
+    m_model->setData(index, QVariant(!completed), TodosModel::CompletedRole);
 }
 
 void MainWindow::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

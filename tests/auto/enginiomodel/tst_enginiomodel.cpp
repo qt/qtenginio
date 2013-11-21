@@ -195,7 +195,7 @@ void tst_EnginioModel::enginio_property()
         QTest::ignoreMessage(QtWarningMsg, "EnginioModel::remove(): Enginio client is not set");
         QVERIFY(!model.remove(0));
         QTest::ignoreMessage(QtWarningMsg, "EnginioModel::setProperty(): Enginio client is not set");
-        QVERIFY(!model.setProperty(0, "blah", QVariant()));
+        QVERIFY(!model.setData(0, "blah", QVariant()));
     }
     {
         // check if initial set is not calling reset twice
@@ -460,22 +460,22 @@ void tst_EnginioModel::invalidSetProperty()
     ReplyCounter replyCounter(&counter);
     EnginioReply *reply;
 
-    reply = model.setProperty(-10, "Blah", QVariant(123));
+    reply = model.setData(-10, "Blah", QVariant(123));
     QVERIFY(reply);
     QVERIFY(reply->parent());
     QObject::connect(reply, &EnginioReply::finished, replyCounter);
 
-    reply = model.setProperty(-1, "Blah", QVariant(123));
+    reply = model.setData(-1, "Blah", QVariant(123));
     QVERIFY(reply);
     QVERIFY(reply->parent());
     QObject::connect(reply, &EnginioReply::finished, replyCounter);
 
-    reply = model.setProperty(model.rowCount(), "Blah", QVariant(123));
+    reply = model.setData(model.rowCount(), "Blah", QVariant(123));
     QVERIFY(reply);
     QVERIFY(reply->parent());
     QObject::connect(reply, &EnginioReply::finished, replyCounter);
 
-    reply = model.setProperty(0, "Blah", QVariant(123)); // invalid Role
+    reply = model.setData(0, "Blah", QVariant(123)); // invalid Role
     QVERIFY(reply);
     QVERIFY(reply->parent());
     QObject::connect(reply, &EnginioReply::finished, replyCounter);
@@ -697,7 +697,7 @@ void tst_EnginioModel::updateAndDeleteReordered()
 
     QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
 
-    EnginioReply *r2 = model.setProperty(model.rowCount() - 1, "email", "email@email.com");
+    EnginioReply *r2 = model.setData(model.rowCount() - 1, "email", "email@email.com");
     EnginioReply *r1 = model.remove(model.rowCount() - 1);
 
     QVERIFY(!r1->isFinished());
@@ -740,7 +740,7 @@ void tst_EnginioModel::updateReordered()
 
     int counter = 0;
 
-    EnginioReply *r2 = model.setProperty(0, "email", "email2@email.com");
+    EnginioReply *r2 = model.setData(0, "email", "email2@email.com");
     QVERIFY(!r2->isError());
     r2->setDelayFinishedSignal(true);
 
@@ -750,7 +750,7 @@ void tst_EnginioModel::updateReordered()
     QTRY_VERIFY(!r2->data().isEmpty()); // at this point r2 is done but finished signal is not emited
     QTRY_COMPARE(counter, 0);
 
-    EnginioReply *r1 = model.setProperty(0, "email", "email1@email.com");
+    EnginioReply *r1 = model.setData(0, "email", "email1@email.com");
     QVERIFY(!r1->isError());
 
     QObject::connect(r1, &EnginioReply::finished, replyCounter);
@@ -945,7 +945,7 @@ struct ExternallyRemovedSetProperty
 {
     EnginioReply *operator()(EnginioModel &model, int row) const
     {
-        return model.setProperty(row, propertyName(), "areYouDeleted?");
+        return model.setData(row, propertyName(), "areYouDeleted?");
     }
     QString propertyName() const
     {
@@ -1028,7 +1028,7 @@ void tst_EnginioModel::createAndModify()
         QVERIFY(!r1->isFinished());
         QVERIFY(!r1->isError());
 
-        EnginioReply *r2 = model.setProperty(model.rowCount() - 1, propertyName, QString::fromLatin1("newO"));
+        EnginioReply *r2 = model.setData(model.rowCount() - 1, propertyName, QString::fromLatin1("newO"));
         QVERIFY(!r2->isFinished());
         QVERIFY(!r2->isError());
         r2->setDelayFinishedSignal(true);
@@ -1179,7 +1179,7 @@ void tst_EnginioModel::createUpdateRemoveWithNotification()
         QModelIndex idx = model.index(i);
         QJsonObject o = model.data(idx).toJsonValue().toObject();
         if (o[propertyName].toString().startsWith("withNotification")) {
-            replies << model.setProperty(i, propertyName, QString::fromLatin1("withNotification_mod"));
+            replies << model.setData(i, propertyName, QString::fromLatin1("withNotification_mod"));
         }
     }
     QVERIFY(replies.count() == repliesCount);
@@ -1267,7 +1267,7 @@ void tst_EnginioModel::delayedRequestBeforeInitialModelReset()
         query.insert("title", QString::fromUtf8("appendAndRemoveModel"));
         EnginioReply *append1 = model.append(query);
         EnginioReply *append2 = model.append(query);
-        EnginioReply *update = model.setProperty(0, "title", QString::fromUtf8("appendAndRemoveModel1"));
+        EnginioReply *update = model.setData(0, "title", QString::fromUtf8("appendAndRemoveModel1"));
         EnginioReply *remove = model.remove(1);
         QTRY_VERIFY(append1->isFinished() && append2->isFinished() && remove->isFinished() && update->isFinished());
         QVERIFY(!append1->isError() || append1->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
@@ -1335,7 +1335,7 @@ void tst_EnginioModel::deleteModelDurringRequests()
         query.insert("title", QString::fromUtf8("deleteModelDurringRequests"));
         replies.append(model.append(query));
         replies.append(model.append(query));
-        replies.append(model.setProperty(0, "title", QString::fromUtf8("deleteModelDurringRequests1")));
+        replies.append(model.setData(0, "title", QString::fromUtf8("deleteModelDurringRequests1")));
         replies.append(model.remove(0));
     }
 
