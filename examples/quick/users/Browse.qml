@@ -62,7 +62,7 @@ ColumnLayout {
         //![browse]
         model: EnginioModel {
             id: enginioModel
-            enginio: enginioClient
+            client: enginioClient
             operation: Enginio.UserOperation
             query: {"objectType": "users" }
         }

@@ -53,7 +53,7 @@ Rectangle {
 
     EnginioModel {
         id: enginioModel
-        enginio: enginioClient
+        client: enginioClient
         query: {"objectType": "objects.todos",
                 "query": { "todoList": { "id": listId, "objectType": "objects.todoLists" } }
         }

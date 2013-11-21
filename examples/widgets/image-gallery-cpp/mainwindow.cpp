@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_client->setBackendId(backendId("image-gallery"));
 
     m_model = new ImageModel(this);
-    m_model->setEnginio(m_client);
+    m_model->setClient(m_client);
 
     m_view = new QListView;
     m_view->setModel(m_model);

@@ -252,19 +252,19 @@ EnginioQmlReply *EnginioQmlModel::setProperty(int row, const QString &role, cons
     return d->setValue(row, role, value);
 }
 
-EnginioQmlClient *EnginioQmlModel::enginio() const
+EnginioQmlClient *EnginioQmlModel::client() const
 {
     Q_D(const EnginioQmlModel);
     return d->enginio();
 }
 
-void EnginioQmlModel::setEnginio(const EnginioQmlClient *enginio)
+void EnginioQmlModel::setClient(const EnginioQmlClient *enginio)
 {
     Q_D(EnginioQmlModel);
     if (enginio == d->enginio())
         return;
 
-    d->setEnginio(enginio);
+    d->setClient(enginio);
 }
 
 QJSValue EnginioQmlModel::query()

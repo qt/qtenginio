@@ -54,17 +54,15 @@ class EnginioModelPrivate;
 class ENGINIOCLIENT_EXPORT EnginioModel : public EnginioModelBase
 {
     Q_OBJECT
-    Q_PROPERTY(EnginioClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
+    Q_PROPERTY(EnginioClient *client READ client WRITE setClient NOTIFY clientChanged)
     Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged)
 
 public:
     explicit EnginioModel(QObject *parent = 0);
     ~EnginioModel();
 
-
-    // TODO: that is a pretty silly name
-    EnginioClient *enginio() const Q_REQUIRED_RESULT;
-    void setEnginio(const EnginioClient *enginio);
+    EnginioClient *client() const Q_REQUIRED_RESULT;
+    void setClient(const EnginioClient *client);
 
     QJsonObject query() Q_REQUIRED_RESULT;
     void setQuery(const QJsonObject &query);
@@ -75,7 +73,7 @@ public:
 
 Q_SIGNALS:
     void queryChanged(const QJsonObject &query);
-    void enginioChanged(EnginioClient *enginio);
+    void clientChanged(EnginioClient *client);
 
 private:
     Q_DISABLE_COPY(EnginioModel)

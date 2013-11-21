@@ -75,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     //![model]
     model = new AddressBookModel(this);
-    model->setEnginio(client);
+    model->setClient(client);
 
     QJsonObject query;
     query["objectType"] = QString::fromUtf8("objects.addressbook");

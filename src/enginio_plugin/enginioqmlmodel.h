@@ -58,13 +58,12 @@ public:
     EnginioQmlModel(QObject *parent = 0);
     ~EnginioQmlModel();
 
-    Q_PROPERTY(EnginioQmlClient *enginio READ enginio WRITE setEnginio NOTIFY enginioChanged)
+    Q_PROPERTY(EnginioQmlClient *client READ client WRITE setClient NOTIFY clientChanged)
     Q_PROPERTY(QJSValue query READ query WRITE setQuery NOTIFY queryChanged)
     Q_PROPERTY(int rowCount READ rowCount NOTIFY rowCountChanged)
 
-    // TODO: that is a pretty silly name
-    EnginioQmlClient *enginio() const Q_REQUIRED_RESULT;
-    void setEnginio(const EnginioQmlClient *enginio);
+    EnginioQmlClient *client() const Q_REQUIRED_RESULT;
+    void setClient(const EnginioQmlClient *client);
 
     QJSValue query() Q_REQUIRED_RESULT;
     void setQuery(const QJSValue &query);
@@ -75,7 +74,7 @@ public:
 
 Q_SIGNALS:
     void queryChanged(const QJSValue &query);
-    void enginioChanged(EnginioQmlClient *enginio);
+    void clientChanged(EnginioQmlClient *client);
     void rowCountChanged();
 private:
     Q_DECLARE_PRIVATE(EnginioQmlModel)

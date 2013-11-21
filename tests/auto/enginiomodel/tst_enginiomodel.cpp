@@ -145,7 +145,7 @@ void tst_EnginioModel::ctor()
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         client.setBackendId(_backendId);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
-        model.setEnginio(&client);
+        model.setClient(&client);
     }
     {   // check if destructor of a fully initilized EnginioClient detach fully initilized model
         EnginioClient client;
@@ -155,7 +155,7 @@ void tst_EnginioModel::ctor()
         model.setQuery(query);
         client.setBackendId(_backendId);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
-        model.setEnginio(&client);
+        model.setClient(&client);
     }
 }
 
@@ -166,25 +166,25 @@ void tst_EnginioModel::enginio_property()
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         EnginioModel model;
         // No initial value
-        QCOMPARE(model.enginio(), static_cast<EnginioClient*>(0));
+        QCOMPARE(model.client(), static_cast<EnginioClient*>(0));
 
-        QSignalSpy spy(&model, SIGNAL(enginioChanged(EnginioClient*)));
-        model.setEnginio(&client);
-        QCOMPARE(model.enginio(), &client);
+        QSignalSpy spy(&model, SIGNAL(clientChanged(EnginioClient*)));
+        model.setClient(&client);
+        QCOMPARE(model.client(), &client);
         QTRY_COMPARE(spy.count(), 1);
     }
     {
         EnginioModel model;
-        QSignalSpy spy(&model, SIGNAL(enginioChanged(EnginioClient*)));
+        QSignalSpy spy(&model, SIGNAL(clientChanged(EnginioClient*)));
         {
             EnginioClient client;
             QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-            model.setEnginio(&client);
-            QCOMPARE(model.enginio(), &client);
+            model.setClient(&client);
+            QCOMPARE(model.client(), &client);
             QTRY_COMPARE(spy.count(), 1);
             QCOMPARE(spy[0][0].value<EnginioClient*>(), &client);
         }
-        QCOMPARE(model.enginio(), static_cast<EnginioClient*>(0));
+        QCOMPARE(model.client(), static_cast<EnginioClient*>(0));
         QTRY_COMPARE(spy.count(), 2);
         QCOMPARE(spy[1][0].value<EnginioClient*>(), static_cast<EnginioClient*>(0));
     }
@@ -210,7 +210,7 @@ void tst_EnginioModel::enginio_property()
         query.insert("limit", 1);
         model.setQuery(query);
         model.setOperation(EnginioClient::UserOperation);
-        model.setEnginio(&client);
+        model.setClient(&client);
 
         QTRY_COMPARE(spyAboutToReset.count(), 1);
         QTRY_COMPARE(spyReset.count(), 1);
@@ -224,7 +224,7 @@ void tst_EnginioModel::enginio_property()
         EnginioModel model;
         QSignalSpy spyAboutToReset(&model, SIGNAL(modelAboutToBeReset()));
         QSignalSpy spyReset(&model, SIGNAL(modelReset()));
-        model.setEnginio(&client);
+        model.setClient(&client);
         QJsonObject query;
         query.insert("limit", 1);
         query.insert("objectTypes", "objects." + EnginioTests::CUSTOM_OBJECT1);
@@ -238,15 +238,15 @@ void tst_EnginioModel::enginio_property()
         EnginioClient client;
         EnginioModel model;
 
-        QSignalSpy clientSpy(&model, SIGNAL(enginioChanged(EnginioClient*)));
-        QCOMPARE(model.enginio(), (EnginioClient *)0);
+        QSignalSpy clientSpy(&model, SIGNAL(clientChanged(EnginioClient*)));
+        QCOMPARE(model.client(), (EnginioClient *)0);
 
-        model.setEnginio(&client);
+        model.setClient(&client);
         QCOMPARE(clientSpy.count(), 1);
         QCOMPARE(clientSpy[0][0].value<EnginioClient*>(), &client);
-        QCOMPARE(model.enginio(), &client);
+        QCOMPARE(model.client(), &client);
 
-        model.setEnginio(&client);
+        model.setClient(&client);
         QCOMPARE(clientSpy.count(), 1);
     }
 }
@@ -284,7 +284,7 @@ void tst_EnginioModel::query_property()
         client.setBackendId(_backendId);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
-        model.setEnginio(&client);
+        model.setClient(&client);
         model.setQuery(query);
         QTRY_VERIFY(model.rowCount() > 0);
 
@@ -330,9 +330,9 @@ void tst_EnginioModel::roleNames()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-    model.setEnginio(&client);
+    model.setClient(&client);
 
-    QVERIFY(model.enginio() == &client);
+    QVERIFY(model.client() == &client);
 
     model.setOperation(EnginioClient::UserOperation);
     QJsonObject query = QJsonDocument::fromJson("{\"limit\":5}").object();
@@ -359,7 +359,7 @@ void tst_EnginioModel::listView()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-    model.setEnginio(&client);
+    model.setClient(&client);
 
     QListView view;
     view.setModel(&model);
@@ -413,7 +413,7 @@ void tst_EnginioModel::invalidRemove()
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioModel model;
-    model.setEnginio(&client);
+    model.setClient(&client);
 
     int counter = 0;
     InvalidRemoveErrorChecker replyCounter(&counter);
@@ -449,7 +449,7 @@ void tst_EnginioModel::invalidSetProperty()
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
     EnginioModel model;
-    model.setEnginio(&client);
+    model.setClient(&client);
     QJsonObject query = QJsonDocument::fromJson("{\"limit\":2}").object();
     model.setOperation(EnginioClient::UserOperation);
     model.setQuery(query);
@@ -523,16 +523,16 @@ void tst_EnginioModel::multpleConnections()
 
         EnginioModelConnectionSpy model;
         for (int i = 0; i < 20; ++i) {
-            model.setEnginio(&client1);
-            model.setEnginio(&client2);
-            model.setEnginio(0);
+            model.setClient(&client1);
+            model.setClient(&client2);
+            model.setClient(0);
         }
 
         // The values here are not strict. Use qDebug() << model.counter; to see what
         // makes sense. Just to be sure 2097150 or 20 doesn't.
         QCOMPARE(model.counter["operationChanged"], 0);
         QCOMPARE(model.counter["queryChanged"], 0);
-        QCOMPARE(model.counter["enginioChanged"], 0);
+        QCOMPARE(model.counter["clientChanged"], 0);
         QCOMPARE(client1.counter["finished"], 0);
         QCOMPARE(client2.counter["finished"], 0);
 
@@ -549,7 +549,7 @@ void tst_EnginioModel::multpleConnections()
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         EnginioModelConnectionSpy model;
-        model.setEnginio(&client);
+        model.setClient(&client);
         QJsonObject query1, query2;
         query1.insert("objectType", QString("objects.todos"));
         query2.insert("objectType", QString("objects.blah"));
@@ -563,7 +563,7 @@ void tst_EnginioModel::multpleConnections()
         // makes sense. Just to be sure 2097150 or 20 doesn't.
         QCOMPARE(model.counter["operationChanged"], 0);
         QCOMPARE(model.counter["queryChanged"], 0);
-        QCOMPARE(model.counter["enginioChanged"], 0);
+        QCOMPARE(model.counter["clientChanged"], 0);
     }
     {
         EnginioClientConnectionSpy client;
@@ -571,7 +571,7 @@ void tst_EnginioModel::multpleConnections()
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
         EnginioModelConnectionSpy model;
-        model.setEnginio(&client);
+        model.setClient(&client);
         QJsonObject query;
         query.insert("objectType", QString("objects.todos"));
         model.setQuery(query);
@@ -585,7 +585,7 @@ void tst_EnginioModel::multpleConnections()
         // makes sense. Just to be sure 2097150 or 20 doesn't.
         QCOMPARE(model.counter["operationChanged"], 0);
         QCOMPARE(model.counter["queryChanged"], 0);
-        QCOMPARE(model.counter["enginioChanged"], 0);
+        QCOMPARE(model.counter["clientChanged"], 0);
     }
 }
 
@@ -614,7 +614,7 @@ void tst_EnginioModel::deletionReordered()
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-    model.setEnginio(&client);
+    model.setClient(&client);
 
     QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
     QVERIFY(model.rowCount() >= 2);
@@ -651,7 +651,7 @@ void tst_EnginioModel::deleteTwiceTheSame()
     EnginioClient client;
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-    model.setEnginio(&client);
+    model.setClient(&client);
 
     QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
 
@@ -693,7 +693,7 @@ void tst_EnginioModel::updateAndDeleteReordered()
     EnginioClient client;
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-    model.setEnginio(&client);
+    model.setClient(&client);
 
     QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
 
@@ -734,7 +734,7 @@ void tst_EnginioModel::updateReordered()
     EnginioClient client;
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-    model.setEnginio(&client);
+    model.setClient(&client);
 
     QTRY_COMPARE(model.rowCount(), int(query["limit"].toDouble()));
 
@@ -785,7 +785,7 @@ void tst_EnginioModel::append()
 
     {   // init the model
         QSignalSpy spy(&model, SIGNAL(modelReset()));
-        model.setEnginio(&client);
+        model.setClient(&client);
 
         QTRY_VERIFY(spy.count() > 0);
     }
@@ -911,7 +911,7 @@ void tst_EnginioModel::externallyRemovedImpl()
 
     {   // init the model
         QSignalSpy spy(&model, SIGNAL(modelReset()));
-        model.setEnginio(&client);
+        model.setClient(&client);
 
         QTRY_VERIFY(spy.count() > 0);
         QVERIFY(model.rowCount());
@@ -992,7 +992,7 @@ void tst_EnginioModel::createAndModify()
     model.setQuery(query);
     {   // init the model
         QSignalSpy spy(&model, SIGNAL(modelReset()));
-        model.setEnginio(&client);
+        model.setClient(&client);
         QTRY_VERIFY(spy.count() > 0);
     }
 
@@ -1077,7 +1077,7 @@ void tst_EnginioModel::externalNotification()
     model.setQuery(query);
     {   // init the model
         QSignalSpy spy(&model, SIGNAL(modelReset()));
-        model.setEnginio(&client);
+        model.setClient(&client);
         QTRY_VERIFY(spy.count() > 0);
     }
 
@@ -1148,7 +1148,7 @@ void tst_EnginioModel::createUpdateRemoveWithNotification()
     model.setQuery(query);
     {   // init the model
         QSignalSpy spy(&model, SIGNAL(modelReset()));
-        model.setEnginio(&client);
+        model.setClient(&client);
         QTRY_VERIFY(spy.count() > 0);
     }
 
@@ -1232,7 +1232,7 @@ void tst_EnginioModel::appendBeforeInitialModelReset()
         EnginioModel model;
         QSignalSpy resetSpy(&model, SIGNAL(modelReset()));
         model.setQuery(query);
-        model.setEnginio(&client);
+        model.setClient(&client);
 
         query.insert("title", QString::fromUtf8("appendAndRemoveModel"));
         EnginioReply *reply = model.append(query);
@@ -1262,7 +1262,7 @@ void tst_EnginioModel::delayedRequestBeforeInitialModelReset()
         EnginioModel model;
         QSignalSpy resetSpy(&model, SIGNAL(modelReset()));
         model.setQuery(query);
-        model.setEnginio(&client);
+        model.setClient(&client);
 
         query.insert("title", QString::fromUtf8("appendAndRemoveModel"));
         EnginioReply *append1 = model.append(query);
@@ -1292,7 +1292,7 @@ void tst_EnginioModel::appendAndChangeQueryBeforeItIsFinished()
     EnginioModel model;
     QSignalSpy resetSpy(&model, SIGNAL(modelReset()));
     model.setQuery(query);
-    model.setEnginio(&client);
+    model.setClient(&client);
     QTRY_COMPARE(resetSpy.count(), 1);
 
     query.insert("title", QString::fromUtf8("appendAndChangeQueryBeforeItIsFinished"));
@@ -1331,7 +1331,7 @@ void tst_EnginioModel::deleteModelDurringRequests()
         query.insert("objectType", objectType);
         EnginioModel model;
         model.setQuery(query);
-        model.setEnginio(&client);
+        model.setClient(&client);
         query.insert("title", QString::fromUtf8("deleteModelDurringRequests"));
         replies.append(model.append(query));
         replies.append(model.append(query));
@@ -1406,7 +1406,7 @@ void tst_EnginioModel::updatingRoles()
     QCOMPARE(model.roleNames()[CustomModel::InvalidRole], invalid);
 
     model.setQuery(query);
-    model.setEnginio(&client);
+    model.setClient(&client);
 
     QCOMPARE(model.roleNames()[CustomModel::FooRole], foo);
     QCOMPARE(model.roleNames()[CustomModel::BarRole], bar);
@@ -1457,7 +1457,7 @@ void tst_EnginioModel::setData()
 
     {   // init the model
         QSignalSpy spy(&model, SIGNAL(modelReset()));
-        model.setEnginio(&client);
+        model.setClient(&client);
 
         QTRY_VERIFY(spy.count() > 0);
     }
@@ -1518,7 +1518,7 @@ void tst_EnginioModel::deleteReply()
     model.disableNotifications();
     model.setOperation(EnginioClient::UserOperation);
     model.setQuery(query);
-    model.setEnginio(&client);
+    model.setClient(&client);
 
     QJsonObject newUser;
     newUser.insert("username", QString::fromUtf8("fool"));

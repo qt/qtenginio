@@ -276,7 +276,7 @@ Module {
             Parameter { name: "query"; type: "QJSValue" }
         }
         Signal {
-            name: "enginioChanged"
+            name: "clientChanged"
             Parameter { name: "enginio"; type: "EnginioQmlClient"; isPointer: true }
         }
         Method {

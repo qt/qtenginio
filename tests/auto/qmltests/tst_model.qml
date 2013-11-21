@@ -87,7 +87,7 @@ Item {
 
         EnginioModel {
             id: modelInvalidRow
-            enginio: Enginio {
+            client: Enginio {
                 serviceUrl: AppConfig.backendData.serviceUrl
                 backendId: AppConfig.backendData.id
             }
@@ -139,7 +139,7 @@ Item {
         SignalSpy {
             id: modelCreateEnginioChanged
             target: modelCreate
-            signalName: "enginioChanged"
+            signalName: "clientChanged"
         }
 
         SignalSpy {
@@ -155,25 +155,25 @@ Item {
         }
 
         function init() {
-            modelCreate.enginio = null
+            modelCreate.client = null
         }
 
         function cleanupTestCase() {
-            modelCreate.enginio = null
+            modelCreate.client = null
         }
 
         function test_assignClient() {
             var signalCount = modelCreateEnginioChanged.count
-            modelCreate.enginio = enginioClientCreate
-            verify(modelCreate.enginio == enginioClientCreate)
+            modelCreate.client = enginioClientCreate
+            verify(modelCreate.client == enginioClientCreate)
             tryCompare(modelCreateEnginioChanged, "count", ++signalCount)
 
-            modelCreate.enginio = null
-            verify(modelCreate.enginio === null)
+            modelCreate.client = null
+            verify(modelCreate.client === null)
             tryCompare(modelCreateEnginioChanged, "count", ++signalCount)
 
-            modelCreate.enginio = enginioClientCreate
-            verify(modelCreate.enginio == enginioClientCreate)
+            modelCreate.client = enginioClientCreate
+            verify(modelCreate.client == enginioClientCreate)
             tryCompare(modelCreateEnginioChanged, "count", ++signalCount)
         }
 
@@ -208,7 +208,7 @@ Item {
 
         EnginioModel {
             id: modelQuery
-            enginio: Enginio {
+            client: Enginio {
                 id: enginioClientQuery
                 serviceUrl: AppConfig.backendData.serviceUrl
 
@@ -225,14 +225,14 @@ Item {
         }
 
         function _query(query, operation) {
-            var enginioClient = modelQuery.enginio
-            modelQuery.enginio = null
+            var enginioClient = modelQuery.client
+            modelQuery.client = null
             var count = modelQuery.resetCount
             modelQuery.operation = operation
             modelQuery.query = query
             // re-assigning the same object should not trigger the property change
             modelQuery.query = query
-            modelQuery.enginio = enginioClient
+            modelQuery.client = enginioClient
             tryCompare(modelQuery, "resetCount", ++count, 10000)
         }
 
@@ -270,7 +270,7 @@ Item {
 
         EnginioModel {
             id: modelModify
-            enginio: Enginio {
+            client: Enginio {
                 id: enginioClientModify
                 serviceUrl: AppConfig.backendData.serviceUrl
 
@@ -331,7 +331,7 @@ Item {
 
         EnginioModel {
             id: modelModifyUndblocked
-            enginio: Enginio {
+            client: Enginio {
                 id: enginioClientModifyUndblocked
                 serviceUrl: AppConfig.backendData.serviceUrl
 
@@ -391,7 +391,7 @@ Item {
 
         EnginioModel {
             id: modelModifyChaos
-            enginio: Enginio {
+            client: Enginio {
                 id: enginioClientModifyChaos
                 serviceUrl: AppConfig.backendData.serviceUrl
 
@@ -452,7 +452,7 @@ Item {
 
         EnginioModel {
             id: modelRowCount
-            enginio: Enginio {
+            client: Enginio {
                 serviceUrl: AppConfig.backendData.serviceUrl
 
                 property int errorCount: 0

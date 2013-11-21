@@ -70,7 +70,7 @@ void ImageModel::updateRows(const QModelIndex &, int start, int end)
         QString id = rowData.toObject().value("id").toString();
         if (id.isEmpty() || m_images.contains(id))
             continue;
-        ImageObject *image = new ImageObject(enginio());
+        ImageObject *image = new ImageObject(client());
         connect(image, SIGNAL(imageChanged(QString)), this, SLOT(imageChanged(QString)));
         m_images.insert(id, image);
         image->setObject(rowData.toObject());

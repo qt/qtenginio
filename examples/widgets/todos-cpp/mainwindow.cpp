@@ -75,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     //![model]
     m_model = new TodosModel(this);
-    m_model->setEnginio(m_client);
+    m_model->setClient(m_client);
 
     QJsonObject query;
     query["objectType"] = QString::fromUtf8("objects.todos");

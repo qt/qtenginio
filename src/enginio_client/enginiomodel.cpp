@@ -413,18 +413,18 @@ EnginioModelBase::~EnginioModelBase()
 
   \sa EnginioClient
 */
-EnginioClient *EnginioModel::enginio() const
+EnginioClient *EnginioModel::client() const
 {
     Q_D(const EnginioModel);
     return d->enginio();
 }
 
-void EnginioModel::setEnginio(const EnginioClient *enginio)
+void EnginioModel::setClient(const EnginioClient *client)
 {
     Q_D(EnginioModel);
-    if (enginio == d->enginio())
+    if (client == d->enginio())
         return;
-    d->setEnginio(enginio);
+    d->setClient(client);
 }
 
 /*!

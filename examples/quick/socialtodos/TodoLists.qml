@@ -50,7 +50,7 @@ Rectangle {
 
     EnginioModel {
         id: enginioModel
-        enginio: enginioClient
+        client: enginioClient
         query: {
             "objectType" : "objects.todoLists",
                     "include": { "creator": {} }

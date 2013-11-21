@@ -52,7 +52,7 @@ Rectangle {
     //![model]
     EnginioModel {
         id: enginioModel
-        enginio: Enginio {
+        client: Enginio {
             backendId: enginioBackendId
         }
         query: {"objectType": "objects.todos" }

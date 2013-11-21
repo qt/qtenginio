@@ -930,7 +930,7 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
         }
         void operator ()()
         {
-            model->setEnginio(0);
+            model->setClient(0);
         }
     };
 
@@ -942,7 +942,7 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
     {
         Base::init();
         QObject::connect(q(), &Public::queryChanged, QueryChanged(this));
-        QObject::connect(q(), &Public::enginioChanged, QueryChanged(this));
+        QObject::connect(q(), &Public::clientChanged, QueryChanged(this));
     }
 
     Client *enginio() const Q_REQUIRED_RESULT
@@ -950,7 +950,7 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
         return _enginio ? ClientPrivate::get(_enginio) : 0;
     }
 
-    void setEnginio(const EnginioClientBase *enginio)
+    void setClient(const EnginioClientBase *enginio)
     {
         if (_enginio) {
             foreach (const QMetaObject::Connection &connection, _clientConnections)
@@ -965,7 +965,7 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
             _enginio = 0;
         }
 
-        q()->enginioChanged(static_cast<Client*>(const_cast<EnginioClientBase*>(enginio)));
+        q()->clientChanged(static_cast<Client*>(const_cast<EnginioClientBase*>(enginio)));
     }
 
     Data query() Q_REQUIRED_RESULT

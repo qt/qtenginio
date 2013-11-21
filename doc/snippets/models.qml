@@ -56,7 +56,7 @@ Rectangle {
     //! [model]
     EnginioModel {
         id: enginioModel
-        enginio: client
+        client: client
         query: { "objectType": "objects.city" }
     }
     //! [model]
