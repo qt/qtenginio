@@ -59,9 +59,10 @@ public:
     ~EnginioOAuth2Authentication();
 
     QString user() const Q_REQUIRED_RESULT;
-    void setUser(const QString &user);
-
     QString password() const Q_REQUIRED_RESULT;
+
+public Q_SLOTS:
+    void setUser(const QString &user);
     void setPassword(const QString &password);
 
 Q_SIGNALS:
