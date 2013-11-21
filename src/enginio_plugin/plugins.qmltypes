@@ -98,7 +98,7 @@ Module {
             Parameter { name: "file"; type: "QUrl" }
         }
         Method {
-            name: "downloadFile"
+            name: "downloadUrl"
             type: "EnginioReply*"
             Parameter { name: "object"; type: "QJsonObject" }
         }
@@ -252,7 +252,7 @@ Module {
             Parameter { name: "object"; type: "QJSValue" }
         }
         Method {
-            name: "downloadFile"
+            name: "downloadUrl"
             type: "EnginioQmlReply*"
             Parameter { name: "object"; type: "QJSValue" }
         }

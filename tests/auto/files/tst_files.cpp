@@ -244,7 +244,7 @@ void tst_Files::fileUploadDownload()
         QJsonObject object;
         object["id"] = fileId; // ID of an existing object with attached file
 
-        const EnginioReply *replyDownload = client.downloadFile(object);
+        const EnginioReply *replyDownload = client.downloadUrl(object);
         //![download]
 
         QVERIFY(replyDownload);
@@ -310,7 +310,7 @@ void tst_Files::fileUploadDownload()
         object["id"] = fileId; // ID of an existing object with attached file
         object[EnginioString::variant] = QStringLiteral("thumbnail");
 
-        const EnginioReply* replyDownload = client.downloadFile(object);
+        const EnginioReply* replyDownload = client.downloadUrl(object);
 
         QVERIFY(replyDownload);
         QTRY_VERIFY(replyDownload->isFinished());

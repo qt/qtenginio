@@ -1187,7 +1187,7 @@ void tst_EnginioClient::backendFakeReply()
     QVERIFY(client.fullTextSearch(objectTypeOnly));
     QVERIFY(client.fullTextSearch(objectWithObjectTypes));
 
-    QVERIFY(client.downloadFile(empty));
+    QVERIFY(client.downloadUrl(empty));
     QVERIFY(client.uploadFile(empty, QUrl()));
 
     QTRY_COMPARE(spyClientFinished.count(), 19);

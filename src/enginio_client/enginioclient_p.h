@@ -560,7 +560,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *downloadFile(const ObjectAdaptor<T> &object)
+    QNetworkReply *downloadUrl(const ObjectAdaptor<T> &object)
     {
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH(url, object, FileGetDownloadUrlOperation);

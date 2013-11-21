@@ -123,7 +123,7 @@ Item {
                             fake.remove(empty, Enginio.UsergroupMembersOperation),
 
                             fake.fullTextSearch(empty),
-                            fake.downloadFile(empty),
+                            fake.downloadUrl(empty),
                             fake.uploadFile(empty, "")]
 
             tryCompare(fake, "errorCount", replies.length)

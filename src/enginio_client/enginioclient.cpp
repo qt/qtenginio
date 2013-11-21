@@ -79,7 +79,7 @@ QT_BEGIN_NAMESPACE
   The basic functions used to interact with the backend are
   \l create(), \l query(), \l remove() and \l update().
   It is possible to do a fulltext search on the server using \l fullTextSearch().
-  For file handling \l downloadFile() and \l uploadFile() are provided.
+  For file handling \l downloadUrl() and \l uploadFile() are provided.
   The functions are asynchronous, which means that they are not blocking
   and the result of them will be delivered together with EnginioReply::finished()
   signal.
@@ -576,7 +576,7 @@ void EnginioClientBase::setIdentity(EnginioIdentity *identity)
   Instead when the object that contains the link to the file gets deleted,
   the file will automatically be deleted as well.
 
-  \sa downloadFile()
+  \sa downloadUrl()
 */
 EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &file)
 {
@@ -589,7 +589,10 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
 }
 
 /*!
-  \brief Download a file stored in Enginio
+  \brief Get a temporary URL for a file stored in Enginio
+
+  From this URL a file can be downloaded. The URL is valid for a certain amount of time as indicated
+  in the reply.
 
   \snippet files/tst_files.cpp download
   The propertyName can be anything, but it must be the same as the one used to upload the file with.
@@ -604,11 +607,11 @@ EnginioReply* EnginioClient::uploadFile(const QJsonObject &object, const QUrl &f
     }
   \endcode
 */
-EnginioReply* EnginioClient::downloadFile(const QJsonObject &object)
+EnginioReply* EnginioClient::downloadUrl(const QJsonObject &object)
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->downloadFile<QJsonObject>(object);
+    QNetworkReply *nreply = d->downloadUrl<QJsonObject>(object);
     EnginioReply *ereply = new EnginioReply(d, nreply);
 
     return ereply;

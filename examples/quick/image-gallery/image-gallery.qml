@@ -122,7 +122,7 @@ Rectangle {
                     } else {
                         var data = { "id": file.id,
                             "variant": "thumbnail"}
-                        var reply = client.downloadFile(data)
+                        var reply = client.downloadUrl(data)
                         reply.finished.connect(function() {
                             imagesUrl[id] = reply.data.expiringUrl
                             if (image && reply.data.expiringUrl) // It may be deleted as it is delegate
@@ -276,7 +276,7 @@ Rectangle {
                 image.source = ""
                 // Download the full image, not the thumbnail
                 var data = { "id": fileId }
-                var reply = client.downloadFile(data)
+                var reply = client.downloadUrl(data)
                 reply.finished.connect(function() {
                     image.source = reply.data.expiringUrl
                 })

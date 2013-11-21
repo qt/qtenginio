@@ -132,11 +132,11 @@ QT_BEGIN_NAMESPACE
   Instead when the object that contains the link to the file gets deleted,
   the file will automatically be deleted as well.
 
-  \sa downloadFile()
+  \sa downloadUrl()
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::downloadFile(QJSValue object)
+  \qmlmethod EnginioReply Enginio1::Enginio::downloadUrl(QJSValue object)
   \brief Get the download URL for a file
 
   \snippet qmltests/tst_files.qml download
@@ -245,7 +245,7 @@ EnginioQmlReply *EnginioQmlClient::remove(const QJSValue &object, const Operatio
     return ereply;
 }
 
-EnginioQmlReply *EnginioQmlClient::downloadFile(const QJSValue &object)
+EnginioQmlReply *EnginioQmlClient::downloadUrl(const QJSValue &object)
 {
     Q_D(EnginioQmlClient);
 
@@ -253,7 +253,7 @@ EnginioQmlReply *EnginioQmlClient::downloadFile(const QJSValue &object)
         return 0;
 
     ObjectAdaptor<QJSValue> o(object, d);
-    QNetworkReply *nreply = d->downloadFile<QJSValue>(o);
+    QNetworkReply *nreply = d->downloadUrl<QJSValue>(o);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
 
     return ereply;

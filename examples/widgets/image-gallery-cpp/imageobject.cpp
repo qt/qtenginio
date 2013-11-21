@@ -58,7 +58,7 @@ void ImageObject::setObject(const QJsonObject &object)
         QJsonObject fileObject;
         fileObject.insert("id", fileId);
         fileObject.insert("variant", QString("thumbnail"));
-        EnginioReply *reply = m_enginio->downloadFile(fileObject);
+        EnginioReply *reply = m_enginio->downloadUrl(fileObject);
         connect(reply, SIGNAL(finished(EnginioReply*)), this, SLOT(replyFinished(EnginioReply*)));
     } else {
         // Try to fall back to the local file

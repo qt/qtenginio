@@ -126,7 +126,7 @@ Item {
             var downloadData = {
                 "id": uploadReply.data.id,
             }
-            var downloadReply = enginio.downloadFile(downloadData)
+            var downloadReply = enginio.downloadUrl(downloadData)
             //! [download]
 
             finishedSpy.wait()
