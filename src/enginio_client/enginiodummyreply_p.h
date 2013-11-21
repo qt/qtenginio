@@ -45,6 +45,8 @@
 #include <Enginio/enginioclient_global.h>
 #include <QtNetwork/qnetworkreply.h>
 
+QT_BEGIN_NAMESPACE
+
 class EnginioClientBasePrivate;
 class EnginioReply;
 class ENGINIOCLIENT_EXPORT EnginioDummyReply : public QNetworkReply
@@ -59,5 +61,7 @@ public:
     virtual qint64 readData(char *dest, qint64 n) Q_DECL_OVERRIDE;
     virtual qint64 writeData(const char *data, qint64 maxSize) Q_DECL_OVERRIDE;
 };
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOWAITREPLY_H

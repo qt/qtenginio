@@ -48,6 +48,8 @@
 #include <QtNetwork/qnetworkreply.h>
 #include <QtCore/qbytearray.h>
 
+QT_BEGIN_NAMESPACE
+
 class ENGINIOCLIENT_EXPORT EnginioFakeReply : public QNetworkReply
 {
     Q_OBJECT
@@ -65,5 +67,7 @@ public:
 private:
     void init(QNetworkAccessManager*);
 };
+
+QT_END_NAMESPACE
 
 #endif // ENGINIOFAKEREPLY_P_H

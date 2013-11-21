@@ -44,6 +44,8 @@
 #include <QtCore/qmetaobject.h>
 #include <QtNetwork/qnetworkrequest.h>
 
+QT_BEGIN_NAMESPACE
+
 struct FinishedFunctor
 {
     QNetworkAccessManager *_qnam;
@@ -106,3 +108,5 @@ qint64 EnginioFakeReply::writeData(const char *data, qint64 maxSize)
     Q_UNUSED(maxSize);
     return -1;
 }
+
+QT_END_NAMESPACE

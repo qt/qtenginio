@@ -41,6 +41,8 @@
 
 #include <Enginio/private/enginiodummyreply_p.h>
 
+QT_BEGIN_NAMESPACE
+
 EnginioDummyReply::EnginioDummyReply(QObject *parent)
     : QNetworkReply(parent)
 {
@@ -71,3 +73,5 @@ qint64 EnginioDummyReply::writeData(const char *data, qint64 maxSize)
     Q_UNUSED(maxSize);
     return -1;
 }
+
+QT_END_NAMESPACE
