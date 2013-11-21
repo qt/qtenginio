@@ -166,7 +166,7 @@ void AddressBookModel::newSearch(const QString &search)
     }
 
     //![callSearch]
-    _searchReply =  enginio()->search(query);
+    _searchReply =  enginio()->fullTextSearch(query);
     QObject::connect(_searchReply, &EnginioReply::finished, this, &AddressBookModel::searchResultsArrived);
     QObject::connect(_searchReply, &EnginioReply::finished, _searchReply, &EnginioReply::deleteLater);
     //![callSearch]

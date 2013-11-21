@@ -93,7 +93,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::search(QJSValue query)
+  \qmlmethod EnginioReply Enginio1::Enginio::fullTextSearch(QJSValue query)
   \brief Perform a full text search on the database
 */
 
@@ -183,7 +183,7 @@ void EnginioQmlClientPrivate::init()
     QObject::connect(q, &EnginioQmlClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientBase::AuthenticationFailure));
 }
 
-EnginioQmlReply *EnginioQmlClient::search(const QJSValue &query)
+EnginioQmlReply *EnginioQmlClient::fullTextSearch(const QJSValue &query)
 {
     Q_D(EnginioQmlClient);
 

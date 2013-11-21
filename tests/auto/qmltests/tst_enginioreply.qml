@@ -165,7 +165,7 @@ Item {
                             "errorString": "{\"errors\": [{\"message\": \"has already been taken\",\"property\": \"username\",\"reason\": \"ValidationFailed\"}]}",
                         },
                         {
-                            "op": "search",
+                            "op": "fullTextSearch",
                             "q": { "objectTypes": "notAnArrayAndSearchMissing" },
                             "area": null,
                             "isError": true,
@@ -175,7 +175,7 @@ Item {
                             "errorString": "{\"errors\": [{\"message\": \"Fulltext Search: 'objectTypes' parameter is missing or it is not an array\",\"reason\": \"BadRequest\"}]}",
                         },
                         {
-                            "op": "search",
+                            "op": "fullTextSearch",
                             "q": { "objectType": "notAnArrayAndSearchMissing" },
                             "area": null,
                             "isError": true,
@@ -185,7 +185,7 @@ Item {
                             "errorString": "{\"errors\": [{\"message\": \"Fulltext Search: 'objectTypes' parameter is missing or it is not an array\",\"reason\": \"BadRequest\"}]}",
                         },
                         {
-                            "op": "search",
+                            "op": "fullTextSearch",
                             "q": { "objectTypes": ["searchIsMissing"] },
                             "area": null,
                             "isError": true,

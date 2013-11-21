@@ -78,7 +78,7 @@ QT_BEGIN_NAMESPACE
 
   The basic functions used to interact with the backend are
   \l create(), \l query(), \l remove() and \l update().
-  It is possible to do a fulltext search on the server using \l search().
+  It is possible to do a fulltext search on the server using \l fullTextSearch().
   For file handling \l downloadFile() and \l uploadFile() are provided.
   The functions are asynchronous, which means that they are not blocking
   and the result of them will be delivered together with EnginioReply::finished()
@@ -419,7 +419,7 @@ EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &ht
   \return EnginioReply containing the status and the result once it is finished.
   \sa EnginioReply, create(), query(), update(), remove()
 */
-EnginioReply *EnginioClient::search(const QJsonObject &query)
+EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
 {
     Q_D(EnginioClient);
 

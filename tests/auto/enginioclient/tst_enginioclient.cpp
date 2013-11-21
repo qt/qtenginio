@@ -96,7 +96,7 @@ private slots:
     void creator_updater();
     void sharingNetworkManager();
     void lifeTimeOfNetworkManager();
-    void search();
+    void fullTextSearch();
     void assignUserToGroup();
 
 private:
@@ -675,7 +675,7 @@ void tst_EnginioClient::query_users_filter()
     QVERIFY(!data["results"].toArray().count());
 }
 
-void tst_EnginioClient::search()
+void tst_EnginioClient::fullTextSearch()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
@@ -692,7 +692,7 @@ void tst_EnginioClient::search()
                     "\"search\": {\"phrase\": \"Query\"}}").object();
 
         QVERIFY(!searchQuery.isEmpty());
-        const EnginioReply* reqId = client.search(searchQuery);
+        const EnginioReply* reqId = client.fullTextSearch(searchQuery);
         QVERIFY(reqId);
 
 
@@ -720,7 +720,7 @@ void tst_EnginioClient::search()
                     "\"search\": {\"phrase\": \"object OR test\", \"properties\": [\"stringValue\"]}}").object();
 
         QVERIFY(!searchQuery.isEmpty());
-        const EnginioReply* reqId = client.search(searchQuery);
+        const EnginioReply* reqId = client.fullTextSearch(searchQuery);
         QVERIFY(reqId);
 
         QTRY_COMPARE(spy.count(), 1);
@@ -1183,9 +1183,9 @@ void tst_EnginioClient::backendFakeReply()
     QVERIFY(client.remove(objectTypeOnly, EnginioClient::AccessControlOperation));
     QVERIFY(client.remove(empty, EnginioClient::UsergroupMembersOperation));
 
-    QVERIFY(client.search(empty));
-    QVERIFY(client.search(objectTypeOnly));
-    QVERIFY(client.search(objectWithObjectTypes));
+    QVERIFY(client.fullTextSearch(empty));
+    QVERIFY(client.fullTextSearch(objectTypeOnly));
+    QVERIFY(client.fullTextSearch(objectWithObjectTypes));
 
     QVERIFY(client.downloadFile(empty));
     QVERIFY(client.uploadFile(empty, QUrl()));

@@ -60,7 +60,7 @@ public:
     EnginioQmlClient(QObject *parent = 0);
     ~EnginioQmlClient();
 
-    Q_INVOKABLE EnginioQmlReply *search(const QJSValue &query);
+    Q_INVOKABLE EnginioQmlReply *fullTextSearch(const QJSValue &query);
     Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);

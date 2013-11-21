@@ -43,7 +43,7 @@ Module {
             Parameter { name: "httpOperation"; type: "QByteArray" }
         }
         Method {
-            name: "search"
+            name: "fullTextSearch"
             type: "EnginioReply*"
             Parameter { name: "query"; type: "QJsonObject" }
         }
@@ -203,7 +203,7 @@ Module {
             Parameter { name: "reply"; type: "QJSValue" }
         }
         Method {
-            name: "search"
+            name: "fullTextSearch"
             type: "EnginioQmlReply*"
             Parameter { name: "query"; type: "QJSValue" }
         }

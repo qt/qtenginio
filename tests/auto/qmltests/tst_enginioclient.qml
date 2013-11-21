@@ -122,7 +122,7 @@ Item {
                             fake.remove(objectTypeOnly, Enginio.AccessControlOperation),
                             fake.remove(empty, Enginio.UsergroupMembersOperation),
 
-                            fake.search(empty),
+                            fake.fullTextSearch(empty),
                             fake.downloadFile(empty),
                             fake.uploadFile(empty, "")]
 

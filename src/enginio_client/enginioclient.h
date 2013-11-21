@@ -65,7 +65,7 @@ public:
     ~EnginioClient();
 
     Q_INVOKABLE EnginioReply *customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data = QJsonObject());
-    Q_INVOKABLE EnginioReply *search(const QJsonObject &query);
+    Q_INVOKABLE EnginioReply *fullTextSearch(const QJsonObject &query);
     Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Operation operation = ObjectOperation);
     Q_INVOKABLE EnginioReply *update(const QJsonObject &object, const Operation operation = ObjectOperation);
