@@ -85,7 +85,7 @@ public:
 
     void disableNotifications();
 Q_SIGNALS:
-    void operationChanged(const EnginioClientBase::Operation operation);
+    void operationChanged(EnginioClientBase::Operation operation);
 
 private:
     Q_DISABLE_COPY(EnginioModelBase)

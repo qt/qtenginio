@@ -100,8 +100,8 @@ public:
 Q_SIGNALS:
     void backendIdChanged(const QByteArray &backendId);
     void serviceUrlChanged(const QUrl& url);
-    void authenticationStateChanged(const AuthenticationState state);
-    void identityChanged(const EnginioIdentity *identity);
+    void authenticationStateChanged(AuthenticationState state);
+    void identityChanged(EnginioIdentity *identity);
 
 protected:
     explicit EnginioClientBase(EnginioClientBasePrivate &dd, QObject *parent);
