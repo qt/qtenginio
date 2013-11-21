@@ -76,7 +76,6 @@ public:
         BackendError
     };
 
-    EnginioReplyBase(EnginioClientBasePrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv);
     ~EnginioReplyBase();
 
 
@@ -104,6 +103,8 @@ Q_SIGNALS:
     void dataChanged();
     void progress(qint64 bytesSent, qint64 bytesTotal);
 
+protected:
+    EnginioReplyBase(EnginioClientBasePrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv);
     friend class EnginioClient;
     friend class EnginioClientBasePrivate;
 };

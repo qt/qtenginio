@@ -61,7 +61,8 @@ protected:
 Q_SIGNALS:
     void dataChanged();
     void aboutToDestroy();
-private:
+
+protected:
     virtual void prepareSessionToken(EnginioClientBasePrivate *enginio) = 0;
     virtual void removeSessionToken(EnginioClientBasePrivate *enginio) = 0;
     friend class EnginioClientBasePrivate;

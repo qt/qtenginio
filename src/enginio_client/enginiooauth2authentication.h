@@ -69,7 +69,7 @@ Q_SIGNALS:
     void userChanged(const QString &user);
     void passwordChanged(const QString &password);
 
-private:
+protected:
     virtual void prepareSessionToken(EnginioClientBasePrivate *enginio) Q_DECL_OVERRIDE;
     virtual void removeSessionToken(EnginioClientBasePrivate *enginio) Q_DECL_OVERRIDE;
 };
