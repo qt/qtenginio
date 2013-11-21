@@ -58,6 +58,14 @@ class EnginioClientBasePrivate;
 class ENGINIOCLIENT_EXPORT EnginioClientBase : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(AuthenticationState)
+    Q_ENUMS(Operation)
+
+    Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
+    Q_PROPERTY(QUrl serviceUrl READ serviceUrl WRITE setServiceUrl NOTIFY serviceUrlChanged FINAL)
+    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
+    Q_PROPERTY(AuthenticationState authenticationState READ authenticationState NOTIFY authenticationStateChanged FINAL)
+
 public:
     enum AuthenticationState {
         NotAuthenticated,
@@ -65,7 +73,6 @@ public:
         Authenticated,
         AuthenticationFailure
     };
-    Q_ENUMS(AuthenticationState)
 
     enum Operation {
         // Do not forget to keep in sync with EnginioClientPrivate::Operation!
@@ -76,14 +83,9 @@ public:
         UsergroupMembersOperation,
         FileOperation
     };
-    Q_ENUMS(Operation)
 
     ~EnginioClientBase();
 
-    Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
-    Q_PROPERTY(QUrl serviceUrl READ serviceUrl WRITE setServiceUrl NOTIFY serviceUrlChanged FINAL)
-    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
-    Q_PROPERTY(AuthenticationState authenticationState READ authenticationState NOTIFY authenticationStateChanged FINAL)
 
     QByteArray backendId() const Q_REQUIRED_RESULT;
     void setBackendId(const QByteArray &backendId);

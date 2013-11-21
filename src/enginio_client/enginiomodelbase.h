@@ -54,6 +54,8 @@ class ENGINIOCLIENT_EXPORT EnginioModelBase : public QAbstractListModel
 {
     Q_OBJECT
     Q_ENUMS(EnginioClientBase::Operation) // TODO remove me QTBUG-33577
+    Q_PROPERTY(EnginioClientBase::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
+
 public:
     explicit EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent);
     ~EnginioModelBase();
@@ -67,8 +69,6 @@ public:
         ObjectTypeRole,
         LastRole = Qt::UserRole + 10 // the first fully dynamic role
     };
-
-    Q_PROPERTY(EnginioClientBase::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
 
     EnginioClientBase::Operation operation() const Q_REQUIRED_RESULT;
     void setOperation(EnginioClientBase::Operation operation);

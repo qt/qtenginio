@@ -56,9 +56,8 @@ class EnginioClientBasePrivate;
 class ENGINIOCLIENT_EXPORT EnginioReply : public EnginioReplyBase
 {
     Q_OBJECT
-
-public:
     Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
+public:
 
     explicit EnginioReply(EnginioClientBasePrivate *parent, QNetworkReply *reply);
     virtual ~EnginioReply();

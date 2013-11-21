@@ -51,13 +51,12 @@ class EnginioOAuth2AuthenticationPrivate;
 class ENGINIOCLIENT_EXPORT EnginioOAuth2Authentication : public EnginioIdentity
 {
     Q_OBJECT
+    Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
+    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
 
 public:
     EnginioOAuth2Authentication(QObject *parent = 0);
     ~EnginioOAuth2Authentication();
-
-    Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
-    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
 
     QString user() const Q_REQUIRED_RESULT;
     void setUser(const QString &user);
