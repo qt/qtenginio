@@ -124,7 +124,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientBasePrivate : public QObjectPrivate
             result.append(objectType.replace('.', '/'));
             break;
         }
-        case ObjectAclOperation:
+        case AccessControlOperation:
         {
             QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty()) {
@@ -283,7 +283,7 @@ public:
     enum Operation {
         // Do not forget to keep in sync with EnginioClientBase::Operation!
         ObjectOperation = EnginioClientBase::ObjectOperation,
-        ObjectAclOperation = EnginioClientBase::ObjectAclOperation,
+        AccessControlOperation = EnginioClientBase::AccessControlOperation,
         UserOperation = EnginioClientBase::UserOperation,
         UsergroupOperation = EnginioClientBase::UsergroupOperation,
         UsergroupMemberOperation = EnginioClientBase::UsergroupMembersOperation,
@@ -463,7 +463,7 @@ public:
         QNetworkReply *reply = 0;
         QByteArray data;
 #if 1 // QT_VERSION < QT_VERSION_CHECK(5, 4, 0) ?
-        if (operation != EnginioClientBase::ObjectAclOperation)
+        if (operation != EnginioClientBase::AccessControlOperation)
             reply = networkManager()->deleteResource(req);
         else {
             data = object[dataPropertyName].toJson();

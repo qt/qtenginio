@@ -51,7 +51,7 @@ Rectangle {
     property var userData: new Object
 
     Component.onCompleted: {
-        var aclQuery = enginioClient.query({ "objectType": "objects.todoLists", "id": listId }, Enginio.ObjectAclOperation)
+        var aclQuery = enginioClient.query({ "objectType": "objects.todoLists", "id": listId }, Enginio.AccessControlOperation)
         aclQuery.finished.connect(function() { aclData = aclQuery.data } )
 
         var usersQuery = enginioClient.query({ "objectType": "users", }, Enginio.UsersOperation)
@@ -122,7 +122,7 @@ Rectangle {
                     console.log("\nUpdated JSON:", JSON.stringify(aclData))
                     enginioClient.update(
                                 { "id": listId, "objectType": "objects.todoLists", "access": aclData },
-                                Enginio.ObjectAclOperation
+                                Enginio.AccessControlOperation
                                 )
 
                     // changing the contents of a JSON object does not emit

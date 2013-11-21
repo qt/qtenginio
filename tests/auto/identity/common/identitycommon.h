@@ -552,7 +552,7 @@ void IdentityCommonTest<Derived, Identity>::queryRestrictedObject()
 //        json = json.arg(userId);
 //        aclUpdate["access"] = QJsonDocument::fromJson(json.toUtf8()).object();
 //        qDebug() << aclUpdate;
-//        EnginioReply *reply = client.update(aclUpdate, EnginioClient::ObjectAclOperation);
+//        EnginioReply *reply = client.update(aclUpdate, EnginioClient::AccessControlOperation);
 //        QTRY_VERIFY(reply->isFinished());
 //        qDebug() << reply;
 //        CHECK_NO_ERROR(reply);

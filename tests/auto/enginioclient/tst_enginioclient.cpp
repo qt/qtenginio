@@ -1167,20 +1167,20 @@ void tst_EnginioClient::backendFakeReply()
     objectWithObjectTypes["objectTypes"] = objectTypes;
 
     QVERIFY(client.query(empty, EnginioClient::ObjectOperation));
-    QVERIFY(client.query(empty, EnginioClient::ObjectAclOperation));
-    QVERIFY(client.query(objectTypeOnly, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.query(empty, EnginioClient::AccessControlOperation));
+    QVERIFY(client.query(objectTypeOnly, EnginioClient::AccessControlOperation));
     QVERIFY(client.query(empty, EnginioClient::UsergroupMembersOperation));
 
     QVERIFY(client.update(empty, EnginioClient::ObjectOperation));
-    QVERIFY(client.update(empty, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.update(empty, EnginioClient::AccessControlOperation));
     QVERIFY(client.update(objectTypeOnly, EnginioClient::ObjectOperation));
-    QVERIFY(client.update(objectTypeOnly, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.update(objectTypeOnly, EnginioClient::AccessControlOperation));
     QVERIFY(client.update(empty, EnginioClient::UsergroupMembersOperation));
 
     QVERIFY(client.remove(empty, EnginioClient::ObjectOperation));
-    QVERIFY(client.remove(empty, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.remove(empty, EnginioClient::AccessControlOperation));
     QVERIFY(client.remove(objectTypeOnly, EnginioClient::ObjectOperation));
-    QVERIFY(client.remove(objectTypeOnly, EnginioClient::ObjectAclOperation));
+    QVERIFY(client.remove(objectTypeOnly, EnginioClient::AccessControlOperation));
     QVERIFY(client.remove(empty, EnginioClient::UsergroupMembersOperation));
 
     QVERIFY(client.search(empty));
@@ -1273,7 +1273,7 @@ void tst_EnginioClient::acl()
     obj = response->data(); // so obj contains valid id
 
     // view acl of the object
-    reqId = client.query(obj, EnginioClient::ObjectAclOperation);
+    reqId = client.query(obj, EnginioClient::AccessControlOperation);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 2);
     response = spy[1][0].value<EnginioReply*>();
@@ -1299,7 +1299,7 @@ void tst_EnginioClient::acl()
     json = json.arg(id1, id2, id3);
     aclUpdate["access"] = QJsonDocument::fromJson(json.toUtf8()).object();
 
-    reqId = client.update(aclUpdate, EnginioClient::ObjectAclOperation);
+    reqId = client.update(aclUpdate, EnginioClient::AccessControlOperation);
     //![update-access]
 
     QVERIFY(reqId);
@@ -1344,7 +1344,7 @@ void tst_EnginioClient::acl()
     QVERIFY(valid);
 
     // view acl again to confirm the change on the server side
-    reqId = client.query(obj, EnginioClient::ObjectAclOperation);
+    reqId = client.query(obj, EnginioClient::AccessControlOperation);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 4);
     QCOMPARE(spyError.count(), 0);
@@ -1384,7 +1384,7 @@ void tst_EnginioClient::acl()
     }
     QVERIFY(valid);
     // it seems to work fine, let's delete the acl we created
-    reqId = client.remove(aclUpdate, EnginioClient::ObjectAclOperation);
+    reqId = client.remove(aclUpdate, EnginioClient::AccessControlOperation);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 5);
     QCOMPARE(spyError.count(), 0);

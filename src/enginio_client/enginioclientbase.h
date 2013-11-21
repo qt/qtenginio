@@ -70,7 +70,7 @@ public:
     enum Operation {
         // Do not forget to keep in sync with EnginioClientPrivate::Operation!
         ObjectOperation,
-        ObjectAclOperation,
+        AccessControlOperation,
         UserOperation,
         UsergroupOperation,
         UsergroupMembersOperation,

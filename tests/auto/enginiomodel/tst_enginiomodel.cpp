@@ -578,7 +578,7 @@ void tst_EnginioModel::multpleConnections()
 
         for (int i = 0; i < 20; ++i) {
             model.setOperation(EnginioClient::ObjectOperation);
-            model.setOperation(EnginioClient::ObjectAclOperation);
+            model.setOperation(EnginioClient::AccessControlOperation);
         }
 
         // The values here are not strict. Use qDebug() << model.counter; to see what

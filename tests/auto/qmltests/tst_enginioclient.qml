@@ -108,18 +108,18 @@ Item {
             var empty = {}
             var objectTypeOnly = {"objectType" : "objects.todos"}
             var replies = [ fake.query(empty, Enginio.ObjectOperation),
-                            fake.query(empty, Enginio.ObjectAclOperation),
-                            fake.query(objectTypeOnly, Enginio.ObjectAclOperation),
+                            fake.query(empty, Enginio.AccessControlOperation),
+                            fake.query(objectTypeOnly, Enginio.AccessControlOperation),
                             fake.query(empty, Enginio.UsergroupMembersOperation),
 
                             fake.update(empty, Enginio.ObjectOperation),
-                            fake.update(empty, Enginio.ObjectAclOperation),
-                            fake.update(objectTypeOnly, Enginio.ObjectAclOperation),
+                            fake.update(empty, Enginio.AccessControlOperation),
+                            fake.update(objectTypeOnly, Enginio.AccessControlOperation),
                             fake.update(empty, Enginio.UsergroupMembersOperation),
 
                             fake.remove(empty, Enginio.ObjectOperation),
-                            fake.remove(empty, Enginio.ObjectAclOperation),
-                            fake.remove(objectTypeOnly, Enginio.ObjectAclOperation),
+                            fake.remove(empty, Enginio.AccessControlOperation),
+                            fake.remove(objectTypeOnly, Enginio.AccessControlOperation),
                             fake.remove(empty, Enginio.UsergroupMembersOperation),
 
                             fake.search(empty),

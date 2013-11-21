@@ -198,8 +198,8 @@ Item {
             modelCreate.operation = Enginio.ObjectOperation
             verify(modelCreate.operation === Enginio.ObjectOperation)
 
-            modelCreate.operation = Enginio.ObjectAclOperation
-            verify(modelCreate.operation === Enginio.ObjectAclOperation)
+            modelCreate.operation = Enginio.AccessControlOperation
+            verify(modelCreate.operation === Enginio.AccessControlOperation)
         }
     }
 

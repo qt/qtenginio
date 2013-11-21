@@ -119,7 +119,7 @@ Module {
             name: "Operation"
             values: {
                 "ObjectOperation": 0,
-                "ObjectAclOperation": 1,
+                "AccessControlOperation": 1,
                 "UserOperation": 2,
                 "UsergroupOperation": 3,
                 "UsergroupMembersOperation": 4,

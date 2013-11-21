@@ -152,7 +152,7 @@ QT_BEGIN_NAMESPACE
     users.
 
     \value ObjectOperation Operate on objects
-    \value ObjectAclOperation Operate on the ACL
+    \value AccessControlOperation Operate on the ACL
     \value FileOperation Operate with files
     \value UserOperation Operate on users
     \value UsergroupOperation Operate on groups
