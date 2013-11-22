@@ -106,7 +106,7 @@
     only full words. To avoid founding substrings, for example in on object id, which is not visible for a user
     the search has to limit scanned property list, by "properties" array.
 
-    When the search query is constructed it is enough to call \l{EnginioClient::search}{search()}:
+    When the search query is constructed it is enough to call \l{EnginioClient::fullTextSearch()}{fullTextSearch()}:
     \snippet cloudaddressbook/addressbookmodel.cpp callSearch
     The result will be delivered to the searchResultsArrived slot. In which from result array all objects ids
     are gathered in \a markedItems set.
