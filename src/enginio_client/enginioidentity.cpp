@@ -311,6 +311,8 @@ void DisconnectConnection::operator ()() const
 }
 
 EnginioUserPassAuthenticationPrivate::~EnginioUserPassAuthenticationPrivate()
-{}
+{
+    cleanupConnections();
+}
 
 QT_END_NAMESPACE
