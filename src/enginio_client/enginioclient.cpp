@@ -50,6 +50,11 @@
 #include <QtNetwork/qnetworkaccessmanager.h>
 #include <QtNetwork/qnetworkreply.h>
 
+#if defined(ENGINIO_VALGRIND_DEBUG)
+#include <QtNetwork/qsslcipher.h>
+#include <QtNetwork/qsslconfiguration.h>
+#endif
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -201,6 +206,12 @@ EnginioClientConnectionPrivate::EnginioClientConnectionPrivate() :
     _authenticationState(EnginioClientConnection::NotAuthenticated)
 {
     assignNetworkManager();
+
+#if defined(ENGINIO_VALGRIND_DEBUG)
+    QSslConfiguration conf = QSslConfiguration::defaultConfiguration();
+    conf.setCiphers(QList<QSslCipher>() << QSslCipher(QStringLiteral("ECDHE-RSA-DES-CBC3-SHA"), QSsl::SslV3));
+    _request.setSslConfiguration(conf);
+#endif
 
     _request.setHeader(QNetworkRequest::ContentTypeHeader,
                           QStringLiteral("application/json"));
@@ -633,7 +644,7 @@ QSharedPointer<QNetworkAccessManager> EnginioClientConnectionPrivate::prepareNet
     qnam = NetworkManager->localData().toStrongRef();
     if (!qnam) {
         qnam = QSharedPointer<QNetworkAccessManager>(new QNetworkAccessManager());
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0) && !defined(QT_NO_SSL)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0) && !defined(QT_NO_SSL) && !defined(ENGINIO_VALGRIND_DEBUG)
         qnam->connectToHostEncrypted(EnginioString::apiEnginIo);
 #endif
         NetworkManager->setLocalData(qnam);

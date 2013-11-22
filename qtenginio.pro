@@ -19,3 +19,7 @@ contains(CONFIG, coverage) {
     warning("Test coverage is supported only through gcc")
   }
 }
+
+contains(DEFINES, ENGINIO_VALGRIND_DEBUG) {
+  warning("ENGINIO_VALGRIND_DEBUG is enabled, ssl cipher will be hardcoded, DO NOT USE IT IN PRODUCTION")
+}
