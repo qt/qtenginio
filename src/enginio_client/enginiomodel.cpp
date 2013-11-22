@@ -320,7 +320,7 @@ struct Types {
     typedef EnginioReply Reply;
     typedef EnginioModel Public;
     typedef EnginioClient Client;
-    typedef EnginioClientBasePrivate ClientPrivate;
+    typedef EnginioClientConnectionPrivate ClientPrivate;
     typedef QJsonObject Data;
 };
 
@@ -450,16 +450,16 @@ void EnginioModel::setQuery(const QJsonObject &query)
 /*!
   \property EnginioModelBase::operation
   \brief The operation type of the query
-  \sa EnginioClientBase::Operation, query()
+  \sa EnginioClientConnection::Operation, query()
   \return returns the Operation
 */
-EnginioClientBase::Operation EnginioModelBase::operation() const
+EnginioClientConnection::Operation EnginioModelBase::operation() const
 {
     Q_D(const EnginioModelBase);
     return d->operation();
 }
 
-void EnginioModelBase::setOperation(EnginioClientBase::Operation operation)
+void EnginioModelBase::setOperation(EnginioClientConnection::Operation operation)
 {
     Q_D(EnginioModelBase);
     if (operation == d->operation())
@@ -499,8 +499,8 @@ EnginioReply *EnginioModel::remove(int row)
     }
 
     if (unsigned(row) >= unsigned(d->rowCount())) {
-        EnginioClientBasePrivate *client = EnginioClientBasePrivate::get(d->enginio());
-        QNetworkReply *nreply = new EnginioFakeReply(client, EnginioClientBasePrivate::constructErrorMessage(EnginioString::EnginioModel_remove_row_is_out_of_range));
+        EnginioClientConnectionPrivate *client = EnginioClientConnectionPrivate::get(d->enginio());
+        QNetworkReply *nreply = new EnginioFakeReply(client, EnginioClientConnectionPrivate::constructErrorMessage(EnginioString::EnginioModel_remove_row_is_out_of_range));
         EnginioReply *ereply = new EnginioReply(client, nreply);
         return ereply;
     }
@@ -526,8 +526,8 @@ EnginioReply *EnginioModel::setData(int row, const QVariant &value, const QStrin
     }
 
     if (unsigned(row) >= unsigned(d->rowCount())) {
-        EnginioClientBasePrivate *client = EnginioClientBasePrivate::get(d->enginio());
-        QNetworkReply *nreply = new EnginioFakeReply(client, EnginioClientBasePrivate::constructErrorMessage(EnginioString::EnginioModel_setProperty_row_is_out_of_range));
+        EnginioClientConnectionPrivate *client = EnginioClientConnectionPrivate::get(d->enginio());
+        QNetworkReply *nreply = new EnginioFakeReply(client, EnginioClientConnectionPrivate::constructErrorMessage(EnginioString::EnginioModel_setProperty_row_is_out_of_range));
         EnginioReply *ereply = new EnginioReply(client, nreply);
         return ereply;
     }

@@ -53,7 +53,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class EnginioClientBasePrivate;
+class EnginioClientConnectionPrivate;
 class EnginioReplyBasePrivate;
 class ENGINIOCLIENT_EXPORT EnginioReplyBase: public QObject
 {
@@ -104,9 +104,9 @@ Q_SIGNALS:
     void progress(qint64 bytesSent, qint64 bytesTotal);
 
 protected:
-    EnginioReplyBase(EnginioClientBasePrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv);
+    EnginioReplyBase(EnginioClientConnectionPrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv);
     friend class EnginioClient;
-    friend class EnginioClientBasePrivate;
+    friend class EnginioClientConnectionPrivate;
 };
 
 Q_DECLARE_TYPEINFO(EnginioReplyBase::ErrorTypes, Q_PRIMITIVE_TYPE);

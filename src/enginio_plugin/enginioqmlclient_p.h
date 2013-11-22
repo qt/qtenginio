@@ -50,7 +50,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class EnginioQmlClientPrivate : public EnginioClientBasePrivate
+class EnginioQmlClientPrivate : public EnginioClientConnectionPrivate
 {
     QJSEngine *_engine;
     QJSValue _stringify;
@@ -62,8 +62,8 @@ public:
         : _engine(0)
     {}
 
-    static EnginioQmlClientPrivate* get(EnginioClientBase *client) { return static_cast<EnginioQmlClientPrivate*>(EnginioClientBasePrivate::get(client)); }
-    static EnginioQmlClient* get(EnginioClientBasePrivate *client) { return static_cast<EnginioQmlClient*>(client->q_ptr); }
+    static EnginioQmlClientPrivate* get(EnginioClientConnection *client) { return static_cast<EnginioQmlClientPrivate*>(EnginioClientConnectionPrivate::get(client)); }
+    static EnginioQmlClient* get(EnginioClientConnectionPrivate *client) { return static_cast<EnginioQmlClient*>(client->q_ptr); }
 
     virtual void init();
     virtual void emitSessionTerminated() const Q_DECL_OVERRIDE;

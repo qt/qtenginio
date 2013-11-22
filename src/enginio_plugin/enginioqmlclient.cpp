@@ -164,7 +164,7 @@ QT_BEGIN_NAMESPACE
 */
 
 EnginioQmlClient::EnginioQmlClient(QObject *parent)
-    : EnginioClientBase(*new EnginioQmlClientPrivate, parent)
+    : EnginioClientConnection(*new EnginioQmlClientPrivate, parent)
 {
     Q_D(EnginioQmlClient);
     d->init();
@@ -179,8 +179,8 @@ void EnginioQmlClientPrivate::init()
     qRegisterMetaType<EnginioQmlClient*>();
     qRegisterMetaType<EnginioQmlReply*>();
     QObject::connect(q, &EnginioQmlClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
-    QObject::connect(q, &EnginioQmlClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientBase::Authenticated));
-    QObject::connect(q, &EnginioQmlClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientBase::AuthenticationFailure));
+    QObject::connect(q, &EnginioQmlClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientConnection::Authenticated));
+    QObject::connect(q, &EnginioQmlClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientConnection::AuthenticationFailure));
 }
 
 EnginioQmlReply *EnginioQmlClient::fullTextSearch(const QJSValue &query)
@@ -188,7 +188,7 @@ EnginioQmlReply *EnginioQmlClient::fullTextSearch(const QJSValue &query)
     Q_D(EnginioQmlClient);
 
     ObjectAdaptor<QJSValue> o(query, d);
-    QNetworkReply *nreply = d->query<QJSValue>(o, EnginioClientBasePrivate::SearchOperation);
+    QNetworkReply *nreply = d->query<QJSValue>(o, EnginioClientConnectionPrivate::SearchOperation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
     return ereply;
 }
@@ -198,7 +198,7 @@ EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation 
     Q_D(EnginioQmlClient);
 
     ObjectAdaptor<QJSValue> o(query, d);
-    QNetworkReply *nreply = d->query<QJSValue>(o, static_cast<EnginioClientBasePrivate::Operation>(operation));
+    QNetworkReply *nreply = d->query<QJSValue>(o, static_cast<EnginioClientConnectionPrivate::Operation>(operation));
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
     return ereply;
 }

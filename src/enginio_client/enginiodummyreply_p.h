@@ -47,7 +47,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class EnginioClientBasePrivate;
+class EnginioClientConnectionPrivate;
 class EnginioReply;
 class ENGINIOCLIENT_EXPORT EnginioDummyReply : public QNetworkReply
 {

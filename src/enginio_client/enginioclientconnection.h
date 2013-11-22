@@ -39,8 +39,8 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOCLIENTBASE_H
-#define ENGINIOCLIENTBASE_H
+#ifndef ENGINIOCLIENTCONNECTION_H
+#define ENGINIOCLIENTCONNECTION_H
 
 #include <Enginio/enginioclient_global.h>
 #include <QObject>
@@ -53,9 +53,9 @@ QT_BEGIN_NAMESPACE
 
 class QNetworkAccessManager;
 class EnginioIdentity;
-class EnginioClientBasePrivate;
+class EnginioClientConnectionPrivate;
 
-class ENGINIOCLIENT_EXPORT EnginioClientBase : public QObject
+class ENGINIOCLIENT_EXPORT EnginioClientConnection : public QObject
 {
     Q_OBJECT
     Q_ENUMS(AuthenticationState)
@@ -84,7 +84,7 @@ public:
         FileOperation
     };
 
-    ~EnginioClientBase();
+    ~EnginioClientConnection();
 
 
     QByteArray backendId() const Q_REQUIRED_RESULT;
@@ -106,19 +106,19 @@ Q_SIGNALS:
     void identityChanged(EnginioIdentity *identity);
 
 protected:
-    explicit EnginioClientBase(EnginioClientBasePrivate &dd, QObject *parent);
+    explicit EnginioClientConnection(EnginioClientConnectionPrivate &dd, QObject *parent);
 
 private:
-    Q_DECLARE_PRIVATE(EnginioClientBase)
-    Q_DISABLE_COPY(EnginioClientBase)
+    Q_DECLARE_PRIVATE(EnginioClientConnection)
+    Q_DISABLE_COPY(EnginioClientConnection)
 };
 
-Q_DECLARE_TYPEINFO(EnginioClientBase::Operation, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(EnginioClientBase::AuthenticationState, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(EnginioClientConnection::Operation, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(EnginioClientConnection::AuthenticationState, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(EnginioClientBase::Operation)
-Q_DECLARE_METATYPE(EnginioClientBase::AuthenticationState)
+Q_DECLARE_METATYPE(EnginioClientConnection::Operation)
+Q_DECLARE_METATYPE(EnginioClientConnection::AuthenticationState)
 
-#endif // ENGINIOCLIENTBASE_H
+#endif // ENGINIOCLIENTCONNECTION_H

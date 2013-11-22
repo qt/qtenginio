@@ -53,7 +53,7 @@
 QT_BEGIN_NAMESPACE
 
 class EnginioClient;
-class EnginioClientBasePrivate;
+class EnginioClientConnectionPrivate;
 class EnginioReply;
 class QTcpSocket;
 
@@ -120,7 +120,7 @@ public:
     explicit EnginioBackendConnection(QObject *parent = 0);
 
     bool isConnected() { return _protocolDecodeState > HandshakePending; }
-    void connectToBackend(EnginioClientBasePrivate *client, const QJsonObject& messageFilter = QJsonObject());
+    void connectToBackend(EnginioClientConnectionPrivate *client, const QJsonObject& messageFilter = QJsonObject());
     void connectToBackend(EnginioClient *client, const QJsonObject& messageFilter = QJsonObject());
 
     void close(WebSocketCloseStatus closeStatus = NormalCloseStatus);

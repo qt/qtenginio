@@ -55,7 +55,7 @@ class ENGINIOCLIENT_EXPORT EnginioFakeReply : public QNetworkReply
     Q_OBJECT
     QByteArray _msg;
 public:
-    explicit EnginioFakeReply(EnginioClientBasePrivate *parent, const QByteArray &msg);
+    explicit EnginioFakeReply(EnginioClientConnectionPrivate *parent, const QByteArray &msg);
     explicit EnginioFakeReply(QObject *parent, const QByteArray &msg);
 
     virtual void abort() Q_DECL_OVERRIDE;

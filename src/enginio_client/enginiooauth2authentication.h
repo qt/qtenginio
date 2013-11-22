@@ -70,8 +70,8 @@ Q_SIGNALS:
     void passwordChanged(const QString &password);
 
 protected:
-    virtual void prepareSessionToken(EnginioClientBasePrivate *enginio) Q_DECL_OVERRIDE;
-    virtual void removeSessionToken(EnginioClientBasePrivate *enginio) Q_DECL_OVERRIDE;
+    virtual void prepareSessionToken(EnginioClientConnectionPrivate *enginio) Q_DECL_OVERRIDE;
+    virtual void removeSessionToken(EnginioClientConnectionPrivate *enginio) Q_DECL_OVERRIDE;
 };
 
 QT_END_NAMESPACE

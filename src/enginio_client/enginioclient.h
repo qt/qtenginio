@@ -43,7 +43,7 @@
 #define ENGINIOCLIENT_H
 
 #include <Enginio/enginioclient_global.h>
-#include <Enginio/enginioclientbase.h>
+#include <Enginio/enginioclientconnection.h>
 #include <QtCore/qjsonobject.h>
 
 QT_BEGIN_NAMESPACE
@@ -52,12 +52,12 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class EnginioReply;
 class EnginioClientPrivate;
-class ENGINIOCLIENT_EXPORT EnginioClient : public EnginioClientBase
+class ENGINIOCLIENT_EXPORT EnginioClient : public EnginioClientConnection
 {
     Q_OBJECT
 
-    Q_ENUMS(EnginioClientBase::Operation); // TODO remove me QTBUG-33577
-    Q_ENUMS(EnginioClientBase::AuthenticationState); // TODO remove me QTBUG-33577
+    Q_ENUMS(EnginioClientConnection::Operation); // TODO remove me QTBUG-33577
+    Q_ENUMS(EnginioClientConnection::AuthenticationState); // TODO remove me QTBUG-33577
 
     Q_DECLARE_PRIVATE(EnginioClient)
 public:

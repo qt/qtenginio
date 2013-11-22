@@ -82,12 +82,12 @@ QT_BEGIN_NAMESPACE
     }
 
 #define CHECK_AND_SET_PATH(Url, Object, Operation) \
-    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientBasePrivate::Default)
+    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientConnectionPrivate::Default)
 
 #define CHECK_AND_SET_PATH_WITH_ID(Url, Object, Operation) \
-    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientBasePrivate::IncludeIdInPath)
+    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientConnectionPrivate::IncludeIdInPath)
 
-class ENGINIOCLIENT_EXPORT EnginioClientBasePrivate : public QObjectPrivate
+class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivate
 {
     enum PathOptions { Default, IncludeIdInPath = 1};
 
@@ -213,10 +213,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientBasePrivate : public QObjectPrivate
 
     class ReplyFinishedFunctor
     {
-        EnginioClientBasePrivate *d;
+        EnginioClientConnectionPrivate *d;
 
     public:
-        ReplyFinishedFunctor(EnginioClientBasePrivate *enginio)
+        ReplyFinishedFunctor(EnginioClientConnectionPrivate *enginio)
             : d(enginio)
         {
             Q_ASSERT(d);
@@ -230,11 +230,11 @@ class ENGINIOCLIENT_EXPORT EnginioClientBasePrivate : public QObjectPrivate
 
     class CallPrepareSessionToken
     {
-        EnginioClientBasePrivate *_enginio;
+        EnginioClientConnectionPrivate *_enginio;
         EnginioIdentity *_identity;
 
     public:
-        CallPrepareSessionToken(EnginioClientBasePrivate *enginio, EnginioIdentity *identity)
+        CallPrepareSessionToken(EnginioClientConnectionPrivate *enginio, EnginioIdentity *identity)
             : _enginio(enginio)
             , _identity(identity)
         {}
@@ -249,10 +249,10 @@ class ENGINIOCLIENT_EXPORT EnginioClientBasePrivate : public QObjectPrivate
 
     class IdentityInstanceDestroyed
     {
-        EnginioClientBasePrivate *_enginio;
+        EnginioClientConnectionPrivate *_enginio;
 
     public:
-        IdentityInstanceDestroyed(EnginioClientBasePrivate *enginio)
+        IdentityInstanceDestroyed(EnginioClientConnectionPrivate *enginio)
             : _enginio(enginio)
         {}
         void operator ()()
@@ -261,14 +261,14 @@ class ENGINIOCLIENT_EXPORT EnginioClientBasePrivate : public QObjectPrivate
         }
     };
 
-    Q_DECLARE_PUBLIC(EnginioClientBase)
+    Q_DECLARE_PUBLIC(EnginioClientConnection)
 protected:
     class AuthenticationStateTrackerFunctor
     {
-        EnginioClientBasePrivate *_enginio;
-        EnginioClientBase::AuthenticationState _state;
+        EnginioClientConnectionPrivate *_enginio;
+        EnginioClientConnection::AuthenticationState _state;
     public:
-        AuthenticationStateTrackerFunctor(EnginioClientBasePrivate *enginio, EnginioClientBase::AuthenticationState state = EnginioClient::NotAuthenticated)
+        AuthenticationStateTrackerFunctor(EnginioClientConnectionPrivate *enginio, EnginioClientConnection::AuthenticationState state = EnginioClient::NotAuthenticated)
             : _enginio(enginio)
             , _state(state)
         {}
@@ -281,13 +281,13 @@ protected:
 
 public:
     enum Operation {
-        // Do not forget to keep in sync with EnginioClientBase::Operation!
-        ObjectOperation = EnginioClientBase::ObjectOperation,
-        AccessControlOperation = EnginioClientBase::AccessControlOperation,
-        UserOperation = EnginioClientBase::UserOperation,
-        UsergroupOperation = EnginioClientBase::UsergroupOperation,
-        UsergroupMemberOperation = EnginioClientBase::UsergroupMembersOperation,
-        FileOperation = EnginioClientBase::FileOperation,
+        // Do not forget to keep in sync with EnginioClientConnection::Operation!
+        ObjectOperation = EnginioClientConnection::ObjectOperation,
+        AccessControlOperation = EnginioClientConnection::AccessControlOperation,
+        UserOperation = EnginioClientConnection::UserOperation,
+        UsergroupOperation = EnginioClientConnection::UsergroupOperation,
+        UsergroupMemberOperation = EnginioClientConnection::UsergroupMembersOperation,
+        FileOperation = EnginioClientConnection::FileOperation,
 
         // private
         SessionOperation,
@@ -298,12 +298,12 @@ public:
 
     Q_ENUMS(Operation)
 
-    EnginioClientBasePrivate();
-    virtual ~EnginioClientBasePrivate();
-    static EnginioClientBasePrivate* get(EnginioClientBase *client) { return client->d_func(); }
-    static const EnginioClientBasePrivate* get(const EnginioClientBase *client) { return client->d_func(); }
-    static EnginioClient* get(EnginioClientBasePrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
-    static const EnginioClient* get(const EnginioClientBasePrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
+    EnginioClientConnectionPrivate();
+    virtual ~EnginioClientConnectionPrivate();
+    static EnginioClientConnectionPrivate* get(EnginioClientConnection *client) { return client->d_func(); }
+    static const EnginioClientConnectionPrivate* get(const EnginioClientConnection *client) { return client->d_func(); }
+    static EnginioClient* get(EnginioClientConnectionPrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
+    static const EnginioClient* get(const EnginioClientConnectionPrivate *client) { return static_cast<EnginioClient*>(client->q_ptr); }
 
     static QByteArray constructErrorMessage(const QByteArray &msg);
 
@@ -323,7 +323,7 @@ public:
     QMap<QNetworkReply*, QPair<QIODevice*, qint64> > _chunkedUploads;
     qint64 _uploadChunkSize;
     QJsonObject _identityToken;
-    EnginioClientBase::AuthenticationState _authenticationState;
+    EnginioClientConnection::AuthenticationState _authenticationState;
 
     QSet<EnginioReplyBase*> _delayedReplies; // Used only for testing
 
@@ -332,16 +332,16 @@ public:
     void replyFinished(QNetworkReply *nreply);
     bool finishDelayedReplies();
 
-    void setAuthenticationState(const EnginioClientBase::AuthenticationState state)
+    void setAuthenticationState(const EnginioClientConnection::AuthenticationState state)
     {
-        Q_Q(EnginioClientBase);
+        Q_Q(EnginioClientConnection);
         if (_authenticationState == state)
             return;
         _authenticationState = state;
         emit q->authenticationStateChanged(state);
     }
 
-    EnginioClientBase::AuthenticationState authenticationState() const Q_REQUIRED_RESULT
+    EnginioClientConnection::AuthenticationState authenticationState() const Q_REQUIRED_RESULT
     {
         return _authenticationState;
     }
@@ -371,7 +371,7 @@ public:
 
     void setIdentity(EnginioIdentity *identity)
     {
-        Q_Q(EnginioClientBase);
+        Q_Q(EnginioClientConnection);
         foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
             QObject::disconnect(identityConnection);
         _identityConnections.clear();
@@ -385,7 +385,7 @@ public:
         _identity = identity;
         CallPrepareSessionToken callPrepareSessionToken(this, identity);
         if (_backendId.isEmpty()) {
-            _identityConnections.append(QObject::connect(q, &EnginioClientBase::backendIdChanged, callPrepareSessionToken));
+            _identityConnections.append(QObject::connect(q, &EnginioClientConnection::backendIdChanged, callPrepareSessionToken));
         } else
             identity->prepareSessionToken(this);
         _identityConnections.append(QObject::connect(identity, &EnginioIdentity::dataChanged, callPrepareSessionToken));
@@ -397,7 +397,7 @@ public:
     {
         Q_ASSERT(!url.isEmpty());
         Q_ASSERT(!httpOperation.isEmpty());
-        Q_ASSERT_X(url.host() == _serviceUrl.host(), "EnginioClientBase::customRequest", "Missmatch between hosts was detected");
+        Q_ASSERT_X(url.host() == _serviceUrl.host(), "EnginioClientConnection::customRequest", "Missmatch between hosts was detected");
 
         QNetworkRequest req = prepareRequest(url);
 
@@ -435,7 +435,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *update(const ObjectAdaptor<T> &object, const EnginioClientBase::Operation operation)
+    QNetworkReply *update(const ObjectAdaptor<T> &object, const EnginioClientConnection::Operation operation)
     {
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
@@ -453,7 +453,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *remove(const ObjectAdaptor<T> &object, const EnginioClientBase::Operation operation)
+    QNetworkReply *remove(const ObjectAdaptor<T> &object, const EnginioClientConnection::Operation operation)
     {
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
@@ -463,7 +463,7 @@ public:
         QNetworkReply *reply = 0;
         QByteArray data;
 #if 1 // QT_VERSION < QT_VERSION_CHECK(5, 4, 0) ?
-        if (operation != EnginioClientBase::AccessControlOperation)
+        if (operation != EnginioClientConnection::AccessControlOperation)
             reply = networkManager()->deleteResource(req);
         else {
             data = object[dataPropertyName].toJson();
@@ -488,7 +488,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *create(const ObjectAdaptor<T> &object, const EnginioClientBase::Operation operation)
+    QNetworkReply *create(const ObjectAdaptor<T> &object, const EnginioClientConnection::Operation operation)
     {
         QUrl url(_serviceUrl);
 
@@ -631,7 +631,7 @@ public:
     class UploadProgressFunctor
     {
     public:
-        UploadProgressFunctor(EnginioClientBasePrivate *client, QNetworkReply *reply)
+        UploadProgressFunctor(EnginioClientConnectionPrivate *client, QNetworkReply *reply)
             : _client(client), _reply(reply)
         {
             Q_ASSERT(_client);
@@ -653,7 +653,7 @@ public:
             emit ereply->progress(progress, total);
         }
     private:
-        EnginioClientBasePrivate *_client;
+        EnginioClientConnectionPrivate *_client;
         QNetworkReply *_reply;
     };
 

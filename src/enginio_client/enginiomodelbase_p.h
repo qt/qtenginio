@@ -257,7 +257,7 @@ public:
 
 class ENGINIOCLIENT_EXPORT EnginioModelBasePrivate : public QAbstractItemModelPrivate {
 protected:
-    EnginioClientBasePrivate *_enginio;
+    EnginioClientConnectionPrivate *_enginio;
     EnginioClient::Operation _operation;
     EnginioModelBase *q;
     QVector<QMetaObject::Connection> _clientConnections;
@@ -319,7 +319,7 @@ protected:
             _connection = (EnginioBackendConnection*)-1;
         }
 
-        void connectToBackend(EnginioModelBasePrivate *model, EnginioClientBasePrivate *enginio, const QJsonObject &filter)
+        void connectToBackend(EnginioModelBasePrivate *model, EnginioClientConnectionPrivate *enginio, const QJsonObject &filter)
         {
             if (qintptr(_connection) == -1)
                 return;
@@ -475,7 +475,7 @@ public:
 
         void markAsError(QByteArray msg)
         {
-            EnginioFakeReply *nreply = new EnginioFakeReply(_reply, EnginioClientBasePrivate::constructErrorMessage(msg));
+            EnginioFakeReply *nreply = new EnginioFakeReply(_reply, EnginioClientConnectionPrivate::constructErrorMessage(msg));
             _reply->setNetworkReply(nreply);
         }
 
@@ -574,15 +574,15 @@ public:
         return setData(row, value, key);
     }
 
-    EnginioClientBase::Operation operation() const Q_REQUIRED_RESULT
+    EnginioClientConnection::Operation operation() const Q_REQUIRED_RESULT
     {
         return _operation;
     }
 
     void setOperation(const int operation)
     {
-        Q_ASSERT_X(operation >= EnginioClientBase::ObjectOperation, "setOperation", "Invalid operation specified.");
-        _operation = static_cast<EnginioClientBase::Operation>(operation);
+        Q_ASSERT_X(operation >= EnginioClientConnection::ObjectOperation, "setOperation", "Invalid operation specified.");
+        _operation = static_cast<EnginioClientConnection::Operation>(operation);
         emit q->operationChanged(_operation);
     }
 
@@ -601,7 +601,7 @@ public:
             // send full query
             QJsonObject query = queryAsJson();
             ObjectAdaptor<QJsonObject> aQuery(query);
-            QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientBasePrivate::Operation>(_operation));
+            QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientConnectionPrivate::Operation>(_operation));
             EnginioReplyBase *ereply = _enginio->createReply(nreply);
             if (_canFetchMore)
                 _latestRequestedOffset = query[EnginioString::limit].toDouble();
@@ -782,7 +782,7 @@ public:
                 return setDataDelyed(row, value, role, oldObject);
             return setDataNow(row, value, role, oldObject, id);
         }
-        QNetworkReply *nreply = new EnginioFakeReply(_enginio, EnginioClientBasePrivate::constructErrorMessage(EnginioString::EnginioModel_Trying_to_update_an_object_with_unknown_role));
+        QNetworkReply *nreply = new EnginioFakeReply(_enginio, EnginioClientConnectionPrivate::constructErrorMessage(EnginioString::EnginioModel_Trying_to_update_an_object_with_unknown_role));
         EnginioReplyBase *ereply = _enginio->createReply(nreply);
         return ereply;
     }
@@ -895,7 +895,7 @@ public:
         qDebug() << Q_FUNC_INFO << query;
         _latestRequestedOffset += limit;
         ObjectAdaptor<QJsonObject> aQuery(query);
-        QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientBasePrivate::Operation>(_operation));
+        QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientConnectionPrivate::Operation>(_operation));
         EnginioReplyBase *ereply = _enginio->createReply(nreply);
         QObject::connect(ereply, &EnginioReplyBase::dataChanged, ereply, &EnginioReplyBase::deleteLater);
         FinishedIncrementalUpdateRequest finishedRequest = { this, query, ereply };
@@ -954,7 +954,7 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
         return _enginio ? ClientPrivate::get(_enginio) : 0;
     }
 
-    void setClient(const EnginioClientBase *enginio)
+    void setClient(const EnginioClientConnection *enginio)
     {
         if (_enginio) {
             foreach (const QMetaObject::Connection &connection, _clientConnections)
@@ -962,14 +962,14 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
             _clientConnections.clear();
         }
         if (enginio) {
-            _enginio = EnginioClientBasePrivate::get(const_cast<EnginioClientBase*>(enginio));
+            _enginio = EnginioClientConnectionPrivate::get(const_cast<EnginioClientConnection*>(enginio));
             _clientConnections.append(QObject::connect(enginio, &QObject::destroyed, EnginioDestroyed(this)));
-            _clientConnections.append(QObject::connect(enginio, &EnginioClientBase::backendIdChanged, QueryChanged(this)));
+            _clientConnections.append(QObject::connect(enginio, &EnginioClientConnection::backendIdChanged, QueryChanged(this)));
         } else {
             _enginio = 0;
         }
 
-        q()->clientChanged(static_cast<Client*>(const_cast<EnginioClientBase*>(enginio)));
+        q()->clientChanged(static_cast<Client*>(const_cast<EnginioClientConnection*>(enginio)));
     }
 
     Data query() Q_REQUIRED_RESULT

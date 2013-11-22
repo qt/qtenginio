@@ -67,7 +67,7 @@ QT_BEGIN_NAMESPACE
   \brief EnginioClient handles all communication with the Enginio server
 
   The Enginio server supports several separate "backends" with each account.
-  By setting the \l EnginioClientBase::backendId a backend is chosen.
+  By setting the \l EnginioClientConnection::backendId a backend is chosen.
   After setting the ID interaction with the server is possible.
   The information about the backend is available on the Enginio Dashboard
   after logging in to \l {http://engin.io}{Enginio}.
@@ -111,12 +111,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \property EnginioClientBase::authenticationState
+  \property EnginioClientConnection::authenticationState
   \brief The state of the authentication.
 
   Enginio provides convenient user management.
   The authentication state reflects whether the current user is authenticated.
-  \sa AuthenticationState EnginioClientBase::identity() EnginioOAuth2Authentication
+  \sa AuthenticationState EnginioClientConnection::identity() EnginioOAuth2Authentication
 */
 
 /*!
@@ -133,17 +133,17 @@ QT_BEGIN_NAMESPACE
   \brief Emitted when a user login fails.
 
   The \a reply contains the details about why the login failed.
-  \sa sessionAuthenticated(), EnginioReply EnginioClientBase::identity() EnginioOAuth2Authentication
+  \sa sessionAuthenticated(), EnginioReply EnginioClientConnection::identity() EnginioOAuth2Authentication
 */
 
 /*!
   \fn EnginioClient::sessionTerminated() const
   \brief Emitted when a user logs out.
-  \sa EnginioClientBase::identity() EnginioOAuth2Authentication
+  \sa EnginioClientConnection::identity() EnginioOAuth2Authentication
 */
 
 /*!
-    \enum EnginioClientBase::Operation
+    \enum EnginioClientConnection::Operation
 
     Enginio has a unified API for several \c operations.
     For example when using query(), the default is \c ObjectOperation,
@@ -160,7 +160,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \enum EnginioClientBase::AuthenticationState
+    \enum EnginioClientConnection::AuthenticationState
 
     This enum describes the state of the user authentication.
     \value NotAuthenticated No attempt to authenticate was made
@@ -173,7 +173,7 @@ QT_BEGIN_NAMESPACE
 
 ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
 
-QNetworkRequest EnginioClientBasePrivate::prepareRequest(const QUrl &url)
+QNetworkRequest EnginioClientConnectionPrivate::prepareRequest(const QUrl &url)
 {
     QByteArray requestId = QUuid::createUuid().toByteArray();
 
@@ -193,12 +193,12 @@ QNetworkRequest EnginioClientBasePrivate::prepareRequest(const QUrl &url)
     return req;
 }
 
-EnginioClientBasePrivate::EnginioClientBasePrivate() :
+EnginioClientConnectionPrivate::EnginioClientConnectionPrivate() :
     _identity(),
     _serviceUrl(EnginioString::apiEnginIo),
     _networkManager(),
     _uploadChunkSize(512 * 1024),
-    _authenticationState(EnginioClientBase::NotAuthenticated)
+    _authenticationState(EnginioClientConnection::NotAuthenticated)
 {
     assignNetworkManager();
 
@@ -206,14 +206,14 @@ EnginioClientBasePrivate::EnginioClientBasePrivate() :
                           QStringLiteral("application/json"));
 }
 
-void EnginioClientBasePrivate::init()
+void EnginioClientConnectionPrivate::init()
 {
     QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
-    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientBase::Authenticated));
-    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientBase::AuthenticationFailure));
+    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientConnection::Authenticated));
+    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientConnection::AuthenticationFailure));
 }
 
-void EnginioClientBasePrivate::replyFinished(QNetworkReply *nreply)
+void EnginioClientConnectionPrivate::replyFinished(QNetworkReply *nreply)
 {
     EnginioReplyBase *ereply = _replyReplyMap.take(nreply);
 
@@ -259,7 +259,7 @@ void EnginioClientBasePrivate::replyFinished(QNetworkReply *nreply)
     }
 }
 
-bool EnginioClientBasePrivate::finishDelayedReplies()
+bool EnginioClientConnectionPrivate::finishDelayedReplies()
 {
     // search if we can trigger an old finished signal.
     bool needToReevaluate = false;
@@ -280,7 +280,7 @@ bool EnginioClientBasePrivate::finishDelayedReplies()
     return !_delayedReplies.isEmpty();
 }
 
-EnginioClientBasePrivate::~EnginioClientBasePrivate()
+EnginioClientConnectionPrivate::~EnginioClientConnectionPrivate()
 {
     foreach (const QMetaObject::Connection &identityConnection, _identityConnections)
         QObject::disconnect(identityConnection);
@@ -289,7 +289,7 @@ EnginioClientBasePrivate::~EnginioClientBasePrivate()
     QObject::disconnect(_networkManagerConnection);
 }
 
-class EnginioClientPrivate: public EnginioClientBasePrivate {
+class EnginioClientPrivate: public EnginioClientConnectionPrivate {
 public:
     EnginioClientPrivate()
     {}
@@ -299,7 +299,7 @@ public:
   \brief Creates a new EnginioClient with \a parent as QObject parent.
 */
 EnginioClient::EnginioClient(QObject *parent)
-    : EnginioClientBase(*new EnginioClientPrivate, parent)
+    : EnginioClientConnection(*new EnginioClientPrivate, parent)
 {
     Q_D(EnginioClient);
     d->init();
@@ -314,7 +314,7 @@ EnginioClient::~EnginioClient()
 {}
 
 /*!
- * \property EnginioClientBase::backendId
+ * \property EnginioClientConnection::backendId
  * \brief The unique ID for the used Enginio backend.
  *
  * The backend ID determines which Enginio backend is used
@@ -323,15 +323,15 @@ EnginioClient::~EnginioClient()
  * It is possible to use several Enginio backends simultaneously
  * by having several instances of EnginioClient.
  */
-QByteArray EnginioClientBase::backendId() const
+QByteArray EnginioClientConnection::backendId() const
 {
-    Q_D(const EnginioClientBase);
+    Q_D(const EnginioClientConnection);
     return d->_backendId;
 }
 
-void EnginioClientBase::setBackendId(const QByteArray &backendId)
+void EnginioClientConnection::setBackendId(const QByteArray &backendId)
 {
-    Q_D(EnginioClientBase);
+    Q_D(EnginioClientConnection);
     if (d->_backendId != backendId) {
         d->_backendId = backendId;
         d->_request.setRawHeader("Enginio-Backend-Id", d->_backendId);
@@ -340,7 +340,7 @@ void EnginioClientBase::setBackendId(const QByteArray &backendId)
 }
 
 /*!
-  \property EnginioClientBase::serviceUrl
+  \property EnginioClientConnection::serviceUrl
   \brief Enginio backend URL.
   \internal
 
@@ -349,25 +349,25 @@ void EnginioClientBase::setBackendId(const QByteArray &backendId)
 */
 
 /*!
-  \fn EnginioClientBase::serviceUrlChanged(const QUrl &url)
+  \fn EnginioClientConnection::serviceUrlChanged(const QUrl &url)
   \internal
 */
 
 /*!
   \internal
 */
-QUrl EnginioClientBase::serviceUrl() const
+QUrl EnginioClientConnection::serviceUrl() const
 {
-    Q_D(const EnginioClientBase);
+    Q_D(const EnginioClientConnection);
     return d->_serviceUrl;
 }
 
 /*!
     \internal
 */
-void EnginioClientBase::setServiceUrl(const QUrl &serviceUrl)
+void EnginioClientConnection::setServiceUrl(const QUrl &serviceUrl)
 {
-    Q_D(EnginioClientBase);
+    Q_D(EnginioClientConnection);
     if (d->_serviceUrl != serviceUrl) {
         d->_serviceUrl = serviceUrl;
         emit serviceUrlChanged(serviceUrl);
@@ -380,9 +380,9 @@ void EnginioClientBase::setServiceUrl(const QUrl &serviceUrl)
   \note that this QNetworkAccessManager may be shared with other EnginioClient instances
   and it is owned by them.
 */
-QNetworkAccessManager *EnginioClientBase::networkManager() const
+QNetworkAccessManager *EnginioClientConnection::networkManager() const
 {
-    Q_D(const EnginioClientBase);
+    Q_D(const EnginioClientConnection);
     return d->networkManager();
 }
 
@@ -423,7 +423,7 @@ EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->query<QJsonObject>(query, EnginioClientBasePrivate::SearchOperation);
+    QNetworkReply *nreply = d->query<QJsonObject>(query, EnginioClientConnectionPrivate::SearchOperation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     return ereply;
 }
@@ -438,13 +438,13 @@ EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
   \snippet enginioclient/tst_enginioclient.cpp query-todo
 
   \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), update(), remove(), EnginioClientBase::Operation
+  \sa EnginioReply, create(), update(), remove(), EnginioClientConnection::Operation
  */
 EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation operation)
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->query<QJsonObject>(query, static_cast<EnginioClientBasePrivate::Operation>(operation));
+    QNetworkReply *nreply = d->query<QJsonObject>(query, static_cast<EnginioClientConnectionPrivate::Operation>(operation));
     EnginioReply *ereply = new EnginioReply(d, nreply);
 
     return ereply;
@@ -453,7 +453,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
 /*!
   \brief Insert a new \a object into the database.
 
-  The \a operation is the area in which the object gets created. It defaults to \l EnginioClientBase::ObjectOperation
+  The \a operation is the area in which the object gets created. It defaults to \l EnginioClientConnection::ObjectOperation
   to create new objects by default.
 
   \snippet enginioclient/tst_enginioclient.cpp create-todo
@@ -484,7 +484,7 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation o
 /*!
   \brief Update an existing \a object in the database.
 
-  The \a operation is the area in which the object gets created. It defaults to \l EnginioClientBase::ObjectOperation
+  The \a operation is the area in which the object gets created. It defaults to \l EnginioClientConnection::ObjectOperation
   to create new objects by default.
 
   To update access control list of an object the JSON loook like this:
@@ -516,7 +516,7 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
 /*!
   \brief Remove an existing \a object from the database.
 
-  The \a operation is the area in which the object gets created. It defaults to \l EnginioClientBase::ObjectOperation
+  The \a operation is the area in which the object gets created. It defaults to \l EnginioClientConnection::ObjectOperation
   to create new objects by default.
 
   \snippet enginioclient/tst_enginioclient.cpp remove-todo
@@ -535,23 +535,23 @@ EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation o
 }
 
 /*!
-  \property EnginioClientBase::identity
+  \property EnginioClientConnection::identity
   Property that represents a user. Setting the property will create an asynchronous authentication request,
-  the result of it updates \l{EnginioClientBase::authenticationState()}{authenticationState}
+  the result of it updates \l{EnginioClientConnection::authenticationState()}{authenticationState}
   EnginioClient does not take ownership of the \a identity object. The object
   has to be valid to keep the authenticated session alive. When the identity object is deleted the session
   is terminated. It is allowed to assign a null pointer to the property to terminate the session.
   \sa EnginioIdentity EnginioOAuth2Authentication
 */
-EnginioIdentity *EnginioClientBase::identity() const
+EnginioIdentity *EnginioClientConnection::identity() const
 {
-    Q_D(const EnginioClientBase);
+    Q_D(const EnginioClientConnection);
     return d->identity();
 }
 
-void EnginioClientBase::setIdentity(EnginioIdentity *identity)
+void EnginioClientConnection::setIdentity(EnginioIdentity *identity)
 {
-    Q_D(EnginioClientBase);
+    Q_D(EnginioClientConnection);
     if (d->_identity == identity)
         return;
     d->setIdentity(identity);
@@ -619,15 +619,15 @@ EnginioReply* EnginioClient::downloadUrl(const QJsonObject &object)
 
 Q_GLOBAL_STATIC(QThreadStorage<QWeakPointer<QNetworkAccessManager> >, NetworkManager)
 
-void EnginioClientBasePrivate::assignNetworkManager()
+void EnginioClientConnectionPrivate::assignNetworkManager()
 {
     Q_ASSERT(!_networkManager);
 
     _networkManager = prepareNetworkManagerInThread();
-    _networkManagerConnection = QObject::connect(_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientBasePrivate::ReplyFinishedFunctor(this));
+    _networkManagerConnection = QObject::connect(_networkManager.data(), &QNetworkAccessManager::finished, EnginioClientConnectionPrivate::ReplyFinishedFunctor(this));
 }
 
-QSharedPointer<QNetworkAccessManager> EnginioClientBasePrivate::prepareNetworkManagerInThread()
+QSharedPointer<QNetworkAccessManager> EnginioClientConnectionPrivate::prepareNetworkManagerInThread()
 {
     QSharedPointer<QNetworkAccessManager> qnam;
     qnam = NetworkManager->localData().toStrongRef();
@@ -641,9 +641,9 @@ QSharedPointer<QNetworkAccessManager> EnginioClientBasePrivate::prepareNetworkMa
     return qnam;
 }
 
-EnginioClientBase::AuthenticationState EnginioClientBase::authenticationState() const
+EnginioClientConnection::AuthenticationState EnginioClientConnection::authenticationState() const
 {
-    Q_D(const EnginioClientBase);
+    Q_D(const EnginioClientConnection);
     return d->authenticationState();
 }
 
@@ -652,16 +652,16 @@ EnginioClientBase::AuthenticationState EnginioClientBase::authenticationState() 
   Tries to emit finished signal from all replies that used to be delayed.
   \return false if all replies were finished, true otherwise.
 */
-bool EnginioClientBase::finishDelayedReplies()
+bool EnginioClientConnection::finishDelayedReplies()
 {
-    Q_D(EnginioClientBase);
+    Q_D(EnginioClientConnection);
     return d->finishDelayedReplies();
 }
 
 /*!
   \internal
 */
-EnginioClientBase::EnginioClientBase(EnginioClientBasePrivate &dd, QObject *parent)
+EnginioClientConnection::EnginioClientConnection(EnginioClientConnectionPrivate &dd, QObject *parent)
     : QObject(dd, parent)
 {
     qRegisterMetaType<EnginioClient*>();
@@ -669,44 +669,44 @@ EnginioClientBase::EnginioClientBase(EnginioClientBasePrivate &dd, QObject *pare
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
     qRegisterMetaType<EnginioOAuth2Authentication*>();
-    qRegisterMetaType<EnginioClientBase::Operation>();
-    qRegisterMetaType<EnginioClientBase::AuthenticationState>();
+    qRegisterMetaType<EnginioClientConnection::Operation>();
+    qRegisterMetaType<EnginioClientConnection::AuthenticationState>();
 }
 
-EnginioClientBase::~EnginioClientBase()
+EnginioClientConnection::~EnginioClientConnection()
 {}
 
-void EnginioClientBasePrivate::emitSessionTerminated() const
+void EnginioClientConnectionPrivate::emitSessionTerminated() const
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionTerminated();
 }
 
-void EnginioClientBasePrivate::emitSessionAuthenticated(EnginioReplyBase *reply)
+void EnginioClientConnectionPrivate::emitSessionAuthenticated(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticated(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientBasePrivate::emitSessionAuthenticationError(EnginioReplyBase *reply)
+void EnginioClientConnectionPrivate::emitSessionAuthenticationError(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticationError(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientBasePrivate::emitFinished(EnginioReplyBase *reply)
+void EnginioClientConnectionPrivate::emitFinished(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->finished(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientBasePrivate::emitError(EnginioReplyBase *reply)
+void EnginioClientConnectionPrivate::emitError(EnginioReplyBase *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->error(static_cast<EnginioReply*>(reply));
 }
 
-EnginioReplyBase *EnginioClientBasePrivate::createReply(QNetworkReply *nreply)
+EnginioReplyBase *EnginioClientConnectionPrivate::createReply(QNetworkReply *nreply)
 {
     return new EnginioReply(this, nreply);
 }
 
-QByteArray EnginioClientBasePrivate::constructErrorMessage(const QByteArray &msg)
+QByteArray EnginioClientConnectionPrivate::constructErrorMessage(const QByteArray &msg)
 {
     static QByteArray msgBegin = QByteArrayLiteral("{\"errors\": [{\"message\": \"");
     static QByteArray msgEnd = QByteArrayLiteral("\",\"reason\": \"BadRequest\"}]}");

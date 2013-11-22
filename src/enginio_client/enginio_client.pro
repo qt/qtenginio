@@ -31,7 +31,7 @@ HEADERS += \
     enginiofakereply_p.h \
     enginiodummyreply_p.h \
     enginiostring_p.h \
-    enginioclientbase.h \
+    enginioclientconnection.h \
     enginioreplybase.h \
     enginiomodelbase.h \
     enginiomodelbase_p.h \

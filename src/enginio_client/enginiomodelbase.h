@@ -45,7 +45,7 @@
 #include <QtCore/qabstractitemmodel.h>
 #include <QtCore/qscopedpointer.h>
 
-#include <Enginio/enginioclientbase.h>
+#include <Enginio/enginioclientconnection.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -53,8 +53,8 @@ class EnginioModelBasePrivate;
 class ENGINIOCLIENT_EXPORT EnginioModelBase : public QAbstractListModel
 {
     Q_OBJECT
-    Q_ENUMS(EnginioClientBase::Operation) // TODO remove me QTBUG-33577
-    Q_PROPERTY(EnginioClientBase::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
+    Q_ENUMS(EnginioClientConnection::Operation) // TODO remove me QTBUG-33577
+    Q_PROPERTY(EnginioClientConnection::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
 
 public:
     explicit EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent);
@@ -70,8 +70,8 @@ public:
         LastRole = Qt::UserRole + 10 // the first fully dynamic role
     };
 
-    EnginioClientBase::Operation operation() const Q_REQUIRED_RESULT;
-    void setOperation(EnginioClientBase::Operation operation);
+    EnginioClientConnection::Operation operation() const Q_REQUIRED_RESULT;
+    void setOperation(EnginioClientConnection::Operation operation);
 
     virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
@@ -85,7 +85,7 @@ public:
 
     void disableNotifications();
 Q_SIGNALS:
-    void operationChanged(EnginioClientBase::Operation operation);
+    void operationChanged(EnginioClientConnection::Operation operation);
 
 private:
     Q_DISABLE_COPY(EnginioModelBase)

@@ -70,7 +70,7 @@ public:
     virtual QNetworkAccessManager *create(QObject *parent) Q_DECL_OVERRIDE
     {
         Q_UNUSED(parent);
-        _guard = EnginioClientBasePrivate::prepareNetworkManagerInThread();
+        _guard = EnginioClientConnectionPrivate::prepareNetworkManagerInThread();
         return _guard.data();
     }
 };

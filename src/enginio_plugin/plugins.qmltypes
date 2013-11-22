@@ -9,7 +9,7 @@ import QtQuick.tooling 1.1
 Module {
     Component {
         name: "EnginioClient"
-        prototype: "EnginioClientBase"
+        prototype: "EnginioClientConnection"
         exports: ["Enginio/__Enginio 1.0"]
         exportMetaObjectRevisions: [0]
         Signal {
@@ -104,7 +104,7 @@ Module {
         }
     }
     Component {
-        name: "EnginioClientBase"
+        name: "EnginioClientConnection"
         prototype: "QObject"
         Enum {
             name: "AuthenticationState"
@@ -158,10 +158,10 @@ Module {
     Component {
         name: "EnginioModelBase"
         prototype: "QAbstractListModel"
-        Property { name: "operation"; type: "EnginioClientBase::Operation" }
+        Property { name: "operation"; type: "EnginioClientConnection::Operation" }
         Signal {
             name: "operationChanged"
-            Parameter { name: "operation"; type: "EnginioClientBase::Operation" }
+            Parameter { name: "operation"; type: "EnginioClientConnection::Operation" }
         }
     }
     Component {
@@ -182,7 +182,7 @@ Module {
     }
     Component {
         name: "EnginioQmlClient"
-        prototype: "EnginioClientBase"
+        prototype: "EnginioClientConnection"
         exports: ["Enginio/Enginio 1.0"]
         exportMetaObjectRevisions: [0]
         Signal {

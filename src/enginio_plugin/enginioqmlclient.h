@@ -42,20 +42,20 @@
 #ifndef ENGINIOQMLCLIENT_H
 #define ENGINIOQMLCLIENT_H
 
-#include <Enginio/enginioclientbase.h>
+#include <Enginio/enginioclientconnection.h>
 #include "enginioqmlreply.h"
 #include <QtQml/qjsvalue.h>
 
 QT_BEGIN_NAMESPACE
 
 class EnginioQmlClientPrivate;
-class EnginioQmlClient : public EnginioClientBase
+class EnginioQmlClient : public EnginioClientConnection
 {
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlClient)
 
-    Q_ENUMS(EnginioClientBase::Operation); // TODO remove me QTBUG-33577
-    Q_ENUMS(EnginioClientBase::AuthenticationState); // TODO remove me QTBUG-33577
+    Q_ENUMS(EnginioClientConnection::Operation); // TODO remove me QTBUG-33577
+    Q_ENUMS(EnginioClientConnection::AuthenticationState); // TODO remove me QTBUG-33577
 public:
     EnginioQmlClient(QObject *parent = 0);
     ~EnginioQmlClient();

@@ -48,7 +48,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class EnginioClientBasePrivate;
+class EnginioClientConnectionPrivate;
 class EnginioIdentityPrivate;
 class ENGINIOCLIENT_EXPORT EnginioIdentity : public QObject
 {
@@ -63,9 +63,9 @@ Q_SIGNALS:
     void aboutToDestroy();
 
 protected:
-    virtual void prepareSessionToken(EnginioClientBasePrivate *enginio) = 0;
-    virtual void removeSessionToken(EnginioClientBasePrivate *enginio) = 0;
-    friend class EnginioClientBasePrivate;
+    virtual void prepareSessionToken(EnginioClientConnectionPrivate *enginio) = 0;
+    virtual void removeSessionToken(EnginioClientConnectionPrivate *enginio) = 0;
+    friend class EnginioClientConnectionPrivate;
 };
 
 QT_END_NAMESPACE

@@ -90,7 +90,7 @@ template <> struct ValueAdaptor<QJsonObject>
 template <> struct ObjectAdaptor<QJsonObject>
 {
     QJsonObject _object;
-    ObjectAdaptor(const QJsonObject &object, EnginioClientBasePrivate* = 0)
+    ObjectAdaptor(const QJsonObject &object, EnginioClientConnectionPrivate* = 0)
         : _object(object)
     {}
 

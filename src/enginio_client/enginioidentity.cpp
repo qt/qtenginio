@@ -99,11 +99,11 @@ class EnginioUserPassAuthenticationPrivate : public EnginioIdentityPrivate
     template<typename T>
     class SessionSetterFunctor
     {
-        EnginioClientBasePrivate *_enginio;
+        EnginioClientConnectionPrivate *_enginio;
         QNetworkReply *_reply;
         EnginioUserPassAuthenticationPrivate *_auth;
     public:
-        SessionSetterFunctor(EnginioClientBasePrivate *enginio, QNetworkReply *reply, EnginioUserPassAuthenticationPrivate *auth)
+        SessionSetterFunctor(EnginioClientConnectionPrivate *enginio, QNetworkReply *reply, EnginioUserPassAuthenticationPrivate *auth)
             : _enginio(enginio)
             , _reply(reply)
             , _auth(auth)
@@ -146,18 +146,18 @@ public:
     }
 
     template<typename Derived>
-    void prepareSessionToken(EnginioClientBasePrivate *enginio)
+    void prepareSessionToken(EnginioClientConnectionPrivate *enginio)
     {
         cleanupConnections();
 
         _reply = thisAs<Derived>()->makeRequest(enginio);
-        enginio->setAuthenticationState(EnginioClientBase::Authenticating);
+        enginio->setAuthenticationState(EnginioClientConnection::Authenticating);
         _replyFinished = QObject::connect(_reply.data(), &QNetworkReply::finished, SessionSetterFunctor<Derived>(enginio, _reply.data(), this));
         _enginioDestroyed = QObject::connect(enginio->q_ptr, &EnginioClient::destroyed, DisconnectConnection(this));
     }
 
     template<typename Derived>
-    void removeSessionToken(EnginioClientBasePrivate *enginio)
+    void removeSessionToken(EnginioClientConnectionPrivate *enginio)
     {
         cleanupConnections();
         thisAs<Derived>()->cleanupClient(enginio);
@@ -169,7 +169,7 @@ public:
 class EnginioOAuth2AuthenticationPrivate: public EnginioUserPassAuthenticationPrivate
 {
 public:
-    QNetworkReply *makeRequest(EnginioClientBasePrivate *enginio)
+    QNetworkReply *makeRequest(EnginioClientConnectionPrivate *enginio)
     {
         QByteArray data;
         {
@@ -190,14 +190,14 @@ public:
         return enginio->networkManager()->post(request, data);
     }
 
-    void proccessToken(EnginioClientBasePrivate *enginio, EnginioReplyBase *ereply)
+    void proccessToken(EnginioClientConnectionPrivate *enginio, EnginioReplyBase *ereply)
     {
         QByteArray header;
         header = EnginioString::Bearer_ + ereply->data()[EnginioString::access_token].toString().toUtf8();
         enginio->_request.setRawHeader(EnginioString::Authorization, header);
     }
 
-    void cleanupClient(EnginioClientBasePrivate *enginio)
+    void cleanupClient(EnginioClientConnectionPrivate *enginio)
     {
         enginio->_request.setRawHeader(EnginioString::Authorization, QByteArray());
     }
@@ -224,7 +224,7 @@ public:
   Setting the identity will trigger an asynchronous request, resulting in EnginioClient::authenticationState()
   changing.
 
-  \sa EnginioClientBase::authenticationState() EnginioClientBase::identity() EnginioClient::sessionAuthenticated()
+  \sa EnginioClientConnection::authenticationState() EnginioClientConnection::identity() EnginioClient::sessionAuthenticated()
   \sa EnginioClient::sessionAuthenticationError() EnginioClient::sessionTerminated()
 */
 
@@ -291,7 +291,7 @@ void EnginioOAuth2Authentication::setPassword(const QString &password)
 /*!
   \internal
 */
-void EnginioOAuth2Authentication::prepareSessionToken(EnginioClientBasePrivate *enginio)
+void EnginioOAuth2Authentication::prepareSessionToken(EnginioClientConnectionPrivate *enginio)
 {
     Q_ASSERT(enginio);
     Q_ASSERT(enginio->identity());
@@ -302,7 +302,7 @@ void EnginioOAuth2Authentication::prepareSessionToken(EnginioClientBasePrivate *
 /*!
   \internal
 */
-void EnginioOAuth2Authentication::removeSessionToken(EnginioClientBasePrivate *enginio)
+void EnginioOAuth2Authentication::removeSessionToken(EnginioClientConnectionPrivate *enginio)
 {
     Q_ASSERT(enginio);
     Q_ASSERT(enginio->identity());
