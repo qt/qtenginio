@@ -42,6 +42,7 @@
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
 #include <Enginio/private/enginiostring_p.h>
+#include <Enginio/private/enginioclient_p.h>
 #include <QtCore/qjsonarray.h>
 #include <QtTest/QSignalSpy>
 #include <QtTest/QtTest>
@@ -151,7 +152,7 @@ bool EnginioBackendManager::authenticate()
     QUrl url(_client.serviceUrl());
     url.setPath(QStringLiteral("/v1/account/auth/oauth2/token"));
 
-    QNetworkRequest request/*(enginio->prepareRequest(url))*/;
+    QNetworkRequest request(EnginioClientConnectionPrivate::get(&_client)->prepareRequest(url));
     request.setHeader(QNetworkRequest::ContentTypeHeader, EnginioString::Application_x_www_form_urlencoded);
     request.setRawHeader(EnginioString::Accept, EnginioString::Application_json);
     request.setUrl(url);

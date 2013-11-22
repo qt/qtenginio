@@ -1,4 +1,4 @@
-QT += enginio-private
+QT += enginio-private core-private
 SOURCES += $$PWD/common.cpp
 HEADERS += $$PWD/common.h
 
