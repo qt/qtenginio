@@ -47,7 +47,7 @@ import "config.js" as AppConfig
 Item {
     id: root
 
-    Enginio {
+    EnginioClient {
         id: enginio
         backendId: AppConfig.backendData.id
         serviceUrl: AppConfig.backendData.serviceUrl
@@ -84,7 +84,7 @@ Item {
     TestCase {
         name: "EnginioClient: MostlyFakeReplies"
 
-        Enginio {
+        EnginioClient {
             id: fake
             backendId: AppConfig.backendData.id
             serviceUrl: AppConfig.backendData.serviceUrl

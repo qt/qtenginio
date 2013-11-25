@@ -50,7 +50,7 @@ Rectangle {
     color: "#f4f4f4"
 
     //![client]
-    Enginio {
+    EnginioClient {
         id: enginioClient
         backendId: enginioBackendId
 

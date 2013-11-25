@@ -45,21 +45,21 @@ import Enginio 1.0
 
 Rectangle {
     //! [client]
-    Enginio {
+    EnginioClient {
         id: client
         backendId: "YOUR_BACKEND_ID" // from Enginio Dashboard
     }
     //! [client]
 
     //! [client-signals]
-    Enginio {
+    EnginioClient {
         onFinished: console.log("Engino request finished." + reply.data)
         onError: console.log("Enginio error " + reply.errorCode + ": " + reply.errorString)
     }
     //! [client-signals]
 
     //! [client-query]
-    Enginio {
+    EnginioClient {
         Component.onCompleted: query({"objectType": "objects.image"})
     }
     //! [client-query]

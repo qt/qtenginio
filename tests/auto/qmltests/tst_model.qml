@@ -87,7 +87,7 @@ Item {
 
         EnginioModel {
             id: modelInvalidRow
-            client: Enginio {
+            client: EnginioClient {
                 serviceUrl: AppConfig.backendData.serviceUrl
                 backendId: AppConfig.backendData.id
             }
@@ -119,7 +119,7 @@ Item {
     TestCase {
         name: "EnginioModel: create"
 
-        Enginio {
+        EnginioClient {
             id: enginioClientCreate
             serviceUrl: AppConfig.backendData.serviceUrl
 
@@ -208,7 +208,7 @@ Item {
 
         EnginioModel {
             id: modelQuery
-            client: Enginio {
+            client: EnginioClient {
                 id: enginioClientQuery
                 serviceUrl: AppConfig.backendData.serviceUrl
 
@@ -270,7 +270,7 @@ Item {
 
         EnginioModel {
             id: modelModify
-            client: Enginio {
+            client: EnginioClient {
                 id: enginioClientModify
                 serviceUrl: AppConfig.backendData.serviceUrl
 
@@ -331,7 +331,7 @@ Item {
 
         EnginioModel {
             id: modelModifyUndblocked
-            client: Enginio {
+            client: EnginioClient {
                 id: enginioClientModifyUndblocked
                 serviceUrl: AppConfig.backendData.serviceUrl
 
@@ -391,7 +391,7 @@ Item {
 
         EnginioModel {
             id: modelModifyChaos
-            client: Enginio {
+            client: EnginioClient {
                 id: enginioClientModifyChaos
                 serviceUrl: AppConfig.backendData.serviceUrl
 
@@ -452,7 +452,7 @@ Item {
 
         EnginioModel {
             id: modelRowCount
-            client: Enginio {
+            client: EnginioClient {
                 serviceUrl: AppConfig.backendData.serviceUrl
 
                 property int errorCount: 0

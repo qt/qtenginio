@@ -52,7 +52,7 @@ Rectangle {
     //![model]
     EnginioModel {
         id: enginioModel
-        client: Enginio {
+        client: EnginioClient {
             backendId: enginioBackendId
             onError: console.log("Enginio error:", JSON.stringify(reply.data))
         }

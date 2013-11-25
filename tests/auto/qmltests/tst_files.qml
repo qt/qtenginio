@@ -52,7 +52,7 @@ import "config.js" as AppConfig
 Item {
     id: root
 
-    Enginio {
+    EnginioClient {
         id: enginio
         backendId: AppConfig.backendData.id
         serviceUrl: AppConfig.backendData.serviceUrl

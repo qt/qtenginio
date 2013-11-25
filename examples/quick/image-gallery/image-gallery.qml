@@ -69,7 +69,7 @@ Rectangle {
 
     // Enginio client specifies the backend to be used
     //! [client]
-    Enginio {
+    EnginioClient {
         id: client
         backendId: enginioBackendId
         onError: console.log("Enginio error: " + reply.errorCode + ": " + reply.errorString)

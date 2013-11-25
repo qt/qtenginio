@@ -58,7 +58,7 @@ Rectangle {
         TodoLists{}
     }
 
-    Enginio {
+    EnginioClient {
         id: enginioClient
         backendId: enginioBackendId
 

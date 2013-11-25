@@ -55,7 +55,7 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-  \qmltype Enginio
+  \qmltype EnginioClient
   \instantiates EnginioQmlClient
   \inqmlmodule Enginio 1
   \ingroup engino-qml
@@ -63,7 +63,7 @@ QT_BEGIN_NAMESPACE
   \brief client interface to access Enginio
   \snippet simple.qml import
 
-  Enginio is the heart of the QML API for Enginio.
+  EnginioClient is the heart of the QML API for Enginio.
   It is used for all communication with the Enginio backend.
   \l EnginioModel compliments it to make handling of multiple objects simple.
 
@@ -71,21 +71,21 @@ QT_BEGIN_NAMESPACE
   \snippet simple.qml client
 
   Once the backend is configured, it is possible to run queries by calling query on
-  Enginio.
+  EnginioClient.
   For example to get all objects stored with the type "objects.image" run this query:
   \snippet simple.qml client-query
 
-  Enginio gives you a convenient way to handle the responses to your queryies as well:
+  EnginioClient gives you a convenient way to handle the responses to your queryies as well:
   \snippet simple.qml client-signals
 */
 
 /*!
-  \qmlproperty string Enginio1::Enginio::backendId
+  \qmlproperty string Enginio1::EnginioClient::backendId
   Enginio backend ID. This can be obtained from the Enginio dashboard.
 */
 
 /*!
-  \qmlproperty url Enginio1::Enginio::serviceUrl
+  \qmlproperty url Enginio1::EnginioClient::serviceUrl
   \internal
   Enginio backend URL.
 
@@ -93,29 +93,29 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::fullTextSearch(QJSValue query)
+  \qmlmethod EnginioReply Enginio1::EnginioClient::fullTextSearch(QJSValue query)
   \brief Perform a full text search on the database
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::query(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply Enginio1::EnginioClient::query(QJSValue query, Operation operation)
   \brief Query the database.
 */
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::create(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply Enginio1::EnginioClient::create(QJSValue query, Operation operation)
   \brief Create an object in the database.
 */
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::update(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply Enginio1::EnginioClient::update(QJSValue query, Operation operation)
   \brief Update an object in the database.
 */
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::remove(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply Enginio1::EnginioClient::remove(QJSValue query, Operation operation)
   \brief Remove an object from the database.
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::uploadFile(QJSValue object, QUrl file)
+  \qmlmethod EnginioReply Enginio1::EnginioClient::uploadFile(QJSValue object, QUrl file)
   \brief Stores a \a file attached to an \a object in Enginio
 
   Each uploaded file needs to be associated with an object in the database.
@@ -136,7 +136,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::Enginio::downloadUrl(QJSValue object)
+  \qmlmethod EnginioReply Enginio1::EnginioClient::downloadUrl(QJSValue object)
   \brief Get the download URL for a file
 
   \snippet qmltests/tst_files.qml download
@@ -151,7 +151,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlsignal Enginio1::Enginio::finished(QJSValue reply)
+  \qmlsignal Enginio1::EnginioClient::finished(QJSValue reply)
   This signal is emitted when a \a reply finishes.
 
   \note that this signal is alwasy emitted, independent of whether
@@ -159,7 +159,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlsignal Enginio1::Enginio::error(QJSValue reply)
+  \qmlsignal Enginio1::EnginioClient::error(QJSValue reply)
   This signal is emitted when a \a reply finishes and contains an error.
 */
 

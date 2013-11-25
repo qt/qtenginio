@@ -46,7 +46,7 @@ Rectangle {
     width: 400
     height: 400
 
-    Enginio {
+    EnginioClient {
         id: client
         backendId: Config.id
         onFinished: console.log("Engino request finished." + reply.data)
