@@ -56,8 +56,9 @@ class ENGINIOCLIENT_EXPORT EnginioModelBase : public QAbstractListModel
     Q_ENUMS(EnginioClientConnection::Operation) // TODO remove me QTBUG-33577
     Q_PROPERTY(EnginioClientConnection::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
 
-public:
+protected:
     explicit EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent);
+public:
     ~EnginioModelBase();
 
     enum Role {
