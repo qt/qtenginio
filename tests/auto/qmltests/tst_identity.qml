@@ -101,14 +101,14 @@ Item {
             verify(enginio.authenticationState !== Enginio.Authenticated)
             enginio.identity = validIdentity
             sessionAuthenticatedSpy.wait()
-            verify(enginio.authenticationState === Enginio.Authenticated)
+            compare(enginio.authenticationState, Enginio.Authenticated)
 
             // reassign the same
             enginio.identity = null
             tryCompare(enginio, "authenticationState", Enginio.NotAuthenticated)
             enginio.identity = validIdentity
             sessionAuthenticatedSpy.wait()
-            verify(enginio.authenticationState === Enginio.Authenticated)
+            compare(enginio.authenticationState, Enginio.Authenticated)
         }
 
         function test_assignInvalidIdentity() {
