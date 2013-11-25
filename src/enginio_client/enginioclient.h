@@ -56,8 +56,8 @@ class ENGINIOCLIENT_EXPORT EnginioClient : public EnginioClientConnection
 {
     Q_OBJECT
 
-    Q_ENUMS(EnginioClientConnection::Operation); // TODO remove me QTBUG-33577
-    Q_ENUMS(EnginioClientConnection::AuthenticationState); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::Operation); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::AuthenticationState); // TODO remove me QTBUG-33577
 
     Q_DECLARE_PRIVATE(EnginioClient)
 public:
@@ -66,10 +66,10 @@ public:
 
     Q_INVOKABLE EnginioReply *customRequest(const QUrl &url, const QByteArray &httpOperation, const QJsonObject &data = QJsonObject());
     Q_INVOKABLE EnginioReply *fullTextSearch(const QJsonObject &query);
-    Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioReply *update(const QJsonObject &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioReply *remove(const QJsonObject &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioReply *query(const QJsonObject &query, const Enginio::Operation operation = Enginio::ObjectOperation);
+    Q_INVOKABLE EnginioReply *create(const QJsonObject &object, const Enginio::Operation operation = Enginio::ObjectOperation);
+    Q_INVOKABLE EnginioReply *update(const QJsonObject &object, const Enginio::Operation operation = Enginio::ObjectOperation);
+    Q_INVOKABLE EnginioReply *remove(const QJsonObject &object, const Enginio::Operation operation = Enginio::ObjectOperation);
 
     Q_INVOKABLE EnginioReply *uploadFile(const QJsonObject &associatedObject, const QUrl &file);
     Q_INVOKABLE EnginioReply *downloadUrl(const QJsonObject &object);

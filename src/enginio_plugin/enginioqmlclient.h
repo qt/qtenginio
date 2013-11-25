@@ -54,17 +54,17 @@ class EnginioQmlClient : public EnginioClientConnection
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlClient)
 
-    Q_ENUMS(EnginioClientConnection::Operation); // TODO remove me QTBUG-33577
-    Q_ENUMS(EnginioClientConnection::AuthenticationState); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::Operation); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::AuthenticationState); // TODO remove me QTBUG-33577
 public:
     EnginioQmlClient(QObject *parent = 0);
     ~EnginioQmlClient();
 
     Q_INVOKABLE EnginioQmlReply *fullTextSearch(const QJSValue &query);
-    Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Operation operation = ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Operation operation = ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Enginio::Operation operation = Enginio::ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Enginio::Operation operation = Enginio::ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Enginio::Operation operation = Enginio::ObjectOperation);
+    Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Enginio::Operation operation = Enginio::ObjectOperation);
     Q_INVOKABLE EnginioQmlReply *downloadUrl(const QJSValue &object);
     Q_INVOKABLE EnginioQmlReply *uploadFile(const QJSValue &object, const QUrl &url);
 

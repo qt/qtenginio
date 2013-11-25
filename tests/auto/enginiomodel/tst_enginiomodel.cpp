@@ -138,7 +138,7 @@ void tst_EnginioModel::ctor()
     QVERIFY(!query.isEmpty());
     {   // check if destructor of a fully initilized EnginioClient detach fully initilized model
         EnginioModel model;
-        model.setOperation(EnginioClient::ObjectOperation);
+        model.setOperation(Enginio::ObjectOperation);
         model.setQuery(query);
 
         EnginioClient client;
@@ -151,7 +151,7 @@ void tst_EnginioModel::ctor()
         EnginioClient client;
         QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
         EnginioModel model;
-        model.setOperation(EnginioClient::ObjectOperation);
+        model.setOperation(Enginio::ObjectOperation);
         model.setQuery(query);
         client.setBackendId(_backendId);
         client.setServiceUrl(EnginioTests::TESTAPP_URL);
@@ -209,7 +209,7 @@ void tst_EnginioModel::enginio_property()
         QJsonObject query;
         query.insert("limit", 1);
         model.setQuery(query);
-        model.setOperation(EnginioClient::UserOperation);
+        model.setOperation(Enginio::UserOperation);
         model.setClient(&client);
 
         QTRY_COMPARE(spyAboutToReset.count(), 1);
@@ -277,7 +277,7 @@ void tst_EnginioModel::query_property()
     QVERIFY(spy[1][0].value<QJsonObject>().isEmpty());
 
     {
-        model.setOperation(EnginioClient::UserOperation);
+        model.setOperation(Enginio::UserOperation);
         QJsonObject query = QJsonDocument::fromJson("{\"limit\":5}").object();
 
         EnginioClient client;
@@ -296,26 +296,26 @@ void tst_EnginioModel::query_property()
 void tst_EnginioModel::operation_property()
 {
     EnginioModel model;
-    QSignalSpy spy(&model, SIGNAL(operationChanged(EnginioClientConnection::Operation)));
+    QSignalSpy spy(&model, SIGNAL(operationChanged(Enginio::Operation)));
 
     // check initial value
-    QCOMPARE(model.operation(), EnginioClient::ObjectOperation);
+    QCOMPARE(model.operation(), Enginio::ObjectOperation);
 
-    model.setOperation(EnginioClient::UserOperation);
-    QCOMPARE(model.operation(), EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
+    QCOMPARE(model.operation(), Enginio::UserOperation);
     QTRY_COMPARE(spy.count(), 1);
-    QCOMPARE(spy[0][0].value<EnginioClientConnection::Operation>(), EnginioClientConnection::UserOperation);
+    QCOMPARE(spy[0][0].value<Enginio::Operation>(), Enginio::UserOperation);
 
     // try to set the same operation again, it should not emit the signal
-    model.setOperation(EnginioClient::UserOperation);
-    QCOMPARE(model.operation(), EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
+    QCOMPARE(model.operation(), Enginio::UserOperation);
     QCOMPARE(spy.count(), 1);
 
     // try to change it agian.
-    model.setOperation(EnginioClient::UsergroupOperation);
+    model.setOperation(Enginio::UsergroupOperation);
     QTRY_COMPARE(spy.count(), 2);
-    QCOMPARE(model.operation(), EnginioClient::UsergroupOperation);
-    QCOMPARE(spy[1][0].value<EnginioClientConnection::Operation>(), EnginioClientConnection::UsergroupOperation);
+    QCOMPARE(model.operation(), Enginio::UsergroupOperation);
+    QCOMPARE(spy[1][0].value<Enginio::Operation>(), Enginio::UsergroupOperation);
 }
 
 void tst_EnginioModel::roleNames()
@@ -334,7 +334,7 @@ void tst_EnginioModel::roleNames()
 
     QVERIFY(model.client() == &client);
 
-    model.setOperation(EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
     QJsonObject query = QJsonDocument::fromJson("{\"limit\":5}").object();
     model.setQuery(query);
 
@@ -353,7 +353,7 @@ void tst_EnginioModel::listView()
     QVERIFY(!query.isEmpty());
     EnginioModel model;
     model.setQuery(query);
-    model.setOperation(EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
 
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
@@ -451,7 +451,7 @@ void tst_EnginioModel::invalidSetProperty()
     EnginioModel model;
     model.setClient(&client);
     QJsonObject query = QJsonDocument::fromJson("{\"limit\":2}").object();
-    model.setOperation(EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
     model.setQuery(query);
 
     QTRY_VERIFY(model.rowCount());
@@ -577,8 +577,8 @@ void tst_EnginioModel::multpleConnections()
         model.setQuery(query);
 
         for (int i = 0; i < 20; ++i) {
-            model.setOperation(EnginioClient::ObjectOperation);
-            model.setOperation(EnginioClient::AccessControlOperation);
+            model.setOperation(Enginio::ObjectOperation);
+            model.setOperation(Enginio::AccessControlOperation);
         }
 
         // The values here are not strict. Use qDebug() << model.counter; to see what
@@ -608,7 +608,7 @@ void tst_EnginioModel::deletionReordered()
     EnginioModel model;
     model.disableNotifications();
     model.setQuery(query);
-    model.setOperation(EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
 
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
@@ -646,7 +646,7 @@ void tst_EnginioModel::deleteTwiceTheSame()
     EnginioModel model;
     model.disableNotifications();
     model.setQuery(query);
-    model.setOperation(EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
 
     EnginioClient client;
     client.setBackendId(_backendId);
@@ -688,7 +688,7 @@ void tst_EnginioModel::updateAndDeleteReordered()
     EnginioModel model;
     model.disableNotifications();
     model.setQuery(query);
-    model.setOperation(EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
 
     EnginioClient client;
     client.setBackendId(_backendId);
@@ -729,7 +729,7 @@ void tst_EnginioModel::updateReordered()
     EnginioModel model;
     model.disableNotifications();
     model.setQuery(query);
-    model.setOperation(EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
 
     EnginioClient client;
     client.setBackendId(_backendId);
@@ -1516,7 +1516,7 @@ void tst_EnginioModel::deleteReply()
 
     EnginioModel model;
     model.disableNotifications();
-    model.setOperation(EnginioClient::UserOperation);
+    model.setOperation(Enginio::UserOperation);
     model.setQuery(query);
     model.setClient(&client);
 

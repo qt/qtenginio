@@ -55,17 +55,11 @@ class QNetworkAccessManager;
 class EnginioIdentity;
 class EnginioClientConnectionPrivate;
 
-class ENGINIOCLIENT_EXPORT EnginioClientConnection : public QObject
+class ENGINIOCLIENT_EXPORT Enginio
 {
-    Q_OBJECT
+    Q_GADGET
     Q_ENUMS(AuthenticationState)
     Q_ENUMS(Operation)
-
-    Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
-    Q_PROPERTY(QUrl serviceUrl READ serviceUrl WRITE setServiceUrl NOTIFY serviceUrlChanged FINAL)
-    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
-    Q_PROPERTY(AuthenticationState authenticationState READ authenticationState NOTIFY authenticationStateChanged FINAL)
-
 public:
     enum AuthenticationState {
         NotAuthenticated,
@@ -75,15 +69,35 @@ public:
     };
 
     enum Operation {
-        // Do not forget to keep in sync with EnginioClientPrivate::Operation!
         ObjectOperation,
         AccessControlOperation,
         UserOperation,
         UsergroupOperation,
         UsergroupMembersOperation,
-        FileOperation
-    };
+        FileOperation,
 
+        // private
+        SessionOperation,
+        SearchOperation,
+        FileChunkUploadOperation,
+        FileGetDownloadUrlOperation
+    };
+};
+
+
+class ENGINIOCLIENT_EXPORT EnginioClientConnection : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(QByteArray backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged FINAL)
+    Q_PROPERTY(QUrl serviceUrl READ serviceUrl WRITE setServiceUrl NOTIFY serviceUrlChanged FINAL)
+    Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
+    Q_PROPERTY(Enginio::AuthenticationState authenticationState READ authenticationState NOTIFY authenticationStateChanged FINAL)
+
+    Q_ENUMS(Enginio::Operation); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::AuthenticationState); // TODO remove me QTBUG-33577
+
+public:
     ~EnginioClientConnection();
 
 
@@ -91,7 +105,7 @@ public:
     void setBackendId(const QByteArray &backendId);
     EnginioIdentity *identity() const Q_REQUIRED_RESULT;
     void setIdentity(EnginioIdentity *identity);
-    AuthenticationState authenticationState() const Q_REQUIRED_RESULT;
+    Enginio::AuthenticationState authenticationState() const Q_REQUIRED_RESULT;
 
     QUrl serviceUrl() const Q_REQUIRED_RESULT;
     void setServiceUrl(const QUrl &serviceUrl);
@@ -102,7 +116,7 @@ public:
 Q_SIGNALS:
     void backendIdChanged(const QByteArray &backendId);
     void serviceUrlChanged(const QUrl& url);
-    void authenticationStateChanged(AuthenticationState state);
+    void authenticationStateChanged(Enginio::AuthenticationState state);
     void identityChanged(EnginioIdentity *identity);
 
 protected:
@@ -113,12 +127,12 @@ private:
     Q_DISABLE_COPY(EnginioClientConnection)
 };
 
-Q_DECLARE_TYPEINFO(EnginioClientConnection::Operation, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(EnginioClientConnection::AuthenticationState, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(Enginio::Operation, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(Enginio::AuthenticationState, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(EnginioClientConnection::Operation)
-Q_DECLARE_METATYPE(EnginioClientConnection::AuthenticationState)
+Q_DECLARE_METATYPE(Enginio::Operation)
+Q_DECLARE_METATYPE(Enginio::AuthenticationState)
 
 #endif // ENGINIOCLIENTCONNECTION_H

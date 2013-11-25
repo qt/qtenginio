@@ -114,7 +114,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
         result.append(QStringLiteral("/v1/"));
 
         switch (operation) {
-        case ObjectOperation: {
+        case Enginio::ObjectOperation: {
             QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty()) {
                 msg = constructErrorMessage(EnginioString::Requested_object_operation_requires_non_empty_objectType_value);
@@ -124,7 +124,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
             result.append(objectType.replace('.', '/'));
             break;
         }
-        case AccessControlOperation:
+        case Enginio::AccessControlOperation:
         {
             QString objectType = object[EnginioString::objectType].toString();
             if (objectType.isEmpty()) {
@@ -144,7 +144,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
             result.append(EnginioString::access);
             return GetPathReturnValue(true, EnginioString::access);
         }
-        case FileOperation: {
+        case Enginio::FileOperation: {
             result.append(EnginioString::files);
             // if we have a fileID, it becomes "view", otherwise it is up/download
             QString fileId = object[EnginioString::id].toString();
@@ -154,7 +154,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
             }
             break;
         }
-        case FileGetDownloadUrlOperation: {
+        case Enginio::FileGetDownloadUrlOperation: {
             result.append(EnginioString::files);
             QString fileId = object[EnginioString::id].toString();
             if (fileId.isEmpty()) {
@@ -164,25 +164,25 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
             result.append(QLatin1Char('/') + fileId + QStringLiteral("/download_url"));
             break;
         }
-        case FileChunkUploadOperation: {
+        case Enginio::FileChunkUploadOperation: {
             const QString fileId = object[EnginioString::id].toString();
             Q_ASSERT(!fileId.isEmpty());
             result.append(EnginioString::files + QLatin1Char('/') + fileId + QStringLiteral("/chunk"));
             break;
         }
-        case SearchOperation:
+        case Enginio::SearchOperation:
             result.append(EnginioString::search);
             break;
-        case SessionOperation:
+        case Enginio::SessionOperation:
             result.append(EnginioString::session);
             break;
-        case UserOperation:
+        case Enginio::UserOperation:
             result.append(EnginioString::users);
             break;
-        case UsergroupOperation:
+        case Enginio::UsergroupOperation:
             result.append(EnginioString::usergroups);
             break;
-        case UsergroupMemberOperation:
+        case Enginio::UsergroupMembersOperation:
         {
             QString id = object[EnginioString::id].toString();
             if (id.isEmpty()) {
@@ -266,9 +266,9 @@ protected:
     class AuthenticationStateTrackerFunctor
     {
         EnginioClientConnectionPrivate *_enginio;
-        EnginioClientConnection::AuthenticationState _state;
+        Enginio::AuthenticationState _state;
     public:
-        AuthenticationStateTrackerFunctor(EnginioClientConnectionPrivate *enginio, EnginioClientConnection::AuthenticationState state = EnginioClient::NotAuthenticated)
+        AuthenticationStateTrackerFunctor(EnginioClientConnectionPrivate *enginio, Enginio::AuthenticationState state = Enginio::NotAuthenticated)
             : _enginio(enginio)
             , _state(state)
         {}
@@ -280,23 +280,23 @@ protected:
     };
 
 public:
-    enum Operation {
-        // Do not forget to keep in sync with EnginioClientConnection::Operation!
-        ObjectOperation = EnginioClientConnection::ObjectOperation,
-        AccessControlOperation = EnginioClientConnection::AccessControlOperation,
-        UserOperation = EnginioClientConnection::UserOperation,
-        UsergroupOperation = EnginioClientConnection::UsergroupOperation,
-        UsergroupMemberOperation = EnginioClientConnection::UsergroupMembersOperation,
-        FileOperation = EnginioClientConnection::FileOperation,
+//    enum Operation {
+//        // Do not forget to keep in sync with Enginio::Operation!
+//        ObjectOperation = Enginio::ObjectOperation,
+//        AccessControlOperation = Enginio::AccessControlOperation,
+//        UserOperation = Enginio::UserOperation,
+//        UsergroupOperation = Enginio::UsergroupOperation,
+//        UsergroupMemberOperation = Enginio::UsergroupMembersOperation,
+//        FileOperation = Enginio::FileOperation,
 
-        // private
-        SessionOperation,
-        SearchOperation,
-        FileChunkUploadOperation,
-        FileGetDownloadUrlOperation
-    };
+//        // private
+//        SessionOperation,
+//        SearchOperation,
+//        FileChunkUploadOperation,
+//        FileGetDownloadUrlOperation
+//    };
 
-    Q_ENUMS(Operation)
+//    Q_ENUMS(Operation)
 
     EnginioClientConnectionPrivate();
     virtual ~EnginioClientConnectionPrivate();
@@ -323,7 +323,7 @@ public:
     QMap<QNetworkReply*, QPair<QIODevice*, qint64> > _chunkedUploads;
     qint64 _uploadChunkSize;
     QJsonObject _identityToken;
-    EnginioClientConnection::AuthenticationState _authenticationState;
+    Enginio::AuthenticationState _authenticationState;
 
     QSet<EnginioReplyBase*> _delayedReplies; // Used only for testing
 
@@ -332,7 +332,7 @@ public:
     void replyFinished(QNetworkReply *nreply);
     bool finishDelayedReplies();
 
-    void setAuthenticationState(const EnginioClientConnection::AuthenticationState state)
+    void setAuthenticationState(const Enginio::AuthenticationState state)
     {
         Q_Q(EnginioClientConnection);
         if (_authenticationState == state)
@@ -341,7 +341,7 @@ public:
         emit q->authenticationStateChanged(state);
     }
 
-    EnginioClientConnection::AuthenticationState authenticationState() const Q_REQUIRED_RESULT
+    Enginio::AuthenticationState authenticationState() const Q_REQUIRED_RESULT
     {
         return _authenticationState;
     }
@@ -435,7 +435,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *update(const ObjectAdaptor<T> &object, const EnginioClientConnection::Operation operation)
+    QNetworkReply *update(const ObjectAdaptor<T> &object, const Enginio::Operation operation)
     {
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
@@ -453,7 +453,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *remove(const ObjectAdaptor<T> &object, const EnginioClientConnection::Operation operation)
+    QNetworkReply *remove(const ObjectAdaptor<T> &object, const Enginio::Operation operation)
     {
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH_WITH_ID(url, object, operation);
@@ -463,7 +463,7 @@ public:
         QNetworkReply *reply = 0;
         QByteArray data;
 #if 1 // QT_VERSION < QT_VERSION_CHECK(5, 4, 0) ?
-        if (operation != EnginioClientConnection::AccessControlOperation)
+        if (operation != Enginio::AccessControlOperation)
             reply = networkManager()->deleteResource(req);
         else {
             data = object[dataPropertyName].toJson();
@@ -488,7 +488,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *create(const ObjectAdaptor<T> &object, const EnginioClientConnection::Operation operation)
+    QNetworkReply *create(const ObjectAdaptor<T> &object, const Enginio::Operation operation)
     {
         QUrl url(_serviceUrl);
 
@@ -507,7 +507,7 @@ public:
     }
 
     template<class T>
-    QNetworkReply *query(const ObjectAdaptor<T> &object, const Operation operation)
+    QNetworkReply *query(const ObjectAdaptor<T> &object, const Enginio::Operation operation)
     {
         QUrl url(_serviceUrl);
         CHECK_AND_SET_PATH(url, object, operation);
@@ -533,7 +533,7 @@ public:
             urlQuery.addQueryItem(EnginioString::sort,
                 QString::fromUtf8(sort.toJson()));
         }
-        if (operation == SearchOperation) {
+        if (operation == Enginio::SearchOperation) {
             ValueAdaptor<T> search = object[EnginioString::search];
             ArrayAdaptor<T> objectTypes = object[EnginioString::objectTypes].toArray();
             if (Q_UNLIKELY(objectTypes.isEmpty()))
@@ -563,7 +563,7 @@ public:
     QNetworkReply *downloadUrl(const ObjectAdaptor<T> &object)
     {
         QUrl url(_serviceUrl);
-        CHECK_AND_SET_PATH(url, object, FileGetDownloadUrlOperation);
+        CHECK_AND_SET_PATH(url, object, Enginio::FileGetDownloadUrlOperation);
         if (object.contains(EnginioString::variant)) {
             QString variant = object[EnginioString::variant].toString();
             QUrlQuery query;
@@ -670,7 +670,7 @@ private:
     QNetworkReply *uploadAsHttpMultiPart(const ObjectAdaptor<T> &object, QIODevice *device, const QString &mimeType)
     {
         QUrl serviceUrl = _serviceUrl;
-        CHECK_AND_SET_PATH(serviceUrl, QJsonObject(), FileOperation);
+        CHECK_AND_SET_PATH(serviceUrl, QJsonObject(), Enginio::FileOperation);
 
         QNetworkRequest req = prepareRequest(serviceUrl);
         req.setHeader(QNetworkRequest::ContentTypeHeader, QByteArray());
@@ -716,7 +716,7 @@ private:
     QNetworkReply *uploadChunked(const ObjectAdaptor<T> &object, QIODevice *device)
     {
         QUrl serviceUrl = _serviceUrl;
-        CHECK_AND_SET_PATH(serviceUrl, QJsonObject(), FileOperation);
+        CHECK_AND_SET_PATH(serviceUrl, QJsonObject(), Enginio::FileOperation);
 
         QNetworkRequest req = prepareRequest(serviceUrl);
 
@@ -732,7 +732,7 @@ private:
         {
             QString path;
             QByteArray errorMsg;
-            if (!getPath(ereply->data(), FileChunkUploadOperation, &path, &errorMsg).successful())
+            if (!getPath(ereply->data(), Enginio::FileChunkUploadOperation, &path, &errorMsg).successful())
                 Q_UNREACHABLE(); // sequential upload can not have an invalid path!
             serviceUrl.setPath(path);
         }

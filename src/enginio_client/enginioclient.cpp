@@ -148,7 +148,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \enum EnginioClientConnection::Operation
+    \enum Enginio::Operation
 
     Enginio has a unified API for several \c operations.
     For example when using query(), the default is \c ObjectOperation,
@@ -162,10 +162,15 @@ QT_BEGIN_NAMESPACE
     \value UserOperation Operate on users
     \value UsergroupOperation Operate on groups
     \value UsergroupMembersOperation Operate on group members
+
+    \omitvalue SessionOperation
+    \omitvalue SearchOperation
+    \omitvalue FileChunkUploadOperation
+    \omitvalue FileGetDownloadUrlOperation
 */
 
 /*!
-    \enum EnginioClientConnection::AuthenticationState
+    \enum Enginio::AuthenticationState
 
     This enum describes the state of the user authentication.
     \value NotAuthenticated No attempt to authenticate was made
@@ -203,7 +208,7 @@ EnginioClientConnectionPrivate::EnginioClientConnectionPrivate() :
     _serviceUrl(EnginioString::apiEnginIo),
     _networkManager(),
     _uploadChunkSize(512 * 1024),
-    _authenticationState(EnginioClientConnection::NotAuthenticated)
+    _authenticationState(Enginio::NotAuthenticated)
 {
     assignNetworkManager();
 
@@ -220,8 +225,8 @@ EnginioClientConnectionPrivate::EnginioClientConnectionPrivate() :
 void EnginioClientConnectionPrivate::init()
 {
     QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
-    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientConnection::Authenticated));
-    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientConnection::AuthenticationFailure));
+    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, Enginio::Authenticated));
+    QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, Enginio::AuthenticationFailure));
 }
 
 void EnginioClientConnectionPrivate::replyFinished(QNetworkReply *nreply)
@@ -434,7 +439,7 @@ EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->query<QJsonObject>(query, EnginioClientConnectionPrivate::SearchOperation);
+    QNetworkReply *nreply = d->query<QJsonObject>(query, Enginio::SearchOperation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
     return ereply;
 }
@@ -449,13 +454,13 @@ EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
   \snippet enginioclient/tst_enginioclient.cpp query-todo
 
   \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), update(), remove(), EnginioClientConnection::Operation
+  \sa EnginioReply, create(), update(), remove(), Enginio::Operation
  */
-EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation operation)
+EnginioReply* EnginioClient::query(const QJsonObject &query, const Enginio::Operation operation)
 {
     Q_D(EnginioClient);
 
-    QNetworkReply *nreply = d->query<QJsonObject>(query, static_cast<EnginioClientConnectionPrivate::Operation>(operation));
+    QNetworkReply *nreply = d->query<QJsonObject>(query, operation);
     EnginioReply *ereply = new EnginioReply(d, nreply);
 
     return ereply;
@@ -464,7 +469,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
 /*!
   \brief Insert a new \a object into the database.
 
-  The \a operation is the area in which the object gets created. It defaults to \l EnginioClientConnection::ObjectOperation
+  The \a operation is the area in which the object gets created. It defaults to \l Enginio::ObjectOperation
   to create new objects by default.
 
   \snippet enginioclient/tst_enginioclient.cpp create-todo
@@ -482,7 +487,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Operation ope
   \return EnginioReply containing the status of the query and the data once it is finished.
   \sa EnginioReply, query(), update(), remove()
 */
-EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation operation)
+EnginioReply* EnginioClient::create(const QJsonObject &object, const Enginio::Operation operation)
 {
     Q_D(EnginioClient);
 
@@ -495,7 +500,7 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation o
 /*!
   \brief Update an existing \a object in the database.
 
-  The \a operation is the area in which the object gets created. It defaults to \l EnginioClientConnection::ObjectOperation
+  The \a operation is the area in which the object gets created. It defaults to \l Enginio::ObjectOperation
   to create new objects by default.
 
   To update access control list of an object the JSON loook like this:
@@ -514,7 +519,7 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Operation o
   \return EnginioReply containing the status of the query and the data once it is finished.
   \sa EnginioReply, create(), query(), remove()
 */
-EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation operation)
+EnginioReply* EnginioClient::update(const QJsonObject &object, const Enginio::Operation operation)
 {
     Q_D(EnginioClient);
 
@@ -527,7 +532,7 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
 /*!
   \brief Remove an existing \a object from the database.
 
-  The \a operation is the area in which the object gets created. It defaults to \l EnginioClientConnection::ObjectOperation
+  The \a operation is the area in which the object gets created. It defaults to \l Enginio::ObjectOperation
   to create new objects by default.
 
   \snippet enginioclient/tst_enginioclient.cpp remove-todo
@@ -535,7 +540,7 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Operation o
   \return EnginioReply containing the status of the query and the data once it is finished.
   \sa EnginioReply, create(), query(), update()
 */
-EnginioReply* EnginioClient::remove(const QJsonObject &object, const Operation operation)
+EnginioReply* EnginioClient::remove(const QJsonObject &object, const Enginio::Operation operation)
 {
     Q_D(EnginioClient);
 
@@ -652,7 +657,7 @@ QSharedPointer<QNetworkAccessManager> EnginioClientConnectionPrivate::prepareNet
     return qnam;
 }
 
-EnginioClientConnection::AuthenticationState EnginioClientConnection::authenticationState() const
+Enginio::AuthenticationState EnginioClientConnection::authenticationState() const
 {
     Q_D(const EnginioClientConnection);
     return d->authenticationState();
@@ -680,8 +685,8 @@ EnginioClientConnection::EnginioClientConnection(EnginioClientConnectionPrivate 
     qRegisterMetaType<EnginioReply*>();
     qRegisterMetaType<EnginioIdentity*>();
     qRegisterMetaType<EnginioOAuth2Authentication*>();
-    qRegisterMetaType<EnginioClientConnection::Operation>();
-    qRegisterMetaType<EnginioClientConnection::AuthenticationState>();
+    qRegisterMetaType<Enginio::Operation>();
+    qRegisterMetaType<Enginio::AuthenticationState>();
 }
 
 EnginioClientConnection::~EnginioClientConnection()

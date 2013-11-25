@@ -108,7 +108,7 @@ private:
         if (id.isEmpty()) {
             QJsonObject obj;
             obj["limit"] = 1;
-            const EnginioReply *reqId = client->query(obj, EnginioClient::UsergroupOperation);
+            const EnginioReply *reqId = client->query(obj, Enginio::UsergroupOperation);
             Q_ASSERT(reqId);
             const int __step = 50;
             const int __timeoutValue = 5000;
@@ -330,7 +330,7 @@ void tst_EnginioClient::query_users()
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
 
     QJsonObject obj;
-    const EnginioReply* reqId = client.query(obj, EnginioClient::UserOperation);
+    const EnginioReply* reqId = client.query(obj, Enginio::UserOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -357,7 +357,7 @@ void tst_EnginioClient::query_users_sort()
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
         QJsonObject obj;
         obj["sort"] = QJsonDocument::fromJson(QByteArrayLiteral("[{\"sortBy\": \"createdAt\", \"direction\": \"asc\"}]")).array();
-        const EnginioReply *reqId = client.query(obj, EnginioClient::UserOperation);
+        const EnginioReply *reqId = client.query(obj, Enginio::UserOperation);
         QVERIFY(reqId);
 
         QTRY_COMPARE(spy.count(), 1);
@@ -383,7 +383,7 @@ void tst_EnginioClient::query_users_sort()
         QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
         QJsonObject obj;
         obj["sort"] = QJsonDocument::fromJson(QByteArrayLiteral("[{\"sortBy\": \"createdAt\", \"direction\": \"desc\"}]")).array();
-        const EnginioReply *reqId = client.query(obj, EnginioClient::UserOperation);
+        const EnginioReply *reqId = client.query(obj, Enginio::UserOperation);
         QVERIFY(reqId);
 
         QTRY_COMPARE(spy.count(), 1);
@@ -424,7 +424,7 @@ void tst_EnginioClient::query_usersgroup_crud()
     QJsonObject data;
     data["name"] = tmpGroupName;
 
-    EnginioReply *reply = client.create(data, EnginioClient::UsergroupOperation);
+    EnginioReply *reply = client.create(data, Enginio::UsergroupOperation);
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
     QVERIFY(reply);
@@ -438,7 +438,7 @@ void tst_EnginioClient::query_usersgroup_crud()
     QJsonObject query;
     query["query"] = data;
 
-    reply = client.query(query, EnginioClient::UsergroupOperation);
+    reply = client.query(query, Enginio::UsergroupOperation);
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
     QVERIFY(reply);
@@ -452,7 +452,7 @@ void tst_EnginioClient::query_usersgroup_crud()
 
     data["id"] = id;
     data["description"] = description;
-    reply = client.update(data, EnginioClient::UsergroupOperation);
+    reply = client.update(data, Enginio::UsergroupOperation);
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
     QVERIFY(reply);
@@ -464,7 +464,7 @@ void tst_EnginioClient::query_usersgroup_crud()
 
     data = QJsonObject();
     data["id"] = id;
-    reply = client.remove(data, EnginioClient::UsergroupOperation);
+    reply = client.remove(data, Enginio::UsergroupOperation);
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
     QVERIFY(reply);
@@ -482,7 +482,7 @@ void tst_EnginioClient::query_usersgroup_limit()
 
     QJsonObject obj;
     obj["limit"] = 1;
-    const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupOperation);
+    const EnginioReply *reqId = client.query(obj, Enginio::UsergroupOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -509,7 +509,7 @@ void tst_EnginioClient::query_usersgroup_count()
 
     QJsonObject obj;
     obj["count"] = 1;
-    const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupOperation);
+    const EnginioReply *reqId = client.query(obj, Enginio::UsergroupOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -535,7 +535,7 @@ void tst_EnginioClient::query_usersgroup_sort()
 
     QJsonObject obj;
     obj["sort"] = QJsonDocument::fromJson(QByteArrayLiteral("[{\"sortBy\": \"createdAt\", \"direction\": \"asc\"}]")).array();
-    const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupOperation);
+    const EnginioReply *reqId = client.query(obj, Enginio::UsergroupOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -571,7 +571,7 @@ void tst_EnginioClient::query_usersgroupmembers_limit()
     QJsonObject obj;
     obj["limit"] = 1;
     obj["id"] = id;
-    const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupMembersOperation);
+    const EnginioReply *reqId = client.query(obj, Enginio::UsergroupMembersOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -600,7 +600,7 @@ void tst_EnginioClient::query_usersgroupmembers_count()
     QJsonObject obj;
     obj["count"] = 1;
     obj["id"] = id;
-    const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupMembersOperation);
+    const EnginioReply *reqId = client.query(obj, Enginio::UsergroupMembersOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -628,7 +628,7 @@ void tst_EnginioClient::query_usersgroupmembers_sort()
     QJsonObject obj;
     obj["id"] = id;
     obj["sort"] = QJsonDocument::fromJson(QByteArrayLiteral("[{\"sortBy\": \"createdAt\", \"direction\": \"desc\"}]")).array();
-    const EnginioReply *reqId = client.query(obj, EnginioClient::UsergroupMembersOperation);
+    const EnginioReply *reqId = client.query(obj, Enginio::UsergroupMembersOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -660,7 +660,7 @@ void tst_EnginioClient::query_users_filter()
 
     QJsonObject obj = QJsonDocument::fromJson("{\"query\":{\"username\": \"john\"}}").object();
     QVERIFY(!obj.isEmpty());
-    const EnginioReply* reqId = client.query(obj, EnginioClient::UserOperation);
+    const EnginioReply* reqId = client.query(obj, Enginio::UserOperation);
     QVERIFY(reqId);
 
     QTRY_COMPARE(spy.count(), 1);
@@ -753,7 +753,7 @@ void tst_EnginioClient::assignUserToGroup()
     {
         // find a user
         QJsonObject query;
-        EnginioReply *reply = client.query(query, EnginioClient::UserOperation);
+        EnginioReply *reply = client.query(query, Enginio::UserOperation);
         QTRY_VERIFY(reply->isFinished());
         CHECK_NO_ERROR(reply);
 
@@ -767,7 +767,7 @@ void tst_EnginioClient::assignUserToGroup()
     {
         //find a group
         QJsonObject query;
-        EnginioReply *reply = client.query(query, EnginioClient::UsergroupOperation);
+        EnginioReply *reply = client.query(query, Enginio::UsergroupOperation);
         QTRY_VERIFY(reply->isFinished());
         CHECK_NO_ERROR(reply);
 
@@ -786,7 +786,7 @@ void tst_EnginioClient::assignUserToGroup()
         op.insert("id", groupId);
         QJsonObject query;
         query.insert("id", userId);
-        EnginioReply *reply = client.query(op, EnginioClient::UsergroupMembersOperation);
+        EnginioReply *reply = client.query(op, Enginio::UsergroupMembersOperation);
         QTRY_VERIFY(reply->isFinished());
         QJsonArray results = reply->data()["results"].toArray();
         QCOMPARE(results.count(), 0);
@@ -800,7 +800,7 @@ void tst_EnginioClient::assignUserToGroup()
         user["objectType"] = QString::fromUtf8("users");
         query["member"] = user;
 
-        EnginioReply *reply = client.create(query, EnginioClient::UsergroupMembersOperation);
+        EnginioReply *reply = client.create(query, Enginio::UsergroupMembersOperation);
         //![create-newmember]
         QTRY_VERIFY(reply->isFinished());
         CHECK_NO_ERROR(reply);
@@ -812,7 +812,7 @@ void tst_EnginioClient::assignUserToGroup()
         op.insert("id", groupId);
         QJsonObject query;
         query.insert("id", userId);
-        EnginioReply *reply = client.query(op, EnginioClient::UsergroupMembersOperation);
+        EnginioReply *reply = client.query(op, Enginio::UsergroupMembersOperation);
         QTRY_VERIFY(reply->isFinished());
         QJsonArray results = reply->data()["results"].toArray();
         QCOMPARE(results.count(), 1);
@@ -847,8 +847,8 @@ void tst_EnginioClient::deleteReply()
     QNetworkAccessManager *qnam = client.networkManager();
 
     QVector<EnginioReply *> replies;
-    replies.append(client.query(QJsonObject(), EnginioClient::UserOperation));
-    replies.append(client.create(QJsonObject(), EnginioClient::UserOperation));
+    replies.append(client.query(QJsonObject(), Enginio::UserOperation));
+    replies.append(client.create(QJsonObject(), Enginio::UserOperation));
 
     QSet<QString> requests;
     requests.reserve(replies.count());
@@ -947,7 +947,7 @@ void tst_EnginioClient::users_crud()
         obj["username"] = name;
         obj["password"] = pass;
 
-        const EnginioReply* reqId = client.create(obj, EnginioClient::UserOperation);
+        const EnginioReply* reqId = client.create(obj, Enginio::UserOperation);
         QVERIFY(reqId);
         QCOMPARE(reqId->parent(), &client);
 
@@ -970,7 +970,7 @@ void tst_EnginioClient::users_crud()
         query["username"] = name;
         QJsonObject obj;
         obj["query"] = query;
-        const EnginioReply* reqId = client.query(obj, EnginioClient::UserOperation);
+        const EnginioReply* reqId = client.query(obj, Enginio::UserOperation);
         QVERIFY(reqId);
         QCOMPARE(reqId->parent(), &client);
 
@@ -988,7 +988,7 @@ void tst_EnginioClient::users_crud()
         QJsonObject obj;
         obj["password"] = pass + "pass";
         obj["id"] = id;
-        const EnginioReply* reqId = client.update(obj, EnginioClient::UserOperation);
+        const EnginioReply* reqId = client.update(obj, Enginio::UserOperation);
         QVERIFY(reqId);
         QCOMPARE(reqId->parent(), &client);
 
@@ -1004,7 +1004,7 @@ void tst_EnginioClient::users_crud()
         // DELETE it
         QJsonObject obj;
         obj["id"] = id;
-        const EnginioReply* reqId = client.remove(obj, EnginioClient::UserOperation);
+        const EnginioReply* reqId = client.remove(obj, Enginio::UserOperation);
         QVERIFY(reqId);
         QCOMPARE(reqId->parent(), &client);
 
@@ -1166,22 +1166,22 @@ void tst_EnginioClient::backendFakeReply()
     QJsonObject objectWithObjectTypes;
     objectWithObjectTypes["objectTypes"] = objectTypes;
 
-    QVERIFY(client.query(empty, EnginioClient::ObjectOperation));
-    QVERIFY(client.query(empty, EnginioClient::AccessControlOperation));
-    QVERIFY(client.query(objectTypeOnly, EnginioClient::AccessControlOperation));
-    QVERIFY(client.query(empty, EnginioClient::UsergroupMembersOperation));
+    QVERIFY(client.query(empty, Enginio::ObjectOperation));
+    QVERIFY(client.query(empty, Enginio::AccessControlOperation));
+    QVERIFY(client.query(objectTypeOnly, Enginio::AccessControlOperation));
+    QVERIFY(client.query(empty, Enginio::UsergroupMembersOperation));
 
-    QVERIFY(client.update(empty, EnginioClient::ObjectOperation));
-    QVERIFY(client.update(empty, EnginioClient::AccessControlOperation));
-    QVERIFY(client.update(objectTypeOnly, EnginioClient::ObjectOperation));
-    QVERIFY(client.update(objectTypeOnly, EnginioClient::AccessControlOperation));
-    QVERIFY(client.update(empty, EnginioClient::UsergroupMembersOperation));
+    QVERIFY(client.update(empty, Enginio::ObjectOperation));
+    QVERIFY(client.update(empty, Enginio::AccessControlOperation));
+    QVERIFY(client.update(objectTypeOnly, Enginio::ObjectOperation));
+    QVERIFY(client.update(objectTypeOnly, Enginio::AccessControlOperation));
+    QVERIFY(client.update(empty, Enginio::UsergroupMembersOperation));
 
-    QVERIFY(client.remove(empty, EnginioClient::ObjectOperation));
-    QVERIFY(client.remove(empty, EnginioClient::AccessControlOperation));
-    QVERIFY(client.remove(objectTypeOnly, EnginioClient::ObjectOperation));
-    QVERIFY(client.remove(objectTypeOnly, EnginioClient::AccessControlOperation));
-    QVERIFY(client.remove(empty, EnginioClient::UsergroupMembersOperation));
+    QVERIFY(client.remove(empty, Enginio::ObjectOperation));
+    QVERIFY(client.remove(empty, Enginio::AccessControlOperation));
+    QVERIFY(client.remove(objectTypeOnly, Enginio::ObjectOperation));
+    QVERIFY(client.remove(objectTypeOnly, Enginio::AccessControlOperation));
+    QVERIFY(client.remove(empty, Enginio::UsergroupMembersOperation));
 
     QVERIFY(client.fullTextSearch(empty));
     QVERIFY(client.fullTextSearch(objectTypeOnly));
@@ -1237,7 +1237,7 @@ void tst_EnginioClient::acl()
                                                         "\"sort\": [{\"sortBy\":\"username\", \"direction\": \"asc\"}]}", &parseError).object();
         QCOMPARE(parseError.error, QJsonParseError::NoError);
 
-        const EnginioReply* reqId = client.query(userQuery, EnginioClient::UserOperation);
+        const EnginioReply* reqId = client.query(userQuery, Enginio::UserOperation);
         QVERIFY(reqId);
         QTRY_COMPARE(spy.count(), 1);
         QCOMPARE(spyError.count(), 0);
@@ -1252,7 +1252,7 @@ void tst_EnginioClient::acl()
     }
 
     // wait for authentication, acl requires that
-    QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
+    QTRY_COMPARE(client.authenticationState(), Enginio::Authenticated);
 
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
 
@@ -1273,7 +1273,7 @@ void tst_EnginioClient::acl()
     obj = response->data(); // so obj contains valid id
 
     // view acl of the object
-    reqId = client.query(obj, EnginioClient::AccessControlOperation);
+    reqId = client.query(obj, Enginio::AccessControlOperation);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 2);
     response = spy[1][0].value<EnginioReply*>();
@@ -1299,7 +1299,7 @@ void tst_EnginioClient::acl()
     json = json.arg(id1, id2, id3);
     aclUpdate["access"] = QJsonDocument::fromJson(json.toUtf8()).object();
 
-    reqId = client.update(aclUpdate, EnginioClient::AccessControlOperation);
+    reqId = client.update(aclUpdate, Enginio::AccessControlOperation);
     //![update-access]
 
     QVERIFY(reqId);
@@ -1344,7 +1344,7 @@ void tst_EnginioClient::acl()
     QVERIFY(valid);
 
     // view acl again to confirm the change on the server side
-    reqId = client.query(obj, EnginioClient::AccessControlOperation);
+    reqId = client.query(obj, Enginio::AccessControlOperation);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 4);
     QCOMPARE(spyError.count(), 0);
@@ -1384,7 +1384,7 @@ void tst_EnginioClient::acl()
     }
     QVERIFY(valid);
     // it seems to work fine, let's delete the acl we created
-    reqId = client.remove(aclUpdate, EnginioClient::AccessControlOperation);
+    reqId = client.remove(aclUpdate, Enginio::AccessControlOperation);
     QVERIFY(reqId);
     QTRY_COMPARE(spy.count(), 5);
     QCOMPARE(spyError.count(), 0);
@@ -1413,7 +1413,7 @@ void tst_EnginioClient::creator_updater()
                                                         "\"sort\": [{\"sortBy\":\"username\", \"direction\": \"asc\"}]}", &parseError).object();
         QCOMPARE(parseError.error, QJsonParseError::NoError);
 
-        const EnginioReply* reqId = client.query(userQuery, EnginioClient::UserOperation);
+        const EnginioReply* reqId = client.query(userQuery, Enginio::UserOperation);
         QVERIFY(reqId);
         QTRY_VERIFY(reqId->isFinished());
         CHECK_NO_ERROR(reqId);
@@ -1427,7 +1427,7 @@ void tst_EnginioClient::creator_updater()
     }
 
     // Make sure we are authenticated and thus have a session
-    QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
+    QTRY_COMPARE(client.authenticationState(), Enginio::Authenticated);
 
     // create an object
     QJsonObject obj;
@@ -1456,8 +1456,8 @@ void tst_EnginioClient::creator_updater()
     identity2.setUser("logintest2");
     identity2.setPassword("logintest2");
     client.setIdentity(&identity2);
-    QCOMPARE(client.authenticationState(), EnginioClient::Authenticating);
-    QTRY_COMPARE(client.authenticationState(), EnginioClient::Authenticated);
+    QCOMPARE(client.authenticationState(), Enginio::Authenticating);
+    QTRY_COMPARE(client.authenticationState(), Enginio::Authenticated);
 
     obj["completed"] = true;
     const EnginioReply *updateReply = client.update(obj);

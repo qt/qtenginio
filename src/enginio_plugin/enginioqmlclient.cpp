@@ -179,8 +179,8 @@ void EnginioQmlClientPrivate::init()
     qRegisterMetaType<EnginioQmlClient*>();
     qRegisterMetaType<EnginioQmlReply*>();
     QObject::connect(q, &EnginioQmlClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
-    QObject::connect(q, &EnginioQmlClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, EnginioClientConnection::Authenticated));
-    QObject::connect(q, &EnginioQmlClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, EnginioClientConnection::AuthenticationFailure));
+    QObject::connect(q, &EnginioQmlClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, Enginio::Authenticated));
+    QObject::connect(q, &EnginioQmlClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, Enginio::AuthenticationFailure));
 }
 
 EnginioQmlReply *EnginioQmlClient::fullTextSearch(const QJSValue &query)
@@ -188,22 +188,22 @@ EnginioQmlReply *EnginioQmlClient::fullTextSearch(const QJSValue &query)
     Q_D(EnginioQmlClient);
 
     ObjectAdaptor<QJSValue> o(query, d);
-    QNetworkReply *nreply = d->query<QJSValue>(o, EnginioClientConnectionPrivate::SearchOperation);
+    QNetworkReply *nreply = d->query<QJSValue>(o, Enginio::SearchOperation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
     return ereply;
 }
 
-EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Operation operation)
+EnginioQmlReply *EnginioQmlClient::query(const QJSValue &query, const Enginio::Operation operation)
 {
     Q_D(EnginioQmlClient);
 
     ObjectAdaptor<QJSValue> o(query, d);
-    QNetworkReply *nreply = d->query<QJSValue>(o, static_cast<EnginioClientConnectionPrivate::Operation>(operation));
+    QNetworkReply *nreply = d->query<QJSValue>(o, operation);
     EnginioQmlReply *ereply = new EnginioQmlReply(d, nreply);
     return ereply;
 }
 
-EnginioQmlReply *EnginioQmlClient::create(const QJSValue &object, const Operation operation)
+EnginioQmlReply *EnginioQmlClient::create(const QJSValue &object, const Enginio::Operation operation)
 {
     Q_D(EnginioQmlClient);
 
@@ -217,7 +217,7 @@ EnginioQmlReply *EnginioQmlClient::create(const QJSValue &object, const Operatio
     return ereply;
 }
 
-EnginioQmlReply *EnginioQmlClient::update(const QJSValue &object, const Operation operation)
+EnginioQmlReply *EnginioQmlClient::update(const QJSValue &object, const Enginio::Operation operation)
 {
     Q_D(EnginioQmlClient);
 
@@ -231,7 +231,7 @@ EnginioQmlReply *EnginioQmlClient::update(const QJSValue &object, const Operatio
     return ereply;
 }
 
-EnginioQmlReply *EnginioQmlClient::remove(const QJSValue &object, const Operation operation)
+EnginioQmlReply *EnginioQmlClient::remove(const QJSValue &object, const Enginio::Operation operation)
 {
     Q_D(EnginioQmlClient);
 

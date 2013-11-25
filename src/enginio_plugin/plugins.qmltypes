@@ -158,10 +158,10 @@ Module {
     Component {
         name: "EnginioModelBase"
         prototype: "QAbstractListModel"
-        Property { name: "operation"; type: "EnginioClientConnection::Operation" }
+        Property { name: "operation"; type: "Enginio::Operation" }
         Signal {
             name: "operationChanged"
-            Parameter { name: "operation"; type: "EnginioClientConnection::Operation" }
+            Parameter { name: "operation"; type: "Enginio::Operation" }
         }
     }
     Component {

@@ -258,7 +258,7 @@ public:
 class ENGINIOCLIENT_EXPORT EnginioModelBasePrivate : public QAbstractItemModelPrivate {
 protected:
     EnginioClientConnectionPrivate *_enginio;
-    EnginioClient::Operation _operation;
+    Enginio::Operation _operation;
     EnginioModelBase *q;
     QVector<QMetaObject::Connection> _clientConnections;
     QObject *_replyConnectionConntext;
@@ -574,15 +574,15 @@ public:
         return setData(row, value, key);
     }
 
-    EnginioClientConnection::Operation operation() const Q_REQUIRED_RESULT
+    Enginio::Operation operation() const Q_REQUIRED_RESULT
     {
         return _operation;
     }
 
     void setOperation(const int operation)
     {
-        Q_ASSERT_X(operation >= EnginioClientConnection::ObjectOperation, "setOperation", "Invalid operation specified.");
-        _operation = static_cast<EnginioClientConnection::Operation>(operation);
+        Q_ASSERT_X(operation >= Enginio::ObjectOperation, "setOperation", "Invalid operation specified.");
+        _operation = static_cast<Enginio::Operation>(operation);
         emit q->operationChanged(_operation);
     }
 
@@ -601,7 +601,7 @@ public:
             // send full query
             QJsonObject query = queryAsJson();
             ObjectAdaptor<QJsonObject> aQuery(query);
-            QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientConnectionPrivate::Operation>(_operation));
+            QNetworkReply *nreply = _enginio->query(aQuery, static_cast<Enginio::Operation>(_operation));
             EnginioReplyBase *ereply = _enginio->createReply(nreply);
             if (_canFetchMore)
                 _latestRequestedOffset = query[EnginioString::limit].toDouble();
@@ -895,7 +895,7 @@ public:
         qDebug() << Q_FUNC_INFO << query;
         _latestRequestedOffset += limit;
         ObjectAdaptor<QJsonObject> aQuery(query);
-        QNetworkReply *nreply = _enginio->query(aQuery, static_cast<EnginioClientConnectionPrivate::Operation>(_operation));
+        QNetworkReply *nreply = _enginio->query(aQuery, static_cast<Enginio::Operation>(_operation));
         EnginioReplyBase *ereply = _enginio->createReply(nreply);
         QObject::connect(ereply, &EnginioReplyBase::dataChanged, ereply, &EnginioReplyBase::deleteLater);
         FinishedIncrementalUpdateRequest finishedRequest = { this, query, ereply };

@@ -450,16 +450,16 @@ void EnginioModel::setQuery(const QJsonObject &query)
 /*!
   \property EnginioModelBase::operation
   \brief The operation type of the query
-  \sa EnginioClientConnection::Operation, query()
+  \sa Enginio::Operation, query()
   \return returns the Operation
 */
-EnginioClientConnection::Operation EnginioModelBase::operation() const
+Enginio::Operation EnginioModelBase::operation() const
 {
     Q_D(const EnginioModelBase);
     return d->operation();
 }
 
-void EnginioModelBase::setOperation(EnginioClientConnection::Operation operation)
+void EnginioModelBase::setOperation(Enginio::Operation operation)
 {
     Q_D(EnginioModelBase);
     if (operation == d->operation())

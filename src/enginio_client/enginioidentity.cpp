@@ -148,7 +148,7 @@ public:
         cleanupConnections();
 
         _reply = thisAs<Derived>()->makeRequest(enginio);
-        enginio->setAuthenticationState(EnginioClientConnection::Authenticating);
+        enginio->setAuthenticationState(Enginio::Authenticating);
         _replyFinished = QObject::connect(_reply.data(), &QNetworkReply::finished, SessionSetterFunctor<Derived>(enginio, _reply.data(), this));
         _enginioDestroyed = QObject::connect(enginio->q_ptr, &EnginioClient::destroyed, DisconnectConnection(this));
     }

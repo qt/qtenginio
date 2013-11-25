@@ -53,8 +53,8 @@ class EnginioModelBasePrivate;
 class ENGINIOCLIENT_EXPORT EnginioModelBase : public QAbstractListModel
 {
     Q_OBJECT
-    Q_ENUMS(EnginioClientConnection::Operation) // TODO remove me QTBUG-33577
-    Q_PROPERTY(EnginioClientConnection::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
+    Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
+    Q_PROPERTY(Enginio::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
 
 protected:
     explicit EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent);
@@ -71,8 +71,8 @@ public:
         LastRole = Qt::UserRole + 10 // the first fully dynamic role
     };
 
-    EnginioClientConnection::Operation operation() const Q_REQUIRED_RESULT;
-    void setOperation(EnginioClientConnection::Operation operation);
+    Enginio::Operation operation() const Q_REQUIRED_RESULT;
+    void setOperation(Enginio::Operation operation);
 
     virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
@@ -86,7 +86,7 @@ public:
 
     void disableNotifications();
 Q_SIGNALS:
-    void operationChanged(EnginioClientConnection::Operation operation);
+    void operationChanged(Enginio::Operation operation);
 
 private:
     Q_DISABLE_COPY(EnginioModelBase)

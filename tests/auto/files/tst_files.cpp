@@ -270,7 +270,7 @@ void tst_Files::fileUploadDownload()
     {
         QJsonObject fileObject;
         fileObject.insert("id", fileId);
-        EnginioReply *fileInfo = client.query(fileObject, EnginioClient::FileOperation);
+        EnginioReply *fileInfo = client.query(fileObject, Enginio::FileOperation);
         QVERIFY(fileInfo);
         QTRY_VERIFY(fileInfo->isFinished());
         CHECK_NO_ERROR(fileInfo);
@@ -286,7 +286,7 @@ void tst_Files::fileUploadDownload()
         int count = 0;
         while (thumbnailStatus == "processing" && ++count < 20) {
             QTest::qWait(1000);
-            fileInfo = client.query(fileObject, EnginioClient::FileOperation);
+            fileInfo = client.query(fileObject, Enginio::FileOperation);
             QVERIFY(fileInfo);
             QTRY_VERIFY(fileInfo->isFinished());
             CHECK_NO_ERROR(fileInfo);
