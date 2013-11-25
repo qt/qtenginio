@@ -39,47 +39,54 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOQMLCLIENT_H
-#define ENGINIOQMLCLIENT_H
+#ifndef ENGINIOQMLCLIENT_P_H
+#define ENGINIOQMLCLIENT_P_H
 
-#include <Enginio/enginioclientconnection.h>
-#include "enginioqmlreply.h"
+#include <Enginio/private/enginioclient_p.h>
+#include "enginioqmlclient_p.h"
+
+#include <QtQml/qjsengine.h>
 #include <QtQml/qjsvalue.h>
 
 QT_BEGIN_NAMESPACE
 
-class EnginioQmlClientPrivate;
-class EnginioQmlClient : public EnginioClientConnection
+class EnginioQmlClientPrivate : public EnginioClientConnectionPrivate
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(EnginioQmlClient)
+    QJSEngine *_engine;
+    QJSValue _stringify;
+    QJSValue _parse;
 
-    Q_ENUMS(Enginio::Operation); // TODO remove me QTBUG-33577
-    Q_ENUMS(Enginio::AuthenticationState); // TODO remove me QTBUG-33577
+    Q_DECLARE_PUBLIC(EnginioQmlClient)
 public:
-    EnginioQmlClient(QObject *parent = 0);
-    ~EnginioQmlClient();
+    EnginioQmlClientPrivate()
+        : _engine(0)
+    {}
 
-    Q_INVOKABLE EnginioQmlReply *fullTextSearch(const QJSValue &query);
-    Q_INVOKABLE EnginioQmlReply *query(const QJSValue &query, const Enginio::Operation operation = Enginio::ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *create(const QJSValue &object, const Enginio::Operation operation = Enginio::ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *update(const QJSValue &object, const Enginio::Operation operation = Enginio::ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *remove(const QJSValue &object, const Enginio::Operation operation = Enginio::ObjectOperation);
-    Q_INVOKABLE EnginioQmlReply *downloadUrl(const QJSValue &object);
-    Q_INVOKABLE EnginioQmlReply *uploadFile(const QJSValue &object, const QUrl &url);
+    static EnginioQmlClientPrivate* get(EnginioClientConnection *client) { return static_cast<EnginioQmlClientPrivate*>(EnginioClientConnectionPrivate::get(client)); }
+    static EnginioQmlClient* get(EnginioClientConnectionPrivate *client) { return static_cast<EnginioQmlClient*>(client->q_ptr); }
 
-Q_SIGNALS:
-    void sessionAuthenticated(const  QJSValue &reply) const;
-    void sessionAuthenticationError(const  QJSValue &reply) const;
-    void sessionTerminated() const;
-    void finished(const QJSValue &reply);
-    void error(const QJSValue &reply);
+    virtual void init();
+    virtual void emitSessionTerminated() const Q_DECL_OVERRIDE;
+    virtual void emitSessionAuthenticated(EnginioReplyState *reply) Q_DECL_OVERRIDE;
+    virtual void emitSessionAuthenticationError(EnginioReplyState *reply) Q_DECL_OVERRIDE;
+    virtual void emitFinished(EnginioReplyState *reply) Q_DECL_OVERRIDE;
+    virtual void emitError(EnginioReplyState *reply) Q_DECL_OVERRIDE;
+    virtual EnginioReplyState *createReply(QNetworkReply *nreply) Q_DECL_OVERRIDE;
 
+
+    inline QJSEngine *jsengine()
+    {
+        if (Q_UNLIKELY(!_engine))
+            _setEngine();
+        return _engine;
+    }
+
+    QByteArray toJson(const QJSValue &value);
+    QJSValue fromJson(const QByteArray &value);
 private:
-    Q_DECLARE_PRIVATE(EnginioQmlClient)
+    void _setEngine();
 };
 
 QT_END_NAMESPACE
 
-#endif // ENGINIOQMLCLIENT_H
-
+#endif // ENGINIOQMLCLIENT_P_H

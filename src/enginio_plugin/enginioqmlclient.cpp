@@ -39,10 +39,10 @@
 **
 ****************************************************************************/
 
-#include "enginioqmlclient.h"
+#include "enginioqmlclient_p_p.h"
 #include "Enginio/private/enginioclient_p.h"
 #include "enginioqmlobjectadaptor_p.h"
-#include "enginioqmlreply.h"
+#include "enginioqmlreply_p.h"
 
 #include <QtNetwork/qnetworkreply.h>
 

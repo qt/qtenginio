@@ -39,9 +39,9 @@
 **
 ****************************************************************************/
 
-#include "enginioqmlreply.h"
+#include "enginioqmlreply_p.h"
+#include "enginioqmlclient_p_p.h"
 #include "enginioqmlclient_p.h"
-#include "enginioqmlclient.h"
 #include <Enginio/private/enginioreply_p.h>
 #include <QtQml/qjsvalue.h>
 #include <QtQml/qqmlengine.h>

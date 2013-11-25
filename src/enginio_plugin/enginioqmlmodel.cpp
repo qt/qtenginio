@@ -39,11 +39,11 @@
 **
 ****************************************************************************/
 
-#include "enginioqmlmodel.h"
+#include "enginioqmlmodel_p.h"
 #include <Enginio/private/enginiobasemodel_p.h>
 #include <QtCore/qjsondocument.h>
-#include "enginioqmlclient_p.h"
-#include "enginioqmlreply.h"
+#include "enginioqmlclient_p_p.h"
+#include "enginioqmlreply_p.h"
 #include "enginioqmlobjectadaptor_p.h"
 
 

@@ -18,12 +18,12 @@ SOURCES += \
     enginioqmlreply.cpp \
 
 HEADERS += \
-    enginioqmlclient.h \
-    enginioqmlmodel.h \
-    enginioplugin.h \
     enginioqmlobjectadaptor_p.h \
+    enginioqmlclient_p_p.h \
+    enginioplugin_p.h \
     enginioqmlclient_p.h \
-    enginioqmlreply.h \
+    enginioqmlmodel_p.h \
+    enginioqmlreply_p.h
 
 QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 

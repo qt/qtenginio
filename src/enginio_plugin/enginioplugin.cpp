@@ -39,12 +39,12 @@
 **
 ****************************************************************************/
 
-#include "enginioplugin.h"
-#include "enginioqmlclient.h"
-#include "enginioqmlmodel.h"
+#include "enginioplugin_p.h"
+#include "enginioqmlclient_p.h"
+#include "enginioqmlmodel_p.h"
+#include "enginioqmlreply_p.h"
 #include <Enginio/enginiomodel.h>
 #include <Enginio/enginioreply.h>
-#include "enginioqmlreply.h"
 #include <Enginio/enginioidentity.h>
 #include <Enginio/enginiooauth2authentication.h>
 #include <Enginio/private/enginioclient_p.h>
