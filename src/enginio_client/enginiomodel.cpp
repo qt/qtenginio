@@ -382,7 +382,7 @@ EnginioModelBase::~EnginioModelBase()
 {}
 
 /*!
-  \enum Enginio::Roles
+  \enum Enginio::Role
 
   EnginioModel defines roles which represent data used by every object
   stored in the Enginio backend
