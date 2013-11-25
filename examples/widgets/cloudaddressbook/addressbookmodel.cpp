@@ -67,7 +67,7 @@ QVariant AddressBookModel::data(const QModelIndex &index, int role) const
     if (role == Qt::FontRole) {
         // this role is used to mark items found in the full text search.
         QFont font;
-        QString id = EnginioModel::data(index, IdRole).value<QString>();
+        QString id = EnginioModel::data(index, Enginio::IdRole).value<QString>();
         font.setBold(_markedItems.contains(id));
         return font;
     }

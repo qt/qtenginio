@@ -51,7 +51,7 @@ class TodosModel : public EnginioModel
 public:
     enum Role
     {
-        TitleRole = EnginioModel::LastRole,
+        TitleRole = Enginio::LastRole,
         CompletedRole
     };
 //![definition]

@@ -810,12 +810,12 @@ void tst_EnginioModel::append()
         QCOMPARE(model.data(model.index(1)).value<QJsonValue>().toObject(), o2);
 
         // check synced flag, the data is not synced yet
-        QCOMPARE(model.data(model.index(0), EnginioModel::SyncedRole).value<bool>(), false);
-        QCOMPARE(model.data(model.index(1), EnginioModel::SyncedRole).value<bool>(), false);
+        QCOMPARE(model.data(model.index(0), Enginio::SyncedRole).value<bool>(), false);
+        QCOMPARE(model.data(model.index(1), Enginio::SyncedRole).value<bool>(), false);
 
         // check synced flag, the data should be in sync at some point
-        QTRY_COMPARE(model.data(model.index(0), EnginioModel::SyncedRole).value<bool>(), true);
-        QTRY_COMPARE(model.data(model.index(1), EnginioModel::SyncedRole).value<bool>(), true);
+        QTRY_COMPARE(model.data(model.index(0), Enginio::SyncedRole).value<bool>(), true);
+        QTRY_COMPARE(model.data(model.index(1), Enginio::SyncedRole).value<bool>(), true);
     }
     {
         // add a new item and remove earlier the first item
@@ -826,7 +826,7 @@ void tst_EnginioModel::append()
 
         // check if everything is in sync
         for (int i = 0; i < model.rowCount(); ++i)
-            QCOMPARE(model.data(model.index(i), EnginioModel::SyncedRole).value<bool>(), true);
+            QCOMPARE(model.data(model.index(i), Enginio::SyncedRole).value<bool>(), true);
 
         const int initialRowCount = model.rowCount();
         // the real test
@@ -834,12 +834,12 @@ void tst_EnginioModel::append()
         QVERIFY(r3);
         QVERIFY(!r3->isFinished());
         r3->setDelayFinishedSignal(true);
-        QCOMPARE(model.data(model.index(initialRowCount), EnginioModel::SyncedRole).value<bool>(), false);
+        QCOMPARE(model.data(model.index(initialRowCount), Enginio::SyncedRole).value<bool>(), false);
 
         EnginioReply *r4 = model.remove(0);
 
-        QCOMPARE(model.data(model.index(0), EnginioModel::SyncedRole).value<bool>(), false);
-        QCOMPARE(model.data(model.index(initialRowCount), EnginioModel::SyncedRole).value<bool>(), false);
+        QCOMPARE(model.data(model.index(0), Enginio::SyncedRole).value<bool>(), false);
+        QCOMPARE(model.data(model.index(initialRowCount), Enginio::SyncedRole).value<bool>(), false);
 
         int counter = 0;
         ReplyCounter replyCounter(&counter);
@@ -854,11 +854,11 @@ void tst_EnginioModel::append()
         QCOMPARE(model.rowCount(), initialRowCount); // one added and one removed
 
         for (int i = 0; i < model.rowCount() - 1; ++i) {
-            QCOMPARE(model.data(model.index(i), EnginioModel::SyncedRole).value<bool>(), true);
+            QCOMPARE(model.data(model.index(i), Enginio::SyncedRole).value<bool>(), true);
         }
         {
             QModelIndex idx = model.index(initialRowCount - 1);
-            QCOMPARE(model.data(idx, EnginioModel::SyncedRole).value<bool>(), false);
+            QCOMPARE(model.data(idx, Enginio::SyncedRole).value<bool>(), false);
             QCOMPARE(model.data(idx).value<QJsonValue>().toObject(), o3);
         }
 
@@ -874,7 +874,7 @@ void tst_EnginioModel::append()
 
         // check if everything is in sync
         for (int i = 0; i < model.rowCount(); ++i)
-            QCOMPARE(model.data(model.index(i), EnginioModel::SyncedRole).value<bool>(), true);
+            QCOMPARE(model.data(model.index(i), Enginio::SyncedRole).value<bool>(), true);
 
         QModelIndex idx = model.index(initialRowCount - 1);
         QCOMPARE(model.data(idx).value<QJsonValue>().toObject()[propertyName], o3[propertyName]);
@@ -917,7 +917,7 @@ void tst_EnginioModel::externallyRemovedImpl()
         QVERIFY(model.rowCount());
     }
     QModelIndex i = model.index(0);
-    QString id = model.data(i, EnginioModel::IdRole).value<QJsonValue>().toString();
+    QString id = model.data(i, Enginio::IdRole).value<QJsonValue>().toString();
     QVERIFY(!id.isEmpty());
 
     QJsonObject o;
@@ -927,7 +927,7 @@ void tst_EnginioModel::externallyRemovedImpl()
     QTRY_VERIFY(r1->isFinished());
 
     // the value was removed on the server side,
-    QCOMPARE(model.data(i, EnginioModel::IdRole).value<QJsonValue>().toString(), id);
+    QCOMPARE(model.data(i, Enginio::IdRole).value<QJsonValue>().toString(), id);
     // but is still in the model cache.
 
     EnginioReply *r2 = operation(model, 0);
@@ -1014,7 +1014,7 @@ void tst_EnginioModel::createAndModify()
 
         QTRY_VERIFY(r1->isFinished());
         QModelIndex i = model.index(model.rowCount() - 1);
-        QCOMPARE(model.data(i, EnginioModel::SyncedRole).value<bool>(), false);
+        QCOMPARE(model.data(i, Enginio::SyncedRole).value<bool>(), false);
         r2->setDelayFinishedSignal(false);
 
         QTRY_VERIFY(r2->isFinished());
@@ -1035,7 +1035,7 @@ void tst_EnginioModel::createAndModify()
 
         QTRY_VERIFY(r1->isFinished());
         QModelIndex i = model.index(model.rowCount() - 1);
-        QCOMPARE(model.data(i, EnginioModel::SyncedRole).value<bool>(), false);
+        QCOMPARE(model.data(i, Enginio::SyncedRole).value<bool>(), false);
         r2->setDelayFinishedSignal(false);
 
         QTRY_VERIFY(r2->isFinished());
@@ -1043,7 +1043,7 @@ void tst_EnginioModel::createAndModify()
         QVERIFY(!r2->isError());
         i = model.index(model.rowCount() - 1);
         QCOMPARE(model.data(i).value<QJsonValue>().toObject()["title"].toString(), QString::fromLatin1("newO"));
-        QCOMPARE(model.data(i, EnginioModel::SyncedRole).value<bool>(), true);
+        QCOMPARE(model.data(i, Enginio::SyncedRole).value<bool>(), true);
     }
 }
 
@@ -1364,15 +1364,15 @@ void tst_EnginioModel::updatingRoles()
     QJsonObject query;
     query.insert("objectType", objectType);
 
-    QTest::ignoreMessage(QtWarningMsg, "Can not use custom role index lower then EnginioModel::LastRole, but '261' was used for 'invalid'");
+    QTest::ignoreMessage(QtWarningMsg, "Can not use custom role index lower then Enginio::LastRole, but '261' was used for 'invalid'");
     struct CustomModel: public EnginioModel
     {
         enum {
-            BarRole = EnginioModel::LastRole,
-            FooRole = EnginioModel::LastRole + 1,
-            TitleRole = EnginioModel::LastRole + 20, // existing custom role
-            InvalidRole = EnginioModel::ObjectTypeRole, // custom and with wrong index
-            IdRole = EnginioModel::IdRole // duplicate of existing role
+            BarRole = Enginio::LastRole,
+            FooRole = Enginio::LastRole + 1,
+            TitleRole = Enginio::LastRole + 20, // existing custom role
+            InvalidRole = Enginio::ObjectTypeRole, // custom and with wrong index
+            IdRole = Enginio::IdRole // duplicate of existing role
         };
 
         bool useBaseClassImplementation;
@@ -1441,7 +1441,7 @@ void tst_EnginioModel::setData()
 
     struct Model: public EnginioModel {
         enum Roles {
-            TitleRole = EnginioModel::LastRole
+            TitleRole = Enginio::LastRole
         };
 
         virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE

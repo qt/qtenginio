@@ -91,7 +91,7 @@ const int EnginioModelBasePrivate::IncrementalModelUpdate = -2;
   because of insufficient access rights, in that case the operation will be reverted.
 
   There are two, ways of tracking if an item state is the same in the model and backend.
-  Each item has a role that returns a boolean \l{EnginioModel::SyncedRole}{SyncedRole}, role name "_synced" which
+  Each item has a role that returns a boolean \l{Enginio::SyncedRole}{SyncedRole}, role name "_synced" which
   indicates whether the item is successfully updated on the server.
   This role can for example meant to be used for a busy indicator while a property is being updated.
   Alternatively the status of each \l{EnginioReply}{EnginioReply} returned by EnginioModel can be tracked.
@@ -279,19 +279,19 @@ void EnginioModelBasePrivate::syncRoles()
 
     if (!_roles.count()) {
         _roles.reserve(firstObject.count());
-        _roles[EnginioModel::SyncedRole] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
-        _roles[EnginioModel::CreatedAtRole] = EnginioString::createdAt;
-        _roles[EnginioModel::UpdatedAtRole] = EnginioString::updatedAt;
-        _roles[EnginioModel::IdRole] = EnginioString::id;
-        _roles[EnginioModel::ObjectTypeRole] = EnginioString::objectType;
-        _rolesCounter = EnginioModel::LastRole;
+        _roles[Enginio::SyncedRole] = EnginioString::_synced; // TODO Use a proper name, can we make it an attached property in qml? Does it make sense to try?
+        _roles[Enginio::CreatedAtRole] = EnginioString::createdAt;
+        _roles[Enginio::UpdatedAtRole] = EnginioString::updatedAt;
+        _roles[Enginio::IdRole] = EnginioString::id;
+        _roles[Enginio::ObjectTypeRole] = EnginioString::objectType;
+        _rolesCounter = Enginio::LastRole;
     }
 
     // check if someone does not use custom roles
     QHash<int, QByteArray> predefinedRoles = q->roleNames();
     foreach (int i, predefinedRoles.keys()) {
-        if (i < EnginioModel::LastRole && i >= EnginioModel::SyncedRole && predefinedRoles[i] != _roles[i].toUtf8()) {
-            qWarning("Can not use custom role index lower then EnginioModel::LastRole, but '%i' was used for '%s'", i, predefinedRoles[i].constData());
+        if (i < Enginio::LastRole && i >= Enginio::SyncedRole && predefinedRoles[i] != _roles[i].toUtf8()) {
+            qWarning("Can not use custom role index lower then Enginio::LastRole, but '%i' was used for '%s'", i, predefinedRoles[i].constData());
             continue;
         }
         _roles[i] = QString::fromUtf8(predefinedRoles[i].constData());
@@ -382,7 +382,7 @@ EnginioModelBase::~EnginioModelBase()
 {}
 
 /*!
-  \enum EnginioModelBase::Roles
+  \enum Enginio::Roles
 
   EnginioModel defines roles which represent data used by every object
   stored in the Enginio backend
@@ -598,7 +598,7 @@ bool EnginioModelBase::setData(const QModelIndex &index, const QVariant &value, 
 
     \note when reimplementating this function, you need to call the base class implementation first and
     take the result into account as shown in the {todos-cpp}{Todos Example}
-    \note custom role indexes have to be greater then or equal to \l EnginioModel::LastRole
+    \note custom role indexes have to be greater then or equal to \l Enginio::LastRole
 */
 QHash<int, QByteArray> EnginioModelBase::roleNames() const
 {

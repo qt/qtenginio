@@ -413,7 +413,7 @@ public:
         , _replyConnectionConntext(new QObject())
         , _latestRequestedOffset(0)
         , _canFetchMore(false)
-        , _rolesCounter(EnginioModel::SyncedRole)
+        , _rolesCounter(Enginio::SyncedRole)
     {
     }
 
@@ -563,14 +563,14 @@ public:
         QObject::connect(ereply, &EnginioReplyBase::dataChanged, _replyConnectionConntext, finishedRequest);
         _attachedData.insertRequestId(ereply->requestId(), row);
         QVector<int> roles(1);
-        roles.append(EnginioModel::SyncedRole);
+        roles.append(Enginio::SyncedRole);
         emit q->dataChanged(q->index(row), q->index(row) , roles);
         return ereply;
     }
 
     EnginioReplyBase *setValue(int row, const QString &role, const QVariant &value)
     {
-        int key = _roles.key(role, EnginioModel::InvalidRole);
+        int key = _roles.key(role, Enginio::InvalidRole);
         return setData(row, value, key);
     }
 
@@ -775,7 +775,7 @@ public:
 
     EnginioReplyBase *setData(const int row, const QVariant &value, int role)
     {
-        if (role > EnginioModel::SyncedRole) {
+        if (role > Enginio::SyncedRole) {
             QJsonObject oldObject = _data.at(row).toObject();
             QString id = oldObject[EnginioString::id].toString();
             if (id.isEmpty())
@@ -803,7 +803,7 @@ public:
     {
         // We are about to update a not synced new item. The item do not have id yet,
         // so we can not make a request now, we need to wait for finished signal.
-        Q_ASSERT(role > EnginioModel::SyncedRole);
+        Q_ASSERT(role > Enginio::SyncedRole);
         EnginioReplyBase *ereply, *createReply;
         QString tmpId;
         Q_ASSERT(oldObject[EnginioString::id].toString().isEmpty());
@@ -816,7 +816,7 @@ public:
     EnginioReplyBase *setDataNow(const int row, const QVariant &value, int role, const QJsonObject &oldObject, const QString &id)
     {
         Q_ASSERT(!id.isEmpty());
-        Q_ASSERT(role > EnginioModel::SyncedRole);
+        Q_ASSERT(role > Enginio::SyncedRole);
         const QString roleName(_roles.value(role));
         QJsonObject deltaObject;
         QJsonObject newObject = oldObject;
@@ -856,7 +856,7 @@ public:
 
     QVariant data(unsigned row, int role) const Q_REQUIRED_RESULT
     {
-        if (role == EnginioModel::SyncedRole) {
+        if (role == Enginio::SyncedRole) {
             return _attachedData.isSynced(row);
         }
 

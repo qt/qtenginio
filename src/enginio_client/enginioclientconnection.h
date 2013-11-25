@@ -82,6 +82,16 @@ public:
         FileChunkUploadOperation,
         FileGetDownloadUrlOperation
     };
+
+    enum Role {
+        InvalidRole = -1,
+        SyncedRole = Qt::UserRole + 1,
+        CreatedAtRole,
+        UpdatedAtRole,
+        IdRole,
+        ObjectTypeRole,
+        LastRole = Qt::UserRole + 10 // the first fully dynamic role
+    };
 };
 
 

@@ -54,7 +54,7 @@ class AddressBookModel : public EnginioModel
 public:
     //![Roles]
     enum Roles {
-        FirstNameRole = EnginioModel::LastRole,
+        FirstNameRole = Enginio::LastRole,
         LastNameRole,
         EmailRole,
         PhoneRole,
