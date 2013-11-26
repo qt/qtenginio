@@ -51,7 +51,12 @@
 QT_BEGIN_NAMESPACE
 
 class EnginioModelPrivate;
-class ENGINIOCLIENT_EXPORT EnginioModel : public EnginioModelBase
+class ENGINIOCLIENT_EXPORT EnginioModel
+#ifdef Q_QDOC
+        : public QAbstractListModel
+#else
+        : public EnginioModelBase
+#endif
 {
     Q_OBJECT
     Q_PROPERTY(EnginioClient *client READ client WRITE setClient NOTIFY clientChanged)
@@ -75,6 +80,18 @@ public:
 Q_SIGNALS:
     void queryChanged(const QJsonObject &query);
     void clientChanged(EnginioClient *client);
+
+#ifdef Q_QDOC
+    // Defined in EnginioModelBase
+public:
+    Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
+    Q_PROPERTY(Enginio::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
+
+    Enginio::Operation operation() const Q_REQUIRED_RESULT;
+    void setOperation(Enginio::Operation operation);
+Q_SIGNALS:
+    void operationChanged(Enginio::Operation operation);
+#endif
 
 private:
     Q_DISABLE_COPY(EnginioModel)

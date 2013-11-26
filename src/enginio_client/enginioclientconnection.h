@@ -55,12 +55,19 @@ class QNetworkAccessManager;
 class EnginioIdentity;
 class EnginioClientConnectionPrivate;
 
+#ifndef Q_QDOC
 class ENGINIOCLIENT_EXPORT Enginio
 {
     Q_GADGET
+#else
+namespace Enginio {
+#endif
     Q_ENUMS(AuthenticationState)
     Q_ENUMS(Operation)
+
+#ifndef Q_QDOC
 public:
+#endif
     enum AuthenticationState {
         NotAuthenticated,
         Authenticating,

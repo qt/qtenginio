@@ -53,7 +53,12 @@ class EnginioClient;
 class EnginioReplyPrivate;
 class EnginioClientConnectionPrivate;
 
-class ENGINIOCLIENT_EXPORT EnginioReply : public EnginioReplyBase
+class ENGINIOCLIENT_EXPORT EnginioReply
+#ifdef Q_QDOC
+        : public QObject
+#else
+        : public EnginioReplyBase
+#endif
 {
     Q_OBJECT
     Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
@@ -67,6 +72,37 @@ public:
 Q_SIGNALS:
     void finished(EnginioReply *reply);
     void dataChanged();
+
+
+#ifdef Q_QDOC
+public:
+    Q_PROPERTY(ErrorTypes errorType READ errorType NOTIFY dataChanged)
+    Q_PROPERTY(QNetworkReply::NetworkError networkError READ networkError NOTIFY dataChanged)
+    Q_PROPERTY(QString errorString READ errorString NOTIFY dataChanged)
+    Q_PROPERTY(int backendStatus READ backendStatus NOTIFY dataChanged)
+    Q_PROPERTY(QString requestId READ requestId CONSTANT)
+    Q_ENUMS(ErrorTypes)
+    enum ErrorTypes {
+        NoError,
+        NetworkError,
+        BackendError
+    };
+
+    ErrorTypes errorType() const Q_REQUIRED_RESULT;
+    QNetworkReply::NetworkError networkError() const Q_REQUIRED_RESULT;
+    QString errorString() const Q_REQUIRED_RESULT;
+    int backendStatus() const Q_REQUIRED_RESULT;
+
+    bool isError() const Q_REQUIRED_RESULT;
+    bool isFinished() const Q_REQUIRED_RESULT;
+
+    QJsonObject data() const Q_REQUIRED_RESULT;
+
+Q_SIGNALS:
+    void dataChanged();
+    void progress(qint64 bytesSent, qint64 bytesTotal);
+
+#endif
 
 protected:
     virtual void emitFinished();

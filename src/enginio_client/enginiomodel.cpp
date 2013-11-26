@@ -91,7 +91,7 @@ const int EnginioModelBasePrivate::IncrementalModelUpdate = -2;
   because of insufficient access rights, in that case the operation will be reverted.
 
   There are two, ways of tracking if an item state is the same in the model and backend.
-  Each item has a role that returns a boolean \l{Enginio::SyncedRole}{SyncedRole}, role name "_synced" which
+  Each item has a role that returns a boolean \l{EnginioModel::SyncedRole}{SyncedRole}, role name "_synced" which
   indicates whether the item is successfully updated on the server.
   This role can for example meant to be used for a busy indicator while a property is being updated.
   Alternatively the status of each \l{EnginioReply}{EnginioReply} returned by EnginioModel can be tracked.
@@ -448,7 +448,7 @@ void EnginioModel::setQuery(const QJsonObject &query)
 }
 
 /*!
-  \property EnginioModelBase::operation
+  \property EnginioModel::operation
   \brief The operation type of the query
   \sa Enginio::Operation, query()
   \return returns the Operation

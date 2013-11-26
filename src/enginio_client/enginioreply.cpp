@@ -65,7 +65,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \enum EnginioReplyBase::ErrorTypes
+  \class EnginioReplyBase
+  \internal
+*/
+
+/*!
+  \enum EnginioReply::ErrorTypes
   Describes the type of error that occured when making a request to the Enginio backend.
   \value NoError The reply returned without errors
   \value NetworkError The error was a networking problem
@@ -75,12 +80,12 @@ QT_BEGIN_NAMESPACE
 /*!
   \fn EnginioReply::finished(EnginioReply *reply)
   This signal is emitted when the EnginioReply \a reply is finished.
-  After the network operation, use the \l{EnginioReplyBase::isError()}{isError()} function to check for
+  After the network operation, use the \l{EnginioReply::isError()}{isError()} function to check for
   potential problems and then use the \l data property to access the returned data.
 */
 
 /*!
-  \fn EnginioReplyBase::progress(qint64 bytesSent, qint64 bytesTotal)
+  \fn EnginioReply::progress(qint64 bytesSent, qint64 bytesTotal)
   This signal is emitted for file operations, indicating the progress of up or downloads.
   The \a bytesSent is the current progress relative to the total \a bytesTotal.
 */
@@ -110,9 +115,10 @@ EnginioReply::~EnginioReply()
 {}
 
 /*!
-  \property EnginioReplyBase::networkError
+  \property EnginioReply::networkError
   This property holds the network error for the request.
 */
+
 QNetworkReply::NetworkError EnginioReplyBase::networkError() const
 {
     Q_D(const EnginioReplyBase);
@@ -120,10 +126,11 @@ QNetworkReply::NetworkError EnginioReplyBase::networkError() const
 }
 
 /*!
-  \property EnginioReplyBase::errorString
+  \property EnginioReply::errorString
   This property holds the error for the request as human readable string.
-  Check \l{EnginioReplyBase::isError()}{isError()} first to check if the reply is an error.
+  Check \l{EnginioReply::isError()}{isError()} first to check if the reply is an error.
 */
+
 QString EnginioReplyBase::errorString() const
 {
     Q_D(const EnginioReplyBase);
@@ -131,7 +138,7 @@ QString EnginioReplyBase::errorString() const
 }
 
 /*!
-  \property EnginioReplyBase::requestId
+  \property EnginioReply::requestId
   This property holds the API request ID for the request.
   The request ID is useful for end-to-end tracking of requests and to identify
   the origin of notifications.
@@ -220,6 +227,9 @@ void EnginioReplyBasePrivate::swapNetworkReply(EnginioReplyBasePrivate *other)
     _client->registerReply(other->_nreply, other->q_func());
 }
 
+/*!
+  \internal
+*/
 void EnginioReplyBase::dumpDebugInfo() const
 {
     Q_D(const EnginioReplyBase);
@@ -251,9 +261,11 @@ bool EnginioReplyBase::delayFinishedSignal()
 }
 
 /*!
+  \fn bool EnginioReply::isError() const
   \brief EnginioReplyBase::isError returns whether this reply was unsuccessful
   \return true if the reply did not succeed
 */
+
 bool EnginioReplyBase::isError() const
 {
     Q_D(const EnginioReplyBase);
@@ -261,9 +273,11 @@ bool EnginioReplyBase::isError() const
 }
 
 /*!
-  \brief EnginioReplyBase::isFinished returns whether this reply was finished or not
+  \fn bool EnginioReply::isFinished() const
+  \brief Returns whether this reply was finished or not
   \return true if the reply was finished, false otherwise.
 */
+
 bool EnginioReplyBase::isFinished() const
 {
     Q_D(const EnginioReplyBase);
@@ -271,10 +285,11 @@ bool EnginioReplyBase::isFinished() const
 }
 
 /*!
-  \property EnginioReplyBase::backendStatus
+  \property EnginioReply::backendStatus
   \return the backend return status for this reply.
   \sa EnginioReplyBase::ErrorTypes
 */
+
 int EnginioReplyBase::backendStatus() const
 {
     Q_D(const EnginioReplyBase);
@@ -282,10 +297,11 @@ int EnginioReplyBase::backendStatus() const
 }
 
 /*!
-  \property EnginioReplyBase::errorType
+  \property EnginioReply::errorType
   \return the type of the error
   \sa EnginioReplyBase::ErrorTypes
 */
+
 EnginioReplyBase::ErrorTypes EnginioReplyBase::errorType() const
 {
     Q_D(const EnginioReplyBase);

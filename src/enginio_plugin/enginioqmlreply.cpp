@@ -57,7 +57,7 @@ QT_BEGIN_NAMESPACE
   \ingroup engino-qml
   \target EnginioModelQml
 
-  \brief A reply to any \l Enginio request.
+  \brief A reply to any \l EnginioClient request.
 */
 
 /*!

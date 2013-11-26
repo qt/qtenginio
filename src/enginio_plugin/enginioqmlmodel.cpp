@@ -83,12 +83,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty Enginio Enginio1::EnginioModel::enginio
-  The instance of \l Enginio used for this model.
+  \qmlproperty Enginio1::EnginioClient Enginio1::EnginioModel::client
+  The instance of \l Enginio1::EnginioClient used for this model.
 */
 
 /*!
-  \qmlproperty Enginio::Operation Enginio1::EnginioModelBase::operation
+  \qmlproperty Enginio::Operation Enginio1::EnginioModel::operation
   The operation used for the \l query.
 */
 

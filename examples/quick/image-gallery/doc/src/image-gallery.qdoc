@@ -64,7 +64,7 @@
 
     \section1 The example code
 
-    The first step is to set up the \l Enginio client.
+    The first step is to set up the \l Enginio1::EnginioClient client.
     \snippet image-gallery/image-gallery.qml client
 
     The model gets initialized with the client declared above.

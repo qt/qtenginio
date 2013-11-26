@@ -63,7 +63,7 @@
     This example uses QtEnginio library together with QtQuickControls, therefore both have
     to be imported.
     \snippet users/Browse.qml imports
-    We will also use a common \l{Enginio}{Enginio} connection as shown here:
+    We will also use a common \l {Enginio1::EnginioClient}{EnginioClient} connection as shown here:
     \snippet users/users.qml client
 
     The example is organized into separate tabs by using \l TabView. Each tab shows different
@@ -72,7 +72,7 @@
     \section1 Browsing users' data
     The most convenient method to browse users is to use \l{Enginio1::EnginioModel}{EnginioModel}. The model can
     automatically download all data that we need. It is sufficient to set three properties:
-    \l{Enginio1::EnginioModel::enginio}{enginio}, \l{Enginio1::EnginioModel::query}{query}
+    \l{Enginio1::EnginioModel::client}{client}, \l{Enginio1::EnginioModel::query}{query}
     and \l{Enginio1::EnginioModel::operation}{operation} as shown below:
     \snippet users/Browse.qml browse
 

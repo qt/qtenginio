@@ -100,6 +100,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+  \namespace Enginio
+  \inmodule enginio-qt
+  \brief The Enginio namespace provides enums used throughout Enginio.
+*/
+
+/*!
   \fn void EnginioClient::error(EnginioReply *reply)
   \brief This signal is emitted when a request to the backend returns an error.
 
@@ -178,7 +184,7 @@ QT_BEGIN_NAMESPACE
     \value Authenticated Authentication was successful
     \value AuthenticationFailure Authentication failed
 
-    \sa authenticationState
+    \sa EnginioClient::authenticationState
 */
 
 ENGINIOCLIENT_EXPORT bool gEnableEnginioDebugInfo = !qEnvironmentVariableIsSet("ENGINIO_DEBUG_INFO");
@@ -454,7 +460,7 @@ EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
   \snippet enginioclient/tst_enginioclient.cpp query-todo
 
   \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), update(), remove(), Enginio::Operation
+  \sa EnginioReply, create(), update(), remove(), EnginioClient::operation
  */
 EnginioReply* EnginioClient::query(const QJsonObject &query, const Enginio::Operation operation)
 {
