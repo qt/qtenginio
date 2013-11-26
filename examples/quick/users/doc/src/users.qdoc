@@ -81,9 +81,9 @@
 
     \section1 User authentication
     Authentication is quite easy. The only thing that needs to be done is to assign an identity, for example
-    \l{EnginioOAuth2Authentication}{EnginioOAuth2Authentication} object to \l{Enginio::identity}{Enginio::identity}.
-    After a while, \l{Enginio::authenticationState}{Enginio::authenticationState} will change and
-    \l{Enginio::sessionAuthenticated}{sessionAuthenticated} or \l{Enginio::sessionAuthenticationError}{sessionAuthenticationError}
+    \l{EnginioOAuth2Authentication}{EnginioOAuth2Authentication} object to \l{EnginioClient::identity}{EnginioClient::identity}.
+    After a while, \l{EnginioClient::authenticationState}{EnginioClient::authenticationState} will change and
+    \l{EnginioClient::sessionAuthenticated}{sessionAuthenticated} or \l{EnginioClient::sessionAuthenticationError}{sessionAuthenticationError}
     will be emitted.
 
     The first thing we need to do is to create an identity object: \l{EnginioOAuth2Authentication}{EnginioOAuth2Authentication}
@@ -97,7 +97,7 @@
 
     Once the authentication query finishes, the state changes to "Authenticated" or
     "AuthenticationFailure" depending on the authentication result. Null
-    assignment to the \l{Enginio::identity}{identity} causes the session to terminate immediately:
+    assignment to the \l{EnginioClient::identity}{identity} causes the session to terminate immediately:
     \snippet users/Login.qml assignNull
 
     For educational purposes, in the example we also show a log window with data attached to
@@ -106,7 +106,7 @@
 
     \section1 Registering a new user
     Registration of a new user is as simple as adding a new object to the "users" collection. It can be achieved
-    by using the \l{Enginio::create}{create} function, as shown below:
+    by using the \l{EnginioClient::create}{create} function, as shown below:
     \snippet users/Register.qml create
 
     We could also use the \l{Enginio1::EnginioModel::append}{EnginioModel::append} method in the browsing example

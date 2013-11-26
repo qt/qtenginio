@@ -79,6 +79,19 @@ EnginioIdentity::EnginioIdentity(EnginioIdentityPrivate &dd, QObject *parent)
     : QObject(dd, parent)
 {}
 
+/*!
+    \fn EnginioIdentity::prepareSessionToken(EnginioClientConnectionPrivate *enginio);
+    \brief EnginioIdentity::prepareSessionToken is called by enginio client to initialize authentication
+    \param enginio client pointer
+    \internal
+*/
+/*!
+    \fn EnginioIdentity::removeSessionToken(EnginioClientConnectionPrivate *enginio);
+    \brief EnginioIdentity::prepareSessionToken is called by enginio client to finalize de-authentication
+    \param enginio client pointer
+    \internal
+*/
+
 class EnginioUserPassAuthenticationPrivate;
 struct DisconnectConnection
 {

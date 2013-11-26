@@ -406,7 +406,7 @@ EnginioModelBase::~EnginioModelBase()
 */
 
 /*!
-  \property EnginioModel::enginio
+  \property EnginioModel::client
   \brief The EnginioClient used by the model.
 
   \sa EnginioClient
