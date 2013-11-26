@@ -47,11 +47,9 @@
 
 #include <Enginio/enginioreply.h>
 
-//![resetRoles]
 TodosModel::TodosModel(QObject *parent)
     : EnginioModel(parent)
 {}
-//![resetRoles]
 
 QVariant TodosModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
@@ -63,9 +61,6 @@ QVariant TodosModel::headerData(int section, Qt::Orientation orientation, int ro
 //![data]
 QVariant TodosModel::data(const QModelIndex &index, int role) const
 {
-    if (role == Qt::DisplayRole)
-        return EnginioModel::data(index, TitleRole).value<QJsonValue>().toString();
-
     if (role == Qt::FontRole) {
         bool completed = EnginioModel::data(index, CompletedRole).value<QJsonValue>().toBool();
         QFont font;
@@ -82,27 +77,17 @@ QVariant TodosModel::data(const QModelIndex &index, int role) const
     if (role == CompletedRole)
         return EnginioModel::data(index, CompletedRole).value<QJsonValue>().toBool();
 
-    if (role == TitleRole)
-        return EnginioModel::data(index, TitleRole).value<QJsonValue>().toString();
-
     // fallback to base class
     return EnginioModel::data(index, role);
 }
 //![data]
-//![setData]
-bool TodosModel::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    if (role == Qt::EditRole || role == TitleRole)
-        return EnginioModel::setData(index, value, role);
-
-    return false;
-}
-//![setData]
 //![roleNames]
 QHash<int, QByteArray> TodosModel::roleNames() const
 {
     QHash<int, QByteArray> roles = EnginioModel::roleNames();
     roles.insert(TitleRole, "title");
+    roles.insert(Qt::DisplayRole, "title");
+    roles.insert(Qt::EditRole, "title");
     roles.insert(CompletedRole, "completed");
     return roles;
 }

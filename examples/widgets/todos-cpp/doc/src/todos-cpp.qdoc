@@ -53,16 +53,22 @@
     and the \c completed information we need to define these two roles.
     \snippet todos-cpp/todosmodel.h definition
 
-    The newly created model is empty and define basic roles. Most roles are created dynamically,
-    based on the json data-structure.  They have no predefined value in the \l Qt::ItemDataRole enum.
+    By default views (for example \l QListView) use the \l{Qt::ItemDataRole} role to display or edit the content.
+    The newly created \l{EnginioModelCpp}{EnginioModel} is empty and defines basic roles. Most roles are created
+    dynamically, based on the json data-structure.  They have no predefined value in the \l Qt::ItemDataRole enum.
     \l{EnginioModelCpp}{EnginioModel} automatically populates itself as soon as the
     \l{EnginioModel::query}{query} and \l{EnginioModel::enginio}{enginio} properties have been set.
     When the data is downloaded, the model resets itself, and sets up the internal data cache and roles names.
     \l{EnginioModelCpp}{EnginioModel} guesses the role names based on heuristics and it may be wrong if not all
     objects received from the backend have exactly the same structure, for example a property can be missing
-    in certain objects. To protect against such cases we overload \l{EnginioModel::roleNames}{roleNames()}
+    in certain objects. To protect against such cases we overload \l{EnginioModel::roleNames}{roleNames()}.
+    Overriding \l{EnginioModel::roleNames}{roleNames()} can also be used to match default Qt roles to the named
+    ones.
 
     \snippet todos-cpp/todosmodel.cpp roleNames
+
+    In this example we map the \l Qt::DisplayRole and \l Qt::EditRole to the "title" property in the JSON.
+    This way the right string is shown by default and editing works as expected.
 
     Remember to always call the base class implementation to avoid situations in which the internal cache is not in sync.
 
@@ -86,15 +92,6 @@
     The model has to be assigned to a view, in our case it is a \l QListView.
 
     \snippet todos-cpp/mainwindow.cpp assignModel
-
-    At this point we are supposed to have a working read only View / Model setup.  To be able
-    to modify the model, we also need to reimplement the EnginioModel::setData function.
-    By default \l QListView uses \l{Qt::ItemDataRole} when a user decides to edit
-    a data content. We need to map that role to our "title" role, and call
-    \l {EnginioModel::setData}{EnginioModel::setData()}
-    to update the data, like in the following code snippet:
-
-    \snippet todos-cpp/todosmodel.cpp setData
 
     To make the application fully functional, a way to add and remove "To Dos" is needed.
     To do so, we need to connect correct buttons to slots for adding a new item:

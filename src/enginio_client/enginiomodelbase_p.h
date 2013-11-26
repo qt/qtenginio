@@ -775,7 +775,7 @@ public:
 
     EnginioReplyBase *setData(const int row, const QVariant &value, int role)
     {
-        if (role > Enginio::SyncedRole) {
+        if (role != Enginio::InvalidRole) {
             QJsonObject oldObject = _data.at(row).toObject();
             QString id = oldObject[EnginioString::id].toString();
             if (id.isEmpty())
@@ -816,8 +816,8 @@ public:
     EnginioReplyBase *setDataNow(const int row, const QVariant &value, int role, const QJsonObject &oldObject, const QString &id)
     {
         Q_ASSERT(!id.isEmpty());
-        Q_ASSERT(role > Enginio::SyncedRole);
         const QString roleName(_roles.value(role));
+        Q_ASSERT(!roleName.isEmpty());
         QJsonObject deltaObject;
         QJsonObject newObject = oldObject;
         deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
@@ -860,14 +860,13 @@ public:
             return _attachedData.isSynced(row);
         }
 
-        if (role == Qt::DisplayRole)
-            return _data.at(row);
-
         const QJsonObject object = _data.at(row).toObject();
         if (!object.isEmpty()) {
             const QString roleName = _roles.value(role);
             if (!roleName.isEmpty())
                 return object[roleName];
+            else if (role == Qt::DisplayRole)
+                return _data.at(row);
         }
 
         return QVariant();
