@@ -165,6 +165,7 @@ bool EnginioBackendManager::authenticate()
     QString sessionToken = _responseData[EnginioString::access_token].toString();
     _headers[EnginioString::Authorization] = EnginioString::Bearer_ + sessionToken;
 
+    reply->deleteLater();
     return !sessionToken.isEmpty();
 }
 

@@ -262,6 +262,7 @@ void tst_Files::fileUploadDownload()
         QSignalSpy downloadSpy(reply, SIGNAL(finished()));
         QTRY_COMPARE(downloadSpy.count(), 1);
         QByteArray imageData = reply->readAll();
+        reply->deleteLater();
         QImage img = QImage::fromData(imageData);
         QCOMPARE(img.size(), QSize(181, 54));
     }
@@ -328,6 +329,7 @@ void tst_Files::fileUploadDownload()
         QSignalSpy downloadSpy(reply, SIGNAL(finished()));
         QTRY_COMPARE(downloadSpy.count(), 1);
         QByteArray imageData = reply->readAll();
+        reply->deleteLater();
         QImage img = QImage::fromData(imageData);
         QCOMPARE(img.size(), QSize(20, 20));
     }
