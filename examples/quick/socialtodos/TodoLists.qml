@@ -60,6 +60,28 @@ Rectangle {
     Header {
         id: header
         text: "My Lists"
+        Item {
+            id: icon
+            height: parent.height
+            width: parent.height
+            anchors.right: parent.right
+            Image {
+                id: reloadButton
+                anchors.centerIn: parent
+                source: mouse.pressed ? "qrc:icons/reload_icon_pressed.png" : "qrc:icons/reload_icon.png"
+                width:  implicitWidth * scaleFactor
+                height: implicitHeight * scaleFactor
+                MouseArea {
+                    id: mouse
+                    anchors.fill: parent
+                    onClicked: {
+                        var q = enginioModel.query
+                        enginioModel.query = { "objectType": "objects.invalid" }
+                        enginioModel.query = q
+                    }
+                }
+            }
+        }
     }
 
     ListView {

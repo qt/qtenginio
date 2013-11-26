@@ -7,6 +7,8 @@
         <file alias="back_icon.png">../../common/icons/back_icon.png</file>
         <file alias="share_icon.png">../../common/icons/share_icon.png</file>
         <file alias="share_icon_pressed.png">../../common/icons/share_icon_pressed.png</file>
+        <file alias="reload_icon.png">../../common/icons/reload_icon.png</file>
+        <file alias="reload_icon_pressed.png">../../common/icons/reload_icon_pressed.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="delegate.png">../../common/images/delegate.png</file>
