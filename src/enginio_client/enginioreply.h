@@ -69,7 +69,6 @@ Q_SIGNALS:
     void dataChanged();
 
 protected:
-    explicit EnginioReply(EnginioClientConnectionPrivate *parent, QNetworkReply *reply, EnginioReplyPrivate *priv);
     virtual void emitFinished();
 
 private:
