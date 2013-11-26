@@ -74,7 +74,6 @@ Q_SIGNALS:
     void finished(EnginioReply *reply);
     void dataChanged();
 
-
 #ifdef Q_QDOC
 public:
     Q_PROPERTY(ErrorTypes errorType READ errorType NOTIFY dataChanged)
@@ -98,9 +97,6 @@ Q_SIGNALS:
     void progress(qint64 bytesSent, qint64 bytesTotal);
 
 #endif
-
-protected:
-    virtual void emitFinished();
 
 private:
     Q_DISABLE_COPY(EnginioReply)

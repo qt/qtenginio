@@ -63,6 +63,12 @@ public:
     QNetworkReply *_nreply;
     mutable QByteArray _data;
     bool _delay;
+
+    static EnginioReplyBasePrivate *get(EnginioReplyBase *p)
+    {
+        return p->d_func();
+    }
+
     EnginioReplyBasePrivate(EnginioClientConnectionPrivate *p, QNetworkReply *reply)
         : _client(p)
         , _nreply(reply)
@@ -151,6 +157,7 @@ public:
             qDebug() << "Reply Data:" << pData();
     }
 
+    virtual void emitFinished() = 0;
     void setNetworkReply(QNetworkReply *reply);
     void swapNetworkReply(EnginioReplyBasePrivate *other);
 };

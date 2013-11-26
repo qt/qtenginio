@@ -97,7 +97,7 @@ public:
         Q_ASSERT(client);
     }
 
-    void emitFinished()
+    void emitFinished() Q_DECL_OVERRIDE
     {
         Q_Q(EnginioQmlReply);
         q->setParent(0);
@@ -126,15 +126,6 @@ QJSValue EnginioQmlReply::data() const
 {
     Q_D(const EnginioQmlReply);
     return d->data();
-}
-
-/*!
-  \internal
-*/
-void EnginioQmlReply::emitFinished()
-{
-    Q_D(EnginioQmlReply);
-    d->emitFinished();
 }
 
 QT_END_NAMESPACE

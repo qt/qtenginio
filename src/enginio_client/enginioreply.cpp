@@ -91,10 +91,12 @@ QT_BEGIN_NAMESPACE
 */
 
 class EnginioReplyPrivate: public EnginioReplyBasePrivate {
+    Q_DECLARE_PUBLIC(EnginioReply)
 public:
     EnginioReplyPrivate(EnginioClientConnectionPrivate *p, QNetworkReply *reply)
         : EnginioReplyBasePrivate(p, reply)
     {}
+    void emitFinished() Q_DECL_OVERRIDE;
 };
 
 /*!
@@ -169,9 +171,10 @@ QJsonObject EnginioReply::data() const
 /*!
   \internal
 */
-void EnginioReply::emitFinished()
+void EnginioReplyPrivate::emitFinished()
 {
-    emit finished(this);
+    Q_Q(EnginioReply);
+    emit q->finished(q);
 }
 
 /*!

@@ -270,7 +270,7 @@ void EnginioClientConnectionPrivate::replyFinished(QNetworkReply *nreply)
         _delayedReplies.insert(ereply);
     } else {
         ereply->dataChanged();
-        ereply->emitFinished();
+        EnginioReplyBasePrivate::get(ereply)->emitFinished();
         emitFinished(ereply);
         if (gEnableEnginioDebugInfo)
             _requestData.remove(nreply);
@@ -290,7 +290,7 @@ bool EnginioClientConnectionPrivate::finishDelayedReplies()
         foreach (EnginioReplyBase *reply, _delayedReplies) {
             if (!reply->delayFinishedSignal()) {
                 reply->dataChanged();
-                reply->emitFinished();
+                EnginioReplyBasePrivate::get(reply)->emitFinished();
                 emitFinished(reply);
                 if (gEnableEnginioDebugInfo)
                     _requestData.remove(reply->d_func()->_nreply); // FIXME it is ugly, and breaks encapsulation
