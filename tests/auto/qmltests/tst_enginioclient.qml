@@ -91,7 +91,7 @@ Item {
 
             property int errorCount: 0
             onError: {
-                    if (reply.errorType === EnginioReply.BackendError
+                    if (reply.errorType === Enginio.BackendError
                         && reply.data.errors[0].message.length > 0
                         && reply.data.errors[0].reason.length > 0
                         && reply.backendStatus === 400

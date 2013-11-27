@@ -299,10 +299,10 @@ int EnginioReplyBase::backendStatus() const
 /*!
   \property EnginioReply::errorType
   \return the type of the error
-  \sa EnginioReplyBase::ErrorTypes
+  \sa Enginio::ErrorTypes
 */
 
-EnginioReplyBase::ErrorTypes EnginioReplyBase::errorType() const
+Enginio::ErrorTypes EnginioReplyBase::errorType() const
 {
     Q_D(const EnginioReplyBase);
     return d->errorType();

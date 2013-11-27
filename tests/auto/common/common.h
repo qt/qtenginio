@@ -65,7 +65,7 @@
     } \
     QVERIFY(response->isFinished()); \
     QVERIFY(!response->isError()); \
-    QCOMPARE(response->errorType(), EnginioReply::NoError);\
+    QCOMPARE(response->errorType(), Enginio::NoError);\
     QCOMPARE(response->networkError(), QNetworkReply::NoError);\
     QVERIFY(response->backendStatus() >= 200 && response->backendStatus() < 300);
 

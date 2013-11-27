@@ -43,6 +43,7 @@
 #define ENGINIOCLIENTCONNECTION_H
 
 #include <Enginio/enginioclient_global.h>
+#include <Enginio/enginio.h>
 #include <QObject>
 #include <QtCore/qscopedpointer.h>
 #include <QtCore/qtypeinfo.h>
@@ -54,53 +55,6 @@ QT_BEGIN_NAMESPACE
 class QNetworkAccessManager;
 class EnginioIdentity;
 class EnginioClientConnectionPrivate;
-
-#ifndef Q_QDOC
-class ENGINIOCLIENT_EXPORT Enginio
-{
-    Q_GADGET
-#else
-namespace Enginio {
-#endif
-    Q_ENUMS(AuthenticationState)
-    Q_ENUMS(Operation)
-
-#ifndef Q_QDOC
-public:
-#endif
-    enum AuthenticationState {
-        NotAuthenticated,
-        Authenticating,
-        Authenticated,
-        AuthenticationFailure
-    };
-
-    enum Operation {
-        ObjectOperation,
-        AccessControlOperation,
-        UserOperation,
-        UsergroupOperation,
-        UsergroupMembersOperation,
-        FileOperation,
-
-        // private
-        SessionOperation,
-        SearchOperation,
-        FileChunkUploadOperation,
-        FileGetDownloadUrlOperation
-    };
-
-    enum Role {
-        InvalidRole = -1,
-        SyncedRole = Qt::UserRole + 1,
-        CreatedAtRole,
-        UpdatedAtRole,
-        IdRole,
-        ObjectTypeRole,
-        LastRole = Qt::UserRole + 10 // the first fully dynamic role
-    };
-};
-
 
 class ENGINIOCLIENT_EXPORT EnginioClientConnection : public QObject
 {
@@ -144,12 +98,6 @@ private:
     Q_DISABLE_COPY(EnginioClientConnection)
 };
 
-Q_DECLARE_TYPEINFO(Enginio::Operation, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(Enginio::AuthenticationState, Q_PRIMITIVE_TYPE);
-
 QT_END_NAMESPACE
-
-Q_DECLARE_METATYPE(Enginio::Operation)
-Q_DECLARE_METATYPE(Enginio::AuthenticationState)
 
 #endif // ENGINIOCLIENTCONNECTION_H

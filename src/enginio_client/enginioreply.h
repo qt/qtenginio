@@ -62,6 +62,7 @@ class ENGINIOCLIENT_EXPORT EnginioReply
 {
     Q_OBJECT
     Q_PROPERTY(QJsonObject data READ data NOTIFY dataChanged)
+    Q_ENUMS(Enginio::ErrorTypes)
 public:
 
     explicit EnginioReply(EnginioClientConnectionPrivate *parent, QNetworkReply *reply);
@@ -81,12 +82,6 @@ public:
     Q_PROPERTY(QString errorString READ errorString NOTIFY dataChanged)
     Q_PROPERTY(int backendStatus READ backendStatus NOTIFY dataChanged)
     Q_PROPERTY(QString requestId READ requestId CONSTANT)
-    Q_ENUMS(ErrorTypes)
-    enum ErrorTypes {
-        NoError,
-        NetworkError,
-        BackendError
-    };
 
     ErrorTypes errorType() const Q_REQUIRED_RESULT;
     QNetworkReply::NetworkError networkError() const Q_REQUIRED_RESULT;

@@ -59,6 +59,9 @@ public:
     ~EnginioQmlModel();
 
     Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::ErrorTypes); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::Role); // TODO remove me QTBUG-33577
+
     Q_PROPERTY(EnginioQmlClient *client READ client WRITE setClient NOTIFY clientChanged)
     Q_PROPERTY(QJSValue query READ query WRITE setQuery NOTIFY queryChanged)
     Q_PROPERTY(Enginio::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)

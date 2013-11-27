@@ -393,7 +393,7 @@ struct InvalidRemoveErrorChecker: public ReplyCounter
     {
         QVERIFY(reply->isFinished());
         QVERIFY(reply->isError());
-        QCOMPARE(reply->errorType(), EnginioReply::BackendError);
+        QCOMPARE(reply->errorType(), Enginio::BackendError);
         QVERIFY(reply->networkError() != QNetworkReply::NoError);\
         QCOMPARE(reply->backendStatus(), 400);
 
@@ -1347,7 +1347,7 @@ void tst_EnginioModel::deleteModelDurringRequests()
 
     for (int i = 2; i < replies.count(); ++i) {
         QVERIFY(replies[i]->isError());
-        QCOMPARE(replies[i]->errorType(), EnginioReply::BackendError);
+        QCOMPARE(replies[i]->errorType(), Enginio::BackendError);
         QCOMPARE(replies[i]->backendStatus(), 400);
         QVERIFY(!replies[i]->errorString().isEmpty());
         QVERIFY(!replies[i]->data().isEmpty());

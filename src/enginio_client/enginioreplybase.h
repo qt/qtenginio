@@ -50,6 +50,7 @@
 #include <QtNetwork/qnetworkreply.h>
 
 #include <Enginio/enginioclient_global.h>
+#include <Enginio/enginio.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -59,9 +60,9 @@ class ENGINIOCLIENT_EXPORT EnginioReplyBase: public QObject
 {
     Q_OBJECT
     Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
-    Q_ENUMS(ErrorTypes)
+    Q_ENUMS(Enginio::ErrorTypes); // TODO remove me QTBUG-33577
 
-    Q_PROPERTY(ErrorTypes errorType READ errorType NOTIFY dataChanged)
+    Q_PROPERTY(Enginio::ErrorTypes errorType READ errorType NOTIFY dataChanged)
     Q_PROPERTY(QNetworkReply::NetworkError networkError READ networkError NOTIFY dataChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY dataChanged)
     Q_PROPERTY(int backendStatus READ backendStatus NOTIFY dataChanged)
@@ -70,16 +71,10 @@ class ENGINIOCLIENT_EXPORT EnginioReplyBase: public QObject
     Q_DECLARE_PRIVATE(EnginioReplyBase)
 
 public:
-    enum ErrorTypes {
-        NoError,
-        NetworkError,
-        BackendError
-    };
-
     ~EnginioReplyBase();
 
 
-    ErrorTypes errorType() const Q_REQUIRED_RESULT;
+    Enginio::ErrorTypes errorType() const Q_REQUIRED_RESULT;
     QNetworkReply::NetworkError networkError() const Q_REQUIRED_RESULT;
     QString errorString() const Q_REQUIRED_RESULT;
     QString requestId() const Q_REQUIRED_RESULT;
@@ -109,10 +104,6 @@ protected:
     friend class EnginioClientConnectionPrivate;
 };
 
-Q_DECLARE_TYPEINFO(EnginioReplyBase::ErrorTypes, Q_PRIMITIVE_TYPE);
-
 QT_END_NAMESPACE
-
-Q_DECLARE_METATYPE(EnginioReplyBase::ErrorTypes)
 
 #endif // ENGINIOREPLYBASE_H

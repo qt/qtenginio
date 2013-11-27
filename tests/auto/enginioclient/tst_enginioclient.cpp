@@ -1206,7 +1206,7 @@ void tst_EnginioClient::backendFakeReply()
         QVERIFY(!data["errors"].toArray()[0].toObject()["message"].toString().isEmpty());
         QVERIFY(!data["errors"].toArray()[0].toObject()["reason"].toString().isEmpty());
 
-        QCOMPARE(reply->errorType(), EnginioReply::BackendError);
+        QCOMPARE(reply->errorType(), Enginio::BackendError);
         QVERIFY(reply->networkError() != QNetworkReply::NoError);
         QCOMPARE(reply->backendStatus(), 400);
 

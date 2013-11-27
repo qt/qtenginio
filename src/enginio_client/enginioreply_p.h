@@ -93,18 +93,18 @@ public:
 
     QString errorString() const Q_REQUIRED_RESULT
     {
-        if (errorType() == EnginioReply::BackendError)
+        if (errorType() == Enginio::BackendError)
             return QString::fromUtf8(pData());
         return _nreply->errorString();
     }
 
-    EnginioReply::ErrorTypes errorType() const Q_REQUIRED_RESULT
+    Enginio::ErrorTypes errorType() const Q_REQUIRED_RESULT
     {
         if (errorCode() == QNetworkReply::NoError)
-            return EnginioReply::NoError;
+            return Enginio::NoError;
         if (pData().isEmpty())
-            return EnginioReply::NetworkError;
-        return EnginioReply::BackendError;
+            return Enginio::NetworkError;
+        return Enginio::BackendError;
     }
 
     QJsonObject data() const Q_REQUIRED_RESULT

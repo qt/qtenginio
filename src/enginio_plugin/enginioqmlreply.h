@@ -43,6 +43,7 @@
 #define ENGINIOQMLREPLY_H
 
 #include <Enginio/enginioreplybase.h>
+#include <Enginio/enginio.h>
 #include <QtQml/qjsvalue.h>
 
 QT_BEGIN_NAMESPACE
@@ -53,6 +54,11 @@ class EnginioQmlReplyPrivate;
 class EnginioQmlReply : public EnginioReplyBase
 {
     Q_OBJECT
+    Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::ErrorTypes); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::Role); // TODO remove me QTBUG-33577
+
 
 public:
     Q_PROPERTY(QJSValue data READ data NOTIFY dataChanged FINAL)

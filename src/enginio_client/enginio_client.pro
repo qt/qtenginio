@@ -19,6 +19,7 @@ SOURCES += \
 
 HEADERS += \
     chunkdevice_p.h \
+    enginio.h \
     enginiobackendconnection_p.h \
     enginioclient.h\
     enginioclient_global.h \
