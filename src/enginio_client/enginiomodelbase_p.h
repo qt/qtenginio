@@ -419,10 +419,6 @@ public:
 
     virtual ~EnginioModelBasePrivate();
 
-    void init()
-    {
-    }
-
     void disableNotifications()
     {
         _notifications.disable();
@@ -941,7 +937,6 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
 
     void init()
     {
-        Base::init();
         QObject::connect(q(), &Public::queryChanged, QueryChanged(this));
         QObject::connect(q(), &Public::clientChanged, QueryChanged(this));
         QObject::connect(q(), &Public::operationChanged, QueryChanged(this));
