@@ -421,7 +421,6 @@ public:
 
     void init()
     {
-        QObject::connect(q, &EnginioModelBase::operationChanged, QueryChanged(this));
     }
 
     void disableNotifications()
@@ -583,7 +582,6 @@ public:
     {
         Q_ASSERT_X(operation >= Enginio::ObjectOperation, "setOperation", "Invalid operation specified.");
         _operation = static_cast<Enginio::Operation>(operation);
-        emit q->operationChanged(_operation);
     }
 
     void execute()
@@ -946,6 +944,7 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
         Base::init();
         QObject::connect(q(), &Public::queryChanged, QueryChanged(this));
         QObject::connect(q(), &Public::clientChanged, QueryChanged(this));
+        QObject::connect(q(), &Public::operationChanged, QueryChanged(this));
     }
 
     Client *enginio() const Q_REQUIRED_RESULT

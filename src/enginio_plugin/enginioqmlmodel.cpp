@@ -281,5 +281,20 @@ void EnginioQmlModel::setQuery(const QJSValue &query)
     return d->setQuery(query);
 }
 
+Enginio::Operation EnginioQmlModel::operation() const
+{
+    Q_D(const EnginioQmlModel);
+    return d->operation();
+}
+
+void EnginioQmlModel::setOperation(Enginio::Operation operation)
+{
+    Q_D(EnginioQmlModel);
+    if (operation == d->operation())
+        return;
+    d->setOperation(operation);
+    emit operationChanged(operation);
+}
+
 QT_END_NAMESPACE
 

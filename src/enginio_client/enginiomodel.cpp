@@ -453,18 +453,19 @@ void EnginioModel::setQuery(const QJsonObject &query)
   \sa Enginio::Operation, query()
   \return returns the Operation
 */
-Enginio::Operation EnginioModelBase::operation() const
+Enginio::Operation EnginioModel::operation() const
 {
-    Q_D(const EnginioModelBase);
+    Q_D(const EnginioModel);
     return d->operation();
 }
 
-void EnginioModelBase::setOperation(Enginio::Operation operation)
+void EnginioModel::setOperation(Enginio::Operation operation)
 {
-    Q_D(EnginioModelBase);
+    Q_D(EnginioModel);
     if (operation == d->operation())
         return;
     d->setOperation(operation);
+    emit operationChanged(operation);
 }
 
 /*!

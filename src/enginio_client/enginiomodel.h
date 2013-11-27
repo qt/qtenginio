@@ -59,6 +59,8 @@ class ENGINIOCLIENT_EXPORT EnginioModel
 #endif
 {
     Q_OBJECT
+    Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
+    Q_PROPERTY(Enginio::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
     Q_PROPERTY(EnginioClient *client READ client WRITE setClient NOTIFY clientChanged)
     Q_PROPERTY(QJsonObject query READ query WRITE setQuery NOTIFY queryChanged)
 
@@ -72,6 +74,9 @@ public:
     QJsonObject query() Q_REQUIRED_RESULT;
     void setQuery(const QJsonObject &query);
 
+    Enginio::Operation operation() const Q_REQUIRED_RESULT;
+    void setOperation(Enginio::Operation operation);
+
     Q_INVOKABLE EnginioReply *append(const QJsonObject &value);
     Q_INVOKABLE EnginioReply *remove(int row);
     Q_INVOKABLE EnginioReply *setData(int row, const QVariant &value, const QString &role);
@@ -80,18 +85,7 @@ public:
 Q_SIGNALS:
     void queryChanged(const QJsonObject &query);
     void clientChanged(EnginioClient *client);
-
-#ifdef Q_QDOC
-    // Defined in EnginioModelBase
-public:
-    Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
-    Q_PROPERTY(Enginio::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
-
-    Enginio::Operation operation() const Q_REQUIRED_RESULT;
-    void setOperation(Enginio::Operation operation);
-Q_SIGNALS:
     void operationChanged(Enginio::Operation operation);
-#endif
 
 private:
     Q_DISABLE_COPY(EnginioModel)

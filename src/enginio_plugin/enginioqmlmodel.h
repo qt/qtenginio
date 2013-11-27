@@ -58,8 +58,10 @@ public:
     EnginioQmlModel(QObject *parent = 0);
     ~EnginioQmlModel();
 
+    Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
     Q_PROPERTY(EnginioQmlClient *client READ client WRITE setClient NOTIFY clientChanged)
     Q_PROPERTY(QJSValue query READ query WRITE setQuery NOTIFY queryChanged)
+    Q_PROPERTY(Enginio::Operation operation READ operation WRITE setOperation NOTIFY operationChanged)
     Q_PROPERTY(int rowCount READ rowCount NOTIFY rowCountChanged)
 
     EnginioQmlClient *client() const Q_REQUIRED_RESULT;
@@ -68,6 +70,9 @@ public:
     QJSValue query() Q_REQUIRED_RESULT;
     void setQuery(const QJSValue &query);
 
+    Enginio::Operation operation() const Q_REQUIRED_RESULT;
+    void setOperation(Enginio::Operation operation);
+
     Q_INVOKABLE EnginioQmlReply *append(const QJSValue &value);
     Q_INVOKABLE EnginioQmlReply *remove(int row);
     Q_INVOKABLE EnginioQmlReply *setProperty(int row, const QString &role, const QVariant &value);
@@ -75,7 +80,9 @@ public:
 Q_SIGNALS:
     void queryChanged(const QJSValue &query);
     void clientChanged(EnginioQmlClient *client);
+    void operationChanged(Enginio::Operation operation);
     void rowCountChanged();
+
 private:
     Q_DECLARE_PRIVATE(EnginioQmlModel)
 };

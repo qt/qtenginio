@@ -39,46 +39,78 @@
 **
 ****************************************************************************/
 
-#ifndef ENGINIOMODELBASE_H
-#define ENGINIOMODELBASE_H
+#ifndef ENGINIO_H
+#define ENGINIO_H
 
-#include <QtCore/qabstractitemmodel.h>
-#include <QtCore/qscopedpointer.h>
-
-#include <Enginio/enginioclientconnection.h>
+#include <Enginio/enginioclient_global.h>
+#include <QObject>
 
 QT_BEGIN_NAMESPACE
 
-class EnginioModelBasePrivate;
-class ENGINIOCLIENT_EXPORT EnginioModelBase : public QAbstractListModel
+#ifndef Q_QDOC
+class ENGINIOCLIENT_EXPORT Enginio
 {
-    Q_OBJECT
+    Q_GADGET
+#else
+namespace Enginio {
+#endif
+    Q_ENUMS(AuthenticationState)
+    Q_ENUMS(Operation)
+    Q_ENUMS(ErrorTypes) // FIXME singular
+    Q_ENUMS(Role)
 
-protected:
-    explicit EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent);
+#ifndef Q_QDOC
 public:
-    ~EnginioModelBase();
+#endif
+    enum AuthenticationState {
+        NotAuthenticated,
+        Authenticating,
+        Authenticated,
+        AuthenticationFailure
+    };
 
-    virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE;
+    enum Operation {
+        ObjectOperation,
+        AccessControlOperation,
+        UserOperation,
+        UsergroupOperation,
+        UsergroupMembersOperation,
+        FileOperation,
 
-    virtual void fetchMore(const QModelIndex &parent) Q_DECL_OVERRIDE;
-    virtual bool canFetchMore(const QModelIndex &parent) const Q_DECL_OVERRIDE;
+        // private
+        SessionOperation,
+        SearchOperation,
+        FileChunkUploadOperation,
+        FileGetDownloadUrlOperation
+    };
 
-    virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
+    enum Role {
+        InvalidRole = -1,
+        SyncedRole = Qt::UserRole + 1,
+        CreatedAtRole,
+        UpdatedAtRole,
+        IdRole,
+        ObjectTypeRole,
+        LastRole = Qt::UserRole + 10 // the first fully dynamic role
+    };
 
-    void disableNotifications();
-
-private:
-    Q_DISABLE_COPY(EnginioModelBase)
-    Q_DECLARE_PRIVATE(EnginioModelBase)
-    friend class EnginioModelPrivate;
+    enum ErrorTypes {
+        NoError,
+        NetworkError,
+        BackendError
+    };
 };
 
+Q_DECLARE_TYPEINFO(Enginio::Operation, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(Enginio::AuthenticationState, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(Enginio::Role, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(Enginio::ErrorTypes, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 
+Q_DECLARE_METATYPE(Enginio::Operation)
+Q_DECLARE_METATYPE(Enginio::AuthenticationState)
+Q_DECLARE_METATYPE(Enginio::Role)
+Q_DECLARE_METATYPE(Enginio::ErrorTypes)
 
-#endif // ENGINIOMODELBASE_H
+#endif // ENGINIO_H
