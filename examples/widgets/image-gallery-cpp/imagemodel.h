@@ -51,14 +51,6 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const;
 
-    enum Role {
-        Id = Qt::UserRole + 1,
-        Image,
-        FileName,
-        FileSize,
-        CreationTime
-    };
-
     virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
 public slots:
