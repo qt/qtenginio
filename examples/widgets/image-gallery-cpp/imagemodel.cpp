@@ -131,5 +131,5 @@ QVariant ImageModel::data(const QModelIndex &index, int role) const
 
 Qt::ItemFlags ImageModel::flags(const QModelIndex &index) const
 {
-    return QAbstractListModel::flags(index) | Qt::ItemIsEnabled;
+    return QAbstractListModel::flags(index) & ~Qt::ItemIsSelectable;
 }
