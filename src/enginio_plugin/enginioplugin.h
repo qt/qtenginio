@@ -43,6 +43,7 @@
 #define ENGINIOPLUGIN_H
 
 #include <QQmlExtensionPlugin>
+#include <QtCore/qsharedpointer.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -56,7 +57,16 @@ public:
     void registerTypes(const char *uri);
 };
 
+class QNetworkAccessManager;
+class QNetworkAccessManagerHolder : public QObject
+{
+    Q_OBJECT
+public:
+    QNetworkAccessManagerHolder(QObject *parent) : QObject(parent)
+    {}
+    QSharedPointer<QNetworkAccessManager> _guard;
+};
+
 QT_END_NAMESPACE
 
 #endif // ENGINIOPLUGIN_H
-

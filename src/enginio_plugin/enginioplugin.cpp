@@ -65,13 +65,14 @@ QT_BEGIN_NAMESPACE
 
 class EnginioNetworkAccessManagerFactory: public QQmlNetworkAccessManagerFactory
 {
-    QSharedPointer<QNetworkAccessManager> _guard;
 public:
     virtual QNetworkAccessManager *create(QObject *parent) Q_DECL_OVERRIDE
     {
-        Q_UNUSED(parent);
-        _guard = EnginioClientConnectionPrivate::prepareNetworkManagerInThread();
-        return _guard.data();
+        // Make sure we use the parent to remove the reference but not actually destroy
+        // the QNAM.
+        QNetworkAccessManagerHolder *holder = new QNetworkAccessManagerHolder(parent);
+        holder->_guard = EnginioClientConnectionPrivate::prepareNetworkManagerInThread();
+        return holder->_guard.data();
     }
 };
 
