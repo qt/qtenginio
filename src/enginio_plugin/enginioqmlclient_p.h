@@ -67,11 +67,11 @@ public:
 
     virtual void init();
     virtual void emitSessionTerminated() const Q_DECL_OVERRIDE;
-    virtual void emitSessionAuthenticated(EnginioReplyBase *reply) Q_DECL_OVERRIDE;
-    virtual void emitSessionAuthenticationError(EnginioReplyBase *reply) Q_DECL_OVERRIDE;
-    virtual void emitFinished(EnginioReplyBase *reply) Q_DECL_OVERRIDE;
-    virtual void emitError(EnginioReplyBase *reply) Q_DECL_OVERRIDE;
-    virtual EnginioReplyBase *createReply(QNetworkReply *nreply) Q_DECL_OVERRIDE;
+    virtual void emitSessionAuthenticated(EnginioReplyState *reply) Q_DECL_OVERRIDE;
+    virtual void emitSessionAuthenticationError(EnginioReplyState *reply) Q_DECL_OVERRIDE;
+    virtual void emitFinished(EnginioReplyState *reply) Q_DECL_OVERRIDE;
+    virtual void emitError(EnginioReplyState *reply) Q_DECL_OVERRIDE;
+    virtual EnginioReplyState *createReply(QNetworkReply *nreply) Q_DECL_OVERRIDE;
 
 
     inline QJSEngine *jsengine()

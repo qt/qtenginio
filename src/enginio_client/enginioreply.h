@@ -45,7 +45,7 @@
 #include <QtCore/qjsonobject.h>
 
 #include <Enginio/enginioclient_global.h>
-#include <Enginio/enginioreplybase.h>
+#include <Enginio/enginioreplystate.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -57,7 +57,7 @@ class ENGINIOCLIENT_EXPORT EnginioReply
 #ifdef Q_QDOC
         : public QObject
 #else
-        : public EnginioReplyBase
+        : public EnginioReplyState
 #endif
 {
     Q_OBJECT

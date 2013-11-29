@@ -42,7 +42,7 @@
 #ifndef ENGINIOQMLREPLY_H
 #define ENGINIOQMLREPLY_H
 
-#include <Enginio/enginioreplybase.h>
+#include <Enginio/enginioreplystate.h>
 #include <Enginio/enginio.h>
 #include <QtQml/qjsvalue.h>
 
@@ -51,7 +51,7 @@ QT_BEGIN_NAMESPACE
 class EnginioQmlClientPrivate;
 class EnginioQmlReplyPrivate;
 
-class EnginioQmlReply : public EnginioReplyBase
+class EnginioQmlReply : public EnginioReplyState
 {
     Q_OBJECT
     Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577

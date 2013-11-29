@@ -56,20 +56,21 @@
 
 QT_BEGIN_NAMESPACE
 
-class EnginioReplyBasePrivate : public QObjectPrivate {
-    Q_DECLARE_PUBLIC(EnginioReplyBase)
+class EnginioReplyStatePrivate : public QObjectPrivate {
+    Q_DECLARE_PUBLIC(EnginioReplyState)
 public:
     EnginioClientConnectionPrivate *_client;
     QNetworkReply *_nreply;
     mutable QByteArray _data;
     bool _delay;
 
-    static EnginioReplyBasePrivate *get(EnginioReplyBase *p)
+    static EnginioReplyStatePrivate *get(EnginioReplyState *p)
     {
         return p->d_func();
     }
 
-    EnginioReplyBasePrivate(EnginioClientConnectionPrivate *p, QNetworkReply *reply)
+
+    EnginioReplyStatePrivate(EnginioClientConnectionPrivate *p, QNetworkReply *reply)
         : _client(p)
         , _nreply(reply)
         , _delay(false)
@@ -159,7 +160,7 @@ public:
 
     virtual void emitFinished() = 0;
     void setNetworkReply(QNetworkReply *reply);
-    void swapNetworkReply(EnginioReplyBasePrivate *other);
+    void swapNetworkReply(EnginioReplyStatePrivate *other);
 };
 
 QT_END_NAMESPACE

@@ -33,8 +33,8 @@ HEADERS += \
     enginiodummyreply_p.h \
     enginiostring_p.h \
     enginioclientconnection.h \
-    enginioreplybase.h \
     enginiomodelbase.h \
     enginiomodelbase_p.h \
-    enginiooauth2authentication.h
+    enginiooauth2authentication.h \
+    enginioreplystate.h
 

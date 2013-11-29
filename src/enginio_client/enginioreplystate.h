@@ -55,8 +55,8 @@
 QT_BEGIN_NAMESPACE
 
 class EnginioClientConnectionPrivate;
-class EnginioReplyBasePrivate;
-class ENGINIOCLIENT_EXPORT EnginioReplyBase: public QObject
+class EnginioReplyStatePrivate;
+class ENGINIOCLIENT_EXPORT EnginioReplyState: public QObject
 {
     Q_OBJECT
     Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
@@ -68,10 +68,10 @@ class ENGINIOCLIENT_EXPORT EnginioReplyBase: public QObject
     Q_PROPERTY(int backendStatus READ backendStatus NOTIFY dataChanged)
     Q_PROPERTY(QString requestId READ requestId CONSTANT)
 
-    Q_DECLARE_PRIVATE(EnginioReplyBase)
+    Q_DECLARE_PRIVATE(EnginioReplyState)
 
 public:
-    ~EnginioReplyBase();
+    ~EnginioReplyState();
 
 
     Enginio::ErrorTypes errorType() const Q_REQUIRED_RESULT;
@@ -86,7 +86,7 @@ public:
     void setDelayFinishedSignal(bool delay);
     bool delayFinishedSignal() Q_REQUIRED_RESULT;
 
-    void swapNetworkReply(EnginioReplyBase *other);
+    void swapNetworkReply(EnginioReplyState *other);
     void setNetworkReply(QNetworkReply *reply);
 
     QJsonObject data() const Q_REQUIRED_RESULT;
@@ -99,7 +99,7 @@ Q_SIGNALS:
     void progress(qint64 bytesSent, qint64 bytesTotal);
 
 protected:
-    EnginioReplyBase(EnginioClientConnectionPrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv);
+    EnginioReplyState(EnginioClientConnectionPrivate *parent, QNetworkReply *reply, EnginioReplyStatePrivate *priv);
     friend class EnginioClient;
     friend class EnginioClientConnectionPrivate;
 };

@@ -335,7 +335,7 @@ public:
         : Base(pub)
     {}
 
-    virtual QJsonObject replyData(const EnginioReplyBase *reply) const Q_DECL_OVERRIDE
+    virtual QJsonObject replyData(const EnginioReplyState *reply) const Q_DECL_OVERRIDE
     {
         return static_cast<const EnginioReply*>(reply)->data();
     }
@@ -581,8 +581,8 @@ bool EnginioModelBase::setData(const QModelIndex &index, const QVariant &value, 
     if (unsigned(index.row()) >= unsigned(d->rowCount()))
         return false;
 
-    EnginioReplyBase *reply = d->setData(index.row(), value, role);
-    QObject::connect(reply, &EnginioReplyBase::dataChanged, reply, &EnginioReply::deleteLater);
+    EnginioReplyState *reply = d->setData(index.row(), value, role);
+    QObject::connect(reply, &EnginioReplyState::dataChanged, reply, &EnginioReply::deleteLater);
     return true;
 }
 

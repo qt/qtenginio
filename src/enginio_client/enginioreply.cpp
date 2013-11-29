@@ -44,7 +44,7 @@
 #include <QtCore/qjsondocument.h>
 #include <QtNetwork/qnetworkreply.h>
 
-#include <Enginio/enginioreplybase.h>
+#include <Enginio/enginioreplystate.h>
 #include <Enginio/enginioreply.h>
 #include <Enginio/private/enginioreply_p.h>
 #include <Enginio/enginioclient.h>
@@ -65,7 +65,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \class EnginioReplyBase
+  \class EnginioReplyState
   \internal
 */
 
@@ -90,11 +90,11 @@ QT_BEGIN_NAMESPACE
   The \a bytesSent is the current progress relative to the total \a bytesTotal.
 */
 
-class EnginioReplyPrivate: public EnginioReplyBasePrivate {
+class EnginioReplyPrivate: public EnginioReplyStatePrivate {
     Q_DECLARE_PUBLIC(EnginioReply)
 public:
     EnginioReplyPrivate(EnginioClientConnectionPrivate *p, QNetworkReply *reply)
-        : EnginioReplyBasePrivate(p, reply)
+        : EnginioReplyStatePrivate(p, reply)
     {}
     void emitFinished() Q_DECL_OVERRIDE;
 };
@@ -103,9 +103,9 @@ public:
   \internal
 */
 EnginioReply::EnginioReply(EnginioClientConnectionPrivate *p, QNetworkReply *reply)
-    : EnginioReplyBase(p, reply, new EnginioReplyPrivate(p, reply))
+    : EnginioReplyState(p, reply, new EnginioReplyPrivate(p, reply))
 {
-    QObject::connect(this, &EnginioReply::dataChanged, this, &EnginioReplyBase::dataChanged);
+    QObject::connect(this, &EnginioReply::dataChanged, this, &EnginioReplyState::dataChanged);
 }
 
 /*!
@@ -121,9 +121,9 @@ EnginioReply::~EnginioReply()
   This property holds the network error for the request.
 */
 
-QNetworkReply::NetworkError EnginioReplyBase::networkError() const
+QNetworkReply::NetworkError EnginioReplyState::networkError() const
 {
-    Q_D(const EnginioReplyBase);
+    Q_D(const EnginioReplyState);
     return d->errorCode();
 }
 
@@ -133,9 +133,9 @@ QNetworkReply::NetworkError EnginioReplyBase::networkError() const
   Check \l{EnginioReply::isError()}{isError()} first to check if the reply is an error.
 */
 
-QString EnginioReplyBase::errorString() const
+QString EnginioReplyState::errorString() const
 {
-    Q_D(const EnginioReplyBase);
+    Q_D(const EnginioReplyState);
     return d->errorString();
 }
 
@@ -150,9 +150,9 @@ QString EnginioReplyBase::errorString() const
 /*!
   \internal
 */
-QString EnginioReplyBase::requestId() const
+QString EnginioReplyState::requestId() const
 {
-    Q_D(const EnginioReplyBase);
+    Q_D(const EnginioReplyState);
     return d->requestId();
 }
 
@@ -180,15 +180,15 @@ void EnginioReplyPrivate::emitFinished()
 /*!
   \internal
 */
-void EnginioReplyBase::setNetworkReply(QNetworkReply *reply)
+void EnginioReplyState::setNetworkReply(QNetworkReply *reply)
 {
-    Q_D(EnginioReplyBase);
+    Q_D(EnginioReplyState);
     d->setNetworkReply(reply);
 }
 
-void EnginioReplyBasePrivate::setNetworkReply(QNetworkReply *reply)
+void EnginioReplyStatePrivate::setNetworkReply(QNetworkReply *reply)
 {
-    Q_Q(EnginioReplyBase);
+    Q_Q(EnginioReplyState);
     _client->unregisterReply(_nreply);
 
     if (gEnableEnginioDebugInfo)
@@ -210,15 +210,15 @@ void EnginioReplyBasePrivate::setNetworkReply(QNetworkReply *reply)
 /*!
   \internal
 */
-void EnginioReplyBase::swapNetworkReply(EnginioReplyBase *other)
+void EnginioReplyState::swapNetworkReply(EnginioReplyState *other)
 {
-    Q_D(EnginioReplyBase);
+    Q_D(EnginioReplyState);
     d->swapNetworkReply(other->d_func());
 }
 
-void EnginioReplyBasePrivate::swapNetworkReply(EnginioReplyBasePrivate *other)
+void EnginioReplyStatePrivate::swapNetworkReply(EnginioReplyStatePrivate *other)
 {
-    Q_Q(EnginioReplyBase);
+    Q_Q(EnginioReplyState);
     Q_ASSERT(other->_client == _client);
     _client->unregisterReply(_nreply);
     _client->unregisterReply(other->_nreply);
@@ -233,9 +233,9 @@ void EnginioReplyBasePrivate::swapNetworkReply(EnginioReplyBasePrivate *other)
 /*!
   \internal
 */
-void EnginioReplyBase::dumpDebugInfo() const
+void EnginioReplyState::dumpDebugInfo() const
 {
-    Q_D(const EnginioReplyBase);
+    Q_D(const EnginioReplyState);
     d->dumpDebugInfo();
 }
 
@@ -246,9 +246,9 @@ void EnginioReplyBase::dumpDebugInfo() const
 
   \note The feature can be used only with one EnginioClient
 */
-void EnginioReplyBase::setDelayFinishedSignal(bool delay)
+void EnginioReplyState::setDelayFinishedSignal(bool delay)
 {
-    Q_D(EnginioReplyBase);
+    Q_D(EnginioReplyState);
     d->_delay = delay;
     d->_client->finishDelayedReplies();
 }
@@ -257,21 +257,21 @@ void EnginioReplyBase::setDelayFinishedSignal(bool delay)
   \internal
   Returns true if signal should be delayed
  */
-bool EnginioReplyBase::delayFinishedSignal()
+bool EnginioReplyState::delayFinishedSignal()
 {
-    Q_D(EnginioReplyBase);
+    Q_D(EnginioReplyState);
     return d->_delay;
 }
 
 /*!
   \fn bool EnginioReply::isError() const
-  \brief EnginioReplyBase::isError returns whether this reply was unsuccessful
+  \brief EnginioReplyState::isError returns whether this reply was unsuccessful
   \return true if the reply did not succeed
 */
 
-bool EnginioReplyBase::isError() const
+bool EnginioReplyState::isError() const
 {
-    Q_D(const EnginioReplyBase);
+    Q_D(const EnginioReplyState);
     return d->errorCode() != QNetworkReply::NoError;
 }
 
@@ -281,21 +281,21 @@ bool EnginioReplyBase::isError() const
   \return true if the reply was finished, false otherwise.
 */
 
-bool EnginioReplyBase::isFinished() const
+bool EnginioReplyState::isFinished() const
 {
-    Q_D(const EnginioReplyBase);
+    Q_D(const EnginioReplyState);
     return d->isFinished();
 }
 
 /*!
   \property EnginioReply::backendStatus
   \return the backend return status for this reply.
-  \sa EnginioReplyBase::ErrorTypes
+  \sa EnginioReplyState::ErrorTypes
 */
 
-int EnginioReplyBase::backendStatus() const
+int EnginioReplyState::backendStatus() const
 {
-    Q_D(const EnginioReplyBase);
+    Q_D(const EnginioReplyState);
     return d->backendStatus();
 }
 
@@ -305,9 +305,9 @@ int EnginioReplyBase::backendStatus() const
   \sa Enginio::ErrorTypes
 */
 
-Enginio::ErrorTypes EnginioReplyBase::errorType() const
+Enginio::ErrorTypes EnginioReplyState::errorType() const
 {
-    Q_D(const EnginioReplyBase);
+    Q_D(const EnginioReplyState);
     return d->errorType();
 }
 
@@ -333,15 +333,15 @@ QDebug operator<<(QDebug d, const EnginioReply *reply)
     return d.space();
 }
 
-EnginioReplyBase::EnginioReplyBase(EnginioClientConnectionPrivate *parent, QNetworkReply *reply, EnginioReplyBasePrivate *priv)
+EnginioReplyState::EnginioReplyState(EnginioClientConnectionPrivate *parent, QNetworkReply *reply, EnginioReplyStatePrivate *priv)
     : QObject(*priv, parent->q_ptr)
 {
     parent->registerReply(reply, this);
 }
 
-EnginioReplyBase::~EnginioReplyBase()
+EnginioReplyState::~EnginioReplyState()
 {
-    Q_D(EnginioReplyBase);
+    Q_D(EnginioReplyState);
     Q_ASSERT(d->_nreply->parent() == this);
     if (Q_UNLIKELY(!d->isFinished())) {
         QObject::connect(d->_nreply, &QNetworkReply::finished, d->_nreply, &QNetworkReply::deleteLater);
@@ -354,9 +354,9 @@ EnginioReplyBase::~EnginioReplyBase()
 /*!
   \internal
 */
-QJsonObject EnginioReplyBase::data() const
+QJsonObject EnginioReplyState::data() const
 {
-    Q_D(const EnginioReplyBase);
+    Q_D(const EnginioReplyState);
     return d->data();
 }
 

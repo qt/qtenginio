@@ -301,31 +301,31 @@ void EnginioQmlClientPrivate::emitSessionTerminated() const
     emit q->sessionTerminated();
 }
 
-void EnginioQmlClientPrivate::emitSessionAuthenticated(EnginioReplyBase *reply)
+void EnginioQmlClientPrivate::emitSessionAuthenticated(EnginioReplyState *reply)
 {
     Q_Q(EnginioQmlClient);
     emit q->sessionAuthenticated(jsengine()->newQObject(reply));
 }
 
-void EnginioQmlClientPrivate::emitSessionAuthenticationError(EnginioReplyBase *reply)
+void EnginioQmlClientPrivate::emitSessionAuthenticationError(EnginioReplyState *reply)
 {
     Q_Q(EnginioQmlClient);
     emit q->sessionAuthenticationError(jsengine()->newQObject(reply));
 }
 
-void EnginioQmlClientPrivate::emitFinished(EnginioReplyBase *reply)
+void EnginioQmlClientPrivate::emitFinished(EnginioReplyState *reply)
 {
     Q_Q(EnginioQmlClient);
     emit q->finished(jsengine()->newQObject(reply));
 }
 
-void EnginioQmlClientPrivate::emitError(EnginioReplyBase *reply)
+void EnginioQmlClientPrivate::emitError(EnginioReplyState *reply)
 {
     Q_Q(EnginioQmlClient);
     emit q->error(jsengine()->newQObject(reply));
 }
 
-EnginioReplyBase *EnginioQmlClientPrivate::createReply(QNetworkReply *nreply)
+EnginioReplyState *EnginioQmlClientPrivate::createReply(QNetworkReply *nreply)
 {
     return new EnginioQmlReply(this, nreply);
 }

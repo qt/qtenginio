@@ -159,7 +159,7 @@ public:
         : Base(pub)
     {}
 
-    virtual QJsonObject replyData(const EnginioReplyBase *reply) const Q_DECL_OVERRIDE
+    virtual QJsonObject replyData(const EnginioReplyState *reply) const Q_DECL_OVERRIDE
     {
         QJSValue data = static_cast<const EnginioQmlReply*>(reply)->data();
         return convert(data);

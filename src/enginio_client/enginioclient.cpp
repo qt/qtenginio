@@ -237,7 +237,7 @@ void EnginioClientConnectionPrivate::init()
 
 void EnginioClientConnectionPrivate::replyFinished(QNetworkReply *nreply)
 {
-    EnginioReplyBase *ereply = _replyReplyMap.take(nreply);
+    EnginioReplyState *ereply = _replyReplyMap.take(nreply);
 
     if (!ereply)
         return;
@@ -270,7 +270,7 @@ void EnginioClientConnectionPrivate::replyFinished(QNetworkReply *nreply)
         _delayedReplies.insert(ereply);
     } else {
         ereply->dataChanged();
-        EnginioReplyBasePrivate::get(ereply)->emitFinished();
+        EnginioReplyStatePrivate::get(ereply)->emitFinished();
         emitFinished(ereply);
         if (gEnableEnginioDebugInfo)
             _requestData.remove(nreply);
@@ -287,10 +287,10 @@ bool EnginioClientConnectionPrivate::finishDelayedReplies()
     bool needToReevaluate = false;
     do {
         needToReevaluate = false;
-        foreach (EnginioReplyBase *reply, _delayedReplies) {
+        foreach (EnginioReplyState *reply, _delayedReplies) {
             if (!reply->delayFinishedSignal()) {
                 reply->dataChanged();
-                EnginioReplyBasePrivate::get(reply)->emitFinished();
+                EnginioReplyStatePrivate::get(reply)->emitFinished();
                 emitFinished(reply);
                 if (gEnableEnginioDebugInfo)
                     _requestData.remove(reply->d_func()->_nreply); // FIXME it is ugly, and breaks encapsulation
@@ -697,7 +697,7 @@ EnginioClientConnection::EnginioClientConnection(EnginioClientConnectionPrivate 
 
 EnginioClientConnection::~EnginioClientConnection()
 {
-    qDeleteAll(findChildren<EnginioReplyBase *>());
+    qDeleteAll(findChildren<EnginioReplyState *>());
 }
 
 void EnginioClientConnectionPrivate::emitSessionTerminated() const
@@ -705,27 +705,27 @@ void EnginioClientConnectionPrivate::emitSessionTerminated() const
     emit static_cast<EnginioClient*>(q_ptr)->sessionTerminated();
 }
 
-void EnginioClientConnectionPrivate::emitSessionAuthenticated(EnginioReplyBase *reply)
+void EnginioClientConnectionPrivate::emitSessionAuthenticated(EnginioReplyState *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticated(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientConnectionPrivate::emitSessionAuthenticationError(EnginioReplyBase *reply)
+void EnginioClientConnectionPrivate::emitSessionAuthenticationError(EnginioReplyState *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->sessionAuthenticationError(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientConnectionPrivate::emitFinished(EnginioReplyBase *reply)
+void EnginioClientConnectionPrivate::emitFinished(EnginioReplyState *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->finished(static_cast<EnginioReply*>(reply));
 }
 
-void EnginioClientConnectionPrivate::emitError(EnginioReplyBase *reply)
+void EnginioClientConnectionPrivate::emitError(EnginioReplyState *reply)
 {
     emit static_cast<EnginioClient*>(q_ptr)->error(static_cast<EnginioReply*>(reply));
 }
 
-EnginioReplyBase *EnginioClientConnectionPrivate::createReply(QNetworkReply *nreply)
+EnginioReplyState *EnginioClientConnectionPrivate::createReply(QNetworkReply *nreply)
 {
     return new EnginioReply(this, nreply);
 }
