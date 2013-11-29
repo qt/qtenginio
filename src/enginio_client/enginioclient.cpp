@@ -100,6 +100,18 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+  \class EnginioClientConnection
+
+  \inmodule enginio-qt
+  \ingroup enginio-client
+  \brief EnginioClientConnection keeps track of the authenticated connection to the server.
+
+  You should never use EnginioClientConnection explicitly, instead use the derrived
+  EnginioClient.
+  \sa EnginioClient
+*/
+
+/*!
   \namespace Enginio
   \inmodule enginio-qt
   \brief The Enginio namespace provides enums used throughout Enginio.
