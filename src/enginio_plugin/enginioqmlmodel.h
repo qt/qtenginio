@@ -42,7 +42,7 @@
 #ifndef ENGINIOQMLMODEL_H
 #define ENGINIOQMLMODEL_H
 
-#include <Enginio/enginiomodelbase.h>
+#include <Enginio/enginiobasemodel.h>
 #include <QtQml/qjsvalue.h>
 
 QT_BEGIN_NAMESPACE
@@ -50,7 +50,7 @@ QT_BEGIN_NAMESPACE
 class EnginioQmlReply;
 class EnginioQmlClient;
 class EnginioQmlModelPrivate;
-class EnginioQmlModel : public EnginioModelBase
+class EnginioQmlModel : public EnginioBaseModel
 {
     Q_OBJECT
     Q_DISABLE_COPY(EnginioQmlModel)

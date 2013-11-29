@@ -40,7 +40,7 @@
 ****************************************************************************/
 
 #include "enginioqmlmodel.h"
-#include <Enginio/private/enginiomodelbase_p.h>
+#include <Enginio/private/enginiobasemodel_p.h>
 #include <QtCore/qjsondocument.h>
 #include "enginioqmlclient_p.h"
 #include "enginioqmlreply.h"
@@ -155,7 +155,7 @@ public:
         return QJsonDocument::fromJson(buffer).object();
     }
 
-    EnginioQmlModelPrivate(EnginioModelBase *pub)
+    EnginioQmlModelPrivate(EnginioBaseModel *pub)
         : Base(pub)
     {}
 
@@ -191,13 +191,13 @@ public:
 };
 
 EnginioQmlModel::EnginioQmlModel(QObject *parent)
-    : EnginioModelBase(*new EnginioQmlModelPrivate(this), parent)
+    : EnginioBaseModel(*new EnginioQmlModelPrivate(this), parent)
 {
     Q_D(EnginioQmlModel);
     d->init();
-    QObject::connect(this, &EnginioModelBase::rowsRemoved, this, &EnginioQmlModel::rowCountChanged);
-    QObject::connect(this, &EnginioModelBase::rowsInserted, this, &EnginioQmlModel::rowCountChanged);
-    QObject::connect(this, &EnginioModelBase::modelReset, this, &EnginioQmlModel::rowCountChanged);
+    QObject::connect(this, &EnginioBaseModel::rowsRemoved, this, &EnginioQmlModel::rowCountChanged);
+    QObject::connect(this, &EnginioBaseModel::rowsInserted, this, &EnginioQmlModel::rowCountChanged);
+    QObject::connect(this, &EnginioBaseModel::modelReset, this, &EnginioQmlModel::rowCountChanged);
 }
 
 EnginioQmlModel::~EnginioQmlModel()

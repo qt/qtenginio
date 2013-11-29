@@ -49,15 +49,15 @@
 
 QT_BEGIN_NAMESPACE
 
-class EnginioModelBasePrivate;
-class ENGINIOCLIENT_EXPORT EnginioModelBase : public QAbstractListModel
+class EnginioBaseModelPrivate;
+class ENGINIOCLIENT_EXPORT EnginioBaseModel : public QAbstractListModel
 {
     Q_OBJECT
 
 protected:
-    explicit EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent);
+    explicit EnginioBaseModel(EnginioBaseModelPrivate &dd, QObject *parent);
 public:
-    ~EnginioModelBase();
+    ~EnginioBaseModel();
 
     virtual Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
@@ -72,8 +72,8 @@ public:
     void disableNotifications();
 
 private:
-    Q_DISABLE_COPY(EnginioModelBase)
-    Q_DECLARE_PRIVATE(EnginioModelBase)
+    Q_DISABLE_COPY(EnginioBaseModel)
+    Q_DECLARE_PRIVATE(EnginioBaseModel)
     friend class EnginioModelPrivate;
 };
 

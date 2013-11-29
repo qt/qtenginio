@@ -50,8 +50,8 @@
 #include <Enginio/private/enginiodummyreply_p.h>
 #include <Enginio/enginioreplystate.h>
 #include <Enginio/private/enginiobackendconnection_p.h>
-#include <Enginio/enginiomodelbase.h>
-#include <Enginio/private/enginiomodelbase_p.h>
+#include <Enginio/enginiobasemodel.h>
+#include <Enginio/private/enginiobasemodel_p.h>
 
 #include <QtCore/qdatetime.h>
 #include <QtCore/qdebug.h>
@@ -255,11 +255,11 @@ public:
 };
 
 
-class ENGINIOCLIENT_EXPORT EnginioModelBasePrivate : public QAbstractItemModelPrivate {
+class ENGINIOCLIENT_EXPORT EnginioBaseModelPrivate : public QAbstractItemModelPrivate {
 protected:
     EnginioClientConnectionPrivate *_enginio;
     Enginio::Operation _operation;
-    EnginioModelBase *q;
+    EnginioBaseModel *q;
     QVector<QMetaObject::Connection> _clientConnections;
     QObject *_replyConnectionConntext;
 
@@ -283,7 +283,7 @@ protected:
 
         struct NotificationReceived
         {
-            EnginioModelBasePrivate *model;
+            EnginioBaseModelPrivate *model;
 
             void operator ()(QJsonObject data)
             {
@@ -319,7 +319,7 @@ protected:
             _connection = (EnginioBackendConnection*)-1;
         }
 
-        void connectToBackend(EnginioModelBasePrivate *model, EnginioClientConnectionPrivate *enginio, const QJsonObject &filter)
+        void connectToBackend(EnginioBaseModelPrivate *model, EnginioClientConnectionPrivate *enginio, const QJsonObject &filter)
         {
             if (qintptr(_connection) == -1)
                 return;
@@ -336,7 +336,7 @@ protected:
 
     struct FinishedRemoveRequest
     {
-        EnginioModelBasePrivate *model;
+        EnginioBaseModelPrivate *model;
         const QString id;
         EnginioReplyState *reply;
         void operator ()()
@@ -347,7 +347,7 @@ protected:
 
     struct FinishedUpdateRequest
     {
-        EnginioModelBasePrivate *model;
+        EnginioBaseModelPrivate *model;
         const QString id;
         const QJsonObject oldValue;
         EnginioReplyState *reply;
@@ -359,7 +359,7 @@ protected:
 
     struct FinishedCreateRequest
     {
-        EnginioModelBasePrivate *model;
+        EnginioBaseModelPrivate *model;
         const QString tmpId;
         EnginioReplyState *reply;
         void operator ()()
@@ -370,7 +370,7 @@ protected:
 
     struct FinishedFullQueryRequest
     {
-        EnginioModelBasePrivate *model;
+        EnginioBaseModelPrivate *model;
         EnginioReplyState *reply;
         void operator ()()
         {
@@ -380,7 +380,7 @@ protected:
 
     struct FinishedIncrementalUpdateRequest
     {
-        EnginioModelBasePrivate *model;
+        EnginioBaseModelPrivate *model;
         const QJsonObject query;
         EnginioReplyState *reply;
         void operator ()()
@@ -391,9 +391,9 @@ protected:
 
     class QueryChanged
     {
-        EnginioModelBasePrivate *model;
+        EnginioBaseModelPrivate *model;
     public:
-        QueryChanged(EnginioModelBasePrivate *m)
+        QueryChanged(EnginioBaseModelPrivate *m)
             : model(m)
         {
             Q_ASSERT(m);
@@ -406,7 +406,7 @@ protected:
     };
 
 public:
-    EnginioModelBasePrivate(EnginioModelBase *q_ptr)
+    EnginioBaseModelPrivate(EnginioBaseModel *q_ptr)
         : _enginio(0)
         , _operation()
         , q(q_ptr)
@@ -417,7 +417,7 @@ public:
     {
     }
 
-    virtual ~EnginioModelBasePrivate();
+    virtual ~EnginioBaseModelPrivate();
 
     void disableNotifications()
     {
@@ -463,10 +463,10 @@ public:
     struct SwapNetworkReplyBase
     {
         EnginioReplyState *_reply;
-        EnginioModelBasePrivate *_model;
+        EnginioBaseModelPrivate *_model;
         QJsonObject _object;
         QString _tmpId;
-        QPointer<EnginioModelBase> _modelGuard;
+        QPointer<EnginioBaseModel> _modelGuard;
 
         void markAsError(QByteArray msg)
         {
@@ -903,9 +903,9 @@ public:
 
 
 template<typename Derived, typename Types>
-struct EnginioModelPrivateT : public EnginioModelBasePrivate
+struct EnginioModelPrivateT : public EnginioBaseModelPrivate
 {
-    typedef EnginioModelBasePrivate Base;
+    typedef EnginioBaseModelPrivate Base;
     typedef typename Types::Reply Reply;
     typedef typename Types::Public Public;
     typedef typename Types::Client Client;
@@ -931,7 +931,7 @@ struct EnginioModelPrivateT : public EnginioModelBasePrivate
         }
     };
 
-    EnginioModelPrivateT(EnginioModelBase *pub)
+    EnginioModelPrivateT(EnginioBaseModel *pub)
         : Base(pub)
     {}
 

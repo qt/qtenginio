@@ -21,6 +21,8 @@ HEADERS += \
     chunkdevice_p.h \
     enginio.h \
     enginiobackendconnection_p.h \
+    enginiobasemodel.h \
+    enginiobasemodel_p.h \
     enginioclient.h\
     enginioclient_global.h \
     enginioclient_p.h \
@@ -33,8 +35,6 @@ HEADERS += \
     enginiodummyreply_p.h \
     enginiostring_p.h \
     enginioclientconnection.h \
-    enginiomodelbase.h \
-    enginiomodelbase_p.h \
     enginiooauth2authentication.h \
     enginioreplystate.h
 

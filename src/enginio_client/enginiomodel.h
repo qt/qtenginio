@@ -46,7 +46,7 @@
 #include <QtCore/qscopedpointer.h>
 
 #include <Enginio/enginioclient.h>
-#include <Enginio/enginiomodelbase.h>
+#include <Enginio/enginiobasemodel.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -55,7 +55,7 @@ class ENGINIOCLIENT_EXPORT EnginioModel
 #ifdef Q_QDOC
         : public QAbstractListModel
 #else
-        : public EnginioModelBase
+        : public EnginioBaseModel
 #endif
 {
     Q_OBJECT
@@ -80,7 +80,7 @@ public:
     Q_INVOKABLE EnginioReply *append(const QJsonObject &value);
     Q_INVOKABLE EnginioReply *remove(int row);
     Q_INVOKABLE EnginioReply *setData(int row, const QVariant &value, const QString &role);
-    using EnginioModelBase::setData;
+    using EnginioBaseModel::setData;
 
 Q_SIGNALS:
     void queryChanged(const QJsonObject &query);
@@ -90,7 +90,7 @@ Q_SIGNALS:
 private:
     Q_DISABLE_COPY(EnginioModel)
     Q_DECLARE_PRIVATE(EnginioModel)
-    friend class EnginioModelBasePrivate;
+    friend class EnginioBaseModelPrivate;
 };
 
 QT_END_NAMESPACE

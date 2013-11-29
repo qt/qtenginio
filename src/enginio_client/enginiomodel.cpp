@@ -45,8 +45,8 @@
 #include <Enginio/private/enginiofakereply_p.h>
 #include <Enginio/private/enginiodummyreply_p.h>
 #include <Enginio/private/enginiobackendconnection_p.h>
-#include <Enginio/enginiomodelbase.h>
-#include <Enginio/private/enginiomodelbase_p.h>
+#include <Enginio/enginiobasemodel.h>
+#include <Enginio/private/enginiobasemodel_p.h>
 
 #include <QtCore/qobject.h>
 #include <QtCore/qvector.h>
@@ -55,7 +55,7 @@
 
 QT_BEGIN_NAMESPACE
 
-const int EnginioModelBasePrivate::IncrementalModelUpdate = -2;
+const int EnginioBaseModelPrivate::IncrementalModelUpdate = -2;
 
 /*!
   \class EnginioModel
@@ -154,7 +154,7 @@ const int EnginioModelBasePrivate::IncrementalModelUpdate = -2;
   For the QML version of this class see \l {Enginio1::EnginioModel}{EnginioModel (QML)}
 */
 
-EnginioModelBasePrivate::~EnginioModelBasePrivate()
+EnginioBaseModelPrivate::~EnginioBaseModelPrivate()
 {
     foreach (const QMetaObject::Connection &connection, _clientConnections)
         QObject::disconnect(connection);
@@ -162,7 +162,7 @@ EnginioModelBasePrivate::~EnginioModelBasePrivate()
     delete _replyConnectionConntext;
 }
 
-void EnginioModelBasePrivate::receivedNotification(QJsonObject data)
+void EnginioBaseModelPrivate::receivedNotification(QJsonObject data)
 {
     const QJsonObject origin = data[EnginioString::origin].toObject();
     const QString requestId = origin[EnginioString::apiRequestId].toString();
@@ -184,7 +184,7 @@ void EnginioModelBasePrivate::receivedNotification(QJsonObject data)
     }
 }
 
-void EnginioModelBasePrivate::receivedRemoveNotification(const QJsonObject &object, int rowHint)
+void EnginioBaseModelPrivate::receivedRemoveNotification(const QJsonObject &object, int rowHint)
 {
     int row = rowHint;
     if (rowHint == NoHintRow) {
@@ -205,7 +205,7 @@ void EnginioModelBasePrivate::receivedRemoveNotification(const QJsonObject &obje
     q->endRemoveRows();
 }
 
-void EnginioModelBasePrivate::receivedUpdateNotification(const QJsonObject &object, const QString &idHint, int row)
+void EnginioBaseModelPrivate::receivedUpdateNotification(const QJsonObject &object, const QString &idHint, int row)
 {
     // update an existing object
     if (row == NoHintRow) {
@@ -247,7 +247,7 @@ void EnginioModelBasePrivate::receivedUpdateNotification(const QJsonObject &obje
     }
 }
 
-void EnginioModelBasePrivate::fullQueryReset(const QJsonArray &data)
+void EnginioBaseModelPrivate::fullQueryReset(const QJsonArray &data)
 {
     delete _replyConnectionConntext;
     _replyConnectionConntext = new QObject();
@@ -259,7 +259,7 @@ void EnginioModelBasePrivate::fullQueryReset(const QJsonArray &data)
     q->endResetModel();
 }
 
-void EnginioModelBasePrivate::receivedCreateNotification(const QJsonObject &object)
+void EnginioBaseModelPrivate::receivedCreateNotification(const QJsonObject &object)
 {
     // create a new object
     QString id = object[EnginioString::id].toString();
@@ -273,7 +273,7 @@ void EnginioModelBasePrivate::receivedCreateNotification(const QJsonObject &obje
     q->endInsertRows();
 }
 
-void EnginioModelBasePrivate::syncRoles()
+void EnginioBaseModelPrivate::syncRoles()
 {
     QJsonObject firstObject(_data.first().toObject());
 
@@ -331,7 +331,7 @@ class EnginioModelPrivate: public EnginioModelPrivateT<EnginioModelPrivate, Type
 public:
     typedef EnginioModelPrivateT<EnginioModelPrivate, Types> Base;
 
-    EnginioModelPrivate(EnginioModelBase *pub)
+    EnginioModelPrivate(EnginioBaseModel *pub)
         : Base(pub)
     {}
 
@@ -355,7 +355,7 @@ public:
     Constructs a new model with \a parent as QObject parent.
 */
 EnginioModel::EnginioModel(QObject *parent)
-    : EnginioModelBase(*new EnginioModelPrivate(this), parent)
+    : EnginioBaseModel(*new EnginioModelPrivate(this), parent)
 {
     Q_D(EnginioModel);
     d->init();
@@ -371,14 +371,14 @@ EnginioModel::~EnginioModel()
     \internal
     Constructs a new model with \a parent as QObject parent.
 */
-EnginioModelBase::EnginioModelBase(EnginioModelBasePrivate &dd, QObject *parent)
+EnginioBaseModel::EnginioBaseModel(EnginioBaseModelPrivate &dd, QObject *parent)
     : QAbstractListModel(dd, parent)
 {}
 
 /*!
     Destroys the model.
 */
-EnginioModelBase::~EnginioModelBase()
+EnginioBaseModel::~EnginioBaseModel()
 {}
 
 /*!
@@ -402,7 +402,7 @@ EnginioModelBase::~EnginioModelBase()
   \note Some objects may not contain value for a static role, it may happen
   for example when an item is not in sync with the backend.
 
-  \sa EnginioModelBase::roleNames()
+  \sa EnginioBaseModel::roleNames()
 */
 
 /*!
@@ -540,7 +540,7 @@ EnginioReply *EnginioModel::setData(int row, const QVariant &value, const QStrin
     \overload
     \internal
 */
-Qt::ItemFlags EnginioModelBase::flags(const QModelIndex &index) const
+Qt::ItemFlags EnginioBaseModel::flags(const QModelIndex &index) const
 {
     return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
 }
@@ -551,9 +551,9 @@ Qt::ItemFlags EnginioModelBase::flags(const QModelIndex &index) const
     With the \l roleNames() function the mapping of JSON property names to data roles used as \a role is available.
     The data returned will be JSON (for example a string for simple objects, or a JSON Object).
 */
-QVariant EnginioModelBase::data(const QModelIndex &index, int role) const
+QVariant EnginioBaseModel::data(const QModelIndex &index, int role) const
 {
-    Q_D(const EnginioModelBase);
+    Q_D(const EnginioBaseModel);
     if (!index.isValid() || index.row() < 0 || index.row() >= d->rowCount())
         return QVariant();
 
@@ -564,9 +564,9 @@ QVariant EnginioModelBase::data(const QModelIndex &index, int role) const
     \overload
     \internal
 */
-int EnginioModelBase::rowCount(const QModelIndex &parent) const
+int EnginioBaseModel::rowCount(const QModelIndex &parent) const
 {
-    Q_D(const EnginioModelBase);
+    Q_D(const EnginioBaseModel);
     Q_UNUSED(parent);
     return d->rowCount();
 }
@@ -575,9 +575,9 @@ int EnginioModelBase::rowCount(const QModelIndex &parent) const
     \overload
     \internal
 */
-bool EnginioModelBase::setData(const QModelIndex &index, const QVariant &value, int role)
+bool EnginioBaseModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    Q_D(EnginioModelBase);
+    Q_D(EnginioBaseModel);
     if (unsigned(index.row()) >= unsigned(d->rowCount()))
         return false;
 
@@ -601,9 +601,9 @@ bool EnginioModelBase::setData(const QModelIndex &index, const QVariant &value, 
     take the result into account as shown in the {todos-cpp}{Todos Example}
     \note custom role indexes have to be greater then or equal to \l Enginio::LastRole
 */
-QHash<int, QByteArray> EnginioModelBase::roleNames() const
+QHash<int, QByteArray> EnginioBaseModel::roleNames() const
 {
-    Q_D(const EnginioModelBase);
+    Q_D(const EnginioBaseModel);
     return d->roleNames();
 }
 
@@ -611,9 +611,9 @@ QHash<int, QByteArray> EnginioModelBase::roleNames() const
     \internal
     Allows to disable notifications for autotests.
 */
-void EnginioModelBase::disableNotifications()
+void EnginioBaseModel::disableNotifications()
 {
-    Q_D(EnginioModelBase);
+    Q_D(EnginioBaseModel);
     d->disableNotifications();
 }
 
@@ -621,9 +621,9 @@ void EnginioModelBase::disableNotifications()
     \overload
     \internal
 */
-void EnginioModelBase::fetchMore(const QModelIndex &parent)
+void EnginioBaseModel::fetchMore(const QModelIndex &parent)
 {
-    Q_D(EnginioModelBase);
+    Q_D(EnginioBaseModel);
     d->fetchMore(parent.row());
 }
 
@@ -631,10 +631,10 @@ void EnginioModelBase::fetchMore(const QModelIndex &parent)
     \overload
     \internal
 */
-bool EnginioModelBase::canFetchMore(const QModelIndex &parent) const
+bool EnginioBaseModel::canFetchMore(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    Q_D(const EnginioModelBase);
+    Q_D(const EnginioBaseModel);
     return d->canFetchMore();
 }
 
