@@ -91,7 +91,7 @@ public:
         UpdatedAtRole,
         IdRole,
         ObjectTypeRole,
-        LastRole = Qt::UserRole + 10 // the first fully dynamic role
+        CustomPropertyRole = Qt::UserRole + 10 // the first fully dynamic role
     };
 
     enum ErrorType {

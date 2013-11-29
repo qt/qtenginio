@@ -1364,13 +1364,13 @@ void tst_EnginioModel::updatingRoles()
     QJsonObject query;
     query.insert("objectType", objectType);
 
-    QTest::ignoreMessage(QtWarningMsg, "Can not use custom role index lower then Enginio::LastRole, but '261' was used for 'invalid'");
+    QTest::ignoreMessage(QtWarningMsg, "Can not use custom role index lower then Enginio::CustomPropertyRole, but '261' was used for 'invalid'");
     struct CustomModel: public EnginioModel
     {
         enum {
-            BarRole = Enginio::LastRole,
-            FooRole = Enginio::LastRole + 1,
-            TitleRole = Enginio::LastRole + 20, // existing custom role
+            BarRole = Enginio::CustomPropertyRole,
+            FooRole = Enginio::CustomPropertyRole + 1,
+            TitleRole = Enginio::CustomPropertyRole + 20, // existing custom role
             InvalidRole = Enginio::ObjectTypeRole, // custom and with wrong index
             IdRole = Enginio::IdRole // duplicate of existing role
         };
@@ -1441,7 +1441,7 @@ void tst_EnginioModel::setData()
 
     struct Model: public EnginioModel {
         enum Roles {
-            TitleRole = Enginio::LastRole
+            TitleRole = Enginio::CustomPropertyRole
         };
 
         virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE

@@ -284,14 +284,14 @@ void EnginioBaseModelPrivate::syncRoles()
         _roles[Enginio::UpdatedAtRole] = EnginioString::updatedAt;
         _roles[Enginio::IdRole] = EnginioString::id;
         _roles[Enginio::ObjectTypeRole] = EnginioString::objectType;
-        _rolesCounter = Enginio::LastRole;
+        _rolesCounter = Enginio::CustomPropertyRole;
     }
 
     // check if someone does not use custom roles
     QHash<int, QByteArray> predefinedRoles = q->roleNames();
     foreach (int i, predefinedRoles.keys()) {
-        if (i < Enginio::LastRole && i >= Enginio::SyncedRole && predefinedRoles[i] != _roles[i].toUtf8()) {
-            qWarning("Can not use custom role index lower then Enginio::LastRole, but '%i' was used for '%s'", i, predefinedRoles[i].constData());
+        if (i < Enginio::CustomPropertyRole && i >= Enginio::SyncedRole && predefinedRoles[i] != _roles[i].toUtf8()) {
+            qWarning("Can not use custom role index lower then Enginio::CustomPropertyRole, but '%i' was used for '%s'", i, predefinedRoles[i].constData());
             continue;
         }
         _roles[i] = QString::fromUtf8(predefinedRoles[i].constData());
@@ -392,11 +392,11 @@ EnginioBaseModel::~EnginioBaseModel()
   \value IdRole \c What is the id of an item
   \value ObjectTypeRole \c What is item type
   \value SyncedRole \c Mark if an item is in sync with the backend
+  \value CustomPropertyRole \c The first role id that may be used for dynamically created roles.
   \omitvalue InvalidRole
-  \omitvalue LastRole
 
   Additionally EnginioModel supports dynamic roles which are mapped
-  directly from recieved data. EnginioModel is mapping first item properties
+  directly from received data. EnginioModel is mapping an item's properties
   to role names.
 
   \note Some objects may not contain value for a static role, it may happen
@@ -599,7 +599,7 @@ bool EnginioBaseModel::setData(const QModelIndex &index, const QVariant &value, 
 
     \note when reimplementating this function, you need to call the base class implementation first and
     take the result into account as shown in the {todos-cpp}{Todos Example}
-    \note custom role indexes have to be greater then or equal to \l Enginio::LastRole
+    \note custom role indexes have to not overlap with \l Enginio::Role
 */
 QHash<int, QByteArray> EnginioBaseModel::roleNames() const
 {
