@@ -92,7 +92,7 @@ QT_BEGIN_NAMESPACE
   \note After the request has finished, it is the responsibility of the
   user to delete the EnginioReply object at an appropriate time.
   Do not directly delete it inside the slot connected to finished().
-  You can use the deleteLater() function.
+  You can use the \l{QObject::deleteLater()}{deleteLater()} function.
 
   For a higher level overview, consult the \l {Enginio Overview} documentation.
   In order to make queries that return an array of data more convenient
@@ -130,6 +130,10 @@ QT_BEGIN_NAMESPACE
   \brief This signal is emitted when a request to the backend finishes.
 
   The \a reply contains the data returned. This signal is emitted for both, successful requests and failed ones.
+
+  From this moment on ownership of the \a reply is moved from EnginioClient, therefore it is the developer's
+  responsibility to delete the \a reply after this signal is handled. That can be achieved
+  by calling the \l{QObject::deleteLater()}{deleteLater()} method of the \a reply.
   \sa EnginioReply
 */
 
@@ -146,7 +150,12 @@ QT_BEGIN_NAMESPACE
   \fn EnginioClient::sessionAuthenticated(EnginioReply *reply) const
   \brief Emitted when a user logs in.
 
-  The \a reply contains the details about the login.
+  The signal is emitted after a user was successfully logged into the backend. From that
+  point on, all communication with the backend will be using these credentials.
+  The \a reply contains the details about the login and the user.
+
+  \note The \a reply will be deleted automatically after this signal, so it can not be
+  stored.
 
   \sa sessionAuthenticationError(), EnginioReply, EnginioOAuth2Authentication
 */
@@ -157,6 +166,9 @@ QT_BEGIN_NAMESPACE
 
   The \a reply contains the details about why the login failed.
   \sa sessionAuthenticated(), EnginioReply EnginioClientConnection::identity() EnginioOAuth2Authentication
+
+  \note The \a reply will be deleted automatically after this signal, so it can not be
+  stored.
 */
 
 /*!
