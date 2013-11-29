@@ -56,7 +56,7 @@ namespace Enginio {
 #endif
     Q_ENUMS(AuthenticationState)
     Q_ENUMS(Operation)
-    Q_ENUMS(ErrorTypes) // FIXME singular
+    Q_ENUMS(ErrorType)
     Q_ENUMS(Role)
 
 #ifndef Q_QDOC
@@ -94,7 +94,7 @@ public:
         LastRole = Qt::UserRole + 10 // the first fully dynamic role
     };
 
-    enum ErrorTypes {
+    enum ErrorType {
         NoError,
         NetworkError,
         BackendError
@@ -104,13 +104,13 @@ public:
 Q_DECLARE_TYPEINFO(Enginio::Operation, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(Enginio::AuthenticationState, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(Enginio::Role, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(Enginio::ErrorTypes, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(Enginio::ErrorType, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 
 Q_DECLARE_METATYPE(Enginio::Operation)
 Q_DECLARE_METATYPE(Enginio::AuthenticationState)
 Q_DECLARE_METATYPE(Enginio::Role)
-Q_DECLARE_METATYPE(Enginio::ErrorTypes)
+Q_DECLARE_METATYPE(Enginio::ErrorType)
 
 #endif // ENGINIO_H

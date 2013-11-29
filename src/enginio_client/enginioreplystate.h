@@ -60,9 +60,9 @@ class ENGINIOCLIENT_EXPORT EnginioReplyState: public QObject
 {
     Q_OBJECT
     Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
-    Q_ENUMS(Enginio::ErrorTypes); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::ErrorType); // TODO remove me QTBUG-33577
 
-    Q_PROPERTY(Enginio::ErrorTypes errorType READ errorType NOTIFY dataChanged)
+    Q_PROPERTY(Enginio::ErrorType errorType READ errorType NOTIFY dataChanged)
     Q_PROPERTY(QNetworkReply::NetworkError networkError READ networkError NOTIFY dataChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY dataChanged)
     Q_PROPERTY(int backendStatus READ backendStatus NOTIFY dataChanged)
@@ -74,7 +74,7 @@ public:
     ~EnginioReplyState();
 
 
-    Enginio::ErrorTypes errorType() const Q_REQUIRED_RESULT;
+    Enginio::ErrorType errorType() const Q_REQUIRED_RESULT;
     QNetworkReply::NetworkError networkError() const Q_REQUIRED_RESULT;
     QString errorString() const Q_REQUIRED_RESULT;
     QString requestId() const Q_REQUIRED_RESULT;

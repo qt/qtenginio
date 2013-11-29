@@ -66,7 +66,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty EnginioReply::ErrorTypes Enginio1::EnginioReply::errorType
+  \qmlproperty EnginioReply::ErrorType Enginio1::EnginioReply::errorType
   The type of error (if any) of this reply.
 */
 

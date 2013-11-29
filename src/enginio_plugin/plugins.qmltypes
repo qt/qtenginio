@@ -325,14 +325,14 @@ Module {
         name: "EnginioReplyBase"
         prototype: "QObject"
         Enum {
-            name: "ErrorTypes"
+            name: "ErrorType"
             values: {
                 "NoError": 0,
                 "NetworkError": 1,
                 "BackendError": 2
             }
         }
-        Property { name: "errorType"; type: "ErrorTypes"; isReadonly: true }
+        Property { name: "errorType"; type: "ErrorType"; isReadonly: true }
         Property { name: "networkError"; type: "QNetworkReply::NetworkError"; isReadonly: true }
         Property { name: "errorString"; type: "string"; isReadonly: true }
         Property { name: "backendStatus"; type: "int"; isReadonly: true }

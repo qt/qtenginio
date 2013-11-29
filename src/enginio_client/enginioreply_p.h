@@ -105,7 +105,7 @@ public:
         return _nreply->errorString();
     }
 
-    Enginio::ErrorTypes errorType() const Q_REQUIRED_RESULT
+    Enginio::ErrorType errorType() const Q_REQUIRED_RESULT
     {
         if (errorCode() == QNetworkReply::NoError)
             return Enginio::NoError;

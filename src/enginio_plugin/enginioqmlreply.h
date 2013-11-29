@@ -56,7 +56,7 @@ class EnginioQmlReply : public EnginioReplyState
     Q_OBJECT
     Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
     Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
-    Q_ENUMS(Enginio::ErrorTypes); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::ErrorType); // TODO remove me QTBUG-33577
     Q_ENUMS(Enginio::Role); // TODO remove me QTBUG-33577
 
 
