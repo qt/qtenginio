@@ -87,8 +87,6 @@ QT_BEGIN_NAMESPACE
 
 class EnginioQmlReplyPrivate : public EnginioReplyStatePrivate
 {
-    QMetaObject::Connection _orphanConnection;
-
     Q_DECLARE_PUBLIC(EnginioQmlReply)
 public:
     EnginioQmlReplyPrivate(EnginioQmlClientPrivate *client, QNetworkReply *reply)
