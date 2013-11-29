@@ -90,10 +90,7 @@ public:
     bool isError() const Q_REQUIRED_RESULT;
     bool isFinished() const Q_REQUIRED_RESULT;
 
-    QJsonObject data() const Q_REQUIRED_RESULT;
-
 Q_SIGNALS:
-    void dataChanged();
     void progress(qint64 bytesSent, qint64 bytesTotal);
 
 #endif
