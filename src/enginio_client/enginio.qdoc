@@ -59,7 +59,7 @@ This section gives a short, high-level overview of the concepts used throughout 
 The Qt library is a client-side library to communicate with the server at \l {http://engin.io}.
 Several backends can exist for each account on the server.
 For all communication with the server, the backend is determined by its ID.
-When shipping an application built with Enginio, the backend ID will be the same for all users of that application.
+When shipping an application built with Enginio, the backend id will be the same for all users of that application.
 
 \section2 Objects
 
@@ -180,9 +180,9 @@ To use Enginio's QML API, you have to import the library.
 import Enginio 1.0
 \endcode
 
-Initialize the \l{Enginio1::EnginioClient}{enginio client} with the \l{EnginioClient::backendId}{Backend Id} value, which can be copied from the Dashboard.
+Initialize the \l{Enginio1::EnginioClient}{enginio client} with the \l{EnginioClient::backendId}{backend id} value, which can be copied from the Dashboard.
 
-Go to Dashboard ⇒ Your Backend home-view ⇒ See ’Keys box’ ⇒ Copy Backend Id value.
+Go to Dashboard ⇒ Your Backend home-view ⇒ See ’Keys box’ ⇒ Copy backend id value.
 
 \code
 EnginioClient {
@@ -237,14 +237,14 @@ To use the Enginio Qt library in your code, you have to include relevant library
 Before making any calls to the Enginio API, the \l EnginioClient needs to be instantiated.
 They can be copied from the Dashboard.
 Go to the \l{https://dashboard.engin.io/}{Enginio Dashboard} and select a backend.
-Copy the Backend Id value.
+Copy the backend id value.
 
 \code
 QString backendId("YOUR_OWN_BACKEND_ID");
 EnginioClient *client = new EnginioClient;
 client->setBackendId(backendId);
 \endcode
-For testing purposes, it is easiest to hardcode the backend ID directly into application code. However, this might not be always the best choice, and sometimes it might be beneficial to put the backend configuration in a separate configuration file.
+For testing purposes, it is easiest to hardcode the backend id directly into application code. However, this might not be always the best choice, and sometimes it might be beneficial to put the backend configuration in a separate configuration file.
 \section1 Store your first Object
 
 Create an object in JSON format and fill in the data:
