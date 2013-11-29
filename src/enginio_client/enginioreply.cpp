@@ -70,7 +70,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \enum EnginioReply::ErrorType
+  \enum Enginio::ErrorType
   Describes the type of error that occured when making a request to the Enginio backend.
   \value NoError The reply returned without errors
   \value NetworkError The error was a networking problem
@@ -290,7 +290,7 @@ bool EnginioReplyState::isFinished() const
 /*!
   \property EnginioReply::backendStatus
   \return the backend return status for this reply.
-  \sa EnginioReplyState::ErrorType
+  \sa Enginio::ErrorType
 */
 
 int EnginioReplyState::backendStatus() const

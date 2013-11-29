@@ -72,7 +72,7 @@ QT_BEGIN_NAMESPACE
   \brief EnginioClient handles all communication with the Enginio server
 
   The Enginio server supports several separate "backends" with each account.
-  By setting the \l EnginioClientConnection::backendId a backend is chosen.
+  By setting the \l{EnginioClientConnection::backendId}{backendId} a backend is chosen.
   After setting the ID interaction with the server is possible.
   The information about the backend is available on the Enginio Dashboard
   after logging in to \l {http://engin.io}{Enginio}.
@@ -143,7 +143,7 @@ QT_BEGIN_NAMESPACE
 
   Enginio provides convenient user management.
   The authentication state reflects whether the current user is authenticated.
-  \sa AuthenticationState EnginioClientConnection::identity() EnginioOAuth2Authentication
+  \sa Enginio::AuthenticationState identity EnginioOAuth2Authentication
 */
 
 /*!
@@ -719,6 +719,9 @@ EnginioClientConnection::EnginioClientConnection(EnginioClientConnectionPrivate 
     qRegisterMetaType<Enginio::AuthenticationState>();
 }
 
+/*!
+  Destroys this instance.
+*/
 EnginioClientConnection::~EnginioClientConnection()
 {
     qDeleteAll(findChildren<EnginioReplyState *>());
