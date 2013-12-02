@@ -77,7 +77,7 @@ ColumnLayout {
 
     TextArea {
         id: data
-        text: "Not logged in"
+        text: "Not logged in.\n\n"
         readOnly: true
         Layout.fillHeight: true
         Layout.fillWidth: true
