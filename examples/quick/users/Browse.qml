@@ -75,7 +75,7 @@ ColumnLayout {
 
         onClicked: {
             var tmp = enginioModel.query
-            enginioModel.query = {}
+            enginioModel.query = null
             enginioModel.query = tmp
         }
     }

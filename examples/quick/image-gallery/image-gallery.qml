@@ -407,7 +407,7 @@ Rectangle {
                     progressBar.value = progress/total
                 })
                 uploadReply.finished.connect(function() {
-                    var tmp = enginioModel.query; enginioModel.query = {}; enginioModel.query = tmp;
+                    var tmp = enginioModel.query; enginioModel.query = null; enginioModel.query = tmp;
                     progressBar.opacity = 0
                 })
             })
