@@ -93,11 +93,12 @@ void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
 void EnginioPlugin::registerTypes(const char *uri)
 {
     // @uri Enginio
-    qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "EnginioClient");
     qmlRegisterUncreatableType<Enginio>(uri, 1, 0, "Enginio", "Enginio is an enum container and can not be constructed");
-    qmlRegisterUncreatableType<EnginioClient>(uri, 1, 0, "__Enginio", "__Enginio should not be instantiated from QML directly.");
+    qmlRegisterUncreatableType<EnginioClientConnection>(uri, 1, 0, "EnginioClientConnection", "EnginioClientConnection should not be instantiated in QML directly.");
+    qmlRegisterType<EnginioQmlClient>(uri, 1, 0, "EnginioClient");
+    qmlRegisterUncreatableType<EnginioBaseModel>(uri, 1, 0, "EnginioBaseModel", "EnginioBaseModel should not be instantiated in QML directly.");
     qmlRegisterType<EnginioQmlModel>(uri, 1, 0, "EnginioModel");
-    qmlRegisterUncreatableType<EnginioReply>(uri, 1, 0, "__EnginioReply", "__EnginioReply cannot be instantiated.");
+    qmlRegisterUncreatableType<EnginioReplyState>(uri, 1, 0, "EnginioReplyState", "EnginioReplyState cannot be instantiated.");
     qmlRegisterUncreatableType<EnginioQmlReply>(uri, 1, 0, "EnginioReply", "EnginioReply cannot be instantiated.");
     qmlRegisterUncreatableType<EnginioIdentity>(uri, 1, 0, "EnginioIdentity", "EnginioIdentity can not be instantiated directly");
     qmlRegisterType<EnginioOAuth2Authentication>(uri, 1, 0, "EnginioOAuth2Authentication");
