@@ -373,7 +373,9 @@ EnginioModel::~EnginioModel()
 */
 EnginioBaseModel::EnginioBaseModel(EnginioBaseModelPrivate &dd, QObject *parent)
     : QAbstractListModel(dd, parent)
-{}
+{
+    qRegisterMetaType<Enginio::Role>();
+}
 
 /*!
     Destroys the model.

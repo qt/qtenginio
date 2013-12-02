@@ -717,6 +717,7 @@ EnginioClientConnection::EnginioClientConnection(EnginioClientConnectionPrivate 
     qRegisterMetaType<EnginioOAuth2Authentication*>();
     qRegisterMetaType<Enginio::Operation>();
     qRegisterMetaType<Enginio::AuthenticationState>();
+    qRegisterMetaType<Enginio::ErrorType>();
 }
 
 /*!
