@@ -185,7 +185,10 @@ Rectangle {
             if (createAccount.errorType !== EnginioReply.NoError) {
                 statusText.text = createAccount.errorString
             } else {
+                //![queryUsergroup]
                 var groupQuery = enginioClient.query({ "query": { "name" : "myUsers" } }, Enginio.UsergroupOperation)
+                //![queryUsergroup]
+
                 groupQuery.finished.connect(function()
                 {
                     if (groupQuery.errorType !== EnginioReply.NoError) {
