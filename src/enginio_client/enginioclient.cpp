@@ -484,7 +484,7 @@ EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
   \snippet enginioclient/tst_enginioclient.cpp query-todo
 
   \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), update(), remove(), EnginioClient::operation
+  \sa EnginioReply, create(), update(), remove()
  */
 EnginioReply* EnginioClient::query(const QJsonObject &query, const Enginio::Operation operation)
 {
