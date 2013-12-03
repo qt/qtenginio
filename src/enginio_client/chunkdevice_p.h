@@ -41,6 +41,8 @@
 
 #include <QtCore/qiodevice.h>
 
+QT_BEGIN_NAMESPACE
+
 /*!
   \brief The ChunkDevice class is a simple QIODevice representing a part of another QIODevice
 
@@ -104,3 +106,5 @@ private:
     qint64 _startPos;
     qint64 _chunkSize;
 };
+
+QT_END_NAMESPACE
