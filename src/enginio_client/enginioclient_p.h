@@ -42,7 +42,6 @@
 #ifndef ENGINIOCLIENT_P_H
 #define ENGINIOCLIENT_P_H
 
-#include <Enginio/private/chunkdevice_p.h>
 #include <Enginio/enginioclient.h>
 #include <Enginio/enginioreply.h>
 #include <Enginio/private/enginiofakereply_p.h>
@@ -726,41 +725,7 @@ private:
         return reply;
     }
 
-    void uploadChunk(EnginioReplyState *ereply, QIODevice *device, qint64 startPos)
-    {
-        QUrl serviceUrl = _serviceUrl;
-        {
-            QString path;
-            QByteArray errorMsg;
-            if (!getPath(ereply->data(), Enginio::FileChunkUploadOperation, &path, &errorMsg).successful())
-                Q_UNREACHABLE(); // sequential upload can not have an invalid path!
-            serviceUrl.setPath(path);
-        }
-
-        QNetworkRequest req = prepareRequest(serviceUrl);
-        req.setHeader(QNetworkRequest::ContentTypeHeader, EnginioString::Application_octet_stream);
-
-        // Content-Range: bytes {chunkStart}-{chunkEnd}/{totalFileSize}
-        qint64 size = device->size();
-        qint64 endPos = qMin(startPos + _uploadChunkSize, size);
-        req.setRawHeader(EnginioString::Content_Range,
-                         QByteArray::number(startPos) + EnginioString::Minus
-                         + QByteArray::number(endPos) + EnginioString::Div
-                         + QByteArray::number(size));
-
-        // qDebug() << "Uploading chunk from " << startPos << " to " << endPos << " of " << size;
-
-        Q_ASSERT(device->isOpen());
-
-        ChunkDevice *chunkDevice = new ChunkDevice(device, startPos, _uploadChunkSize);
-        chunkDevice->open(QIODevice::ReadOnly);
-
-        QNetworkReply *reply = networkManager()->put(req, chunkDevice);
-        chunkDevice->setParent(reply);
-        _chunkedUploads.insert(reply, qMakePair(device, endPos));
-        ereply->setNetworkReply(reply);
-        _connections.append(QObject::connect(reply, &QNetworkReply::uploadProgress, UploadProgressFunctor(this, reply)));
-    }
+    void uploadChunk(EnginioReplyState *ereply, QIODevice *device, qint64 startPos);
 };
 
 #undef CHECK_AND_SET_URL_PATH_IMPL
