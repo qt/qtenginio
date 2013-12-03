@@ -100,7 +100,8 @@ QT_BEGIN_NAMESPACE
   Note that the search requires the searched properties to be indexed (on the server, configureable in the backend).
 
   \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), query(), update(), remove()
+  \sa EnginioReply, create(), query(), update(), remove(),
+  {https://engin.io/documentation/rest/parameters/fulltext_query}{JSON request structure}
 */
 
 /*!

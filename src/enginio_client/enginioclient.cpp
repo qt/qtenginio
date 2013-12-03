@@ -465,7 +465,8 @@ EnginioReply *EnginioClient::customRequest(const QUrl &url, const QByteArray &ht
 
 
   \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), query(), update(), remove(), {cloudaddressbook}{Address book example}
+  \sa EnginioReply, create(), query(), update(), remove(), {cloudaddressbook}{Address book example},
+  {https://engin.io/documentation/rest/parameters/fulltext_query}{JSON request structure}
 */
 EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
 {
