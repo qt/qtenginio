@@ -240,7 +240,7 @@ Go to the \l{https://dashboard.engin.io/}{Enginio Dashboard} and select a backen
 Copy the backend id value.
 
 \code
-QString backendId("YOUR_OWN_BACKEND_ID");
+QByteArray backendId("YOUR_OWN_BACKEND_ID");
 EnginioClient *client = new EnginioClient;
 client->setBackendId(backendId);
 \endcode
