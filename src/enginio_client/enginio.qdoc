@@ -117,16 +117,13 @@ This guide shows how to use the Enginio Qt library in a Qt application
 (both Qt C++ and QML cases are covered).
 This guide can be also applied when integrating Enginio with existing Qt projects.
 
-\note The Enginio Qt library is currently under heavy development and not yet production ready.
-
 \section1 Prerequisites
 
-You can use Enginio with an existing installation of Qt 5.1 or later, or get Qt packages containing Engino (starting with Qt 5.2).
-
+You can use Enginio with an existing installation of Qt 5.2 or later, or get Qt packages containing Engino (starting with Qt 5.2).
 
 \list
   \li  Development environment (Linux, Windows or Mac OS X) and compiler toolchain.
-  \li  Qt framework, 5.1 or newer (Qt 5.1.1 recommended)
+  \li  Qt framework, 5.2 or newer
   \li  OpenSSL to enable SSL support in Qt.
        Install the OpenSSL binaries into your system and Qt will automatically pick them up.
 
@@ -147,12 +144,7 @@ You can use Enginio with an existing installation of Qt 5.1 or later, or get Qt 
 \section1 Install Enginio Qt library
 
 \list
-  \li  Download the latest library release for your platform from Enginio dashboard.
-
-       Go to Enginio Dashboard ⇒ Open Dashboard left menu ⇒ Create backend
-        ⇒ Give some meaningful name for backend ⇒ Create
-        ⇒ See ’Qt Installers and Examples’ in backend home view
-        ⇒ Select your platform from drop-down ⇒ Click Download
+  \li  Download the latest library release for your platform
   \li  Execute downloaded binary installer and follow instructions
 \endlist
 */
