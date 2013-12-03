@@ -133,7 +133,7 @@ void AddressBookModel::newSearch(const QString &search)
     // construct JSON object:
     //    {
     //        "objectTypes": ["objects.addressbook"],
-    //        "search": { "phrase": "*$PHRASE*",
+    //        "search": { "phrase": "*PHRASE*",
     //            "properties": ["firstName", "lastName", "email", "phone", "address"]
     //        }
     //    }
