@@ -511,7 +511,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Enginio::Oper
   \code
   {
       "id": "groupId",
-      "member": { "id": "abcd", "objectType": "users" }
+      "member": { "id": "userId", "objectType": "users" }
   }
   \endcode
   It can be constructed like this:

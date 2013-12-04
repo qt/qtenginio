@@ -129,7 +129,7 @@ QT_BEGIN_NAMESPACE
   \code
   {
       "id": "groupId",
-      "member": { "id": "abcd", "objectType": "users" }
+      "member": { "id": "userId", "objectType": "users" }
   }
   \endcode
 
