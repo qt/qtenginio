@@ -222,6 +222,57 @@ QT_BEGIN_NAMESPACE
   This signal is emitted when a \a reply finishes and contains an error.
 */
 
+/*!
+  \qmlsignal Enginio1::EnginioClient::sessionAuthenticated(QJSValue reply)
+  \brief Emitted when a user logs in.
+
+  The signal is emitted after a user was successfully logged into the backend. From that
+  point on, all communication with the backend will be using these credentials.
+  The \a reply contains the information about the login and the user, the details may be different
+  depending on used authentication method, but a typical reply may look like that:
+  \code
+  {
+    "access_token": "...",              // oauth2 access token
+    "refresh_token": "...",             // oauth2 refresh token
+    "token_type": "bearer",             // oauth2 token type
+    "expires_in": 28799,                // oautth2 token expiry date
+    "enginio_data": {
+      "user": {
+        "id": "...",                    // this user Id
+        "createdAt": "...",             // when the user was created
+        "creator": {                    // who created the user
+          "id": "creatorId",
+          "objectType": "users"
+        },
+        "email": "user@user.com",       // the user's email address
+        "firstName": "John",            // the user's first name
+        "lastName": "Foo",              // the user's last name
+        "objectType": "users",
+        "updatedAt": "2013-11-25T14:54:58.957Z",
+        "username": "JohnFoo"           // the user's login
+      },
+      "usergroups": []                  // usergroups to which the user belongs
+    }
+  }
+  \endcode
+
+  \sa sessionAuthenticationError() EnginioReply EnginioOAuth2Authentication
+*/
+
+/*!
+  \qmlsignal Enginio1::EnginioClient::sessionAuthenticationError(QJSValue reply) const
+  \brief Emitted when a user login fails.
+
+  The \a reply contains the details about why the login failed.
+  \sa sessionAuthenticated() EnginioReply EnginioClientConnection::identity() EnginioOAuth2Authentication
+*/
+
+/*!
+  \qmlsignal Enginio1::EnginioClient::sessionTerminated() const
+  \brief Emitted when a user logs out.
+  \sa EnginioOAuth2Authentication
+*/
+
 EnginioQmlClient::EnginioQmlClient(QObject *parent)
     : EnginioClientConnection(*new EnginioQmlClientPrivate, parent)
 {
