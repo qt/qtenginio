@@ -59,6 +59,16 @@ QT_BEGIN_NAMESPACE
   \inmodule enginio-qt
   \ingroup enginio-client
 
+  The reply, when finished, contains information received from the server:
+  \list
+  \li Data - object, which is a result from an earlier request,
+    see the \l {EnginioReply::data}{data} function
+  \li Network status - in case of a network problem, additional information can
+  be accessed through: errorType, errorString, networkError
+  \li Backend status - a finished request is always associated with a backend status
+  code, which is just an HTTP code, and it can be queried through backendStatus
+  \endlist
+
   The finished signal is emitted when the query is done.
 
   \sa EnginioClient

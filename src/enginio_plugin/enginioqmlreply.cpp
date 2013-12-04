@@ -57,7 +57,17 @@ QT_BEGIN_NAMESPACE
   \ingroup engino-qml
   \target EnginioModelQml
 
-  \brief A reply to any \l EnginioClient request.
+  \brief A reply to any Enginio request.
+
+  The reply, when finished, contains information received from the server:
+  \list
+  \li Data - object, which is a result from an earlier request,
+    see the \l {EnginioReply::data}{data} function
+  \li Network status - in case of a network problem, additional information can
+  be accessed through: errorType, errorString, networkError
+  \li Backend status - a finished request is always associated with a backend status
+  code, which is just an HTTP code, and it can be queried through backendStatus
+  \endlist
 */
 
 /*!
@@ -66,7 +76,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty EnginioReply::ErrorType Enginio1::EnginioReply::errorType
+  \qmlproperty Enginio::ErrorType Enginio1::EnginioReply::errorType
   The type of error (if any) of this reply.
 */
 
@@ -83,6 +93,16 @@ QT_BEGIN_NAMESPACE
 /*!
   \qmlproperty int Enginio1::EnginioReply::backendStatus
   The backend status code.
+*/
+
+/*!
+  \qmlproperty bool Enginio1::EnginioReply::isFinished
+  The property holds \c true if this reply is finished, \c false otherwise.
+*/
+
+/*!
+  \qmlproperty bool Enginio1::EnginioReply::isError
+  The property holds \c true if this reply has finished with an error, \c false otherwise.
 */
 
 class EnginioQmlReplyPrivate : public EnginioReplyStatePrivate
