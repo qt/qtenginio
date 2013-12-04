@@ -153,7 +153,33 @@ QT_BEGIN_NAMESPACE
 
   The signal is emitted after a user was successfully logged into the backend. From that
   point on, all communication with the backend will be using these credentials.
-  The \a reply contains the details about the login and the user.
+  The \a reply contains the information about the login and the user. The details may be different
+  depending on the authentication method used, but a typical reply look like this:
+  \code
+  {
+    "access_token": "...",              // oauth2 access token
+    "refresh_token": "...",             // oauth2 refresh token
+    "token_type": "bearer",             // oauth2 token type
+    "expires_in": 28799,                // oautth2 token expiry date
+    "enginio_data": {
+      "user": {
+        "id": "...",                    // this user Id
+        "createdAt": "...",             // when the user was created
+        "creator": {                    // who created the user
+          "id": "creatorId",
+          "objectType": "users"
+        },
+        "email": "user@user.com",       // the user's email address
+        "firstName": "John",            // the user's first name
+        "lastName": "Foo",              // the user's last name
+        "objectType": "users",
+        "updatedAt": "2013-11-25T14:54:58.957Z",
+        "username": "JohnFoo"           // the user's login
+      },
+      "usergroups": []                  // usergroups to which the user belongs
+    }
+  }
+  \endcode
 
   \note The \a reply will be deleted automatically after this signal, so it can not be
   stored.
