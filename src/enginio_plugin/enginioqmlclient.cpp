@@ -85,6 +85,24 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+  \qmlproperty Enginio::AuthenticationState Enginio1::EnginioClient::authenticationState
+  \brief The state of the authentication.
+
+  Enginio provides convenient user management.
+  The authentication state reflects whether the current user is authenticated.
+  \sa identity EnginioOAuth2Authentication
+*/
+
+/*!
+  \qmlproperty EnginioIdentity Enginio1::EnginioClient::identity
+  Property that represents a user. Setting the property will create an asynchronous authentication request,
+  the result of it updates \l{Enginio1::EnginioClient::authenticationState}{authenticationState}
+
+  It is allowed to assign a null pointer to the property to terminate the session.
+  \sa authenticationState sessionAuthenticated sessionAuthenticationError EnginioOAuth2Authentication
+*/
+
+/*!
   \qmlproperty url Enginio1::EnginioClient::serviceUrl
   \internal
   Enginio backend URL.
