@@ -60,7 +60,7 @@ QT_BEGIN_NAMESPACE
   \inqmlmodule Enginio 1
   \ingroup engino-qml
 
-  \brief client interface to access Enginio
+  \brief Client interface to access Enginio service
   \snippet simple.qml import
 
   EnginioClient is the heart of the QML API for Enginio.
