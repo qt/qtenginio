@@ -483,6 +483,20 @@ EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
   The \a query is a JSON object containing the actual query to the backend.
   The query will be run on the \a operation part of the backend.
 
+  The \a query has to contain an "objectType" which has to point to a type defined
+  in the backend. Optionaly it can also contain:
+  \list
+  \li query - describes how objects are queried, allows to filter results. See \l{https://engin.io/documentation/rest/parameters/queries}
+  {JSON query structure}
+  \li limit - limits how many objects the server should return (default value is 100).
+  \li offset - how many objects the server should skip from the beginning of the returned results. Note that the server keeps the data
+  in random order so that usage of offset implies using \c sort as well.
+  \li sort - describes how results are sorted. See \l{https://engin.io/documentation/rest/parameters/sort}{JSON sort request structure}
+  \li count - if the \c count is set the server will return only count of matching objects
+  \li include - describes which other objects are included in the response. See \l{https://engin.io/documentation/rest/parameters/include}
+  {JSON include structure}
+  \endlist
+
   To query the database of all objects of type "objects.todo":
   \snippet enginioclient/tst_enginioclient.cpp query-todo
 

@@ -111,6 +111,20 @@ QT_BEGIN_NAMESPACE
   The \a query is an object containing the actual query to the backend.
   The query will be run on the \a operation part of the backend.
 
+  The \a query has to contain an "objectType" which has to point to a type defined
+  in the backend. Optionaly it can also contain:
+  \list
+  \li query - describes how objects are queried, allows to filter results. See \l{https://engin.io/documentation/rest/parameters/queries}
+  {JSON query structure}
+  \li limit - limits how many objects the server should return (default value is 100).
+  \li offset - how many objects the server should skip from the beginning of the returned results. Note that the server keeps the data
+  in random order so that usage of offset implies using \c sort as well.
+  \li sort - describes how results are sorted. See \l{https://engin.io/documentation/rest/parameters/sort}{JSON sort request structure}
+  \li count - if the \c count is set the server will return only count of matching objects
+  \li include - describes which other objects are included in the response. See \l{https://engin.io/documentation/rest/parameters/include}
+  {JSON include structure}
+  \endlist
+
   For example to find a usergroup named "myUsers" it is enough to call:
   \snippet socialtodos/Login.qml queryUsergroup
 
