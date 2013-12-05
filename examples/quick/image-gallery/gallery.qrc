@@ -12,6 +12,5 @@
         <file alias="delegate.png">../../common/images/delegate.png</file>
         <file alias="delegate_pressed.png">../../common/images/delegate_pressed.png</file>
         <file alias="shadow.png">../../common/images/shadow.png</file>
-        <file alias="enginio.png">../../common/images/enginio.png</file>
     </qresource>
 </RCC>

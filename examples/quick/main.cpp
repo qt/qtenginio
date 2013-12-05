@@ -38,17 +38,70 @@
 **
 ****************************************************************************/
 
-#include <QApplication>
+#include <QGuiApplication>
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QQuickView>
 #include <QDir>
+#include <QSettings>
 
-#include "backendhelper.h"
+static QString backendIdKey = QStringLiteral("backendId");
+
+class BackendHelperContext : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QString exampleName READ exampleName CONSTANT)
+    Q_PROPERTY(QString backendId READ backendId WRITE setBackendId NOTIFY backendIdChanged)
+
+    QString _backendId;
+    QScopedPointer<QSettings> _settings;
+    static QString _exampleName;
+
+public:
+    BackendHelperContext(QQuickView *parent)
+        : QObject(parent)
+    {
+        QString fileName = QStringLiteral("EnginioExamples.conf");
+        for (int i = 0; i < 4; ++i) {
+            if (QFile::exists(fileName))
+                break;
+            fileName = fileName.prepend("../");
+        }
+
+        QFileInfo settingsFile = QFileInfo(fileName);
+        _settings.reset(settingsFile.exists()
+            ? new QSettings(settingsFile.absoluteFilePath(), QSettings::IniFormat)
+            : new QSettings("com.digia", "EnginioExamples"));
+
+        _settings->beginGroup(_exampleName);
+        _backendId = _settings->value(backendIdKey).toString();
+    }
+
+    ~BackendHelperContext()
+    {
+        _settings->setValue(backendIdKey, _backendId);
+        _settings->endGroup();
+        _settings->sync();
+    }
+
+    QString backendId() const { return _backendId; }
+    void setBackendId(const QString &backendId)
+    {
+        if (_backendId == backendId)
+            return;
+        _backendId = backendId;
+        emit backendIdChanged();
+    }
+
+    QString exampleName() const { return _exampleName; }
+signals:
+    void backendIdChanged();
+};
+QString BackendHelperContext::_exampleName = ENGINIO_SAMPLE_NAME;
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc,argv);
+    QGuiApplication app(argc,argv);
     QQuickView view;
     const QString appPath = QCoreApplication::applicationDirPath();
 
@@ -61,11 +114,14 @@ int main(int argc, char* argv[])
     view.engine()->addImportPath(qmlImportDir.canonicalPath());
     QObject::connect(view.engine(), SIGNAL(quit()), &app, SLOT(quit()));
 
-    QByteArray enginioBackendId = backendId(ENGINIO_SAMPLE_NAME);
-    view.engine()->rootContext()->setContextProperty("enginioBackendId", enginioBackendId);
+    BackendHelperContext *backendContext = new BackendHelperContext(&view);
+
+    view.engine()->rootContext()->setContextProperty("enginioBackendContext", backendContext);
 
     view.setSource(QUrl("qrc:///" ENGINIO_SAMPLE_NAME ".qml"));
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.show();
     return app.exec();
 }
+
+#include "main.moc"

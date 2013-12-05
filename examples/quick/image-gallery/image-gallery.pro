@@ -2,10 +2,9 @@ TEMPLATE = app
 
 DEFINES += ENGINIO_SAMPLE_NAME=\\\"image-gallery\\\"
 
-include(../../common/backendhelper/backendhelper.pri)
+include(../../common/backendhelper/qmlbackendhelper.pri)
 
-# for file dialogs we want widgets
-QT += quick qml enginio widgets
+QT += quick qml enginio
 SOURCES += ../main.cpp
 
 mac: CONFIG -= app_bundle

@@ -43,41 +43,51 @@ import QtQuick.Controls 1.0
 import QtQuick.Window 2.1
 import Enginio 1.0
 
-Rectangle {
-    id: root
-
+Item {
+    id: main
     property real scaleFactor: Screen.pixelDensity / 5.0
     property int intScaleFactor: Math.max(1, scaleFactor)
 
     width: 400 * scaleFactor
     height: 640 * scaleFactor
-    color: "#f4f4f4"
 
-    Component {
-        id: lists
-        TodoLists{}
+    BackendHelper{
+        id: backendHelper
     }
 
-    EnginioClient {
-        id: enginioClient
-        backendId: enginioBackendId
+    Rectangle {
+        id: root
+        anchors.fill: parent
+        opacity: 1 - backendHelper.opacity
 
-        onAuthenticationStateChanged: {
-            console.log("Auth state:", authenticationState)
-            if (authenticationState === 2)
-                mainView.push({ item: lists, properties: {"username": auth.user}})
+        color: "#f4f4f4"
+
+        Component {
+            id: lists
+            TodoLists{}
         }
 
-        onError: console.log(JSON.stringify(reply.data))
-    }
+        EnginioClient {
+            id: enginioClient
+            backendId: backendHelper.backendId
 
-    EnginioOAuth2Authentication {
-        id: auth
-    }
+            onAuthenticationStateChanged: {
+                console.log("Auth state:", authenticationState)
+                if (authenticationState === 2)
+                    mainView.push({ item: lists, properties: {"username": auth.user}})
+            }
 
-    StackView {
-        id: mainView
-        anchors.fill: parent
-        initialItem: Login{}
+            onError: console.log(JSON.stringify(reply.data))
+        }
+
+        EnginioOAuth2Authentication {
+            id: auth
+        }
+
+        StackView {
+            id: mainView
+            anchors.fill: parent
+            initialItem: Login{}
+        }
     }
 }

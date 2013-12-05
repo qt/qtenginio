@@ -11,7 +11,6 @@
         <file alias="shadow.png">../../common/images/shadow.png</file>
         <file alias="textfield.png">../../common/images/textfield.png</file>
         <file alias="checkmark.png">../../common/images/checkbox_checked.png</file>
-        <file alias="enginio.png">../../common/images/enginio.png</file>
     </qresource>
     <qresource prefix="/">
         <file>todo.qml</file>

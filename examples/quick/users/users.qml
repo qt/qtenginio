@@ -43,39 +43,50 @@ import Enginio 1.0
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 
-Rectangle {
-    id: root
+Item {
+    id: main
     height: 800
     width: 600
-    color: "#f4f4f4"
 
-    //![client]
-    EnginioClient {
-        id: enginioClient
-        backendId: enginioBackendId
-
-        onError: console.debug(JSON.stringify(reply.data))
+    BackendHelper{
+        id: backendHelper
     }
-    //![client]
 
-    TabView {
-        id: tabView
+    Rectangle {
+        id: root
         anchors.fill: parent
-        anchors.margins: 3
+        opacity: 1 - backendHelper.opacity
 
-        Tab {
-            title: "Users"
-            Browse { anchors.fill: parent }
+        color: "#f4f4f4"
+
+        //![client]
+        EnginioClient {
+            id: enginioClient
+            backendId: backendHelper.backendId
+
+            onError: console.debug(JSON.stringify(reply.data))
         }
+        //![client]
 
-        Tab {
-            title: "Login"
-            Login { anchors.fill: parent }
-        }
+        TabView {
+            id: tabView
+            anchors.fill: parent
+            anchors.margins: 3
 
-        Tab {
-            title: "Register"
-            Register { anchors.fill: parent }
+            Tab {
+                title: "Users"
+                Browse { anchors.fill: parent }
+            }
+
+            Tab {
+                title: "Login"
+                Login { anchors.fill: parent }
+            }
+
+            Tab {
+                title: "Register"
+                Register { anchors.fill: parent }
+            }
         }
     }
 }

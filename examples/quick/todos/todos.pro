@@ -2,9 +2,9 @@ TEMPLATE = app
 
 DEFINES += ENGINIO_SAMPLE_NAME=\\\"todo\\\"
 
-include(../../common/backendhelper/backendhelper.pri)
+include(../../common/backendhelper/qmlbackendhelper.pri)
 
-QT += quick qml enginio widgets
+QT += quick qml enginio
 SOURCES += ../main.cpp
 
 mac: CONFIG -= app_bundle
