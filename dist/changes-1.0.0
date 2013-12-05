@@ -2,8 +2,8 @@ Enginio 1.0 introduces many improvements to stability and API compared to previo
 
 API Changes
 -----------
-- backendSecret has been removed from EnginioClient (both QML and C++)
-- Switch to OAuth2 as authentication mechanism everywhere
+- backendSecret was removed from EnginioClient (both QML and C++)
+- Switched to OAuth2 as authentication mechanism everywhere
   - EnginioBasicAuthentication removed
   - EnginioOAuth2Authentication added
 - Many properties and signal&slots argument types changed to better fit QML API
@@ -11,6 +11,15 @@ API Changes
 - New property in Enginio model qml: rowCount
 - ObjectAclOperation and UsergroupMembersOperation JSON api was fixed
 - EnginioClient is not exposed to QML directly anymore
+- Renamed ObjectAclOperation to AccessControlOperation
+- Renamed the EnginioClient::search method to fullTextSearch
+- Renamed the EnginioClient::downloadFile function to downloadUrl to make it clear that this function does only provide a URL and does not download the file
+- Renamed EnginioModel::engino property to client
+- Renamed EnginioModel::setProperty to setData for better consistency with other C++ models. The order of the role and value arguments was changed as well
+- Renamed Roles to Role in EnginioModelBase. Enums should be singular according to Qt naming policy
+- Renamed EnginioClientBase to EnginioClientConnection
+- ErrorTypes enum was renamed to ErrorType
+- All enums were moved from a class scope to Enginio namespace
 
 Fixed Issues
 ------------
