@@ -78,7 +78,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty QJSValue Enginio1::EnginioModel::query
+  \qmlproperty QJSValue EnginioModel::query
   The query used to populate the model with data.
 */
 
@@ -88,12 +88,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty Enginio::Operation Enginio1::EnginioModel::operation
+  \qmlproperty Enginio::Operation EnginioModel::operation
   The operation used for the \l query.
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioModel::append(QJSValue value)
+  \qmlmethod EnginioReply EnginioModel::append(QJSValue value)
   \brief Add a new object to the model and database.
 
   To add a "city" object to the model by appending it:
@@ -101,11 +101,11 @@ QT_BEGIN_NAMESPACE
   The append will be reflected by the model immediately and will be propagated
   to the server asynchronously.
 
-  The returned \l Enginio1::EnginioReply can be used to react to a finished object creation.
+  The returned \l EnginioReply can be used to react to a finished object creation.
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioModel::setProperty(int row, string propertyName, QVariant value)
+  \qmlmethod EnginioReply EnginioModel::setProperty(int row, string propertyName, QVariant value)
   \brief Change a property of an object in the model
 
   The property \a propertyName of the object at \a row will be set to \a value.
@@ -114,7 +114,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioModel::remove(int row)
+  \qmlmethod EnginioReply EnginioModel::remove(int row)
   \brief removes the object at \a row
 */
 

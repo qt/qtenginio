@@ -151,7 +151,7 @@ const int EnginioBaseModelPrivate::IncrementalModelUpdate = -2;
   For the model the "creator" property is not longer a reference (as it is on the backend), but a full object.
   But while the full object is accessible, attempts to alter the object's data will fail.
 
-  For the QML version of this class see \l {Enginio1::EnginioModel}{EnginioModel (QML)}
+  For the QML version of this class see \l {EnginioModel}{EnginioModel (QML)}
 */
 
 EnginioBaseModelPrivate::~EnginioBaseModelPrivate()

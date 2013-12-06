@@ -80,12 +80,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty string Enginio1::EnginioClient::backendId
+  \qmlproperty string EnginioClient::backendId
   Enginio backend ID. This can be obtained from the Enginio dashboard.
 */
 
 /*!
-  \qmlproperty Enginio::AuthenticationState Enginio1::EnginioClient::authenticationState
+  \qmlproperty Enginio::AuthenticationState EnginioClient::authenticationState
   \brief The state of the authentication.
 
   Enginio provides convenient user management.
@@ -94,16 +94,16 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty EnginioIdentity Enginio1::EnginioClient::identity
+  \qmlproperty EnginioIdentity EnginioClient::identity
   Property that represents a user. Setting the property will create an asynchronous authentication request,
-  the result of it updates \l{Enginio1::EnginioClient::authenticationState}{authenticationState}
+  the result of it updates \l{EnginioClient::authenticationState}{authenticationState}
 
   It is allowed to assign a null pointer to the property to terminate the session.
   \sa authenticationState sessionAuthenticated sessionAuthenticationError EnginioOAuth2Authentication
 */
 
 /*!
-  \qmlproperty url Enginio1::EnginioClient::serviceUrl
+  \qmlproperty url EnginioClient::serviceUrl
   \internal
   Enginio backend URL.
 
@@ -111,7 +111,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioClient::fullTextSearch(QJSValue query)
+  \qmlmethod EnginioReply EnginioClient::fullTextSearch(QJSValue query)
   \brief Perform a full text search on the database
 
   The \a query is an object sent to the backend to perform a fulltext search.
@@ -123,7 +123,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioClient::query(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply EnginioClient::query(QJSValue query, Operation operation)
   \brief Query the database.
 
   The \a query is an object containing the actual query to the backend.
@@ -150,7 +150,7 @@ QT_BEGIN_NAMESPACE
   \sa EnginioReply, create(), update(), remove(), Enginio::operation
 */
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioClient::create(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply EnginioClient::create(QJSValue query, Operation operation)
   \brief Create an object in the database.
 
   This command can create an object in the database, for example to create a new user
@@ -168,7 +168,7 @@ QT_BEGIN_NAMESPACE
   \return EnginioReply containing the status and the result once it is finished.
 */
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioClient::update(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply EnginioClient::update(QJSValue query, Operation operation)
   \brief Update an object in the database.
 
   To update access control list of an object the JSON loook like this:
@@ -185,14 +185,14 @@ QT_BEGIN_NAMESPACE
   \return EnginioReply containing the status of the query and the data once it is finished.
 */
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioClient::remove(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply EnginioClient::remove(QJSValue query, Operation operation)
   \brief Remove an object from the database.
 
   \return EnginioReply containing the status once it is finished.
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioClient::uploadFile(QJSValue object, QUrl file)
+  \qmlmethod EnginioReply EnginioClient::uploadFile(QJSValue object, QUrl file)
   \brief Stores a \a file attached to an \a object in Enginio
 
   Each uploaded file needs to be associated with an object in the database.
@@ -213,7 +213,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply Enginio1::EnginioClient::downloadUrl(QJSValue object)
+  \qmlmethod EnginioReply EnginioClient::downloadUrl(QJSValue object)
   \brief Get the download URL for a file
 
   \snippet qmltests/tst_files.qml download
@@ -228,7 +228,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlsignal Enginio1::EnginioClient::finished(QJSValue reply)
+  \qmlsignal EnginioClient::finished(QJSValue reply)
   This signal is emitted when a \a reply finishes.
 
   \note that this signal is alwasy emitted, independent of whether
@@ -236,12 +236,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlsignal Enginio1::EnginioClient::error(QJSValue reply)
+  \qmlsignal EnginioClient::error(QJSValue reply)
   This signal is emitted when a \a reply finishes and contains an error.
 */
 
 /*!
-  \qmlsignal Enginio1::EnginioClient::sessionAuthenticated(QJSValue reply)
+  \qmlsignal EnginioClient::sessionAuthenticated(QJSValue reply)
   \brief Emitted when a user logs in.
 
   The signal is emitted after a user was successfully logged into the backend. From that
@@ -278,7 +278,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlsignal Enginio1::EnginioClient::sessionAuthenticationError(QJSValue reply) const
+  \qmlsignal EnginioClient::sessionAuthenticationError(QJSValue reply) const
   \brief Emitted when a user login fails.
 
   The \a reply contains the details about why the login failed.
@@ -286,7 +286,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlsignal Enginio1::EnginioClient::sessionTerminated() const
+  \qmlsignal EnginioClient::sessionTerminated() const
   \brief Emitted when a user logs out.
   \sa EnginioOAuth2Authentication
 */

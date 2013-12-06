@@ -71,37 +71,37 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty QJSValue Enginio1::EnginioReply::data
+  \qmlproperty QJSValue EnginioReply::data
   The data of this reply.
 */
 
 /*!
-  \qmlproperty Enginio::ErrorType Enginio1::EnginioReply::errorType
+  \qmlproperty Enginio::ErrorType EnginioReply::errorType
   The type of error (if any) of this reply.
 */
 
 /*!
-  \qmlproperty QNetworkReply::NetworkError Enginio1::EnginioReply::networkError
+  \qmlproperty QNetworkReply::NetworkError EnginioReply::networkError
   The network error (if any).
 */
 
 /*!
-  \qmlproperty string Enginio1::EnginioReply::errorString
+  \qmlproperty string EnginioReply::errorString
   The error message if this reply was an error.
 */
 
 /*!
-  \qmlproperty int Enginio1::EnginioReply::backendStatus
+  \qmlproperty int EnginioReply::backendStatus
   The backend status code.
 */
 
 /*!
-  \qmlproperty bool Enginio1::EnginioReply::isFinished
+  \qmlproperty bool EnginioReply::isFinished
   The property holds \c true if this reply is finished, \c false otherwise.
 */
 
 /*!
-  \qmlproperty bool Enginio1::EnginioReply::isError
+  \qmlproperty bool EnginioReply::isError
   The property holds \c true if this reply has finished with an error, \c false otherwise.
 */
 
