@@ -83,8 +83,8 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlproperty Enginio1::EnginioClient Enginio1::EnginioModel::client
-  The instance of \l Enginio1::EnginioClient used for this model.
+  \qmlproperty EnginioClient EnginioModel::client
+  The instance of \l EnginioClient used for this model.
 */
 
 /*!

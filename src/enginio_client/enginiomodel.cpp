@@ -75,16 +75,16 @@ const int EnginioBaseModelPrivate::IncrementalModelUpdate = -2;
   \endcode
 
   Assigning such a query to the model results in downloading of all objects from the "objects.fruits"
-  collection. It is possible to \l{EnginioModel::append}{append} new objects, to
-  \l{EnginioModel::setProperty}{modify} or to \l{EnginioModel::remove}{remove} them.
+  collection. It is possible to \l{EnginioModel::append()}{append} new objects, to
+  \l{EnginioModel::setProperty()}{modify} or to \l{EnginioModel::remove()}{remove} them.
 
   The query has to result in a list of objects, each object becomes an item in the model. Properties
   of the items are used as role names.
-  There are a few predefined role names that will always be available (\l{EnginioModel::Roles}{Roles}).
+  There are a few predefined role names that will always be available (\l{Enginio::Role}{Role}).
 
   The operations are executed asynchronously, which means that user interface is not
   blocked while the model is initialized and updated. Every modification is divided in
-  two steps; request and confirmation. For example when \l{EnginioModel::append}{append}
+  two steps; request and confirmation. For example when \l{EnginioModel::append()}{append}
   is called EnginioModel returns immediately as if the operation had succeeded. In
   the background it waits for confirmation from the backend and only then the operation is
   really finished. It may happen that operation fails, for example
@@ -95,7 +95,7 @@ const int EnginioBaseModelPrivate::IncrementalModelUpdate = -2;
   indicates whether the item is successfully updated on the server.
   This role can for example meant to be used for a busy indicator while a property is being updated.
   Alternatively the status of each \l{EnginioReply}{EnginioReply} returned by EnginioModel can be tracked.
-  The operation is confirmed when the reply is \l{EnginioReply::isFinished}{finished} without \l{EnginioReply::isError}{error}.
+  The operation is confirmed when the reply is \l{EnginioReply::isFinished()}{finished} without \l{EnginioReply::isError()}{error}.
 
   When a reply is finished it is the user's responsibility to delete it, it can be done
   by connecting the \l{EnginioReply::finished}{finished} signal to \l{QObject::deleteLater()}{deleteLater}.

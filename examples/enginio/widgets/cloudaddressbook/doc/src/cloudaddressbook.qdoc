@@ -85,7 +85,7 @@
     \snippet cloudaddressbook/addressbookmodel.h Roles
     \snippet cloudaddressbook/addressbookmodel.cpp Roles
 
-    and as always \l{EnginioModel::data}{data()} \l{EnginioModel::setData}{setData()} functions have to be overridden
+    and as always \l{EnginioModel::data()}{data()} \l{EnginioModel::setData}{setData()} functions have to be overridden
     to provide Qt::DisplayRole in the way it is needed to nicely cooperate with QTableView.
     \snippet cloudaddressbook/addressbookmodel.cpp data
 
