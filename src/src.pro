@@ -2,7 +2,6 @@ requires(qtHaveModule(network))
 
 TEMPLATE = subdirs
 
-
 SUBDIRS += enginio_client
 
 qtHaveModule(quick) {

@@ -1,0 +1,46 @@
+include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
+
+project = qtenginiocpp
+description = Client library for Enginio
+url = http://engin.io
+
+sourcedirs += ..
+headerdirs += ..
+
+imagedirs += images
+
+outputdir = ./html
+outputformats = HTML
+
+exampledirs += \
+               ../../../examples/enginio/widgets \
+               ../../../tests/auto \
+
+# Specify example install dir under QT_INSTALL_EXAMPLES
+examplesinstallpath = enginio/widgets
+
+depends += qtcore qtgui qtwidgets qtnetwork
+
+qhp.projects            = EnginioCpp
+
+qhp.EnginioCpp.file                = qtenginiocpp.qhp
+qhp.EnginioCpp.namespace           = io.engin.cpp.100
+qhp.EnginioCpp.virtualFolder       = qtenginiocpp
+qhp.EnginioCpp.indexTitle          = Enginio C++ Classes and Examples
+qhp.EnginioCpp.indexRoot           =
+
+qhp.EnginioCpp.filterAttributes    = qtenginio 1.0.0
+qhp.EnginioCpp.customFilters.Qt.name = Enginio 1.0.0
+qhp.EnginioCpp.customFilters.Qt.filterAttributes = qtenginio 1.0.0
+
+qhp.EnginioCpp.subprojects         = classes examples
+
+qhp.EnginioCpp.subprojects.classes.title = C++ Classes
+qhp.EnginioCpp.subprojects.classes.indexTitle = Enginio C++ Classes
+qhp.EnginioCpp.subprojects.classes.selectors = class
+qhp.EnginioCpp.subprojects.classes.sortPages = true
+
+qhp.EnginioCpp.subprojects.examples.title = Examples
+qhp.EnginioCpp.subprojects.examples.indexTitle = Enginio Examples
+qhp.EnginioCpp.subprojects.examples.selectors = fake:example
+qhp.EnginioCpp.subprojects.examples.sortPages = true

@@ -4,7 +4,7 @@ TARGETPATH = Enginio
 
 QT += qml quick enginio enginio-private core-private
 
-QMAKE_DOCS = $$PWD/doc/qtenginio_plugin.qdocconf
+QMAKE_DOCS = $$PWD/doc/qtenginioqml.qdocconf
 load(qt_docs)
 
 include(../src.pri)
