@@ -53,7 +53,7 @@ Rectangle {
 
     //! [client-signals]
     EnginioClient {
-        ...
+        // ...
         onFinished: console.log("Engino request finished." + reply.data)
         onError: console.log("Enginio error " + reply.errorCode + ": " + reply.errorString)
     }
@@ -61,7 +61,7 @@ Rectangle {
 
     //! [client-query]
     EnginioClient {
-        ...
+        // ...
         Component.onCompleted: query({"objectType": "objects.image"})
     }
     //! [client-query]

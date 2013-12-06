@@ -85,7 +85,7 @@
     \snippet cloudaddressbook/addressbookmodel.h Roles
     \snippet cloudaddressbook/addressbookmodel.cpp Roles
 
-    and as always \l{EnginioModel::data()}{data()} \l{EnginioModel::setData}{setData()} functions have to be overridden
+    and as always \l{EnginioModel::data()}{data()} \l{EnginioModel::setData()}{setData()} functions have to be overridden
     to provide Qt::DisplayRole in the way it is needed to nicely cooperate with QTableView.
     \snippet cloudaddressbook/addressbookmodel.cpp data
 
@@ -93,7 +93,7 @@
     \snippet cloudaddressbook/addressbookmodel.cpp tableViewIntegration
 
     Integration of the full text search is the last step in this tutorial. The goal is to highlight items that
-    contains a given phrase. The highlighting is done by \l{EnginioModel::data}{data()}, which returns a bold font
+    contains a given phrase. The highlighting is done by \l{EnginioModel::data()}{data()}, which returns a bold font
     for Qt::FontRole, if an item is matching the search query. This example for simplicity assumes that matching
     items count is not big and can be kept in a QSet, which would be recreated on each search.
 

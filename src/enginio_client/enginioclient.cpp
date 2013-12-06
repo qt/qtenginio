@@ -70,6 +70,7 @@ QT_BEGIN_NAMESPACE
   \class EnginioClient
   \inmodule enginio-qt
   \ingroup enginio-client
+  \target EnginioClientCpp
   \brief EnginioClient handles all communication with the Enginio server
 
   The Enginio server supports several separate "backends" with each account.
@@ -95,7 +96,6 @@ QT_BEGIN_NAMESPACE
   Do not directly delete it inside the slot connected to finished().
   You can use the \l{QObject::deleteLater()}{deleteLater()} function.
 
-  For a higher level overview, consult the \l {Enginio Overview} documentation.
   In order to make queries that return an array of data more convenient
   a model is provided by \l {EnginioModelCpp}{EnginioModel}.
 */

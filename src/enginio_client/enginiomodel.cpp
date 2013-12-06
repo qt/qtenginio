@@ -91,18 +91,18 @@ const int EnginioBaseModelPrivate::IncrementalModelUpdate = -2;
   because of insufficient access rights, in that case the operation will be reverted.
 
   There are two, ways of tracking if an item state is the same in the model and backend.
-  Each item has a role that returns a boolean \l{EnginioModel::SyncedRole}{SyncedRole}, role name "_synced" which
+  Each item has a role that returns a boolean \l{Enginio::SyncedRole}{SyncedRole}, role name "_synced" which
   indicates whether the item is successfully updated on the server.
   This role can for example meant to be used for a busy indicator while a property is being updated.
   Alternatively the status of each \l{EnginioReply}{EnginioReply} returned by EnginioModel can be tracked.
   The operation is confirmed when the reply is \l{EnginioReply::isFinished()}{finished} without \l{EnginioReply::isError()}{error}.
 
   When a reply is finished it is the user's responsibility to delete it, it can be done
-  by connecting the \l{EnginioReply::finished}{finished} signal to \l{QObject::deleteLater()}{deleteLater}.
+  by connecting the \l{EnginioReply::finished()}{finished} signal to \l{QObject::deleteLater()}{deleteLater}.
   \code
   QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
   \endcode
-  \note it is not safe to use the delete operator directly in \l{EnginioReply::finished}{finished}.
+  \note it is not safe to use the delete operator directly in \l{EnginioReply::finished()}{finished}.
 
   \note EnginioClient emits the finished and error signals for the model, not the model itself.
 
@@ -150,8 +150,6 @@ const int EnginioBaseModelPrivate::IncrementalModelUpdate = -2;
   \endcode
   For the model the "creator" property is not longer a reference (as it is on the backend), but a full object.
   But while the full object is accessible, attempts to alter the object's data will fail.
-
-  For the QML version of this class see \l {EnginioModel}{EnginioModel (QML)}
 */
 
 EnginioBaseModelPrivate::~EnginioBaseModelPrivate()

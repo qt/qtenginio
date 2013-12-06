@@ -59,6 +59,7 @@ QT_BEGIN_NAMESPACE
   \instantiates EnginioQmlClient
   \inqmlmodule Enginio 1
   \ingroup engino-qml
+  \target EnginioClientQml
 
   \brief Client interface to access Enginio service
   \snippet simple.qml import
@@ -90,7 +91,7 @@ QT_BEGIN_NAMESPACE
 
   Enginio provides convenient user management.
   The authentication state reflects whether the current user is authenticated.
-  \sa identity EnginioOAuth2Authentication
+  \sa identity, EnginioOAuth2Authentication
 */
 
 /*!
@@ -99,7 +100,7 @@ QT_BEGIN_NAMESPACE
   the result of it updates \l{EnginioClient::authenticationState}{authenticationState}
 
   It is allowed to assign a null pointer to the property to terminate the session.
-  \sa authenticationState sessionAuthenticated sessionAuthenticationError EnginioOAuth2Authentication
+  \sa authenticationState, sessionAuthenticated, sessionAuthenticationError, EnginioOAuth2Authentication
 */
 
 /*!
@@ -118,12 +119,12 @@ QT_BEGIN_NAMESPACE
   Note that the search requires the searched properties to be indexed (on the server, configureable in the backend).
 
   \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), query(), update(), remove(),
+  \sa EnginioReply, EnginioClient::create(), EnginioClient::query(), EnginioClient::update(), EnginioClient::remove(),
   {https://engin.io/documentation/rest/parameters/fulltext_query}{JSON request structure}
 */
 
 /*!
-  \qmlmethod EnginioReply EnginioClient::query(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply EnginioClient::query(QJSValue query, Enginio::Operation operation)
   \brief Query the database.
 
   The \a query is an object containing the actual query to the backend.
@@ -147,10 +148,10 @@ QT_BEGIN_NAMESPACE
   \snippet socialtodos/Login.qml queryUsergroup
 
   \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), update(), remove(), Enginio::operation
+  \sa EnginioReply, create(), update(), remove(), Enginio::Operation
 */
 /*!
-  \qmlmethod EnginioReply EnginioClient::create(QJSValue query, Operation operation)
+  \qmlmethod EnginioReply EnginioClient::create(QJSValue query, Enginio::Operation operation)
   \brief Create an object in the database.
 
   This command can create an object in the database, for example to create a new user
@@ -274,7 +275,7 @@ QT_BEGIN_NAMESPACE
   }
   \endcode
 
-  \sa sessionAuthenticationError() EnginioReply EnginioOAuth2Authentication
+  \sa EnginioClient::sessionAuthenticationError(), EnginioReply EnginioOAuth2Authentication
 */
 
 /*!
@@ -282,7 +283,7 @@ QT_BEGIN_NAMESPACE
   \brief Emitted when a user login fails.
 
   The \a reply contains the details about why the login failed.
-  \sa sessionAuthenticated() EnginioReply EnginioClientConnection::identity() EnginioOAuth2Authentication
+  \sa EnginioClient::sessionAuthenticated(), EnginioReply, EnginioClientConnection::identity, EnginioOAuth2Authentication
 */
 
 /*!
