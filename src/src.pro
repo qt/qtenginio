@@ -2,8 +2,6 @@ requires(qtHaveModule(network))
 
 TEMPLATE = subdirs
 
-QMAKE_DOCS = $$PWD/../doc/qtenginio.qdocconf
-load(qt_docs)
 
 SUBDIRS += enginio_client
 
