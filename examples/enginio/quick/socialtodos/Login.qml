@@ -177,7 +177,7 @@ Rectangle {
         enginioClient.identity = auth
     }
 
-    // Register a new user and add her to the group "myUsers"
+    // Register a new user and add her to the group "allUsers"
     function register() {
         statusText.text = "Creating user account..."
         var createAccount = enginioClient.create({ "username": nameInput.text, "password": passwordInput.text }, Enginio.UserOperation)
@@ -186,7 +186,7 @@ Rectangle {
                 statusText.text = createAccount.errorString
             } else {
                 //![queryUsergroup]
-                var groupQuery = enginioClient.query({ "query": { "name" : "myUsers" } }, Enginio.UsergroupOperation)
+                var groupQuery = enginioClient.query({ "query": { "name" : "allUsers" } }, Enginio.UsergroupOperation)
                 //![queryUsergroup]
 
                 groupQuery.finished.connect(function()

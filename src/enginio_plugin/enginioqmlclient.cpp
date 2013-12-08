@@ -144,7 +144,7 @@ QT_BEGIN_NAMESPACE
   {JSON include structure}
   \endlist
 
-  For example to find a usergroup named "myUsers" it is enough to call:
+  For example to find a usergroup named "allUsers" it is enough to call:
   \snippet socialtodos/Login.qml queryUsergroup
 
   \return EnginioReply containing the status and the result once it is finished.

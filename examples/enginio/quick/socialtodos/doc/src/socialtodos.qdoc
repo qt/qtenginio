@@ -93,7 +93,7 @@ A big part of the backend configuration is related to restricting who can create
                 Application users are added to this usergroup when they use the QML application.
 
                 For built-in users and usergroups the creation control is handled slightly differently.
-                New users can be freely created, anyone can register to use the application.
+                New users can be freely created and thus anyone can register to use the application.
                 Usergroups creation is completely blocked, since the application uses just one fixed usergroup.
 
         \row
@@ -199,18 +199,6 @@ Then configure the object type with needed details:
 
                 The '\c {name}' property will hold the name of the todo list.
         \row
-            \li \b {Data validators}
-            \li Setup following validators:
-                \list
-                    \li \e {Required} validator for \c {name} property.
-                    \li \e {Length} validator for \c {name} property with \e {minimum 5} and \e {maximum 20} limits.
-                \endlist
-            \li \e {Data validators} are used to enforce objects internal data structure and value constraints.
-
-                \e {Required} validator enforces that \c {name} property has non-null value.
-
-                \e {Length} validator enforces that \c {name} length is between given minimum and maximum limits.
-        \row
             \li \b {Permissions}
             \li Configure following permissions:
                 \list
@@ -229,9 +217,9 @@ Then configure the object type with needed details:
                 Now those rights are granted to \c {allUsers} usergroup members.
 
                 \e {Object permissions template} define how object level permissions will be initially set for created \c {objects.todoLists} objects.
-                Now \e {admin} permission will be granted to user who creates the \c {objects.todoLists} object.
+                Now \e {admin} permission will be granted to the user who creates the \c {objects.todoLists} object.
 
-                \e {Admin} right allows the user to perform all 'normal' operations to the \c {objects.todoLists} object (i.e. read, update and delete the object).
+                \e {Admin} right allows the user to perform all 'normal' operations on the \c {objects.todoLists} object (i.e. read, update and delete the object).
                 \e {Admin} right allows the user also to manage object's permissions (i.e. grant and withdraw rights for other users).
     \endtable
 \enddiv
@@ -276,18 +264,6 @@ Then configure the object type with needed details:
                 The '\c {done}' property is boolean status whether the item is done or not.
 
                 The '\c {todoList}' is a reference to parent todo list, i.e. a link to todo list object to which this todo item belongs to.
-    \row
-        \li \b {Data validators}
-        \li Setup following validators:
-            \list
-                \li \e {Required} validator for properties \c {title}, \c {done} and \c {todoList}.
-                \li \e {Length} validator for \c {title} property with \e {minimum 5} and \e {maximum 40} limits.
-            \endlist
-            \li \e {Data validators} are used to enforce objects internal data structure and value constraints.
-
-                \e {Required} validator enforces that \c {title}, \c {done} and \c {todoList} properties have non-null values.
-
-                \e {Length} validator enforces that \c {title} property value length is between given minimum and maximum limits.
     \row
         \li \b {Reference constraints}
         \li Configure following reference constraint action:
@@ -357,6 +333,7 @@ The \c {users} object type defines data schema and other settings for user objec
                     \li Object permissions template
                         \list
                             \li Grant \e {read} permission to \c {allUsers} usergroup.
+                            \li Grant \e {admin} permission to \e {creator} subject.
                             \li Clear other permission grants.
                         \endlist
                 \endlist
@@ -366,6 +343,9 @@ The \c {users} object type defines data schema and other settings for user objec
 
                 \e {Object permissions template} define how object level permissions will be initially set for created \c {users} objects.
                 Read-only right is given to \c {allUsers} usergroup members, so registered users are able to see each other details for sharing purposes.
+
+                Now \e {admin} permission will be granted to the user who creates the \c {users} object, i.e. to user itself.
+                \e {Admin} right allows the user to perform all operations on the \c {users} object (i.e. read, update and delete the object and also to manage its access rights).
     \endtable
 \enddiv
 
@@ -399,7 +379,7 @@ The \c {usergroups} object type defines data schema and other settings for userg
                         \endlist
                     \li Object permissions template
                         \list
-                            \li Clear all permission grants.
+                            \li No changes.
                         \endlist
                 \endlist
             \li \e {Collection permissions} control who is able to create new \c {usergroups} objects or list existing ones.
@@ -408,7 +388,8 @@ The \c {usergroups} object type defines data schema and other settings for userg
                 However, since create right is not granted to anyone, new usergroups can not be created.
 
                 \e {Object permissions template} define how object level permissions will be initially set for created \c {usergroups} objects.
-                Since new usergroups can't be created, also object permissions template is set empty.
+                Since new usergoups will not be created dynamcally, there is no need to modify the permission template.
+                Note that changes made in the permissions template will effect existing \c {usergroups} objects and thus the \c {allUsers} group as well.
     \endtable
 \enddiv
 
