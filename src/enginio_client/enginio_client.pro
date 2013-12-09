@@ -3,8 +3,7 @@ QT += core-private network
 DEFINES += ENGINIOCLIENT_LIBRARY
 MODULE = enginio
 
-QMAKE_DOCS = $$PWD/doc/qtenginiocpp.qdocconf
-load(qt_docs)
+QMAKE_DOCS = $$PWD/doc/qtenginio.qdocconf
 
 include(../src.pri)
 
