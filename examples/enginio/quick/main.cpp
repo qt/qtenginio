@@ -79,7 +79,6 @@ public:
 
     ~BackendHelperContext()
     {
-        _settings->setValue(backendIdKey, _backendId);
         _settings->endGroup();
         _settings->sync();
     }
@@ -90,6 +89,7 @@ public:
         if (_backendId == backendId)
             return;
         _backendId = backendId;
+        _settings->setValue(backendIdKey, _backendId);
         emit backendIdChanged();
     }
 
