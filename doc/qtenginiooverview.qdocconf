@@ -11,19 +11,19 @@ imagedirs += images
 
 depends += qtcore qtgui qtwidgets qtnetwork qtdoc qtenginio qtenginioqml
 
-qhp.projects            = Enginio
+qhp.projects            = QtEnginioOverview
 
-qhp.Enginio.file                = qtenginiooverview.qhp
-qhp.Enginio.namespace           = io.engin.overview.100
-qhp.Enginio.virtualFolder       = enginiooverview
-qhp.Enginio.indexTitle          = Enginio Manual
+qhp.QtEnginioOverview.file                = qtenginiooverview.qhp
+qhp.QtEnginioOverview.namespace           = io.engin.overview.100
+qhp.QtEnginioOverview.virtualFolder       = enginiooverview
+qhp.QtEnginioOverview.indexTitle          = Enginio Manual
 
-qhp.Enginio.filterAttributes    = enginio 1.0.0
-qhp.Enginio.customFilters.Qt.name = Enginio 1.0.0
-qhp.Enginio.customFilters.Qt.filterAttributes = enginio 1.0.0
+qhp.QtEnginioOverview.filterAttributes    = enginio 1.0.0
+qhp.QtEnginioOverview.customFilters.Qt.name = Enginio 1.0.0
+qhp.QtEnginioOverview.customFilters.Qt.filterAttributes = enginio 1.0.0
 
-qhp.Enginio.subprojects = manual
-qhp.Enginio.subprojects.manual.title = Manual
-qhp.Enginio.subprojects.manual.indexTitle = Enginio Manual
-qhp.Enginio.subprojects.manual.selectors = fake:page
+qhp.QtEnginioOverview.subprojects = manual
+qhp.QtEnginioOverview.subprojects.manual.title = Manual
+qhp.QtEnginioOverview.subprojects.manual.indexTitle = Enginio Manual
+qhp.QtEnginioOverview.subprojects.manual.selectors = fake:page
 

@@ -34,6 +34,7 @@
     In this example, a simple list of objects is displayed in a \l QListView.
     Each item in the list is a "To Do" object which can be "done" or "not yet done".
     Todos can be added, removed, or altered.
+    \image todo-example.png
 
     In this simple schema the objects will have two properties that are added
     to the default properties (such as creation date which always exists):

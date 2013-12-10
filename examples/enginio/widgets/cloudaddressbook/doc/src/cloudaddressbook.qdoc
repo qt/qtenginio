@@ -37,6 +37,8 @@
     This example doesn't cover security or multi-user management, for such topics please refer
     to Social Todo example.
 
+    \image cloudaddressbook-example.png
+
     \section1 Preconditions
     To start the example, a backend id and a backend secret have to be provided to an existing and configured
     Enginio backend. The backend can be created using dashboard, the Cloud Address Book pre-configured backend

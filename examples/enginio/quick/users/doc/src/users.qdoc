@@ -38,6 +38,8 @@
     is attached to an authenticated session. This is a simple example and data access rights
     management is not covered here. For such information, please refer to the Social Todo example.
 
+    \image users-example.png
+
     There is no special need for the backend setup. This example will use only predefined
     structures, which are the same for every backend.
 

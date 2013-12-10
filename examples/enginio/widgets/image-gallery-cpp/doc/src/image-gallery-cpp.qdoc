@@ -33,6 +33,8 @@
 
     The user interface consists of a list of images and a button to upload more images.
 
+    \image gallery-example.png
+
     \section1 Backend configuration
     The Enginio backend needs to be set up in order to get this example working.
 
