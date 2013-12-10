@@ -141,7 +141,7 @@ Rectangle {
             TouchButton {
                 id: registerButton
                 text: "Register"
-                onClicked: register()
+                onClicked: registerAndLogin()
                 width: (parent.width - parent.spacing)/2
                 enabled: enginioClient.authenticationState !== Enginio.Authenticating && nameInput.text.length && passwordInput.text.length
                 KeyNavigation.tab: nameInput
@@ -158,17 +158,21 @@ Rectangle {
         color: "#444"
     }
 
-    Component.onCompleted:
+    Component.onCompleted: {
         enginioClient.sessionAuthenticationError.connect(function(reply){
-            if (enginioClient.authenticationState === Enginio.AuthenticationFailure)
-                statusText.text = "Authentication failed: " + reply.errorString
-            }
-            )
+            statusText.text = "Login failed: " + reply.errorString
+        })
+
+       enginioClient.sessionAuthenticated.connect(function(reply){
+           addUserToAllUsersGroup(reply.data.enginio_data.user.id)
+        })
+    }
 
     Controls.Stack.onStatusChanged: {
         if (Controls.Stack.status == Controls.Stack.Activating) {
             nameInput.text = ""
             passwordInput.text = ""
+            statusText.text = ""
             nameInput.forceActiveFocus()
         }
     }
@@ -184,42 +188,54 @@ Rectangle {
     }
 
     // Register a new user and add her to the group "allUsers"
-    function register() {
+    function registerAndLogin() {
         statusText.text = "Creating user account..."
         var createAccount = enginioClient.create({ "username": nameInput.text, "password": passwordInput.text }, Enginio.UserOperation)
         createAccount.finished.connect(function() {
             if (createAccount.errorType !== EnginioReply.NoError) {
-                statusText.text = createAccount.errorString
+                statusText.text = "Account creation failed: " + createAccount.errorString
             } else {
-                //![queryUsergroup]
-                var groupQuery = enginioClient.query({ "query": { "name" : "allUsers" } }, Enginio.UsergroupOperation)
-                //![queryUsergroup]
+                login()
+            }
+        })
+    }
 
-                groupQuery.finished.connect(function()
-                {
-                    if (groupQuery.errorType !== EnginioReply.NoError) {
-                        statusText.text = groupQuery.errorString
+
+    function addUserToAllUsersGroup(userId) {
+        //![queryUsergroup]
+        var groupQuery = enginioClient.query({ "query": { "name" : "allUsers" } }, Enginio.UsergroupOperation)
+        //![queryUsergroup]
+
+        groupQuery.finished.connect(function(){
+            if (groupQuery.errorType !== EnginioReply.NoError) {
+                statusText.text = groupQuery.errorString
+            } else if (groupQuery.data.results.length === 0 ){
+                statusText.text = "Usergroup 'allUsers' not found, check required backend configuration from Social Todos example documentation."
+            } else {
+                var addUserToGroupData = {
+                    "id": groupQuery.data.results[0].id,
+                    "member" : {
+                        "id": userId,
+                        "objectType": "users"
+                    }
+                }
+                var addUserToGroup = enginioClient.create(addUserToGroupData, Enginio.UsergroupMembersOperation)
+                addUserToGroup.finished.connect(function(){
+                    if (addUserToGroup.errorType === EnginioReply.NoError) {
+                        switchToListsView()
+                    } else if (addUserToGroup.errorType === EnginioReply.BackendError &&
+                               addUserToGroup.backendStatus === 400) {
+                        //User already present in group, OK to proceed
+                        switchToListsView()
                     } else {
-                        var addUserToGroupData = {
-                            "id": groupQuery.data.results[0].id,
-                            "member" : {
-                                "id": createAccount.data.id,
-                                "objectType": "users"
-                            }
-                        }
-                        var addUserToGroup = enginioClient.create(addUserToGroupData, Enginio.UsergroupMembersOperation)
-                        addUserToGroup.finished.connect(function()
-                        {
-                            if (addUserToGroup.errorType !== EnginioReply.NoError) {
-                                statusText.text = addUserToGroup.errorString
-                            } else {
-                                statusText.text = "Account Created."
-                                login()
-                            }
-                        })
+                        statusText.text = "User add to group failed: " + JSON.stringify(addUserToGroup.data.errors[0])
                     }
                 })
             }
         })
+    }
+
+    function switchToListsView() {
+        mainView.push({ item: lists, properties: {"username": enginioClient.identity.user}})
     }
 }
