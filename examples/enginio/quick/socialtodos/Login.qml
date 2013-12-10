@@ -177,11 +177,9 @@ Rectangle {
         }
     }
 
-    EnginioOAuth2Authentication { id: noAuth }
-
     function login() {
         statusText.text = "Logging in..."
-        enginioClient.identity = noAuth
+        enginioClient.identity = null
         auth.user = nameInput.text
         auth.password = passwordInput.text
         enginioClient.identity = auth
