@@ -112,6 +112,7 @@ Rectangle {
             id: nameInput
             onAccepted: passwordInput.forceActiveFocus()
             placeholderText: "Username"
+            KeyNavigation.tab: passwordInput
         }
 
         TextField {
@@ -119,6 +120,7 @@ Rectangle {
             onAccepted: login()
             placeholderText: "Password"
             echoMode: TextInput.Password
+            KeyNavigation.tab: loginButton
         }
 
         Row {
@@ -128,17 +130,21 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.alignWhenCentered: true
             TouchButton {
+                id: loginButton
                 text: "Login"
                 baseColor: "#7a5"
                 width: (parent.width - parent.spacing)/2
                 onClicked: login()
                 enabled: enginioClient.authenticationState !== Enginio.Authenticating && nameInput.text.length && passwordInput.text.length
+                KeyNavigation.tab: registerButton
             }
             TouchButton {
+                id: registerButton
                 text: "Register"
                 onClicked: register()
                 width: (parent.width - parent.spacing)/2
                 enabled: enginioClient.authenticationState !== Enginio.Authenticating && nameInput.text.length && passwordInput.text.length
+                KeyNavigation.tab: nameInput
             }
         }
     }
