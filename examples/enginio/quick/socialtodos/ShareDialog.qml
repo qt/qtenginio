@@ -46,35 +46,34 @@ Rectangle {
     property string listId
     property string listName
     property var aclData
-
-    property var userNames: new Array
-    property var userData: new Object
+    property var usersData
 
     Component.onCompleted: {
         var aclQuery = enginioClient.query({ "objectType": "objects.todoLists", "id": listId }, Enginio.AccessControlOperation)
-        aclQuery.finished.connect(function() { aclData = aclQuery.data } )
+        aclQuery.finished.connect(function() {
+            if (aclQuery.errorType === EnginioReply.NoError) {
+                aclData = aclQuery.data
+
+                usersDataChanged() //In case of aclQuery completes after usersQuery, signal also usersData change so UI re-updates correctly
+            }
+        })
 
         var usersQuery = enginioClient.query({ "objectType": "users", }, Enginio.UsersOperation)
         usersQuery.finished.connect(function() {
-            var userNamesTmp = new Array
-            for (var i = 0; i < usersQuery.data.results.length; ++i) {
-                var user = usersQuery.data.results[i]
-                userNamesTmp.push(user["username"])
-                userData[user["username"]] = user
+            if (usersQuery.errorType === EnginioReply.NoError) {
+                usersData = usersQuery.data.results
             }
-
-            userNames = userNamesTmp
-        } )
+        })
     }
 
     Header {
         id: header
-        text: "Share " + listName
+        text: listName + " admins"
     }
 
     ListView {
         id: nameView
-        model: userNames
+        model: usersData
         anchors.top: header.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -103,40 +102,66 @@ Rectangle {
                 Image {
                     anchors.centerIn: parent
                     fillMode: Image.PreserveAspectFit
-                    source: sharedWithUser(userData[modelData].id) ? "qrc:images/checkmark.png" : ""
+                    source: isAccessGrantedForUser(modelData) ? "qrc:images/checkmark.png" : ""
                 }
             }
             Text {
                 anchors.left: checkBox.right
                 anchors.verticalCenter: parent.verticalCenter
-                text: modelData
+                text:  isUserTheLoggedInOne(modelData) ? modelData.username + " (current user)" : modelData.username
                 font.pixelSize: 22 * scaleFactor
             }
 
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    var id = userData[modelData].id
-                    aclData["read"].push({ "id": id, "objectType": "users" })
-                    aclData["admin"].push({ "id": id, "objectType": "users" })
-                    console.log("\nUpdated JSON:", JSON.stringify(aclData))
-                    enginioClient.update(
-                                { "id": listId, "objectType": "objects.todoLists", "access": aclData },
-                                Enginio.AccessControlOperation
-                                )
-
-                    // changing the contents of a JSON object does not emit
-                    // the update signal for performance reasons
-                    aclDataChanged()
+                    if (isUserTheLoggedInOne(modelData) === false){
+                        toggleAccessGrantForUser(modelData)
+                    }
                 }
             }
         }
     }
 
-    function sharedWithUser(userId) {
-        for (var i = 0; i < aclData["read"].length; ++i)
-            if (aclData["read"][i]["id"] === userId)
-                return true;
+    function isAccessGrantedForUser(userObject) {
+        if (aclData){
+            var aclAdmins = aclData.admin
+
+            for (var i = 0; i < aclData.admin.length; ++i){
+                if (aclAdmins[i].id === userObject.id){
+                    return true;
+                }
+            }
+        }
+
         return false;
+    }
+
+    function isUserTheLoggedInOne(userObject) {
+        if ( userObject.username === enginioClient.identity.user){
+                return true;
+        }
+        return false;
+    }
+
+    function toggleAccessGrantForUser(userObject) {
+        var aclOperation
+        var accessGrant =  {"admin": [{"id": userObject.id, "objectType": "users"}]}
+
+        if (isAccessGrantedForUser(userObject)) {
+            aclOperation = enginioClient.remove({ "id": listId, "objectType": "objects.todoLists", "access": accessGrant },
+                                                  Enginio.AccessControlOperation)
+
+        } else {
+            aclOperation = enginioClient.update({ "id": listId, "objectType": "objects.todoLists", "access": accessGrant },
+                                                  Enginio.AccessControlOperation)
+        }
+
+        aclOperation.finished.connect(function(reply) {
+            if (aclOperation.errorType === EnginioReply.NoError) {
+                aclData = reply.data
+                usersDataChanged()
+            }
+        })
     }
 }
