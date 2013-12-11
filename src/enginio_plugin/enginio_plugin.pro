@@ -8,7 +8,6 @@ QMAKE_DOCS = $$PWD/doc/qtenginioqml.qdocconf
 
 include(../src.pri)
 
-load(qml_plugin)
 
 TARGET = enginioplugin
 TARGET.module_name = Enginio
@@ -27,12 +26,10 @@ HEADERS += \
     enginioqmlmodel_p.h \
     enginioqmlreply_p.h
 
-QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
+CONFIG += no_cxx_module
+load(qml_plugin)
 
-macx|win32 {
-    DESTDIR = ../../qml/$${TARGET.module_name}
-    TARGET = $$TARGET$$qtPlatformTargetSuffix()
-}
+QMLDIRFILE = $${_PRO_FILE_PWD_}/qmldir
 
 copy2build.input = QMLDIRFILE
 copy2build.output = ../../qml/$${TARGET.module_name}/qmldir
