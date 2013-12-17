@@ -14,13 +14,13 @@ depends += qtcore qtgui qtwidgets qtnetwork qtdoc qtenginio qtenginioqml
 qhp.projects            = QtEnginioOverview
 
 qhp.QtEnginioOverview.file                = qtenginiooverview.qhp
-qhp.QtEnginioOverview.namespace           = io.engin.overview.100
+qhp.QtEnginioOverview.namespace           = io.engin.overview.101
 qhp.QtEnginioOverview.virtualFolder       = enginiooverview
 qhp.QtEnginioOverview.indexTitle          = Enginio Manual
 
-qhp.QtEnginioOverview.filterAttributes    = enginio 1.0.0
-qhp.QtEnginioOverview.customFilters.Qt.name = Enginio 1.0.0
-qhp.QtEnginioOverview.customFilters.Qt.filterAttributes = enginio 1.0.0
+qhp.QtEnginioOverview.filterAttributes    = enginio 1.0.1
+qhp.QtEnginioOverview.customFilters.Qt.name = Enginio 1.0.1
+qhp.QtEnginioOverview.customFilters.Qt.filterAttributes = enginio 1.0.1
 
 qhp.QtEnginioOverview.subprojects = manual
 qhp.QtEnginioOverview.subprojects.manual.title = Manual
