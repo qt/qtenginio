@@ -38,6 +38,8 @@ demonstrating the user management and access control features of Enginio.
 Social Todos is a simple todo list application with a social twist, demonstrating the user management and access control features of the Enginio service.
 The application allows the end-user to register a new user account, log in, and create and delete task lists, manage tasks on those lists and share lists with selected other users.
 
+\image socialtodo-example.png
+
 The application data is modeled as \e {todo items} and \e {todo lists}.
 \list
     \li A \e {todo item} represents a single tasks which needs to be done.
