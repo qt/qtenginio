@@ -5,6 +5,7 @@ include(../../../doc/enginio_global.qdocconf)
 project = QtEnginio
 description = Client library for Enginio
 url = http://engin.io
+version = $QT_VERSION
 
 sourcedirs += ..
 headerdirs += ..
@@ -26,14 +27,14 @@ depends += qtcore qtgui qtwidgets qtnetwork
 qhp.projects            = QtEnginio
 
 qhp.QtEnginio.file                = qtenginio.qhp
-qhp.QtEnginio.namespace           = io.engin.101
+qhp.QtEnginio.namespace           = io.engin.$QT_VERSION_TAG
 qhp.QtEnginio.virtualFolder       = qtenginio
 qhp.QtEnginio.indexTitle          = Enginio C++ Classes and Examples
 qhp.QtEnginio.indexRoot           =
 
-qhp.QtEnginio.filterAttributes    = qtenginio 1.0.1
-qhp.QtEnginio.customFilters.Qt.name = Enginio 1.0.1
-qhp.QtEnginio.customFilters.Qt.filterAttributes = qtenginio 1.0.1
+qhp.QtEnginio.filterAttributes    = qtenginio $QT_VERSION
+qhp.QtEnginio.customFilters.Qt.name = Enginio $QT_VERSION
+qhp.QtEnginio.customFilters.Qt.filterAttributes = qtenginio $QT_VERSION
 
 qhp.QtEnginio.subprojects         = classes examples
 
