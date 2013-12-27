@@ -29,7 +29,7 @@
     \title Enginio QML Examples - Users
     \example users
     \brief The Users example introduces user registration, authentication and browsing.
-    \ingroup enginio-examples
+    \ingroup enginio-qml-examples
     \inmodule enginio-qml
 
     \section1 Introduction

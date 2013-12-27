@@ -28,7 +28,7 @@
     \title Enginio QML Examples - Todos
     \example todos
     \brief The Todo example shows the EnginioModel usage in Qt Quick.
-    \ingroup enginio-examples
+    \ingroup enginio-qml-examples
     \inmodule enginio-qml
 
     In this example a simple list of objects is displayed in a ListView.
