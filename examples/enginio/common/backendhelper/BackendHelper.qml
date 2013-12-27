@@ -119,7 +119,7 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
                 visible: !(parent.text.length || parent.inputMethodComposing)
                 font: parent.font
-                text: "Place " + capitalise(enginioBackendContext.exampleName) + " example backend id here"
+                text: "backend id"
                 color: "#aaa"
             }
         }
