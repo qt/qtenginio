@@ -86,6 +86,7 @@ Rectangle {
             color: "black"
 
             wrapMode: Text.Wrap
+            onLinkActivated: Qt.openUrlExternally(link)
         }
 
         Text {
