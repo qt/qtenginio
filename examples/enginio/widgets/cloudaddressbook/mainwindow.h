@@ -47,12 +47,14 @@
 QT_BEGIN_NAMESPACE
 class EnginioClient;
 class EnginioReply;
+class QSortFilterProxyModel;
 QT_END_NAMESPACE
 
 
 QT_USE_NAMESPACE
 
 class AddressBookModel;
+
 class MainWindow : public QMainWindow, Ui_MainWindow
 {
     Q_OBJECT
@@ -74,6 +76,7 @@ private:
 
     // Enginio object model containing addresses
     AddressBookModel *model;
+    QSortFilterProxyModel *sortFilterProxyModel;
 };
 
 #endif // MAINWINDOW_H
