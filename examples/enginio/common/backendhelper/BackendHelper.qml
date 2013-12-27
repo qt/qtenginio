@@ -82,7 +82,7 @@ Rectangle {
             verticalAlignment: Text.AlignVCenter
             font.pixelSize: 20
 
-            text: "<html><head/><body><p>For the Enginio Examples to work the backend ID is needed. Please copy them from your <a href=\"http://engin.io\"><span style=\" text-decoration: underline; color:#0000ff;\">Enginio Dashboard.</span></a></p><p>Make sure to have the right type of backend or configure it manually according to the example's documentation. </p></body></html>"
+            text: "<html><head/><body><p>For the Enginio Examples to work the backend ID is needed. Please copy it from your <a href=\"http://engin.io\"><span style=\" text-decoration: underline; color:#0000ff;\">Enginio Dashboard</span></a>.</p><p>Make sure to have the right type of backend or configure it manually according to the example's documentation. </p></body></html>"
             color: "black"
 
             wrapMode: Text.Wrap
