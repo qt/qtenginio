@@ -76,7 +76,7 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         var q = enginioModel.query
-                        enginioModel.query = { "objectType": "objects.invalid" }
+                        enginioModel.query = null
                         enginioModel.query = q
                     }
                 }

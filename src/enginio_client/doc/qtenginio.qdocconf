@@ -24,14 +24,14 @@ depends += qtcore qtgui qtwidgets qtnetwork
 qhp.projects            = QtEnginio
 
 qhp.QtEnginio.file                = qtenginio.qhp
-qhp.QtEnginio.namespace           = io.engin.100
+qhp.QtEnginio.namespace           = io.engin.101
 qhp.QtEnginio.virtualFolder       = qtenginio
 qhp.QtEnginio.indexTitle          = Enginio C++ Classes and Examples
 qhp.QtEnginio.indexRoot           =
 
-qhp.QtEnginio.filterAttributes    = qtenginio 1.0.0
-qhp.QtEnginio.customFilters.Qt.name = Enginio 1.0.0
-qhp.QtEnginio.customFilters.Qt.filterAttributes = qtenginio 1.0.0
+qhp.QtEnginio.filterAttributes    = qtenginio 1.0.1
+qhp.QtEnginio.customFilters.Qt.name = Enginio 1.0.1
+qhp.QtEnginio.customFilters.Qt.filterAttributes = qtenginio 1.0.1
 
 qhp.QtEnginio.subprojects         = classes examples
 
