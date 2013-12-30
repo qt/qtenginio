@@ -255,6 +255,12 @@ EnginioQmlReply *EnginioQmlModel::setProperty(int row, const QString &role, cons
     return d->setValue(row, role, value);
 }
 
+EnginioQmlReply *EnginioQmlModel::reload()
+{
+    Q_D(EnginioQmlModel);
+    return d->reload();
+}
+
 EnginioQmlClient *EnginioQmlModel::client() const
 {
     Q_D(const EnginioQmlModel);

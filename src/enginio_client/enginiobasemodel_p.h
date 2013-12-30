@@ -586,19 +586,25 @@ public:
             filter.insert(EnginioString::data, objectType);
             _notifications.connectToBackend(this, _enginio, filter);
 
-            // send full query
-            QJsonObject query = queryAsJson();
-            ObjectAdaptor<QJsonObject> aQuery(query);
-            QNetworkReply *nreply = _enginio->query(aQuery, static_cast<Enginio::Operation>(_operation));
-            EnginioReplyState *ereply = _enginio->createReply(nreply);
-            if (_canFetchMore)
-                _latestRequestedOffset = query[EnginioString::limit].toDouble();
-            FinishedFullQueryRequest finshedRequest = { this, ereply };
-            QObject::connect(ereply, &EnginioReplyState::dataChanged, _replyConnectionConntext, finshedRequest);
+            EnginioReplyState *ereply = reload();
             QObject::connect(ereply, &EnginioReplyState::dataChanged, ereply, &EnginioReplyState::deleteLater);
         } else {
             fullQueryReset(QJsonArray());
         }
+    }
+
+    EnginioReplyState *reload()
+    {
+        // send full query
+        QJsonObject query = queryAsJson();
+        ObjectAdaptor<QJsonObject> aQuery(query);
+        QNetworkReply *nreply = _enginio->query(aQuery, static_cast<Enginio::Operation>(_operation));
+        EnginioReplyState *ereply = _enginio->createReply(nreply);
+        if (_canFetchMore)
+            _latestRequestedOffset = query[EnginioString::limit].toDouble();
+        FinishedFullQueryRequest finshedRequest = { this, ereply };
+        QObject::connect(ereply, &EnginioReplyState::dataChanged, _replyConnectionConntext, finshedRequest);
+        return ereply;
     }
 
     void finishedIncrementalUpdateRequest(const EnginioReplyState *reply, const QJsonObject &query)
@@ -993,6 +999,7 @@ struct EnginioModelPrivateT : public EnginioBaseModelPrivate
     Reply *append(const QJsonObject &value) { return static_cast<Reply*>(Base::append(value)); }
     Reply *remove(int row) { return static_cast<Reply*>(Base::remove(row)); }
     Reply *setValue(int row, const QString &role, const QVariant &value) { return static_cast<Reply*>(Base::setValue(row, role, value)); }
+    Reply *reload() { return static_cast<Reply*>(Base::reload()); }
 
     bool queryIsEmpty() const Q_DECL_OVERRIDE
     {

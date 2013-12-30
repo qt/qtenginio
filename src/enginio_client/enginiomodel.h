@@ -82,6 +82,8 @@ public:
     Q_INVOKABLE EnginioReply *setData(int row, const QVariant &value, const QString &role);
     using EnginioBaseModel::setData;
 
+    Q_INVOKABLE EnginioReply *reload();
+
 Q_SIGNALS:
     void queryChanged(const QJsonObject &query);
     void clientChanged(EnginioClient *client);

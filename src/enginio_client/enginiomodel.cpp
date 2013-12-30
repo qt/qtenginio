@@ -480,6 +480,25 @@ void EnginioModel::setOperation(Enginio::Operation operation)
 }
 
 /*!
+  Reload the model data from the server.
+  This is similar to reset and will emit \l modelAboutToBeReset() and \l modelReset().
+  This function invalidated the internal state of the model, reloads it from the backend
+  and resets all views.
+
+  \note when using this function while other requests to the server are made the result
+  is undefined. For example when calling append() and then reset() before append finished,
+  the model may or may not contain the result of the append operation.
+
+  \return reply from backend
+  \since 1.1
+*/
+EnginioReply *EnginioModel::reload()
+{
+    Q_D(EnginioModel);
+    return d->reload();
+}
+
+/*!
   \include model-append.qdocinc
   \sa EnginioClient::create()
 */
@@ -542,7 +561,6 @@ EnginioReply *EnginioModel::setData(int row, const QVariant &value, const QStrin
 
     return d->setValue(row, role, value);
 }
-
 
 Qt::ItemFlags EnginioBaseModel::flags(const QModelIndex &index) const
 {

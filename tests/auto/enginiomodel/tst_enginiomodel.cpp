@@ -98,6 +98,8 @@ private slots:
     void deleteModelDurringRequests();
     void updatingRoles();
     void setData();
+    void reload();
+
 private:
     template<class T>
     void externallyRemovedImpl();
@@ -119,6 +121,23 @@ void tst_EnginioModel::initTestCase()
     // The test operates on user data.
     EnginioTests::prepareTestUsersAndUserGroups(_backendId);
     EnginioTests::prepareTestObjectType(_backendName);
+
+    // Object types for the reload test
+    QJsonObject reload1;
+    reload1["name"] = QStringLiteral("reload1");
+    QJsonObject title;
+    title["name"] = QStringLiteral("title");
+    title["type"] = QStringLiteral("string");
+    title["indexed"] = false;
+    QJsonArray properties;
+    properties.append(title);
+    reload1["properties"] = properties;
+    QVERIFY(_backendManager.createObjectType(_backendName, EnginioTests::TESTAPP_ENV, reload1));
+
+    QJsonObject reload2;
+    reload2["name"] = QStringLiteral("reload2");
+    reload2["properties"] = properties;
+    QVERIFY(_backendManager.createObjectType(_backendName, EnginioTests::TESTAPP_ENV, reload2));
 }
 
 void tst_EnginioModel::cleanupTestCase()
@@ -1555,6 +1574,117 @@ void tst_EnginioModel::deleteReply()
     qDeleteAll(replies);
 
     QTRY_COMPARE(counter, replies.count());
+}
+
+QJsonObject createTestObject(const QString &name, const QString &type)
+{
+    QJsonObject obj;
+    obj.insert("title", name);
+    obj.insert("objectType", type);
+    return obj;
+}
+
+void tst_EnginioModel::reload()
+{
+    QString objectType = "objects.reload1";
+
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QJsonObject query;
+    query.insert("objectType", objectType);
+
+    EnginioModel model;
+    model.disableNotifications();
+    model.setQuery(query);
+    model.setClient(&client);
+
+    QCOMPARE(model.rowCount(), 0);
+
+    // create an object, since notification are disabled the model cannot know about it
+    EnginioReply *r1(client.create(createTestObject(QString::fromLatin1("o1"), objectType)));
+    QTRY_VERIFY(r1->isFinished());
+    CHECK_NO_ERROR(r1);
+    QCOMPARE(model.rowCount(), 0);
+
+    // reload and verify that the object appears
+    EnginioReply *reload(model.reload());
+    QTRY_VERIFY(reload->isFinished());
+    CHECK_NO_ERROR(reload);
+    QCOMPARE(model.rowCount(), 1);
+
+    // this test mostly checks that we don't crash
+    // when calling reload while other operations are on-going it is undefined
+    // if the result contains the data of them or not
+
+    // create object and reload before that is finished
+    EnginioReply *r2(client.create(createTestObject(QString::fromLatin1("o2"), objectType)));
+    EnginioReply *reload2 = model.reload();
+    QVERIFY(reload2);
+    QTRY_VERIFY(r2->isFinished());
+    CHECK_NO_ERROR(r2);
+    QTRY_VERIFY(reload2->isFinished());
+    CHECK_NO_ERROR(reload2);
+
+    // create object bug delay it's response until reload is done
+    EnginioReply *r3(client.create(createTestObject(QString::fromLatin1("o3"), objectType)));
+    QVERIFY(r3);
+    r3->setDelayFinishedSignal(true);
+    EnginioReply *reload3(model.reload());
+    QVERIFY(reload3);
+    QTRY_VERIFY(reload3->isFinished());
+    r3->setDelayFinishedSignal(false);
+    QTRY_VERIFY(r3->isFinished());
+
+    // make sure we are in a defined state again
+    reload = model.reload();
+    QTRY_VERIFY(reload->isFinished());
+    QCOMPARE(model.rowCount(), 3);
+
+    EnginioReply *r4(model.append(createTestObject(QString::fromLatin1("o4"), objectType)));
+    EnginioReply *reload4(model.reload());
+    EnginioReply *r5(model.append(createTestObject(QString::fromLatin1("o5"), objectType)));
+    EnginioReply *reload5(model.reload());
+    QTRY_VERIFY(r4->isFinished() && reload4->isFinished() && r5->isFinished() && reload5->isFinished());
+
+    reload = model.reload();
+    QTRY_VERIFY(reload->isFinished());
+    QCOMPARE(model.rowCount(), 5);
+
+    // randomly reordered append and reset calls
+    EnginioReply *r6(model.append(createTestObject(QString::fromLatin1("o6"), objectType)));
+    r6->setDelayFinishedSignal(true);
+    EnginioReply *reload6(model.reload());
+    reload6->setDelayFinishedSignal(true);
+    EnginioReply *r7(model.append(createTestObject(QString::fromLatin1("o7"), objectType)));
+    r7->setDelayFinishedSignal(true);
+    EnginioReply *reload7(model.reload());
+    EnginioReply *c7(model.setData(6, QString::fromLatin1("object7"), QString::fromLatin1("title")));
+    EnginioReply *c5(model.setData(4, QString::fromLatin1("object5"), QString::fromLatin1("title")));
+    QTRY_VERIFY(reload7->isFinished());
+    r6->setDelayFinishedSignal(false);
+    r7->setDelayFinishedSignal(false);
+    reload6->setDelayFinishedSignal(false);
+    QTRY_VERIFY(c5->isFinished() && c7->isFinished() && r6->isFinished() && r7->isFinished() && reload6->isFinished());
+
+    reload = model.reload();
+    QTRY_VERIFY(reload->isFinished());
+    QCOMPARE(model.rowCount(), 7);
+
+    // completely try to mess it up by changing the query
+    // object type reload2 is empty
+    EnginioReply *reload8 = model.reload();
+    reload8->setDelayFinishedSignal(true);
+    QJsonObject query2;
+    query2.insert("objectTypes", "objects.reload2");
+    model.setQuery(query2);
+
+    QSignalSpy spy(&model, SIGNAL(modelReset()));
+    QTRY_VERIFY(spy.count());
+    reload8->setDelayFinishedSignal(false);
+    QTRY_VERIFY(reload8->isFinished());
+    QCOMPARE(model.rowCount(), 0);
 }
 
 QTEST_MAIN(tst_EnginioModel)

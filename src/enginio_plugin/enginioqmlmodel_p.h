@@ -79,6 +79,7 @@ public:
     Q_INVOKABLE EnginioQmlReply *append(const QJSValue &value);
     Q_INVOKABLE EnginioQmlReply *remove(int row);
     Q_INVOKABLE EnginioQmlReply *setProperty(int row, const QString &role, const QVariant &value);
+    Q_INVOKABLE EnginioQmlReply *reload();
 
 Q_SIGNALS:
     void queryChanged(const QJSValue &query);

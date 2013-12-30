@@ -511,4 +511,35 @@ Item {
             tryCompare(modelRowCount, "rowCountChangedCounter", initialRowCountChangedCounter + 4)
         }
     }
+
+    TestCase {
+        name: "EnginioModel: reload"
+
+        EnginioModel {
+            id: model
+            client: EnginioClient {
+                id: client
+                serviceUrl: AppConfig.backendData.serviceUrl
+
+                property int errorCount: 0
+                onError: {
+                    ++errorCount
+                    replyDumpDebugInfo(reply)
+                }
+
+                backendId: AppConfig.backendData.id
+            }
+            query: {
+                     "objectType": AppConfig.testObjectType,
+                     "query": {"testCase": "EnginioModel: rowCount"}
+                   }
+        }
+
+        function test_rowCount()
+        {
+            var r = model.reload();
+            tryCompare(r, "isFinished", true);
+            compare(client.errorCount, 0)
+        }
+    }
 }
