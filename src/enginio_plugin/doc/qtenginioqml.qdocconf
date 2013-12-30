@@ -7,7 +7,9 @@ description = Client library for Enginio from QML
 url = http://engin.io
 version = $QT_VERSION
 
-sourcedirs += ..
+sourcedirs += .. \
+    ../../../doc/shared
+
 headerdirs += ..
 
 imagedirs += images
