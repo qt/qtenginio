@@ -124,7 +124,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply EnginioClient::query(QJSValue query, Enginio::Operation operation)
+  \qmlmethod EnginioReply EnginioClient::query(QJSValue query, Operation operation)
   \brief Query the database.
 
   The \a query is an object containing the actual query to the backend.
@@ -151,7 +151,7 @@ QT_BEGIN_NAMESPACE
   \sa EnginioReply, create(), update(), remove(), Enginio::Operation
 */
 /*!
-  \qmlmethod EnginioReply EnginioClient::create(QJSValue query, Enginio::Operation operation)
+  \qmlmethod EnginioReply EnginioClient::create(QJSValue query, Operation operation)
   \brief Create an object in the database.
 
   This command can create an object in the database, for example to create a new user
