@@ -1,4 +1,4 @@
-\brief Add a new object to the model and database.
+\brief Add a new \a object to the model and database.
 
 This function appends the new object to the local model cache
 and makes an asynchronous request to the backend.

@@ -125,37 +125,19 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \qmlmethod EnginioReply EnginioClient::query(QJSValue query, Operation operation)
-  \brief Query the database.
+  \include client-query.qdocinc
 
-  The \a query is an object containing the actual query to the backend.
-  The query will be run on the \a operation part of the backend.
-
-  The \a query has to contain an "objectType" which has to point to a type defined
-  in the backend. Optionaly it can also contain:
-  \list
-  \li query - describes how objects are queried, allows to filter results. See \l{https://engin.io/documentation/rest/parameters/queries}
-  {JSON query structure}
-  \li limit - limits how many objects the server should return (default value is 100).
-  \li offset - how many objects the server should skip from the beginning of the returned results. Note that the server keeps the data
-  in random order so that usage of offset implies using \c sort as well.
-  \li sort - describes how results are sorted. See \l{https://engin.io/documentation/rest/parameters/sort}{JSON sort request structure}
-  \li count - if the \c count is set the server will return only count of matching objects
-  \li include - describes which other objects are included in the response. See \l{https://engin.io/documentation/rest/parameters/include}
-  {JSON include structure}
-  \endlist
-
-  For example to find a usergroup named "allUsers" it is enough to call:
+  To find a usergroup named "allUsers":
   \snippet socialtodos/Login.qml queryUsergroup
 
-  \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), update(), remove(), Enginio::Operation
+  \return an EnginioReply containing the status and the result once it is finished.
 */
-/*!
-  \qmlmethod EnginioReply EnginioClient::create(QJSValue query, Operation operation)
-  \brief Create an object in the database.
 
-  This command can create an object in the database, for example to create a new user
-  such code could be used:
+/*!
+  \qmlmethod EnginioReply EnginioClient::create(QJSValue object, Operation operation)
+  \include client-create.qdocinc
+
+  To create a new user:
   \snippet users/Register.qml create
 
   To add a new member to a usergroup, the JSON needs to look like the example below.
@@ -166,30 +148,21 @@ QT_BEGIN_NAMESPACE
   }
   \endcode
 
-  \return EnginioReply containing the status and the result once it is finished.
+  \return an EnginioReply containing the status and data once it is finished.
 */
+
 /*!
   \qmlmethod EnginioReply EnginioClient::update(QJSValue query, Operation operation)
-  \brief Update an object in the database.
+  \include client-remove.qdocinc
 
-  To update access control list of an object the JSON loook like this:
-  \code
-  {
-        "id": "objectId",
-        "objectType": "objects.objectType",
-        "access": { "read": ["id": "userId", "objectTypes": "users"],
-                     "update": ["id": "userId", "objectTypes": "users"],
-                     "admin": ["id": "userId", "objectTypes": "users"] }
-  }
-  \endcode
-
-  \return EnginioReply containing the status of the query and the data once it is finished.
+  \return an EnginioReply containing the status once it is finished.
 */
+
 /*!
   \qmlmethod EnginioReply EnginioClient::remove(QJSValue query, Operation operation)
-  \brief Remove an object from the database.
+  \include client-remove.qdocinc
 
-  \return EnginioReply containing the status once it is finished.
+  \return an EnginioReply containing the status once it is finished.
 */
 
 /*!

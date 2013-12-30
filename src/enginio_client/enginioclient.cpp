@@ -504,30 +504,12 @@ EnginioReply *EnginioClient::fullTextSearch(const QJsonObject &query)
 }
 
 /*!
-  \brief Query the database.
+  \include client-query.qdocinc
 
-  The \a query is a JSON object containing the actual query to the backend.
-  The query will be run on the \a operation part of the backend.
-
-  The \a query has to contain an "objectType" which has to point to a type defined
-  in the backend. Optionaly it can also contain:
-  \list
-  \li query - describes how objects are queried, allows to filter results. See \l{https://engin.io/documentation/rest/parameters/queries}
-  {JSON query structure}
-  \li limit - limits how many objects the server should return (default value is 100).
-  \li offset - how many objects the server should skip from the beginning of the returned results. Note that the server keeps the data
-  in random order so that usage of offset implies using \c sort as well.
-  \li sort - describes how results are sorted. See \l{https://engin.io/documentation/rest/parameters/sort}{JSON sort request structure}
-  \li count - if the \c count is set the server will return only count of matching objects
-  \li include - describes which other objects are included in the response. See \l{https://engin.io/documentation/rest/parameters/include}
-  {JSON include structure}
-  \endlist
-
-  To query the database of all objects of type "objects.todo":
+  To query the database for all objects of the type "objects.todo":
   \snippet enginioclient/tst_enginioclient.cpp query-todo
 
-  \return EnginioReply containing the status and the result once it is finished.
-  \sa EnginioReply, create(), update(), remove()
+  \return an EnginioReply containing the status and the result once it is finished.
  */
 EnginioReply* EnginioClient::query(const QJsonObject &query, const Enginio::Operation operation)
 {
@@ -540,10 +522,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Enginio::Oper
 }
 
 /*!
-  \brief Insert a new \a object into the database.
-
-  The \a operation is the area in which the object gets created. It defaults to \l Enginio::ObjectOperation
-  to create new objects by default.
+  \include client-create.qdocinc
 
   \snippet enginioclient/tst_enginioclient.cpp create-todo
 
@@ -557,8 +536,7 @@ EnginioReply* EnginioClient::query(const QJsonObject &query, const Enginio::Oper
   It can be constructed like this:
   \snippet enginioclient/tst_enginioclient.cpp create-newmember
 
-  \return EnginioReply containing the status of the query and the data once it is finished.
-  \sa EnginioReply, query(), update(), remove()
+  \return an EnginioReply containing the status and data once it is finished.
 */
 EnginioReply* EnginioClient::create(const QJsonObject &object, const Enginio::Operation operation)
 {
@@ -571,26 +549,12 @@ EnginioReply* EnginioClient::create(const QJsonObject &object, const Enginio::Op
 }
 
 /*!
-  \brief Update an existing \a object in the database.
+  \include client-update.qdocinc
 
-  The \a operation is the area in which the object gets created. It defaults to \l Enginio::ObjectOperation
-  to create new objects by default.
-
-  To update access control list of an object the JSON loook like this:
-  \code
-  {
-        "id": "objectId",
-        "objectType": "objects.objectType",
-        "access": { "read": ["id": "userId", "objectTypes": "users"],
-                     "update": ["id": "userId", "objectTypes": "users"],
-                     "admin": ["id": "userId", "objectTypes": "users"] }
-  }
-  \endcode
-  which could be implemented for example this way:
+  In C++, the updating of the ACL could be done like this:
   \snippet enginioclient/tst_enginioclient.cpp update-access
 
-  \return EnginioReply containing the status of the query and the data once it is finished.
-  \sa EnginioReply, create(), query(), remove()
+  \return an EnginioReply containing the status of the query and the data once it is finished.
 */
 EnginioReply* EnginioClient::update(const QJsonObject &object, const Enginio::Operation operation)
 {
@@ -603,15 +567,12 @@ EnginioReply* EnginioClient::update(const QJsonObject &object, const Enginio::Op
 }
 
 /*!
-  \brief Remove an existing \a object from the database.
+  \include client-remove.qdocinc
 
-  The \a operation is the area in which the object gets created. It defaults to \l Enginio::ObjectOperation
-  to create new objects by default.
-
+  To remove a todo object:
   \snippet enginioclient/tst_enginioclient.cpp remove-todo
 
-  \return EnginioReply containing the status of the query and the data once it is finished.
-  \sa EnginioReply, create(), query(), update()
+  \return an EnginioReply containing the status and the data once it is finished.
 */
 EnginioReply* EnginioClient::remove(const QJsonObject &object, const Enginio::Operation operation)
 {
