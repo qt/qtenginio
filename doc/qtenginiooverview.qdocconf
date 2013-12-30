@@ -1,5 +1,7 @@
 include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
 
+include(enginio_global.qdocconf)
+
 project = QtEnginioOverview
 description = Enginio Client Library
 url = http://engin.io

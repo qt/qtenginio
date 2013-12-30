@@ -1,5 +1,7 @@
 include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
 
+include(../../../doc/enginio_global.qdocconf)
+
 project = QtEnginioQml
 description = Client library for Enginio from QML
 url = http://engin.io
