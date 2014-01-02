@@ -312,6 +312,16 @@ void EnginioBaseModelPrivate::syncRoles()
     }
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug dbg, const EnginioModelPrivateAttachedData &a)
+{
+    dbg.nospace() << "EnginioModelPrivateAttachedData(ref:";
+    dbg.nospace() << a.ref << ", row: "<< a.row << ", synced: " << (a.ref == 0) << ", id: " << a.id;
+    dbg.nospace() << ')';
+    return dbg.space();
+}
+#endif
+
 namespace  {
 
 struct Types {
