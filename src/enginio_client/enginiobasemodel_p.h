@@ -88,13 +88,7 @@ struct EnginioModelPrivateAttachedData
 Q_DECLARE_TYPEINFO(EnginioModelPrivateAttachedData, Q_MOVABLE_TYPE);
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug dbg, const EnginioModelPrivateAttachedData &a)
-{
-    dbg.nospace() << "EnginioModelPrivateAttachedData(ref:";
-    dbg.nospace() << a.ref << ", row: "<< a.row << ", synced: " << (a.ref == 0) << ", id: " << a.id;
-    dbg.nospace() << ')';
-    return dbg.space();
-}
+QDebug operator<<(QDebug dbg, const EnginioModelPrivateAttachedData &a);
 #endif
 
 class AttachedDataContainer
