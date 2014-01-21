@@ -29,7 +29,7 @@
 \example socialtodos
 \brief Social Todos is a todo list application with a social twist,
 demonstrating the user management and access control features of Enginio.
-\ingroup enginio-examples
+\ingroup enginio-qml-examples
 \inmodule enginio-qml
 
 
