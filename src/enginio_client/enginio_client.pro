@@ -4,6 +4,9 @@ DEFINES += ENGINIOCLIENT_LIBRARY
 MODULE = enginio
 
 QMAKE_DOCS = $$PWD/doc/qtenginio.qdocconf
+OTHER_FILES += \
+    doc/qtenginio.qdocconf \
+    doc/enginio_client.qdoc
 
 include(../src.pri)
 
