@@ -87,7 +87,7 @@ EnginioIdentity::EnginioIdentity(EnginioIdentityPrivate &dd, QObject *parent)
 */
 /*!
     \fn EnginioIdentity::removeSessionToken(EnginioClientConnectionPrivate *enginio);
-    \brief EnginioIdentity::prepareSessionToken is called by enginio client to finalize de-authentication
+    \brief This method is called by enginio client to finalize de-authentication
     \param enginio client pointer
     \internal
 */
