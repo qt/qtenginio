@@ -28,7 +28,7 @@
     \title Enginio QML Examples - Image Gallery
     \example image-gallery
     \brief This is an example that demonstrates uploading and downloading of files in Enginio.
-    \ingroup enginio-examples
+    \ingroup enginio-qml-examples
     \inmodule enginio-qml
 
     The user interface is a list of images with their meta-information

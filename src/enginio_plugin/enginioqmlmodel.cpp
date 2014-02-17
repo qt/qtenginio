@@ -79,7 +79,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \qmlproperty QJSValue EnginioModel::query
-  The query used to populate the model with data.
+  \include model-query.qdocinc
 */
 
 /*!
@@ -93,15 +93,11 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-  \qmlmethod EnginioReply EnginioModel::append(QJSValue value)
-  \brief Add a new object to the model and database.
+  \qmlmethod EnginioReply EnginioModel::append(QJSValue object)
+  \include model-append.qdocinc
 
   To add a "city" object to the model by appending it:
   \snippet models.qml append
-  The append will be reflected by the model immediately and will be propagated
-  to the server asynchronously.
-
-  The returned \l EnginioReply can be used to react to a finished object creation.
 */
 
 /*!
@@ -115,7 +111,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \qmlmethod EnginioReply EnginioModel::remove(int row)
-  \brief removes the object at \a row
+  \include model-remove.qdocinc
 */
 
 namespace  {

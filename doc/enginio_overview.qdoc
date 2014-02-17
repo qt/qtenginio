@@ -119,34 +119,13 @@ This guide can be also applied when integrating Enginio with existing Qt project
 
 \section1 Prerequisites
 
-You can use Enginio with an existing installation of Qt 5.2 or later, or get Qt packages containing Engino (starting with Qt 5.2).
+Enginio comes with Qt 5.2 and later (for 5.2.0 only in the online installer).
+Make sure to select the Enginio component in the \tt{Qt Cloud Services} category.
 
-\list
-  \li  Development environment (Linux, Windows or Mac OS X) and compiler toolchain.
-  \li  Qt framework, 5.2 or newer
-  \li  OpenSSL to enable SSL support in Qt.
-       Install the OpenSSL binaries into your system and Qt will automatically pick them up.
+\note Make sure to have OpenSSL installed for Enginio to work.
 
-       \list
-         \li Mac OS X: the OpenSSL library should be preinstalled in the system
-         \li Linux: Most distributions have a preinstalled OpenSSL library. If yours doesn't, install libssl via your distribution's package manager
-         \li Windows: Install Win32 OpenSSL (light version is enough, copy DLLs to windows system directory when asked)
-       \endlist
+On iOS openSSL is not required since the native SSL framework is used.
 
-    \li Perl 5.10 or newer to enable Qt5 module compilation
-    \list
-        \li Mac OS X: Perl should exist as preinstalled in the system
-        \li Linux: Perl should exist as preinstalled in the system
-        \li Windows: Install some Perl distribution
-    \endlist
-\endlist
-
-\section1 Install Enginio Qt library
-
-\list
-  \li  Download the latest library release for your platform
-  \li  Execute downloaded binary installer and follow instructions
-\endlist
 */
 
 /*!

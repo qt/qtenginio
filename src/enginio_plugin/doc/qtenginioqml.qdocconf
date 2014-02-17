@@ -1,10 +1,15 @@
 include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
 
+include(../../../doc/enginio_global.qdocconf)
+
 project = QtEnginioQml
 description = Client library for Enginio from QML
 url = http://engin.io
+version = $QT_VERSION
 
-sourcedirs += ..
+sourcedirs += .. \
+    ../../../doc/shared
+
 headerdirs += ..
 
 imagedirs += images
@@ -25,14 +30,14 @@ depends += qtcore qtgui qtnetwork qtqml qtquick qtquickcontrols qtenginio
 qhp.projects            = QtEnginioQml
 
 qhp.QtEnginioQml.file                = qtenginioqml.qhp
-qhp.QtEnginioQml.namespace           = io.engin.qml.100
+qhp.QtEnginioQml.namespace           = io.engin.qml.$QT_VERSION_TAG
 qhp.QtEnginioQml.virtualFolder       = qtenginioqml
 qhp.QtEnginioQml.indexTitle          = Enginio QML Types and Examples
 qhp.QtEnginioQml.indexRoot           =
 
-qhp.QtEnginioQml.filterAttributes    = qtenginio 1.0.0
-qhp.QtEnginioQml.customFilters.Qt.name = Enginio 1.0.0
-qhp.QtEnginioQml.customFilters.Qt.filterAttributes = qtenginio 1.0.0
+qhp.QtEnginioQml.filterAttributes    = qtenginio $QT_VERSION
+qhp.QtEnginioQml.customFilters.Qt.name = Enginio $QT_VERSION
+qhp.QtEnginioQml.customFilters.Qt.filterAttributes = qtenginio $QT_VERSION
 
 qhp.QtEnginioQml.subprojects         = qmltypes examples
 

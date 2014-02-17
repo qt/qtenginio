@@ -679,63 +679,41 @@ void tst_EnginioClient::fullTextSearch()
 {
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
-    client.setBackendId(_backendId);
-    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+    client.setBackendId("52fb5b6de5bde556dc03b107");
 
-    QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
-
-    int resultCount1 = 0;
     {
-        QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
         QJsonObject searchQuery = QJsonDocument::fromJson(
-                    "{\"objectTypes\": [\"objects." + EnginioTests::CUSTOM_OBJECT1.toUtf8() + "\"],"
-                    "\"search\": {\"phrase\": \"Query\"}}").object();
+                    "{\"objectTypes\": [\"objects.fullTextSearch1\"],"
+                    "\"search\": {\"phrase\": \"cat\"}}").object();
 
         QVERIFY(!searchQuery.isEmpty());
-        const EnginioReply* reqId = client.fullTextSearch(searchQuery);
-        QVERIFY(reqId);
+        EnginioReply *reply = client.fullTextSearch(searchQuery);
+        QVERIFY(reply);
 
+        QTRY_VERIFY(reply->isFinished());
+        CHECK_NO_ERROR(reply);
 
-        if (!spy.wait())
-            reqId->dumpDebugInfo();
-
-        QCOMPARE(spy.count(), 1);
-        QCOMPARE(spyError.count(), 0);
-
-        const EnginioReply *response = spy[0][0].value<EnginioReply*>();
-
-        QCOMPARE(response, reqId);
-        CHECK_NO_ERROR(response);
-        QJsonObject data = response->data();
+        QJsonObject data = reply->data();
         QVERIFY(!data.isEmpty());
         QVERIFY(!data["results"].isUndefined());
-        resultCount1 = data["results"].toArray().count();
-        QVERIFY(resultCount1);
-        qDebug() << resultCount1 << "results on objects." + EnginioTests::CUSTOM_OBJECT1 + " with phrase \"Query\".";
+        QCOMPARE(data["results"].toArray().count(), 2);
     }
     {
-        QSignalSpy spy(&client, SIGNAL(finished(EnginioReply*)));
         QJsonObject searchQuery = QJsonDocument::fromJson(
-                    "{\"objectTypes\": [\"objects." + EnginioTests::CUSTOM_OBJECT1.toUtf8() + "\", \"objects." + EnginioTests::CUSTOM_OBJECT2.toUtf8() + "\"],"
-                    "\"search\": {\"phrase\": \"object OR test\", \"properties\": [\"stringValue\"]}}").object();
+                    "{\"objectTypes\": [\"objects.fullTextSearch1\", \"objects.fullTextSearch2\"],"
+                    "\"search\": {\"phrase\": \"cat OR dog\", \"properties\": [\"stringValue\"]}}").object();
 
         QVERIFY(!searchQuery.isEmpty());
-        const EnginioReply* reqId = client.fullTextSearch(searchQuery);
-        QVERIFY(reqId);
+        EnginioReply *reply = client.fullTextSearch(searchQuery);
+        QVERIFY(reply);
 
-        QTRY_COMPARE(spy.count(), 1);
-        QCOMPARE(spyError.count(), 0);
+        QTRY_VERIFY(reply->isFinished());
+        CHECK_NO_ERROR(reply);
 
-        const EnginioReply *response = spy[0][0].value<EnginioReply*>();
-
-        QCOMPARE(response, reqId);
-        CHECK_NO_ERROR(response);
-        QJsonObject data = response->data();
+        QJsonObject data = reply->data();
         QVERIFY(!data.isEmpty());
         QVERIFY(!data["results"].isUndefined());
-        int resultCount2 = data["results"].toArray().count();
-        qDebug() << resultCount2 << " results on objects." + EnginioTests::CUSTOM_OBJECT1 + "and objects." + EnginioTests::CUSTOM_OBJECT2 + " with phrase \"object OR test\".";
-        QVERIFY(resultCount2 > resultCount1);
+        QCOMPARE(data["results"].toArray().count(), 4);
     }
 }
 

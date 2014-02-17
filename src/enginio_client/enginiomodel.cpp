@@ -312,6 +312,16 @@ void EnginioBaseModelPrivate::syncRoles()
     }
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug dbg, const EnginioModelPrivateAttachedData &a)
+{
+    dbg.nospace() << "EnginioModelPrivateAttachedData(ref:";
+    dbg.nospace() << a.ref << ", row: "<< a.row << ", synced: " << (a.ref == 0) << ", id: " << a.id;
+    dbg.nospace() << ')';
+    return dbg.space();
+}
+#endif
+
 namespace  {
 
 struct Types {
@@ -427,11 +437,8 @@ void EnginioModel::setClient(const EnginioClient *client)
 
 /*!
   \property EnginioModel::query
-  \brief The query which returns the data for the model.
 
-  Sorting preserved until insertion/deletion
-
-  \sa EnginioClient::query()
+  \include model-query.qdocinc
 */
 QJsonObject EnginioModel::query()
 {
@@ -469,12 +476,10 @@ void EnginioModel::setOperation(Enginio::Operation operation)
 }
 
 /*!
-  Append \a value to this model local cache and send a create request
-  to enginio backend.
-  \return reply from backend
+  \include model-append.qdocinc
   \sa EnginioClient::create()
 */
-EnginioReply *EnginioModel::append(const QJsonObject &value)
+EnginioReply *EnginioModel::append(const QJsonObject &object)
 {
     Q_D(EnginioModel);
     if (Q_UNLIKELY(!d->enginio())) {
@@ -482,14 +487,11 @@ EnginioReply *EnginioModel::append(const QJsonObject &value)
         return 0;
     }
 
-    return d->append(value);
+    return d->append(object);
 }
 
 /*!
-  Remove a value from \a row in this model local cache and send
-  a remove request to enginio backend.
-  \return reply from backend
-  \sa EnginioClient::remove()
+  \include model-remove.qdocinc
 */
 EnginioReply *EnginioModel::remove(int row)
 {
@@ -536,10 +538,7 @@ EnginioReply *EnginioModel::setData(int row, const QVariant &value, const QStrin
     return d->setValue(row, role, value);
 }
 
-/*!
-    \overload
-    \internal
-*/
+
 Qt::ItemFlags EnginioBaseModel::flags(const QModelIndex &index) const
 {
     return QAbstractListModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;

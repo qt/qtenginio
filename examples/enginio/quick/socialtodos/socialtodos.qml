@@ -70,14 +70,6 @@ Item {
         EnginioClient {
             id: enginioClient
             backendId: backendHelper.backendId
-
-            onAuthenticationStateChanged: {
-                console.log("Auth state:", authenticationState)
-                if (authenticationState === 2)
-                    mainView.push({ item: lists, properties: {"username": auth.user}})
-            }
-
-            onError: console.log(JSON.stringify(reply.data))
         }
 
         EnginioOAuth2Authentication {

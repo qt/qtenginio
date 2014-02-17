@@ -8,104 +8,9 @@ import QtQuick.tooling 1.1
 
 Module {
     Component {
-        name: "EnginioClient"
-        prototype: "EnginioClientConnection"
-        exports: ["Enginio/__Enginio 1.0"]
+        name: "Enginio"
+        exports: ["Enginio/Enginio 1.0"]
         exportMetaObjectRevisions: [0]
-        Signal {
-            name: "sessionAuthenticated"
-            Parameter { name: "reply"; type: "EnginioReply"; isPointer: true }
-        }
-        Signal {
-            name: "sessionAuthenticationError"
-            Parameter { name: "reply"; type: "EnginioReply"; isPointer: true }
-        }
-        Signal { name: "sessionTerminated" }
-        Signal {
-            name: "finished"
-            Parameter { name: "reply"; type: "EnginioReply"; isPointer: true }
-        }
-        Signal {
-            name: "error"
-            Parameter { name: "reply"; type: "EnginioReply"; isPointer: true }
-        }
-        Method {
-            name: "customRequest"
-            type: "EnginioReply*"
-            Parameter { name: "url"; type: "QUrl" }
-            Parameter { name: "httpOperation"; type: "QByteArray" }
-            Parameter { name: "data"; type: "QJsonObject" }
-        }
-        Method {
-            name: "customRequest"
-            type: "EnginioReply*"
-            Parameter { name: "url"; type: "QUrl" }
-            Parameter { name: "httpOperation"; type: "QByteArray" }
-        }
-        Method {
-            name: "fullTextSearch"
-            type: "EnginioReply*"
-            Parameter { name: "query"; type: "QJsonObject" }
-        }
-        Method {
-            name: "query"
-            type: "EnginioReply*"
-            Parameter { name: "query"; type: "QJsonObject" }
-            Parameter { name: "operation"; type: "Operation" }
-        }
-        Method {
-            name: "query"
-            type: "EnginioReply*"
-            Parameter { name: "query"; type: "QJsonObject" }
-        }
-        Method {
-            name: "create"
-            type: "EnginioReply*"
-            Parameter { name: "object"; type: "QJsonObject" }
-            Parameter { name: "operation"; type: "Operation" }
-        }
-        Method {
-            name: "create"
-            type: "EnginioReply*"
-            Parameter { name: "object"; type: "QJsonObject" }
-        }
-        Method {
-            name: "update"
-            type: "EnginioReply*"
-            Parameter { name: "object"; type: "QJsonObject" }
-            Parameter { name: "operation"; type: "Operation" }
-        }
-        Method {
-            name: "update"
-            type: "EnginioReply*"
-            Parameter { name: "object"; type: "QJsonObject" }
-        }
-        Method {
-            name: "remove"
-            type: "EnginioReply*"
-            Parameter { name: "object"; type: "QJsonObject" }
-            Parameter { name: "operation"; type: "Operation" }
-        }
-        Method {
-            name: "remove"
-            type: "EnginioReply*"
-            Parameter { name: "object"; type: "QJsonObject" }
-        }
-        Method {
-            name: "uploadFile"
-            type: "EnginioReply*"
-            Parameter { name: "associatedObject"; type: "QJsonObject" }
-            Parameter { name: "file"; type: "QUrl" }
-        }
-        Method {
-            name: "downloadUrl"
-            type: "EnginioReply*"
-            Parameter { name: "object"; type: "QJsonObject" }
-        }
-    }
-    Component {
-        name: "EnginioClientConnection"
-        prototype: "QObject"
         Enum {
             name: "AuthenticationState"
             values: {
@@ -123,13 +28,49 @@ Module {
                 "UserOperation": 2,
                 "UsergroupOperation": 3,
                 "UsergroupMembersOperation": 4,
-                "FileOperation": 5
+                "FileOperation": 5,
+                "SessionOperation": 6,
+                "SearchOperation": 7,
+                "FileChunkUploadOperation": 8,
+                "FileGetDownloadUrlOperation": 9
             }
         }
+        Enum {
+            name: "Role"
+            values: {
+                "InvalidRole": -1,
+                "SyncedRole": 257,
+                "CreatedAtRole": 258,
+                "UpdatedAtRole": 259,
+                "IdRole": 260,
+                "ObjectTypeRole": 261,
+                "CustomPropertyRole": 266
+            }
+        }
+        Enum {
+            name: "ErrorType"
+            values: {
+                "NoError": 0,
+                "NetworkError": 1,
+                "BackendError": 2
+            }
+        }
+    }
+    Component {
+        name: "EnginioBaseModel"
+        prototype: "QAbstractListModel"
+        exports: ["Enginio/EnginioBaseModel 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
+    Component {
+        name: "EnginioClientConnection"
+        prototype: "QObject"
+        exports: ["Enginio/EnginioClientConnection 1.0"]
+        exportMetaObjectRevisions: [0]
         Property { name: "backendId"; type: "QByteArray" }
         Property { name: "serviceUrl"; type: "QUrl" }
         Property { name: "identity"; type: "EnginioIdentity"; isPointer: true }
-        Property { name: "authenticationState"; type: "AuthenticationState"; isReadonly: true }
+        Property { name: "authenticationState"; type: "Enginio::AuthenticationState"; isReadonly: true }
         Signal {
             name: "backendIdChanged"
             Parameter { name: "backendId"; type: "QByteArray" }
@@ -140,11 +81,11 @@ Module {
         }
         Signal {
             name: "authenticationStateChanged"
-            Parameter { name: "state"; type: "AuthenticationState" }
+            Parameter { name: "state"; type: "Enginio::AuthenticationState" }
         }
         Signal {
             name: "identityChanged"
-            Parameter { name: "identity"; type: "const EnginioIdentity"; isPointer: true }
+            Parameter { name: "identity"; type: "EnginioIdentity"; isPointer: true }
         }
     }
     Component {
@@ -154,15 +95,6 @@ Module {
         exportMetaObjectRevisions: [0]
         Signal { name: "dataChanged" }
         Signal { name: "aboutToDestroy" }
-    }
-    Component {
-        name: "EnginioModelBase"
-        prototype: "QAbstractListModel"
-        Property { name: "operation"; type: "Enginio::Operation" }
-        Signal {
-            name: "operationChanged"
-            Parameter { name: "operation"; type: "Enginio::Operation" }
-        }
     }
     Component {
         name: "EnginioOAuth2Authentication"
@@ -179,11 +111,19 @@ Module {
             name: "passwordChanged"
             Parameter { name: "password"; type: "string" }
         }
+        Method {
+            name: "setUser"
+            Parameter { name: "user"; type: "string" }
+        }
+        Method {
+            name: "setPassword"
+            Parameter { name: "password"; type: "string" }
+        }
     }
     Component {
         name: "EnginioQmlClient"
         prototype: "EnginioClientConnection"
-        exports: ["Enginio/Enginio 1.0"]
+        exports: ["Enginio/EnginioClient 1.0"]
         exportMetaObjectRevisions: [0]
         Signal {
             name: "sessionAuthenticated"
@@ -211,7 +151,7 @@ Module {
             name: "query"
             type: "EnginioQmlReply*"
             Parameter { name: "query"; type: "QJSValue" }
-            Parameter { name: "operation"; type: "Operation" }
+            Parameter { name: "operation"; type: "Enginio::Operation" }
         }
         Method {
             name: "query"
@@ -222,7 +162,7 @@ Module {
             name: "create"
             type: "EnginioQmlReply*"
             Parameter { name: "object"; type: "QJSValue" }
-            Parameter { name: "operation"; type: "Operation" }
+            Parameter { name: "operation"; type: "Enginio::Operation" }
         }
         Method {
             name: "create"
@@ -233,7 +173,7 @@ Module {
             name: "update"
             type: "EnginioQmlReply*"
             Parameter { name: "object"; type: "QJSValue" }
-            Parameter { name: "operation"; type: "Operation" }
+            Parameter { name: "operation"; type: "Enginio::Operation" }
         }
         Method {
             name: "update"
@@ -244,7 +184,7 @@ Module {
             name: "remove"
             type: "EnginioQmlReply*"
             Parameter { name: "object"; type: "QJSValue" }
-            Parameter { name: "operation"; type: "Operation" }
+            Parameter { name: "operation"; type: "Enginio::Operation" }
         }
         Method {
             name: "remove"
@@ -265,11 +205,12 @@ Module {
     }
     Component {
         name: "EnginioQmlModel"
-        prototype: "EnginioModelBase"
+        prototype: "EnginioBaseModel"
         exports: ["Enginio/EnginioModel 1.0"]
         exportMetaObjectRevisions: [0]
-        Property { name: "enginio"; type: "EnginioQmlClient"; isPointer: true }
+        Property { name: "client"; type: "EnginioQmlClient"; isPointer: true }
         Property { name: "query"; type: "QJSValue" }
+        Property { name: "operation"; type: "Enginio::Operation" }
         Property { name: "rowCount"; type: "int"; isReadonly: true }
         Signal {
             name: "queryChanged"
@@ -277,7 +218,11 @@ Module {
         }
         Signal {
             name: "clientChanged"
-            Parameter { name: "enginio"; type: "EnginioQmlClient"; isPointer: true }
+            Parameter { name: "client"; type: "EnginioQmlClient"; isPointer: true }
+        }
+        Signal {
+            name: "operationChanged"
+            Parameter { name: "operation"; type: "Enginio::Operation" }
         }
         Method {
             name: "append"
@@ -299,7 +244,7 @@ Module {
     }
     Component {
         name: "EnginioQmlReply"
-        prototype: "EnginioReplyBase"
+        prototype: "EnginioReplyState"
         exports: ["Enginio/EnginioReply 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "data"; type: "QJSValue"; isReadonly: true }
@@ -311,28 +256,11 @@ Module {
         }
     }
     Component {
-        name: "EnginioReply"
-        prototype: "EnginioReplyBase"
-        exports: ["Enginio/__EnginioReply 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "data"; type: "QJsonObject"; isReadonly: true }
-        Signal {
-            name: "finished"
-            Parameter { name: "reply"; type: "EnginioReply"; isPointer: true }
-        }
-    }
-    Component {
-        name: "EnginioReplyBase"
+        name: "EnginioReplyState"
         prototype: "QObject"
-        Enum {
-            name: "ErrorType"
-            values: {
-                "NoError": 0,
-                "NetworkError": 1,
-                "BackendError": 2
-            }
-        }
-        Property { name: "errorType"; type: "ErrorType"; isReadonly: true }
+        exports: ["Enginio/EnginioReplyState 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "errorType"; type: "Enginio::ErrorType"; isReadonly: true }
         Property { name: "networkError"; type: "QNetworkReply::NetworkError"; isReadonly: true }
         Property { name: "errorString"; type: "string"; isReadonly: true }
         Property { name: "backendStatus"; type: "int"; isReadonly: true }

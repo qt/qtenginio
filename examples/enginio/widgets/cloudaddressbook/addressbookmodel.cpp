@@ -117,7 +117,7 @@ QHash<int, QByteArray> AddressBookModel::roleNames() const
     QHash<int, QByteArray> roles = EnginioModel::roleNames();
     roles.insert(FirstNameRole, "firstName");
     roles.insert(LastNameRole, "lastName");
-    roles.insert(AddressRole, "email");
+    roles.insert(EmailRole, "email");
     roles.insert(PhoneRole, "phone");
     roles.insert(AddressRole, "address");
     return roles;

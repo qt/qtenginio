@@ -7,6 +7,9 @@ load(qt_parts)
 
 QMAKE_DOCS = $$PWD/doc/qtenginiooverview.qdocconf
 load(qt_docs)
+OTHER_FILES += \
+    doc/enginio_overview.qdoc \
+    doc/qtenginiooverview.qdocconf
 
 contains(CONFIG, coverage) {
   gcc*: {

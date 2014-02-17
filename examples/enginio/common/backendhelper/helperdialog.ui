@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For the Enginio Examples to work the backend ID is needed. Please copy them from your &lt;a href=&quot;http://engin.io&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Enginio Dashboard.&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Make sure to have the right type of backend or configure it manually according to the example's documentation. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For the Enginio Examples to work the backend ID is needed. Please copy it from your &lt;a href=&quot;http://engin.io&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Enginio Dashboard.&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Make sure to have the right type of backend or configure it manually according to the example's documentation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

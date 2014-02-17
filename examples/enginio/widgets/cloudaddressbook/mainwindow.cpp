@@ -85,10 +85,10 @@ MainWindow::MainWindow(QWidget *parent)
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     //![assignProxyModel]
-    QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel(this);
-    proxyModel->setSourceModel(model);
+    sortFilterProxyModel = new QSortFilterProxyModel(this);
+    sortFilterProxyModel->setSourceModel(model);
     tableView->setSortingEnabled(true);
-    tableView->setModel(proxyModel);
+    tableView->setModel(sortFilterProxyModel);
     //![assignProxyModel]
 
     // create the full text search based on searchEdit text value
@@ -135,7 +135,8 @@ void MainWindow::onSelectionChanged()
 void MainWindow::onRemoveRow()
 {
     foreach (const QModelIndex &index, tableView->selectionModel()->selectedRows()) {
-        EnginioReply *reply = model->remove(index.row());
+        QModelIndex sourceIndex = sortFilterProxyModel->mapToSource(index);
+        EnginioReply *reply = model->remove(sourceIndex.row());
         QObject::connect(reply, &EnginioReply::finished, reply, &EnginioReply::deleteLater);
     }
 }
