@@ -4,7 +4,7 @@ include(enginio_global.qdocconf)
 
 project = QtEnginioOverview
 description = Enginio Client Library
-url = http://engin.io
+url = http://qt-project.org/doc/qt-$QT_VER
 version = $QT_VERSION
 
 sourcedirs += .
@@ -17,7 +17,7 @@ depends += qtcore qtgui qtwidgets qtnetwork qtdoc qtenginio qtenginioqml
 qhp.projects            = QtEnginioOverview
 
 qhp.QtEnginioOverview.file                = qtenginiooverview.qhp
-qhp.QtEnginioOverview.namespace           = io.engin.overview.$QT_VERSION_TAG
+qhp.QtEnginioOverview.namespace           = org.qt-project.qtenginiooverview.$QT_VERSION_TAG
 qhp.QtEnginioOverview.virtualFolder       = enginiooverview
 qhp.QtEnginioOverview.indexTitle          = Enginio Manual
 
@@ -25,8 +25,7 @@ qhp.QtEnginioOverview.filterAttributes    = enginio $QT_VERSION
 qhp.QtEnginioOverview.customFilters.Qt.name = Enginio $QT_VERSION
 qhp.QtEnginioOverview.customFilters.Qt.filterAttributes = enginio $QT_VERSION
 
-qhp.QtEnginioOverview.subprojects = manual
-qhp.QtEnginioOverview.subprojects.manual.title = Manual
+qhp.QtEnginioOverview.subprojects                   = manual
+qhp.QtEnginioOverview.subprojects.manual.title      = Enginio Manual
 qhp.QtEnginioOverview.subprojects.manual.indexTitle = Enginio Manual
-qhp.QtEnginioOverview.subprojects.manual.selectors = fake:page
-
+qhp.QtEnginioOverview.subprojects.manual.type       = manual

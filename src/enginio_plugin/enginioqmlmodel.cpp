@@ -52,7 +52,7 @@ QT_BEGIN_NAMESPACE
 /*!
   \qmltype EnginioModel
   \instantiates EnginioQmlModel
-  \inqmlmodule Enginio 1
+  \inqmlmodule Enginio
   \ingroup engino-qml
 
   \brief Makes accessing collections of objects easy

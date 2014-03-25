@@ -57,7 +57,7 @@ QT_BEGIN_NAMESPACE
 /*!
   \qmltype EnginioClient
   \instantiates EnginioQmlClient
-  \inqmlmodule Enginio 1
+  \inqmlmodule Enginio
   \ingroup engino-qml
   \target EnginioClientQml
 
@@ -153,7 +153,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \qmlmethod EnginioReply EnginioClient::update(QJSValue query, Operation operation)
-  \include client-remove.qdocinc
+  \include client-update.qdocinc
 
   \return an EnginioReply containing the status once it is finished.
 */
