@@ -59,6 +59,7 @@ const int EnginioBaseModelPrivate::IncrementalModelUpdate = -2;
 
 /*!
   \class EnginioModel
+  \since 5.3
   \inmodule enginio-qt
   \ingroup enginio-client
   \target EnginioModelCpp

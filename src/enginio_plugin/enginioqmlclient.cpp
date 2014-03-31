@@ -56,6 +56,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \qmltype EnginioClient
+  \since 5.3
   \instantiates EnginioQmlClient
   \inqmlmodule Enginio
   \ingroup engino-qml

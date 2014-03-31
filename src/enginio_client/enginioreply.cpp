@@ -55,6 +55,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \class EnginioReply
+  \since 5.3
   \brief The EnginioReply class contains the data from a request to the Enginio database.
   \inmodule enginio-qt
   \ingroup enginio-client
@@ -76,6 +77,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \class EnginioReplyState
+  \since 5.3
   \internal
 */
 

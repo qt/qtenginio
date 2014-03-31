@@ -51,6 +51,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \qmltype EnginioModel
+  \since 5.3
   \instantiates EnginioQmlModel
   \inqmlmodule Enginio
   \ingroup engino-qml
@@ -293,4 +294,3 @@ void EnginioQmlModel::setOperation(Enginio::Operation operation)
 }
 
 QT_END_NAMESPACE
-
