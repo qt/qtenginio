@@ -52,8 +52,9 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \qmltype EnginioReply
+  \since 5.3
   \instantiates EnginioQmlReply
-  \inqmlmodule Enginio 1
+  \inqmlmodule Enginio
   \ingroup engino-qml
   \target EnginioModelQml
 

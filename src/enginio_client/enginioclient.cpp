@@ -68,6 +68,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \class EnginioClient
+  \since 5.3
   \inmodule enginio-qt
   \ingroup enginio-client
   \target EnginioClientCpp
@@ -102,7 +103,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \class EnginioClientConnection
-
+  \since 5.3
   \inmodule enginio-qt
   \ingroup enginio-client
   \brief EnginioClientConnection keeps track of the authenticated connection to the server.

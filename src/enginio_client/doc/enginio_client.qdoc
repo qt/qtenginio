@@ -29,6 +29,7 @@
 \page enginio-cpp-classes-and-examples.html
 \title Enginio C++ Classes and Examples
 \inmodule enginio-qt
+\ingroup modules
 
 Enginio provides these \b{C++ classes}:
 \generatelist {classesbymodule enginio-qt}

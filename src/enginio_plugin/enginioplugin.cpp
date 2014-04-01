@@ -56,7 +56,7 @@
 QT_BEGIN_NAMESPACE
 
 /*!
- * \qmlmodule enginio-plugin
+ * \qmlmodule Enginio 1.0
  * \title Enginio QML Plugin
  * 
  * The Enginio QML plugin provides access to the Enginio service through a set of

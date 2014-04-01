@@ -39,7 +39,7 @@
     In this simple schema the objects will only have two properties that are added
     to the default properties (such as creation date which always exists).
     A string "title" and a bool "completed". The object type will be created
-    when a call to create, or, in this case, a call to \l{Enginio1::EnginioModel::append()}{EnginioModel::append()} is made.
+    when a call to create, or, in this case, a call to \l{Enginio::EnginioModel::append()}{EnginioModel::append()} is made.
 
     A todo object will look like this (in JSON):
     \code
@@ -52,7 +52,7 @@
     The example uses Qt Quick Controls, Layouts, and Enginio.
     \snippet todos/todo.qml imports
 
-    The first step is to create an \l{Enginio1::EnginioModel} and
+    The first step is to create an \l{Enginio::EnginioModel} and
     the Enginio instance with the backend configuration.
     To get nice debug output in case something goes wrong, the onError signal in
     Enginio is handled. Since the error is a JSON object, JSON.stringify is used
@@ -75,7 +75,7 @@
     boolean is used to display the item with a strikeout font and a light color.
     \snippet todos/todo.qml delegate-properties
 
-    The \l Enginio1::EnginioModel::setProperty() function is called to update the data in the Enginio backend.
+    The \l Enginio::EnginioModel::setProperty() function is called to update the data in the Enginio backend.
 
     \snippet todos/todo.qml setProperty
 
@@ -86,6 +86,6 @@
     \snippet todos/todo.qml sync
 
     Finally, a remove button is visible when hovering over an item with the mouse.
-    Removal is implemented by calling \l{Enginio1::EnginioModel::remove()}{EnginioModel::remove()} with the row of the item.
+    Removal is implemented by calling \l{Enginio::EnginioModel::remove()}{EnginioModel::remove()} with the row of the item.
     \snippet todos/todo.qml remove
 */

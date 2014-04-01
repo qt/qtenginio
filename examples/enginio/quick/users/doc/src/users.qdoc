@@ -65,17 +65,17 @@
     This example uses QtEnginio library together with QtQuickControls, therefore both have
     to be imported.
     \snippet users/Browse.qml imports
-    We will also use a common \l {Enginio1::EnginioClient}{EnginioClient} connection as shown here:
+    We will also use a common \l {Enginio::EnginioClient}{EnginioClient} connection as shown here:
     \snippet users/users.qml client
 
     The example is organized into separate tabs by using \l TabView. Each tab shows different
     functionality.
 
     \section1 Browsing users' data
-    The most convenient method to browse users is to use \l{Enginio1::EnginioModel}{EnginioModel}. The model can
+    The most convenient method to browse users is to use \l{Enginio::EnginioModel}{EnginioModel}. The model can
     automatically download all data that we need. It is sufficient to set three properties:
-    \l{Enginio1::EnginioModel::client}{client}, \l{Enginio1::EnginioModel::query}{query}
-    and \l{Enginio1::EnginioModel::operation}{operation} as shown below:
+    \l{Enginio::EnginioModel::client}{client}, \l{Enginio::EnginioModel::query}{query}
+    and \l{Enginio::EnginioModel::operation}{operation} as shown below:
     \snippet users/Browse.qml browse
 
     The model is used directly by TableView, in which we define data that will be shown.
@@ -111,6 +111,6 @@
     by using the \l{EnginioClient::create}{create} function, as shown below:
     \snippet users/Register.qml create
 
-    We could also use the \l{Enginio1::EnginioModel::append}{EnginioModel::append} method in the browsing example
+    We could also use the \l{Enginio::EnginioModel::append}{EnginioModel::append} method in the browsing example
     to accomplish the same task.
 */

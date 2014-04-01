@@ -26,10 +26,8 @@
 ****************************************************************************/
 
 /*!
-\page index.html
-\contentspage {Enginio Manual}{Contents}
-\indexpage Enginio Manual
-\startpage Enginio Manual
+\page enginio-index.html
+\contentspage {enginio-index.html}{Contents}
 \nextpage Enginio Installation and Prerequisites
 
 \title Enginio Manual
@@ -106,10 +104,9 @@ The entire Enginio documentation including backend and client is available here:
 */
 
 /*!
-\page enginio-getting-started
-\indexpage Enginio Manual
+\page enginio-getting-started.html
 \nextpage Getting Started with Enginio using Qt Quick
-\previouspage Enginio Manual
+\previouspage {enginio-index.html}{Enginio Manual}
 
 \title Enginio Installation and Prerequisites
 
@@ -120,17 +117,15 @@ This guide can be also applied when integrating Enginio with existing Qt project
 \section1 Prerequisites
 
 Enginio comes with Qt 5.2 and later (for 5.2.0 only in the online installer).
-Make sure to select the Enginio component in the \tt{Qt Cloud Services} category.
+Make sure to select the Enginio component in the \e {Qt Cloud Services} category.
 
-\note Make sure to have OpenSSL installed for Enginio to work.
-
-On iOS openSSL is not required since the native SSL framework is used.
+\note Make sure to have OpenSSL installed for Enginio to work. On iOS, OpenSSL is not
+required as the native SSL framework is used.
 
 */
 
 /*!
-\page enginio-qml
-\indexpage Enginio Manual
+\page enginio-qml.html
 \nextpage Getting Started with Enginio using C++
 \previouspage Enginio Installation and Prerequisites
 
@@ -183,8 +178,7 @@ Now you can \l{Checking stored objects in the Dashboard}{check the Enginio dashb
 
 
 /*!
-\page enginio-cpp
-\indexpage Enginio Manual
+\page enginio-cpp.html
 \nextpage Checking stored objects in the Dashboard
 \previouspage Getting Started with Enginio using Qt Quick
 
@@ -226,12 +220,12 @@ Create an object in JSON format and fill in the data:
     city.insert("population", 624000);
 \endcode
 
-Create the object in the Enginio database by calling \l{EnginioClient::create()}:
+Create the object in the Enginio database by calling \l{EnginioClient}{EnginioClient::create()}:
 \code
     client->create(city);
     connect(client, SIGNAL(finished(EnginioReply*)), this, SLOT(uploadFinished(EnginioReply*)));
 \endcode
-Note that the \l{EnginioClient::create()}{create()} method performs the actual asynchronous network communication.
+Note that the \c create() method performs the actual asynchronous network communication.
 You need to wait for its completion by connecting to the \l{EnginioClient::finished()}{finished} and \l{EnginioClient::error()}{error} signals.
 
 Now you can \l{Checking stored objects in the Dashboard}{check the Enginio dashboard} for the newly created object.
@@ -241,7 +235,6 @@ Now you can \l{Checking stored objects in the Dashboard}{check the Enginio dashb
 /*!
 \page enginio-dashboard.html
 \title Checking Stored Objects in the Dashboard
-\indexpage Enginio Manual
 \previouspage Getting Started with Enginio using C++
 
 When you have successfully stored objects with Qt C++ or QML code, go to your \l{https://dashboard.engin.io/}{Enginio Dashboard}
@@ -261,30 +254,11 @@ To get convenient access to objects stored in Enginio, consider using \l Enginio
 /*!
 \page tutorials.html
 \title Enginio Tutorials
-\indexpage Enginio Manual
 
 \list
 \li \l {Enginio Installation and Prerequisites}
 \li \l {Getting Started with Enginio using Qt Quick}
 \li \l {Getting Started with Enginio using C++}
 \endlist
-*/
-
-/*!
-\page enginio-classes.html
-\title Enginio C++ Classes
-\indexpage Enginio Manual
-
-Enginio provides these \b{C++ classes}:
-\generatelist {classesbymodule enginio-qt}
-*/
-
-/*!
-\page enginio-qml-types.html
-\title Enginio QML Types
-\indexpage Enginio Manual
-
-Enginio provides these \b{QML types}:
-\annotatedlist engino-qml
 */
 

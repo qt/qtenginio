@@ -53,6 +53,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \class EnginioIdentity
+  \since 5.3
   \inmodule enginio-qt
   \ingroup enginio-client
   \brief Represents a user that is authenticated with the backend
@@ -213,6 +214,7 @@ public:
 
 /*!
   \class EnginioOAuth2Authentication
+  \since 5.3
   \inmodule enginio-qt
   \ingroup enginio-client
   \brief Represents a user that is authenticated directly by the backend using OAuth2 standard.

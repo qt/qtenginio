@@ -51,8 +51,9 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \qmltype EnginioModel
+  \since 5.3
   \instantiates EnginioQmlModel
-  \inqmlmodule Enginio 1
+  \inqmlmodule Enginio
   \ingroup engino-qml
 
   \brief Makes accessing collections of objects easy
@@ -293,4 +294,3 @@ void EnginioQmlModel::setOperation(Enginio::Operation operation)
 }
 
 QT_END_NAMESPACE
-
