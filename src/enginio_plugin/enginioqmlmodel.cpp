@@ -80,7 +80,11 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \qmlproperty QJSValue EnginioModel::query
-  \include model-query.qdocinc
+  \include model-query.qdocinc 0
+  \l {Enginio::EnginioClient::query()}{EnginioClient::query()}
+  \include model-query.qdocinc 1
+
+  \sa {Enginio::EnginioClient::query()}{EnginioClient::query()}
 */
 
 /*!
@@ -113,6 +117,8 @@ QT_BEGIN_NAMESPACE
 /*!
   \qmlmethod EnginioReply EnginioModel::remove(int row)
   \include model-remove.qdocinc
+
+  \sa {Enginio::EnginioClient::remove()}{EnginioClient::remove()}
 */
 
 namespace  {
