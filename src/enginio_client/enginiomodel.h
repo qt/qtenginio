@@ -80,6 +80,7 @@ public:
     Q_INVOKABLE EnginioReply *append(const QJsonObject &value);
     Q_INVOKABLE EnginioReply *remove(int row);
     Q_INVOKABLE EnginioReply *setData(int row, const QVariant &value, const QString &role);
+    Q_INVOKABLE EnginioReply *setData(int row, const QJsonObject &value);
     using EnginioBaseModel::setData;
 
     Q_INVOKABLE EnginioReply *reload();

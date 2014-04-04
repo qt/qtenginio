@@ -830,11 +830,21 @@ public:
     EnginioReplyState *setDataNow(const int row, const QVariant &value, int role, const QJsonObject &oldObject, const QString &id)
     {
         Q_ASSERT(!id.isEmpty());
-        const QString roleName(_roles.value(role));
-        Q_ASSERT(!roleName.isEmpty());
         QJsonObject deltaObject;
         QJsonObject newObject = oldObject;
-        deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
+        if (role != Enginio::JsonObjectRole) {
+            const QString roleName(_roles.value(role));
+            Q_ASSERT(!roleName.isEmpty());
+            deltaObject[roleName] = newObject[roleName] = QJsonValue::fromVariant(value);
+        } else {
+            const QJsonObject updateObject = value.toJsonObject();
+            if (updateObject.isEmpty()) {
+                QNetworkReply *nreply = new EnginioFakeReply(_enginio, EnginioClientConnectionPrivate::constructErrorMessage(EnginioString::EnginioModel_Trying_to_update_an_object_with_unknown_role));
+                return _enginio->createReply(nreply);
+            }
+            for (QJsonObject::const_iterator i = updateObject.constBegin(); i != updateObject.constEnd(); ++i)
+                deltaObject[i.key()] = i.value();
+        }
         deltaObject[EnginioString::id] = id;
         deltaObject[EnginioString::objectType] = newObject[EnginioString::objectType];
         ObjectAdaptor<QJsonObject> aDeltaObject(deltaObject);
@@ -876,11 +886,11 @@ public:
 
         const QJsonObject object = _data.at(row).toObject();
         if (!object.isEmpty()) {
+            if (role == Qt::DisplayRole || role == Enginio::JsonObjectRole)
+                return _data.at(row);
             const QString roleName = _roles.value(role);
             if (!roleName.isEmpty())
                 return object[roleName];
-            else if (role == Qt::DisplayRole)
-                return _data.at(row);
         }
 
         return QVariant();
@@ -1021,7 +1031,7 @@ struct EnginioModelPrivateT : public EnginioBaseModelPrivate
     Reply *remove(int row) { return static_cast<Reply*>(Base::remove(row)); }
     Reply *setValue(int row, const QString &role, const QVariant &value) { return static_cast<Reply*>(Base::setValue(row, role, value)); }
     Reply *reload() { return static_cast<Reply*>(Base::reload()); }
-
+    Reply *setData(const int row, const QVariant &value, int role) { return static_cast<Reply*>(Base::setData(row, value, role)); }
     bool queryIsEmpty() const Q_DECL_OVERRIDE
     {
         return ObjectAdaptor<Data>(_query, static_cast<ClientPrivate*>(_enginio)).isEmpty();

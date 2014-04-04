@@ -91,6 +91,7 @@ public:
         UpdatedAtRole,
         IdRole,
         ObjectTypeRole,
+        JsonObjectRole,
         CustomPropertyRole = Qt::UserRole + 10 // the first fully dynamic role
     };
 

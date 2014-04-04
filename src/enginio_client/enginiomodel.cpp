@@ -404,6 +404,7 @@ EnginioBaseModel::~EnginioBaseModel()
   \value ObjectTypeRole \c What is item type
   \value SyncedRole \c Mark if an item is in sync with the backend
   \value CustomPropertyRole \c The first role id that may be used for dynamically created roles.
+  \value JsonObjectRole \c Object like representation of an item
   \omitvalue InvalidRole
 
   Additionally EnginioModel supports dynamic roles which are mapped
@@ -560,6 +561,35 @@ EnginioReply *EnginioModel::setData(int row, const QVariant &value, const QStrin
     }
 
     return d->setValue(row, role, value);
+}
+
+/*!
+  \overload
+  Update a \a value on \a row of this model's local cache
+  and send an update request to the Enginio backend.
+
+  All properties of the \a value will be used to update the item in \a row.
+  This can be useful to update multiple item's properties with one request.
+
+  \return reply from backend
+  \sa EnginioClient::update()
+*/
+EnginioReply *EnginioModel::setData(int row, const QJsonObject &value)
+{
+    Q_D(EnginioModel);
+    if (Q_UNLIKELY(!d->enginio())) {
+        qWarning("EnginioModel::setData(): Enginio client is not set");
+        return 0;
+    }
+
+    if (unsigned(row) >= unsigned(d->rowCount())) {
+        EnginioClientConnectionPrivate *client = EnginioClientConnectionPrivate::get(d->enginio());
+        QNetworkReply *nreply = new EnginioFakeReply(client, EnginioClientConnectionPrivate::constructErrorMessage(EnginioString::EnginioModel_setProperty_row_is_out_of_range));
+        EnginioReply *ereply = new EnginioReply(client, nreply);
+        return ereply;
+    }
+
+    return d->setData(row, value, Enginio::JsonObjectRole);
 }
 
 Qt::ItemFlags EnginioBaseModel::flags(const QModelIndex &index) const

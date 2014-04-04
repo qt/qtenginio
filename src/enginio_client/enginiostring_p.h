@@ -128,6 +128,7 @@
     F(EnginioModel_was_removed_before_this_request_was_prepared, "EnginioModel was removed before this request was prepared")\
     F(EnginioModel_The_query_was_changed_before_the_request_could_be_sent, "EnginioModel: The query was changed before the request could be sent")\
     F(EnginioModel_Trying_to_update_an_object_with_unknown_role, "EnginioModel: Trying to update an object with unknown role")\
+    F(EnginioModel_Trying_to_update_an_item_with_an_empty_object, "EnginioModel: Trying to update an item with an empty object")\
     F(Content_Range, "Content-Range")\
     F(Content_Type, "Content-Type")\
     F(Get, "GET")\

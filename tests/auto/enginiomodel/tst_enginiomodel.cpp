@@ -99,9 +99,11 @@ private slots:
     void deleteModelDurringRequests();
     void updatingRoles();
     void setData();
+    void setJsonData();
+    void data();
+    void setInvalidJsonData();
     void reload();
     void identityChange();
-
 private:
     template<class T>
     void externallyRemovedImpl();
@@ -1275,25 +1277,31 @@ void tst_EnginioModel::delayedRequestBeforeInitialModelReset()
     EnginioClient client;
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
-    for (int i = 0; i < 24 ; ++i) {
-        QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
-        QJsonObject query;
-        query.insert("objectType", objectType);
 
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+    query.insert("title", QString::fromUtf8("appendAndRemoveModel"));
+
+    QJsonObject object;
+    object["title"] = "New Title";
+
+    for (int i = 0; i < 24 ; ++i) {
         EnginioModel model;
         QSignalSpy resetSpy(&model, SIGNAL(modelReset()));
         model.setQuery(query);
         model.setClient(&client);
 
-        query.insert("title", QString::fromUtf8("appendAndRemoveModel"));
         EnginioReply *append1 = model.append(query);
         EnginioReply *append2 = model.append(query);
-        EnginioReply *update = model.setData(0, QString::fromUtf8("appendAndRemoveModel1"), "title");
+        EnginioReply *update1 = model.setData(0, QString::fromUtf8("appendAndRemoveModel1"), "title");
+        EnginioReply *update2 = model.setData(0, object);
         EnginioReply *remove = model.remove(1);
-        QTRY_VERIFY(append1->isFinished() && append2->isFinished() && remove->isFinished() && update->isFinished());
+        QTRY_VERIFY(append1->isFinished() && append2->isFinished() && remove->isFinished() && update1->isFinished() && update2->isFinished());
         QVERIFY(!append1->isError() || append1->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
         QVERIFY(!append2->isError() || append2->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
-        QVERIFY(!update->isError() || update->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
+        QVERIFY(!update1->isError() || update1->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
+        QVERIFY(!update2->isError() || update1->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
         QVERIFY(!remove->isError() || remove->errorString().contains("EnginioModel: The query was changed before the request could be sent"));
         if (resetSpy.isEmpty())
             break;
@@ -1353,10 +1361,15 @@ void tst_EnginioModel::deleteModelDurringRequests()
         EnginioModel model;
         model.setQuery(query);
         model.setClient(&client);
+
         query.insert("title", QString::fromUtf8("deleteModelDurringRequests"));
+        QJsonObject object = query;
+        object.insert("count", 111);
+
         replies.append(model.append(query));
         replies.append(model.append(query));
         replies.append(model.setData(0, QString::fromUtf8("deleteModelDurringRequests1"), "title"));
+        replies.append(model.setData(1, object));
         replies.append(model.remove(0));
     }
 
@@ -1449,6 +1462,21 @@ void tst_EnginioModel::updatingRoles()
     QCOMPARE(model.roleNames()[CustomModel::InvalidRole], QByteArray("objectType"));
 }
 
+struct CustomModel: public EnginioModel {
+    enum Roles {
+        TitleRole = Enginio::CustomPropertyRole,
+        CountRole
+    };
+
+    virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE
+    {
+        QHash<int, QByteArray> roles = EnginioModel::roleNames();
+        roles.insert(TitleRole, "title");
+        roles.insert(CountRole, "count");
+        return roles;
+    }
+};
+
 void tst_EnginioModel::setData()
 {
     QString propertyName = "title";
@@ -1460,18 +1488,7 @@ void tst_EnginioModel::setData()
     client.setBackendId(_backendId);
     client.setServiceUrl(EnginioTests::TESTAPP_URL);
 
-    struct Model: public EnginioModel {
-        enum Roles {
-            TitleRole = Enginio::CustomPropertyRole
-        };
-
-        virtual QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE
-        {
-            QHash<int, QByteArray> roles = EnginioModel::roleNames();
-            roles.insert(TitleRole, "title");
-            return roles;
-        }
-    } model;
+    CustomModel model;
 
     model.disableNotifications();
     model.setQuery(query);
@@ -1505,7 +1522,148 @@ void tst_EnginioModel::setData()
     QVERIFY(!model.setData(model.index(-1, 1), QVariant()));
 
     // make a correct setData call
-    QVERIFY(model.setData(model.index(0), QString::fromLatin1("1111"), Model::TitleRole));
+    QVERIFY(model.setData(model.index(0), QString::fromLatin1("1111"), CustomModel::TitleRole));
+}
+
+void tst_EnginioModel::setJsonData()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString propertyName1 = "title";
+    QString propertyName2 = "count";
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+
+    CustomModel model;
+
+    model.disableNotifications();
+    model.setQuery(query);
+
+    {   // init the model
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setClient(&client);
+
+        QTRY_VERIFY(spy.count() > 0);
+    }
+
+    if (model.rowCount() < 1) {
+        QJsonObject o;
+        o.insert(propertyName1, QString::fromLatin1("o"));
+        o.insert(propertyName2, 123);
+        o.insert("objectType", objectType);
+        model.append(o);
+    }
+
+    QTRY_VERIFY(model.rowCount());
+
+    QJsonObject object = model.data(model.index(0)).toJsonValue().toObject();
+    QVERIFY(!object.isEmpty());
+
+    object[propertyName1] = object[propertyName1].toString() + QString::fromLatin1("o");
+    object[propertyName2] = object[propertyName2].toInt() + 123;
+
+    EnginioReply *reply = model.setData(0, object);
+    QTRY_VERIFY(reply->isFinished());
+    CHECK_NO_ERROR(reply);
+
+    QJsonObject data = reply->data();
+    QCOMPARE(data[propertyName1], object[propertyName1]);
+    QCOMPARE(data[propertyName2], object[propertyName2]);
+}
+
+void tst_EnginioModel::data()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString propertyName1 = "title";
+    QString propertyName2 = "count";
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+
+    CustomModel model;
+
+    model.disableNotifications();
+    model.setQuery(query);
+
+    {   // init the model
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setClient(&client);
+
+        QTRY_VERIFY(spy.count() > 0);
+    }
+
+    if (model.rowCount() < 1) {
+        QJsonObject o;
+        o.insert(propertyName1, QString::fromLatin1("o"));
+        o.insert(propertyName2, 123);
+        o.insert("objectType", objectType);
+        model.append(o);
+    }
+
+    QTRY_VERIFY(model.rowCount());
+    QModelIndex index = model.index(0);
+    QJsonObject item = model.data(index, Enginio::JsonObjectRole).toJsonValue().toObject();
+    QVERIFY(!item.isEmpty());
+
+    QCOMPARE(model.data(index, Enginio::IdRole).toJsonValue(), QJsonValue(item["id"]));
+    QCOMPARE(model.data(index, Enginio::CreatedAtRole).toJsonValue(), QJsonValue(item["createdAt"]));
+    QCOMPARE(model.data(index, Enginio::UpdatedAtRole).toJsonValue(), QJsonValue(item["updatedAt"]));
+}
+
+void tst_EnginioModel::setInvalidJsonData()
+{
+    EnginioClient client;
+    client.setBackendId(_backendId);
+    client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+    QString propertyName1 = "title";
+    QString propertyName2 = "count";
+    QString objectType = "objects." + EnginioTests::CUSTOM_OBJECT1;
+    QJsonObject query;
+    query.insert("objectType", objectType);
+
+    CustomModel model;
+
+    model.disableNotifications();
+    model.setQuery(query);
+
+    QJsonObject object;
+    {
+        QSignalSpy spy(&model, SIGNAL(modelReset()));
+        model.setClient(&client);
+
+        object.insert(propertyName1, QString::fromLatin1("o"));
+        object.insert(propertyName2, 123);
+        object.insert("objectType", objectType);
+
+        QTRY_VERIFY(spy.count() > 0);
+    }
+
+    if (model.rowCount() < 1) {
+        QJsonObject o;
+        o.insert(propertyName1, QString::fromLatin1("o"));
+        o.insert(propertyName2, 123);
+        o.insert("objectType", objectType);
+        model.append(o);
+    }
+
+    QVector<EnginioReply *> replies;
+    replies.append(model.setData(-1, object));
+    replies.append(model.setData(model.rowCount(), object));
+
+    QTRY_VERIFY(model.rowCount());
+    replies.append(model.setData(0, QJsonObject()));
+
+    foreach (const EnginioReply *reply, replies){
+        QTRY_VERIFY(reply->isFinished());
+        QVERIFY(reply->isError());
+    }
 }
 
 struct DeleteReplyCountHelper
