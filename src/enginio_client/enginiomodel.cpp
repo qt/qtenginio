@@ -77,7 +77,7 @@ const int EnginioBaseModelPrivate::IncrementalModelUpdate = -2;
 
   Assigning such a query to the model results in downloading of all objects from the "objects.fruits"
   collection. It is possible to \l{EnginioModel::append()}{append} new objects, to
-  \l{EnginioModel::setProperty()}{modify} or to \l{EnginioModel::remove()}{remove} them.
+  \l{EnginioModel::setData()}{modify} or to \l{EnginioModel::remove()}{remove} them.
 
   The query has to result in a list of objects, each object becomes an item in the model. Properties
   of the items are used as role names.
@@ -529,7 +529,7 @@ EnginioReply *EnginioModel::setData(int row, const QVariant &value, const QStrin
 {
     Q_D(EnginioModel);
     if (Q_UNLIKELY(!d->enginio())) {
-        qWarning("EnginioModel::setProperty(): Enginio client is not set");
+        qWarning("EnginioModel::setData(): Enginio client is not set");
         return 0;
     }
 
