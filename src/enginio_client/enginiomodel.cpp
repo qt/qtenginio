@@ -77,7 +77,7 @@ const int EnginioBaseModelPrivate::IncrementalModelUpdate = -2;
 
   Assigning such a query to the model results in downloading of all objects from the "objects.fruits"
   collection. It is possible to \l{EnginioModel::append()}{append} new objects, to
-  \l{EnginioModel::setProperty()}{modify} or to \l{EnginioModel::remove()}{remove} them.
+  \l{EnginioModel::setData()}{modify} or to \l{EnginioModel::remove()}{remove} them.
 
   The query has to result in a list of objects, each object becomes an item in the model. Properties
   of the items are used as role names.
@@ -439,7 +439,11 @@ void EnginioModel::setClient(const EnginioClient *client)
 /*!
   \property EnginioModel::query
 
-  \include model-query.qdocinc
+  \include model-query.qdocinc 0
+  \l {EnginioClient::query()}
+  \include model-query.qdocinc 1
+
+  \sa EnginioClient::query()
 */
 QJsonObject EnginioModel::query()
 {
@@ -459,7 +463,6 @@ void EnginioModel::setQuery(const QJsonObject &query)
   \property EnginioModel::operation
   \brief The operation type of the query
   \sa Enginio::Operation, query()
-  \return returns the Operation
 */
 Enginio::Operation EnginioModel::operation() const
 {
@@ -493,6 +496,7 @@ EnginioReply *EnginioModel::append(const QJsonObject &object)
 
 /*!
   \include model-remove.qdocinc
+  \sa EnginioClient::remove()
 */
 EnginioReply *EnginioModel::remove(int row)
 {
@@ -518,14 +522,14 @@ EnginioReply *EnginioModel::remove(int row)
 
   The \a role is the property of the object that will be updated to be the new \a value.
 
-  \return reply from backend
+  \return reply from backend.
   \sa EnginioClient::update()
 */
 EnginioReply *EnginioModel::setData(int row, const QVariant &value, const QString &role)
 {
     Q_D(EnginioModel);
     if (Q_UNLIKELY(!d->enginio())) {
-        qWarning("EnginioModel::setProperty(): Enginio client is not set");
+        qWarning("EnginioModel::setData(): Enginio client is not set");
         return 0;
     }
 

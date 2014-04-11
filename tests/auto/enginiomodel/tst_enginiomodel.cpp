@@ -194,7 +194,7 @@ void tst_EnginioModel::enginio_property()
         QVERIFY(!model.append(QJsonObject()));
         QTest::ignoreMessage(QtWarningMsg, "EnginioModel::remove(): Enginio client is not set");
         QVERIFY(!model.remove(0));
-        QTest::ignoreMessage(QtWarningMsg, "EnginioModel::setProperty(): Enginio client is not set");
+        QTest::ignoreMessage(QtWarningMsg, "EnginioModel::setData(): Enginio client is not set");
         QVERIFY(!model.setData(0, QVariant(), "blah"));
     }
     {

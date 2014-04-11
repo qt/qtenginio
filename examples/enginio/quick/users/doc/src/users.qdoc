@@ -93,7 +93,7 @@
 
     Then, depending on the state of the application, we assign the object to
     our enginioClient instance. There are four possible states, defined by
-    \l{EnginioClient::AuthenticationState}. After assigning the Identity object,
+    \l{Enginio::AuthenticationState}. After assigning the Identity object,
     the state changes from the initial "NotAuthenticated" to "Authenticating".
     \snippet users/Login.qml assignIdentity
 
