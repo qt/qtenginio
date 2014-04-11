@@ -416,19 +416,13 @@ void EnginioClientConnection::setBackendId(const QByteArray &backendId)
 /*!
   \property EnginioClientConnection::serviceUrl
   \brief Enginio backend URL.
-  \internal
 
   The API URL determines the server used by Enginio.
-  Usually it is not needed to change the default URL.
-*/
 
-/*!
-  \fn EnginioClientConnection::serviceUrlChanged(const QUrl &url)
-  \internal
-*/
-
-/*!
-  \internal
+  Usually it is not needed to change the default URL, but if it has
+  to be changed it should be done as a first operaion on this
+  EnginioClientConnection, otherwise some request may be sent accidentally
+  to the default url.
 */
 QUrl EnginioClientConnection::serviceUrl() const
 {
@@ -436,9 +430,6 @@ QUrl EnginioClientConnection::serviceUrl() const
     return d->_serviceUrl;
 }
 
-/*!
-    \internal
-*/
 void EnginioClientConnection::setServiceUrl(const QUrl &serviceUrl)
 {
     Q_D(EnginioClientConnection);
