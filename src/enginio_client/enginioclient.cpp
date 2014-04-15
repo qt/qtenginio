@@ -116,6 +116,7 @@ QT_BEGIN_NAMESPACE
 /*!
   \namespace Enginio
   \inmodule enginio-qt
+  \ingroup enginio-namespace
   \brief The Enginio namespace provides enums used throughout Enginio.
 */
 
