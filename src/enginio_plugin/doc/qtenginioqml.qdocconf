@@ -25,6 +25,9 @@ exampledirs += \
 # Specify example install dir under QT_INSTALL_EXAMPLES
 examplesinstallpath = enginio/quick
 
+# Add highlighting for QML Todo example
+manifestmeta.highlighted.names += "QtEnginioQml/Enginio QML Examples - Todos"
+
 depends += qtcore qtgui qtnetwork qtqml qtquick qtquickcontrols qtenginio qtenginiooverview
 
 qhp.projects            = QtEnginioQml
