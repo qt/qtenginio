@@ -399,6 +399,26 @@ protected:
         }
     };
 
+    class RefreshQueryAfterAuthChange // It is needed for compilers that don't support variadic templates
+    {
+        EnginioBaseModelPrivate *model;
+    public:
+        RefreshQueryAfterAuthChange(EnginioBaseModelPrivate *m)
+            : model(m)
+        {
+            Q_ASSERT(m);
+        }
+
+        void operator ()(Enginio::AuthenticationState state) const
+        {
+            // TODO we do not want to refresh on a failed attempt to login
+            if (state == Enginio::NotAuthenticated // logout
+                || state == Enginio::Authenticated // successful login
+                || state == Enginio::AuthenticationFailure)  // token refresh failed
+                    model->execute();
+        }
+    };
+
 public:
     EnginioBaseModelPrivate(EnginioBaseModel *q_ptr)
         : _enginio(0)
@@ -958,6 +978,7 @@ struct EnginioModelPrivateT : public EnginioBaseModelPrivate
             _enginio = EnginioClientConnectionPrivate::get(const_cast<EnginioClientConnection*>(enginio));
             _clientConnections.append(QObject::connect(enginio, &QObject::destroyed, EnginioDestroyed(this)));
             _clientConnections.append(QObject::connect(enginio, &EnginioClientConnection::backendIdChanged, QueryChanged(this)));
+            _clientConnections.append(QObject::connect(enginio, &EnginioClientConnection::authenticationStateChanged, RefreshQueryAfterAuthChange(this)));
         } else {
             _enginio = 0;
         }

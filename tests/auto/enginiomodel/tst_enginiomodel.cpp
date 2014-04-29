@@ -50,6 +50,7 @@
 #include <Enginio/enginioreply.h>
 #include <Enginio/enginiomodel.h>
 #include <Enginio/enginioidentity.h>
+#include <Enginio/enginiooauth2authentication.h>
 
 #include "../common/common.h"
 
@@ -99,6 +100,7 @@ private slots:
     void updatingRoles();
     void setData();
     void reload();
+    void identityChange();
 
 private:
     template<class T>
@@ -1685,6 +1687,39 @@ void tst_EnginioModel::reload()
     reload8->setDelayFinishedSignal(false);
     QTRY_VERIFY(reload8->isFinished());
     QCOMPARE(model.rowCount(), 0);
+}
+
+void tst_EnginioModel::identityChange()
+{
+    EnginioClient client;
+    QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+    client.setBackendId("5376019e698b3c6ad500095a");
+
+    QJsonObject query;
+    query["objectType"] = "objects.EnginioModelIdentityChange";
+
+    EnginioModel model;
+    model.setQuery(query);
+    model.setClient(&client);
+
+    EnginioOAuth2Authentication identity1;
+    identity1.setUser("test1");
+    identity1.setPassword("test1");
+
+    EnginioOAuth2Authentication identity2;
+    identity2.setUser("test2");
+    identity2.setPassword("test2");
+
+    QTRY_COMPARE(model.rowCount(), 1);  // There is only one publicly visible element
+
+    client.setIdentity(&identity1);
+    QTRY_COMPARE(model.rowCount(), 2);  // Test1 sees one additional element
+
+    client.setIdentity(&identity2);
+    QTRY_COMPARE(model.rowCount(), 3);  // Test2 sees two additional elements
+
+    client.setIdentity(0);
+    QTRY_COMPARE(model.rowCount(), 1);
 }
 
 QTEST_MAIN(tst_EnginioModel)
