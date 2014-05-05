@@ -258,9 +258,14 @@ void tst_Files::fileUploadDownload()
         QNetworkRequest req;
         req.setUrl(QUrl(downloadData["expiringUrl"].toString()));
         QNetworkReply *reply = client.networkManager()->get(req);
-        QVERIFY(reply);
-        QSignalSpy downloadSpy(reply, SIGNAL(finished()));
-        QTRY_COMPARE(downloadSpy.count(), 1);
+        QTRY_VERIFY(reply->isFinished());
+        if (reply->error() != QNetworkReply::NoError) {
+            // the test has failed already, let's printout some debugging information
+            qDebug() << downloadData;
+            qDebug() << req.url();
+            qDebug() << reply->readAll();
+            QCOMPARE(reply->error(), QNetworkReply::NoError);
+        }
         QByteArray imageData = reply->readAll();
         reply->deleteLater();
         QImage img = QImage::fromData(imageData);
@@ -325,9 +330,14 @@ void tst_Files::fileUploadDownload()
         QNetworkRequest req;
         req.setUrl(QUrl(downloadData["expiringUrl"].toString()));
         QNetworkReply *reply = client.networkManager()->get(req);
-        QVERIFY(reply);
-        QSignalSpy downloadSpy(reply, SIGNAL(finished()));
-        QTRY_COMPARE(downloadSpy.count(), 1);
+        QTRY_VERIFY(reply->isFinished());
+        if (reply->error() != QNetworkReply::NoError) {
+            // the test has failed already, let's printout some debugging information
+            qDebug() << downloadData;
+            qDebug() << req.url();
+            qDebug() << reply->readAll();
+            QCOMPARE(reply->error(), QNetworkReply::NoError);
+        }
         QByteArray imageData = reply->readAll();
         reply->deleteLater();
         QImage img = QImage::fromData(imageData);
