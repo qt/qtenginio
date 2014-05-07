@@ -261,9 +261,10 @@ void tst_Files::fileUploadDownload()
         QTRY_VERIFY(reply->isFinished());
         if (reply->error() != QNetworkReply::NoError) {
             // the test has failed already, let's printout some debugging information
-            qDebug() << downloadData;
-            qDebug() << req.url();
-            qDebug() << reply->readAll();
+            qDebug() << "downloadData:" << downloadData;
+            qDebug() << "reply->readAll():" << reply->readAll();
+            qDebug() << "reply->error() and errorString():" << reply->error() << reply->errorString();
+            qDebug() << "reply http code:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).value<int>();
             QCOMPARE(reply->error(), QNetworkReply::NoError);
         }
         QByteArray imageData = reply->readAll();
@@ -333,9 +334,10 @@ void tst_Files::fileUploadDownload()
         QTRY_VERIFY(reply->isFinished());
         if (reply->error() != QNetworkReply::NoError) {
             // the test has failed already, let's printout some debugging information
-            qDebug() << downloadData;
-            qDebug() << req.url();
-            qDebug() << reply->readAll();
+            qDebug() << "downloadData:" << downloadData;
+            qDebug() << "reply->readAll():" << reply->readAll();
+            qDebug() << "reply->error() and errorString():" << reply->error() << reply->errorString();
+            qDebug() << "reply http code:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).value<int>();
             QCOMPARE(reply->error(), QNetworkReply::NoError);
         }
         QByteArray imageData = reply->readAll();
