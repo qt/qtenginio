@@ -10,6 +10,7 @@ Module {
     Component {
         name: "Enginio"
         exports: ["Enginio/Enginio 1.0"]
+        isCreatable: false
         exportMetaObjectRevisions: [0]
         Enum {
             name: "AuthenticationState"
@@ -60,12 +61,14 @@ Module {
         name: "EnginioBaseModel"
         prototype: "QAbstractListModel"
         exports: ["Enginio/EnginioBaseModel 1.0"]
+        isCreatable: false
         exportMetaObjectRevisions: [0]
     }
     Component {
         name: "EnginioClientConnection"
         prototype: "QObject"
         exports: ["Enginio/EnginioClientConnection 1.0"]
+        isCreatable: false
         exportMetaObjectRevisions: [0]
         Property { name: "backendId"; type: "QByteArray" }
         Property { name: "serviceUrl"; type: "QUrl" }
@@ -92,6 +95,7 @@ Module {
         name: "EnginioIdentity"
         prototype: "QObject"
         exports: ["Enginio/EnginioIdentity 1.0"]
+        isCreatable: false
         exportMetaObjectRevisions: [0]
         Signal { name: "dataChanged" }
         Signal { name: "aboutToDestroy" }
@@ -246,6 +250,7 @@ Module {
         name: "EnginioQmlReply"
         prototype: "EnginioReplyState"
         exports: ["Enginio/EnginioReply 1.0"]
+        isCreatable: false
         exportMetaObjectRevisions: [0]
         Property { name: "data"; type: "QJSValue"; isReadonly: true }
         Property { name: "isError"; type: "bool"; isReadonly: true }
@@ -259,6 +264,7 @@ Module {
         name: "EnginioReplyState"
         prototype: "QObject"
         exports: ["Enginio/EnginioReplyState 1.0"]
+        isCreatable: false
         exportMetaObjectRevisions: [0]
         Property { name: "errorType"; type: "Enginio::ErrorType"; isReadonly: true }
         Property { name: "networkError"; type: "QNetworkReply::NetworkError"; isReadonly: true }
@@ -288,6 +294,7 @@ Module {
         name: "QNetworkReply"
         prototype: "QIODevice"
         exports: ["Enginio/QNetworkReply 1.0"]
+        isCreatable: false
         exportMetaObjectRevisions: [0]
         Enum {
             name: "NetworkError"
@@ -314,10 +321,16 @@ Module {
                 "ContentNotFoundError": 203,
                 "AuthenticationRequiredError": 204,
                 "ContentReSendError": 205,
+                "ContentConflictError": 206,
+                "ContentGoneError": 207,
                 "UnknownContentError": 299,
                 "ProtocolUnknownError": 301,
                 "ProtocolInvalidOperationError": 302,
-                "ProtocolFailure": 399
+                "ProtocolFailure": 399,
+                "InternalServerError": 401,
+                "OperationNotImplementedError": 402,
+                "ServiceUnavailableError": 403,
+                "UnknownServerError": 499
             }
         }
         Signal { name: "metaDataChanged" }
