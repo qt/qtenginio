@@ -31,7 +31,11 @@
 \inmodule enginio-qt
 \ingroup modules
 
-Enginio provides these \b{C++ classes}:
+\section1 Namespaces
+
+\annotatedlist enginio-namespace
+
+\section1 Classes
 \generatelist {classesbymodule enginio-qt}
 
 List of examples:
