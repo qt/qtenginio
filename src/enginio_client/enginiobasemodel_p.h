@@ -418,7 +418,7 @@ public:
         _notifications.disable();
     }
 
-    void receivedNotification(QJsonObject data);
+    void receivedNotification(const QJsonObject &data);
     void receivedRemoveNotification(const QJsonObject &object, int rowHint = NoHintRow);
     void receivedUpdateNotification(const QJsonObject &object, const QString &idHint = QString(), int row = NoHintRow);
     void receivedCreateNotification(const QJsonObject &object);

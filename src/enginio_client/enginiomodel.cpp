@@ -161,7 +161,7 @@ EnginioBaseModelPrivate::~EnginioBaseModelPrivate()
     delete _replyConnectionConntext;
 }
 
-void EnginioBaseModelPrivate::receivedNotification(QJsonObject data)
+void EnginioBaseModelPrivate::receivedNotification(const QJsonObject &data)
 {
     const QJsonObject origin = data[EnginioString::origin].toObject();
     const QString requestId = origin[EnginioString::apiRequestId].toString();
