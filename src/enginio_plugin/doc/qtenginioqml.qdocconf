@@ -43,7 +43,7 @@ qhp.QtEnginioQml.subprojects         = qmltypes examples
 
 qhp.QtEnginioQml.subprojects.qmltypes.title = QML Types
 qhp.QtEnginioQml.subprojects.qmltypes.indexTitle = Enginio QML Types and Examples
-qhp.QtEnginioQml.subprojects.qmltypes.selectors = fake:qmlclass
+qhp.QtEnginioQml.subprojects.qmltypes.selectors = qmlclass
 qhp.QtEnginioQml.subprojects.qmltypes.sortPages = true
 
 qhp.QtEnginioQml.subprojects.examples.title = Examples
