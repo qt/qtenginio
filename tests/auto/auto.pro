@@ -2,9 +2,12 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     enginioclient \
-    files \
     notifications \
     identity \
+
+qtHaveModule(gui) {
+    SUBDIRS += files
+}
 
 qtHaveModule(quick) {
     SUBDIRS += qmltests
