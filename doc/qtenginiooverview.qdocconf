@@ -4,7 +4,6 @@ include(enginio_global.qdocconf)
 
 project = QtEnginioOverview
 description = Enginio Client Library
-url = http://qt-project.org/doc/qt-$QT_VER
 version = $QT_VERSION
 
 sourcedirs += .
