@@ -43,7 +43,6 @@
 #define ENGINIOCLIENT_GLOBAL_H
 
 #include <QtCore/qglobal.h>
-#include <QDebug>
 
 #if defined(QT_SHARED) || !defined(QT_STATIC)
 #  if defined(ENGINIOCLIENT_LIBRARY)
