@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
+#     cmake \
     enginioclient \
     notifications \
     identity \

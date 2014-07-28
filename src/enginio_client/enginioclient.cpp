@@ -116,6 +116,7 @@ QT_BEGIN_NAMESPACE
 /*!
   \namespace Enginio
   \inmodule enginio-qt
+  \ingroup enginio-namespace
   \brief The Enginio namespace provides enums used throughout Enginio.
 */
 
@@ -285,6 +286,8 @@ void EnginioClientConnectionPrivate::init()
     QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionTerminated, AuthenticationStateTrackerFunctor(this));
     QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticated, AuthenticationStateTrackerFunctor(this, Enginio::Authenticated));
     QObject::connect(static_cast<EnginioClient*>(q_ptr), &EnginioClient::sessionAuthenticationError, AuthenticationStateTrackerFunctor(this, Enginio::AuthenticationFailure));
+    _request.setHeader(QNetworkRequest::UserAgentHeader,
+                          QByteArrayLiteral("Qt:" QT_VERSION_STR " Enginio:" ENGINIO_VERSION " Language:C++"));
 }
 
 void EnginioClientConnectionPrivate::replyFinished(QNetworkReply *nreply)
@@ -416,19 +419,13 @@ void EnginioClientConnection::setBackendId(const QByteArray &backendId)
 /*!
   \property EnginioClientConnection::serviceUrl
   \brief Enginio backend URL.
-  \internal
 
   The API URL determines the server used by Enginio.
-  Usually it is not needed to change the default URL.
-*/
 
-/*!
-  \fn EnginioClientConnection::serviceUrlChanged(const QUrl &url)
-  \internal
-*/
-
-/*!
-  \internal
+  Usually it is not needed to change the default URL, but if it has
+  to be changed it should be done as a first operaion on this
+  EnginioClientConnection, otherwise some request may be sent accidentally
+  to the default url.
 */
 QUrl EnginioClientConnection::serviceUrl() const
 {
@@ -436,9 +433,6 @@ QUrl EnginioClientConnection::serviceUrl() const
     return d->_serviceUrl;
 }
 
-/*!
-    \internal
-*/
 void EnginioClientConnection::setServiceUrl(const QUrl &serviceUrl)
 {
     Q_D(EnginioClientConnection);
