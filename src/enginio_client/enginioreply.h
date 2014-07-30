@@ -108,6 +108,6 @@ ENGINIOCLIENT_EXPORT QDebug operator<<(QDebug d, const EnginioReply *reply);
 #endif
 
 QT_END_NAMESPACE
-Q_DECLARE_METATYPE(const EnginioReply*);
+Q_DECLARE_METATYPE(const EnginioReply*)
 
 #endif // ENGINIOREPLY_H

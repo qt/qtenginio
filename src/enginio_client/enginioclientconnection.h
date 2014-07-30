@@ -65,8 +65,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnection : public QObject
     Q_PROPERTY(EnginioIdentity *identity READ identity WRITE setIdentity NOTIFY identityChanged FINAL)
     Q_PROPERTY(Enginio::AuthenticationState authenticationState READ authenticationState NOTIFY authenticationStateChanged FINAL)
 
-    Q_ENUMS(Enginio::Operation); // TODO remove me QTBUG-33577
-    Q_ENUMS(Enginio::AuthenticationState); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::AuthenticationState) // TODO remove me QTBUG-33577
 
 public:
     ~EnginioClientConnection();

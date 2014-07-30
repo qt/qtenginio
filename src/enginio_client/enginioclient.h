@@ -56,8 +56,8 @@ class ENGINIOCLIENT_EXPORT EnginioClient : public EnginioClientConnection
 {
     Q_OBJECT
 
-    Q_ENUMS(Enginio::Operation); // TODO remove me QTBUG-33577
-    Q_ENUMS(Enginio::AuthenticationState); // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::Operation) // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::AuthenticationState) // TODO remove me QTBUG-33577
 
     Q_DECLARE_PRIVATE(EnginioClient)
 public:

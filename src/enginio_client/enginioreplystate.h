@@ -59,8 +59,8 @@ class EnginioReplyStatePrivate;
 class ENGINIOCLIENT_EXPORT EnginioReplyState: public QObject
 {
     Q_OBJECT
-    Q_ENUMS(QNetworkReply::NetworkError); // TODO remove me QTBUG-33577
-    Q_ENUMS(Enginio::ErrorType); // TODO remove me QTBUG-33577
+    Q_ENUMS(QNetworkReply::NetworkError) // TODO remove me QTBUG-33577
+    Q_ENUMS(Enginio::ErrorType) // TODO remove me QTBUG-33577
 
     Q_PROPERTY(Enginio::ErrorType errorType READ errorType NOTIFY dataChanged)
     Q_PROPERTY(QNetworkReply::NetworkError networkError READ networkError NOTIFY dataChanged)
