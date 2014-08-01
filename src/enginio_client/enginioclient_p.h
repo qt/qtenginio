@@ -87,11 +87,11 @@ QT_BEGIN_NAMESPACE
     CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientConnectionPrivate::Default)
 
 #define CHECK_AND_SET_PATH_WITH_ID(Url, Object, Operation) \
-    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientConnectionPrivate::IncludeIdInPath)
+    CHECK_AND_SET_URL_PATH_IMPL(Url, Object, Operation, EnginioClientConnectionPrivate::RequireIdInPath)
 
 class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivate
 {
-    enum PathOptions { Default, IncludeIdInPath = 1};
+    enum PathOptions { Default, RequireIdInPath = 1};
 
     struct ENGINIOCLIENT_EXPORT GetPathReturnValue : public QPair<bool, QString>
     {
@@ -105,6 +105,8 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
         operator QString() const { return second; }
     };
 
+    static bool appendIdToPathIfPossible(QString *path, const QString &id, QByteArray *errorMsg, PathOptions flags, QByteArray errorMessageHint = EnginioString::Requested_operation_requires_non_empty_id_value);
+
     template<class T>
     static GetPathReturnValue getPath(const T &object, int operation, QString *path, QByteArray *errorMsg, PathOptions flags = Default)
     {
@@ -114,6 +116,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
         QString &result = *path;
         result.reserve(96);
         result.append(QStringLiteral("/v1/"));
+        QString id = object[EnginioString::id].toString();
 
         switch (operation) {
         case Enginio::ObjectOperation: {
@@ -122,8 +125,9 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
                 msg = constructErrorMessage(EnginioString::Requested_object_operation_requires_non_empty_objectType_value);
                 return GetPathReturnValue(Failed);
             }
-
             result.append(objectType.replace('.', '/'));
+            if (!appendIdToPathIfPossible(path, id, errorMsg, flags))
+                return GetPathReturnValue(Failed);
             break;
         }
         case Enginio::AccessControlOperation:
@@ -133,81 +137,63 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
                 msg = constructErrorMessage(EnginioString::Requested_object_acl_operation_requires_non_empty_objectType_value);
                 return GetPathReturnValue(Failed);
             }
-
             result.append(objectType.replace('.', '/'));
-            QString id = object[EnginioString::id].toString();
-            if (id.isEmpty()) {
-                msg = constructErrorMessage(EnginioString::Requested_object_acl_operation_requires_non_empty_id_value);
+            if (!appendIdToPathIfPossible(path, id, errorMsg, RequireIdInPath, EnginioString::Requested_object_acl_operation_requires_non_empty_id_value))
                 return GetPathReturnValue(Failed);
-            }
-            result.append('/');
-            result.append(id);
             result.append('/');
             result.append(EnginioString::access);
             return GetPathReturnValue(true, EnginioString::access);
         }
         case Enginio::FileOperation: {
             result.append(EnginioString::files);
-            // if we have a fileID, it becomes "view", otherwise it is up/download
-            QString fileId = object[EnginioString::id].toString();
-            if (!fileId.isEmpty()) {
-                result.append('/');
-                result.append(fileId);
-            }
+            if (!appendIdToPathIfPossible(path, id, errorMsg, flags))
+                return GetPathReturnValue(Failed);
             break;
         }
         case Enginio::FileGetDownloadUrlOperation: {
             result.append(EnginioString::files);
-            QString fileId = object[EnginioString::id].toString();
-            if (fileId.isEmpty()) {
-                msg = constructErrorMessage(EnginioString::Download_operation_requires_non_empty_fileId_value);
+            if (!appendIdToPathIfPossible(path, id, errorMsg, RequireIdInPath, EnginioString::Download_operation_requires_non_empty_fileId_value))
                 return GetPathReturnValue(Failed);
-            }
-            result.append(QLatin1Char('/') + fileId + QStringLiteral("/download_url"));
+            result.append(QStringLiteral("/download_url"));
             break;
         }
         case Enginio::FileChunkUploadOperation: {
-            const QString fileId = object[EnginioString::id].toString();
-            Q_ASSERT(!fileId.isEmpty());
-            result.append(EnginioString::files + QLatin1Char('/') + fileId + QStringLiteral("/chunk"));
+            Q_ASSERT(!id.isEmpty());
+            result.append(EnginioString::files);
+            if (!appendIdToPathIfPossible(path, id, errorMsg, flags))
+                return GetPathReturnValue(Failed);
+            result.append(QStringLiteral("/chunk"));
             break;
         }
         case Enginio::SearchOperation:
             result.append(EnginioString::search);
+            if (!appendIdToPathIfPossible(path, id, errorMsg, flags))
+                return GetPathReturnValue(Failed);
             break;
         case Enginio::SessionOperation:
             result.append(EnginioString::session);
+            if (!appendIdToPathIfPossible(path, id, errorMsg, flags))
+                return GetPathReturnValue(Failed);
             break;
         case Enginio::UserOperation:
             result.append(EnginioString::users);
+            if (!appendIdToPathIfPossible(path, id, errorMsg, flags))
+                return GetPathReturnValue(Failed);
             break;
         case Enginio::UsergroupOperation:
             result.append(EnginioString::usergroups);
+            if (!appendIdToPathIfPossible(path, id, errorMsg, flags))
+                return GetPathReturnValue(Failed);
             break;
         case Enginio::UsergroupMembersOperation:
         {
-            QString id = object[EnginioString::id].toString();
-            if (id.isEmpty()) {
-                msg = constructErrorMessage(EnginioString::Requested_usergroup_member_operation_requires_non_empty_id_value);
-                return GetPathReturnValue(Failed);
-            }
             result.append(EnginioString::usergroups);
-            result.append('/');
-            result.append(id);
+            if (!appendIdToPathIfPossible(path, id, errorMsg, RequireIdInPath, EnginioString::Requested_usergroup_member_operation_requires_non_empty_id_value))
+                return GetPathReturnValue(Failed);
             result.append('/');
             result.append(EnginioString::members);
             return GetPathReturnValue(true, EnginioString::member);
         }
-        }
-
-        if (flags & IncludeIdInPath) {
-            QString id = object[EnginioString::id].toString();
-            if (id.isEmpty()) {
-                msg = constructErrorMessage(EnginioString::Requested_operation_requires_non_empty_id_value);
-                return GetPathReturnValue(Failed);
-            }
-            result.append('/');
-            result.append(id);
         }
 
         return GetPathReturnValue(true, QString());
@@ -557,7 +543,6 @@ public:
         url.setQuery(urlQuery);
 
         QNetworkRequest req = prepareRequest(url);
-
         return networkManager()->get(req);
     }
 
@@ -565,7 +550,7 @@ public:
     QNetworkReply *downloadUrl(const ObjectAdaptor<T> &object)
     {
         QUrl url(_serviceUrl);
-        CHECK_AND_SET_PATH(url, object, Enginio::FileGetDownloadUrlOperation);
+        CHECK_AND_SET_PATH_WITH_ID(url, object, Enginio::FileGetDownloadUrlOperation);
         if (object.contains(EnginioString::variant)) {
             QString variant = object[EnginioString::variant].toString();
             QUrlQuery query;

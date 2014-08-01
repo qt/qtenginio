@@ -140,6 +140,49 @@ void tst_EnginioClient::initTestCase()
 
     prepareForSearch();
     EnginioTests::prepareTestUsersAndUserGroups(_backendId);
+
+    // create some todos objects
+    QJsonObject todos;
+    todos["name"] = QStringLiteral("todos");
+
+    QJsonObject title;
+    title["name"] = QStringLiteral("title");
+    title["type"] = QStringLiteral("string");
+    title["indexed"] = true;
+    QJsonObject completed;
+    completed["name"] = QStringLiteral("completed");
+    completed["type"] = QStringLiteral("boolean");
+    completed["indexed"] = false;
+    QJsonObject count;
+    count["name"] = QStringLiteral("count");
+    count["type"] = QStringLiteral("number");
+    count["indexed"] = false;
+
+    QJsonArray properties;
+    properties.append(title);
+    properties.append(completed);
+    properties.append(count);
+    todos["properties"] = properties;
+
+    QVERIFY(_backendManager.createObjectType(_backendName, EnginioTests::TESTAPP_ENV, todos));
+    {
+        EnginioClient client;
+        QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
+        client.setBackendId(_backendId);
+        client.setServiceUrl(EnginioTests::TESTAPP_URL);
+
+        QJsonObject object;
+        object["objectType"] = QString::fromUtf8("objects.todos");
+        object["title"] = QString::fromUtf8("init todo 1");
+        object["completed"] = false;
+        EnginioReply* reply1 = client.create(object);
+        object["title"] = QString::fromUtf8("init todo 2");
+        EnginioReply* reply2 = client.create(object);
+        QTRY_VERIFY(reply1->isFinished());
+        CHECK_NO_ERROR(reply1);
+        QTRY_VERIFY(reply2->isFinished());
+        CHECK_NO_ERROR(reply2);
+    }
 }
 
 void tst_EnginioClient::cleanupTestCase()
@@ -177,20 +220,31 @@ void tst_EnginioClient::query_todos()
     QSignalSpy spy(&client, SIGNAL(finished(EnginioReply *)));
     QSignalSpy spyError(&client, SIGNAL(error(EnginioReply*)));
     //![query-todo]
-    QJsonObject object;
-    object["objectType"] = QString::fromUtf8("objects.todos");
-    const EnginioReply* reply = client.query(object);
+    QJsonObject query;
+    query["objectType"] = QString::fromUtf8("objects.todos");
+    EnginioReply *reply = client.query(query);
     //![query-todo]
     QVERIFY(reply);
 
     QTRY_COMPARE(spy.count(), 1);
     QCOMPARE(spyError.count(), 0);
 
-    const EnginioReply *response = spy[0][0].value<EnginioReply*>();
+    EnginioReply *response = spy[0][0].value<EnginioReply*>();
     QCOMPARE(response, reply);
     CHECK_NO_ERROR(response);
     QVERIFY(!response->data().isEmpty());
     QVERIFY(!response->data()["results"].isUndefined());
+
+    {   // try to query the object with an id
+        QJsonArray results = reply->data()["results"].toArray();
+        QVERIFY(results.count() > 1); // the test assumes that querying by id will return less items.
+        QString id = results[0].toObject()["id"].toString();
+        query["id"] = id;
+        reply = client.query(query);
+        QTRY_VERIFY(reply->isFinished());
+        CHECK_NO_ERROR(reply);
+        QCOMPARE(reply->data()["id"].toString(), id);
+    }
 }
 
 void tst_EnginioClient::query_todos_filter()
@@ -882,30 +936,6 @@ void tst_EnginioClient::deleteReply()
 
 void tst_EnginioClient::create_todos()
 {
-    QJsonObject todos;
-    todos["name"] = QStringLiteral("todos");
-
-    QJsonObject title;
-    title["name"] = QStringLiteral("title");
-    title["type"] = QStringLiteral("string");
-    title["indexed"] = true;
-    QJsonObject completed;
-    completed["name"] = QStringLiteral("completed");
-    completed["type"] = QStringLiteral("boolean");
-    completed["indexed"] = false;
-    QJsonObject count;
-    count["name"] = QStringLiteral("count");
-    count["type"] = QStringLiteral("number");
-    count["indexed"] = false;
-
-    QJsonArray properties;
-    properties.append(title);
-    properties.append(completed);
-    properties.append(count);
-    todos["properties"] = properties;
-
-    QVERIFY(_backendManager.createObjectType(_backendName, EnginioTests::TESTAPP_ENV, todos));
-
     EnginioClient client;
     QObject::connect(&client, SIGNAL(error(EnginioReply *)), this, SLOT(error(EnginioReply *)));
     client.setBackendId(_backendId);

@@ -262,6 +262,21 @@ QNetworkRequest EnginioClientConnectionPrivate::prepareRequest(const QUrl &url)
     return req;
 }
 
+bool EnginioClientConnectionPrivate::appendIdToPathIfPossible(QString *path, const QString &id, QByteArray *errorMsg, EnginioClientConnectionPrivate::PathOptions flags, QByteArray errorMessageHint)
+{
+    Q_ASSERT(path && errorMsg);
+    if (id.isEmpty()) {
+        if (flags == RequireIdInPath) {
+            *errorMsg = constructErrorMessage(errorMessageHint);
+            return false;
+        }
+        return true;
+    }
+    path->append('/');
+    path->append(id);
+    return true;
+}
+
 EnginioClientConnectionPrivate::EnginioClientConnectionPrivate() :
     _identity(),
     _serviceUrl(EnginioString::apiEnginIo),
