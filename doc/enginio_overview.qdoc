@@ -90,7 +90,8 @@ To operate on objects of any type, the basic operations are:
 \endlist
 
 For a detailed description of the operations see the functions
-in the \l {EnginioClientCpp}{EnginioClient Class} in C++ or \l {EnginioClientQml}{EnginioClient type} in QML.
+in the \l [CPP] {EnginioClient} {EnginioClient Class} in C++ or
+\l [QML] {EnginioClient} {EnginioClient type} in QML.
 
 \note User management and access control lists are conveniently done by the same functions.
 
@@ -135,7 +136,7 @@ required as the native SSL framework is used.
 
 \section1 Setup a Qt Quick 2 application project
 
-Create a new Qt Quick 2 Application.
+Create a new  \l [QtQuick] {Qt Quick} {Qt Quick 2} Application.
 
 You can use Qt Creator to get started with a template.
 (File ⇒ New File or Project ⇒ Applications ⇒ Qt Quick 2 Application)
@@ -147,7 +148,7 @@ To use Enginio's QML API, you have to import the library.
 import Enginio 1.0
 \endcode
 
-Initialize the \l{EnginioClientQml}{EnginioClient} with the \c {backend id} value, which can be copied from the Dashboard.
+Initialize the \l [QML] {EnginioClient} with the \c {backend id} value, which can be copied from the Dashboard.
 
 Go to Dashboard ⇒ Your Backend home-view ⇒ See ’Keys box’ ⇒ Copy backend id value.
 
@@ -224,12 +225,12 @@ Create an object in JSON format and fill in the data:
     city.insert("population", 624000);
 \endcode
 
-Create the object in the Enginio database by calling \l{EnginioClient}{EnginioClient::create()}:
+Create the object in the Enginio database by calling \l {EnginioClient::create()}:
 \code
     client->create(city);
     connect(client, SIGNAL(finished(EnginioReply*)), this, SLOT(uploadFinished(EnginioReply*)));
 \endcode
-Note that the \c create() method performs the actual asynchronous network communication.
+Note that the \l {EnginioClient::create()} {create()} method performs the actual asynchronous network communication.
 You need to wait for its completion by connecting to the \l{EnginioClient::finished()}{finished} and \l{EnginioClient::error()}{error} signals.
 
 Now you can \l{Checking stored objects in the Dashboard}{check the Enginio dashboard} for the newly created object.

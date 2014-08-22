@@ -278,8 +278,8 @@ bool EnginioReplyState::delayFinishedSignal()
 
 /*!
   \fn bool EnginioReply::isError() const
-  \brief EnginioReplyState::isError returns whether this reply was unsuccessful
-  \return true if the reply did not succeed
+  Returns whether this reply was unsuccessful.
+  Returns true if the reply did not succeed.
 */
 
 bool EnginioReplyState::isError() const
@@ -290,8 +290,8 @@ bool EnginioReplyState::isError() const
 
 /*!
   \fn bool EnginioReply::isFinished() const
-  \brief Returns whether this reply was finished or not
-  \return true if the reply was finished, false otherwise.
+  Returns whether this reply was finished or not.
+  Returns true if the reply was finished.
 */
 
 bool EnginioReplyState::isFinished() const

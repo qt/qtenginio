@@ -11,7 +11,7 @@ headerdirs += .
 
 imagedirs += images
 
-depends += qtcore qtgui qtwidgets qtnetwork qtdoc qtenginio qtenginioqml
+depends += qtcore qtgui qtwidgets qtnetwork qtquick qtdoc qtenginio qtenginioqml
 
 qhp.projects            = QtEnginioOverview
 
