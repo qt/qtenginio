@@ -48,11 +48,11 @@
 QT_BEGIN_NAMESPACE
 
 /*!
- * \qmlmodule Enginio 1.0
- * \title Enginio QML Plugin
- * 
- * The Enginio QML plugin provides access to the Enginio service through a set of
- * QML types.
+ \qmlmodule Enginio 1.0
+ \title Enginio QML Plugin
+
+ The Enginio QML plugin provides access to the Enginio service through a set of
+ QML types.
  */
 
 class EnginioNetworkAccessManagerFactory: public QQmlNetworkAccessManagerFactory
@@ -96,5 +96,15 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterType<EnginioOAuth2Authentication>(uri, 1, 0, "EnginioOAuth2Authentication");
     qmlRegisterUncreatableType<QNetworkReply>(uri, 1, 0, "QNetworkReply", "QNetworkReply is abstract and it can not be constructed");
 }
+
+/*!
+  \qmltype EnginioOAuth2Authentication
+  \since 5.3
+  \instantiates EnginioOAuth2Authentication
+  \inqmlmodule Enginio
+  \ingroup engino-qml
+  \target EnginioOAuth2AuthenticationQml
+
+*/
 
 QT_END_NAMESPACE

@@ -64,17 +64,17 @@
 
     \section1 The example code
 
-    The first step is to set up the \l Enginio::EnginioClient client.
+    The first step is to set up the \l {EnginioClient} {Enginio client}.
     \snippet image-gallery/image-gallery.qml client
 
-    The model gets initialized with the client declared above.
+    Then the model is initialized with that client.
     \snippet image-gallery/image-gallery.qml model
 
     A delegate is needed to present the images nicely.
     The model is used to get the list of image objects, but the images
     are only attached to the objects as file references.
     Thus the image's thumbnail is fetched by each delegate.
-    \note in a real application it might be necessary to cache the images.
+    \note In a real application it might be necessary to cache the images.
 
     The \c Component.onCompleted function is used to fetch the image.
     When the delegate is created, it has the JSON image object data.
