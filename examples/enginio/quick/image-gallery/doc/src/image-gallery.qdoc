@@ -35,7 +35,7 @@
     and a button to upload more images.
     \image image-gallery.png
 
-    \section1 Backend configuration
+    \section1 Backend Configuration
     The Enginio backend needs to be set up to get this example working.
 
     Go to the Enginio Dashboard and create a new backend with the \c{Image Gallery} template.
@@ -62,7 +62,7 @@
     Copy the \e {backend id} from the Enginio dashboard.
     They need to be entered into the example when it is executed for the first time.
 
-    \section1 The example code
+    \section1 The Example Code
 
     The first step is to set up the \l {EnginioClient} {Enginio client}.
     \snippet image-gallery/image-gallery.qml client
