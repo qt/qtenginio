@@ -85,8 +85,8 @@ void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
         engine->setNetworkAccessManagerFactory(&factory);
     } else {
         qWarning() << "Enginio client failed to install QQmlNetworkAccessManagerFactory"
-                      "on QML engine because a differnt factory is already attached, It"
-                      " is recomanded to use QNetworkAccessManager delivered by Enginio";
+                      "on QML engine because a different factory is already attached, it"
+                      " is recommended to use QNetworkAccessManager delivered by Enginio";
     }
 }
 
