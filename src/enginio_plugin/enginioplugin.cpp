@@ -82,6 +82,49 @@ void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
     }
 }
 
+/*!
+  \qmltype EnginioOAuth2Authentication
+  \since 5.3
+  \instantiates EnginioOAuth2Authentication
+  \inqmlmodule Enginio
+  \ingroup engino-qml
+  \target EnginioOAuth2AuthenticationQml
+  \brief Represents a user that is authenticated directly by the backend using OAuth2 standard.
+
+  This component can authenticate a user by verifying the user's login and password.
+  The user has to exist in the backend already.
+
+  To authenticate an instance of EnginioClient called \a client such code may be used:
+  \code
+    EnginioClient {
+        ...
+        identity: oauth2
+    }
+    EnginioOAuth2Authentication {
+        id: oauth2
+        user: "userName"
+        password: "userPassword"
+    }
+  \endcode
+
+  Setting the identity on the EnginioClient will trigger an asynchronous request, resulting in
+  EnginioClient::authenticationState changing.
+
+  \sa EnginioClient::authenticationState EnginioClient::identity EnginioClient::sessionAuthenticated
+  \sa EnginioClient::sessionAuthenticationError() EnginioClient::sessionTerminated()
+*/
+
+/*!
+  \qmlproperty EnginioOAuth2Authentication::user
+  This property contains the user name used for authentication.
+*/
+
+/*!
+  \qmlproperty EnginioOAuth2Authentication::password
+  This property contains the password used for authentication.
+*/
+
+
 void EnginioPlugin::registerTypes(const char *uri)
 {
     // @uri Enginio
@@ -96,15 +139,5 @@ void EnginioPlugin::registerTypes(const char *uri)
     qmlRegisterType<EnginioOAuth2Authentication>(uri, 1, 0, "EnginioOAuth2Authentication");
     qmlRegisterUncreatableType<QNetworkReply>(uri, 1, 0, "QNetworkReply", "QNetworkReply is abstract and it can not be constructed");
 }
-
-/*!
-  \qmltype EnginioOAuth2Authentication
-  \since 5.3
-  \instantiates EnginioOAuth2Authentication
-  \inqmlmodule Enginio
-  \ingroup engino-qml
-  \target EnginioOAuth2AuthenticationQml
-
-*/
 
 QT_END_NAMESPACE
