@@ -304,7 +304,7 @@ void EnginioBaseModelPrivate::syncRoles()
         if (definedRoles.contains(key)) {
             // we skip predefined keys so we can keep constant id for them
             if (Q_UNLIKELY(key == EnginioString::_synced))
-                qWarning("EnginioModel can not be used with objects having \"_synced\" property. The property will be overriden.");
+                qWarning("EnginioModel can not be used with objects having \"_synced\" property. The property will be overridden.");
         } else {
             while (definedRolesIndexes.contains(_rolesCounter))
                 ++_rolesCounter;
