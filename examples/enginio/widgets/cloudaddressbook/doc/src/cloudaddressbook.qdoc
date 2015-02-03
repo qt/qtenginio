@@ -67,7 +67,7 @@
     \list
         \li \l EnginioClient which encapsulates all information needed to keep the connection to the backend
         \li \l EnginioModel which queries all addresses
-        \li \l QSortFilterProxy which sorts the data
+        \li \l QSortFilterProxyModel which sorts the data
         \li \l QTableView which shows the data
     \endlist
 
@@ -80,7 +80,7 @@
     \snippet cloudaddressbook/mainwindow.cpp model
 
     EnginioModel can sort or filter data only initially, which means that, for example, a newly added
-    item will not be placed correctly. To solve the problem QSortFilterProxy has to be used.
+    item will not be placed correctly. To solve the problem QSortFilterProxyModel has to be used.
     \snippet cloudaddressbook/mainwindow.cpp assignProxyModel
 
     Now is a time to look deeper into EngnioModel. EnginioModel should define data roles.
