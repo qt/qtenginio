@@ -24,11 +24,11 @@ Client library for accessing Enginio service from Qt and QML code.
 
 # Contributing
 * Contributing to the Enginio Qt Library works the same way as contributing to any other Qt module
-    * See [Qt Contribution Guidelines](http://wiki.qt.io/?title=Qt_Contribution_Guidelines)
+    * See [Qt Contribution Guidelines](http://wiki.qt.io/Qt_Contribution_Guidelines)
     * Clone the repository from ssh://codereview.qt-project.org/qt/qtenginio.git
     * Implement the new feature and automated tests for it
     * Make sure all tests pass
-    * Push your change for review to [Gerrit](http://wiki.qt.io/?title=Gerrit_Introduction)
+    * Push your change for review to [Gerrit](http://wiki.qt.io/Gerrit_Introduction)
     * Add reviewers (You can find e-mail addresses in git log and git blame)
 
 # Copyright
