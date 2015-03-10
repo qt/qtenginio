@@ -115,12 +115,12 @@ void EnginioPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
 */
 
 /*!
-  \qmlproperty EnginioOAuth2Authentication::user
+  \qmlproperty string EnginioOAuth2Authentication::user
   This property contains the user name used for authentication.
 */
 
 /*!
-  \qmlproperty EnginioOAuth2Authentication::password
+  \qmlproperty string EnginioOAuth2Authentication::password
   This property contains the password used for authentication.
 */
 
