@@ -406,7 +406,7 @@ EnginioBaseModel::~EnginioBaseModel()
   \note Some objects may not contain value for a static role, it may happen
   for example when an item is not in sync with the backend.
 
-  \sa EnginioBaseModel::roleNames()
+  \sa QAbstractItemModel::roleNames()
 */
 
 /*!
