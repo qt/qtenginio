@@ -60,7 +60,7 @@ QByteArray backendId(const QString &exampleName)
 
     QScopedPointer<QSettings> settings(settingsFile.exists()
         ? new QSettings(settingsFile.absoluteFilePath(), QSettings::IniFormat)
-        : new QSettings("com.digia", "EnginioExamples"));
+        : new QSettings("QtProject", "EnginioExamples"));
 
     settings->beginGroup(exampleName);
     QByteArray id = settings->value(backendIdKey).toByteArray();

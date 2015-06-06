@@ -71,7 +71,7 @@ public:
         QFileInfo settingsFile = QFileInfo(fileName);
         _settings.reset(settingsFile.exists()
             ? new QSettings(settingsFile.absoluteFilePath(), QSettings::IniFormat)
-            : new QSettings("com.digia", "EnginioExamples"));
+            : new QSettings("QtProject", "EnginioExamples"));
 
         _settings->beginGroup(_exampleName);
         _backendId = _settings->value(backendIdKey).toString();
