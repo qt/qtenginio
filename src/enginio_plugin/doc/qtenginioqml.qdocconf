@@ -22,7 +22,7 @@ exampledirs += \
                ../../../tests/auto \
 
 # Specify example install dir under QT_INSTALL_EXAMPLES
-examplesinstallpath = enginio/quick
+examplesinstallpath = qtenginio/enginio/quick
 
 # Add highlighting for QML Todo example
 manifestmeta.highlighted.names += "QtEnginioQml/Enginio QML Examples - Todos"
