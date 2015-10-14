@@ -2,6 +2,8 @@ requires(qtHaveModule(qml))
 
 TARGETPATH = Enginio
 
+IMPORT_VERSION = 1.0
+
 QT = qml enginio enginio-private core-private
 
 QMAKE_DOCS = $$PWD/doc/qtenginioqml.qdocconf
