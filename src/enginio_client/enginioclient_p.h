@@ -85,7 +85,7 @@ class ENGINIOCLIENT_EXPORT EnginioClientConnectionPrivate : public QObjectPrivat
 {
     enum PathOptions { Default, RequireIdInPath = 1};
 
-    struct ENGINIOCLIENT_EXPORT GetPathReturnValue : public QPair<bool, QString>
+    struct GetPathReturnValue : public QPair<bool, QString>
     {
         GetPathReturnValue(bool value)
             : QPair<bool, QString>(value, QString())
