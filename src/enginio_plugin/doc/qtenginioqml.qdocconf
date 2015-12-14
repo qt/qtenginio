@@ -50,4 +50,4 @@ qhp.QtEnginioQml.subprojects.examples.indexTitle = Enginio QML Types and Example
 qhp.QtEnginioQml.subprojects.examples.selectors = fake:example
 qhp.QtEnginioQml.subprojects.examples.sortPages = true
 
-navigation.landingpage               = "Enginio QML Types and Examples"
+navigation.qmltypespage              = "Enginio QML Types and Examples"
