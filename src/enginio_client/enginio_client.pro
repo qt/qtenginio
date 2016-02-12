@@ -10,8 +10,6 @@ OTHER_FILES += \
 
 include(../src.pri)
 
-load(qt_module)
-
 SOURCES += \
     enginiobackendconnection.cpp \
     enginioclient.cpp \
@@ -43,5 +41,6 @@ HEADERS += \
     enginiooauth2authentication.h \
     enginioreplystate.h
 
-
 DEFINES +=  "ENGINIO_VERSION=\\\"$$MODULE_VERSION\\\""
+
+load(qt_module)
