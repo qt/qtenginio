@@ -1,7 +1,8 @@
 TARGET = Enginio
+MODULE = enginio
+
 QT = core-private network
 DEFINES += ENGINIOCLIENT_LIBRARY
-MODULE = enginio
 
 QMAKE_DOCS = $$PWD/doc/qtenginio.qdocconf
 OTHER_FILES += \
