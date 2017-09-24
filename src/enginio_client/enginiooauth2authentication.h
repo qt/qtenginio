@@ -48,7 +48,7 @@ class ENGINIOCLIENT_EXPORT EnginioOAuth2Authentication : public EnginioIdentity
     Q_DECLARE_PRIVATE(EnginioOAuth2Authentication)
 
 public:
-    explicit EnginioOAuth2Authentication(QObject *parent = Q_NULLPTR);
+    explicit EnginioOAuth2Authentication(QObject *parent = nullptr);
     ~EnginioOAuth2Authentication();
 
     QString user() const Q_REQUIRED_RESULT;
